@@ -18,5 +18,8 @@ abstract class TimeStamp {
   void revert() {
     stamps.remove(this);
   }
+  void call(){} // execute timestamp without respect for currenttime
 }
+
+
 

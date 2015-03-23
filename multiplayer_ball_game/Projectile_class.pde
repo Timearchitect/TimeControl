@@ -1,12 +1,20 @@
-abstract class Projectile {
+class Projectile  implements Cloneable {
   PVector coord;
   PVector speed;
-  int  size, damage;
-  float x, y, angle;
+  int  size, damage, ally=-1;
+  float x, y, angle, force;
   long deathTime, spawnTime;
   color projectileColor;
   boolean dead, deathAnimation;
-  int  playerIndex=-1;
+  int  playerIndex=-1, time;
+  Projectile( ) { // nothing
+  }
+  Projectile(Projectile _p ) { // copy
+    this(_p.playerIndex, int(_p.x), int(_p.y), _p.size, _p.projectileColor, _p.time) ;
+    this.spawnTime=_p.spawnTime;
+    this.deathTime=_p.deathTime;
+  }
+
   Projectile( int _x, int _y, int _size, color _color, int  _time) { // no playerIndex
     x= _x;
     y= _y;
@@ -14,15 +22,18 @@ abstract class Projectile {
     projectileColor=_color;
     spawnTime=stampTime;
     deathTime=stampTime + _time;
+    time=_time;
   }
   Projectile(int _playerIndex, int _x, int _y, int _size, color _color, int  _time) {
     playerIndex=_playerIndex;
+    ally=players.get(_playerIndex).ally;
     x= _x;
     y= _y;
     size=_size;
     projectileColor=_color;
     spawnTime=stampTime;
     deathTime=stampTime + _time;
+    time=_time;
   }
   void update() {
   }
@@ -50,18 +61,25 @@ abstract class Projectile {
   }
   void hit(Player enemy) {// collide death
   }
+
+  public Projectile clone()throws CloneNotSupportedException {  
+    return (Projectile)super.clone();
+  }
 }
 
 class Ball extends Projectile { //----------------------------------------- ball objects ----------------------------------------------------
   int speedX, speedY, dirX, dirY;
   int [] allies;
   int up, down, left, right;
-
+  float vx, vy;
   Ball( int _x, int _y, int _speedX, int _speedY, int _size, color _color) {
     super( _x, _y, _size, _color, 999999);
     projectileColor=_color;
+    damage=1;
     coord= new PVector(_x, _y);
     speed= new PVector(_speedX, _speedY);
+    vx=_speedX;
+    vy=_speedY;
     angle=degrees( PVector.angleBetween(coord, speed));
   }
 
@@ -69,7 +87,6 @@ class Ball extends Projectile { //----------------------------------------- ball
   void playerBounds() {
     if (!reverse) {
       for (int i=0; i<players.size (); i++) {
-
         if (coord.y-size/2+speedY<players.get(i).y+players.get(i).h+10+players.get(i).vy && coord.y+size/2+speedY>players.get(i).y-10+players.get(i).vy) {
           if (coord.x+size/2+speedX> players.get(i).x+20 && coord.x-size/2+speedX< players.get(i).x + players.get(i).w-20 ) {
             // speed.set( speed.x, speed.y*(-1));
@@ -77,7 +94,6 @@ class Ball extends Projectile { //----------------------------------------- ball
             // y-=players.get(i).vy;
           }
         }
-
         if (coord.y-size/2+speedY<players.get(i).y+players.get(i).h-20+players.get(i).vy && coord.y+size/2+speedY>players.get(i).y+20+players.get(i).vy) {
           if (coord.x+size/2+speedX> players.get(i).x-10 && coord.x-size/2+speedX< players.get(i).x + players.get(i).w +10 ) {
             //  speed.set( speed.x*(-1), speed.y);
@@ -100,6 +116,17 @@ class Ball extends Projectile { //----------------------------------------- ball
     } else if (coord.x+size/2>width ) {
       speed.set( speed.x*(-1), speed.y);
     }
+
+    if (y-size/2<0 ) { // walls
+      vy*=(-1);
+    } else if (y+size/2>height) {
+      vy*=(-1);
+    }
+    if (x-size/2<0 ) {
+      vx*=(-1);
+    } else if (x+size/2>width ) {
+      vx*=(-1);
+    }
   }
 
   void display() {
@@ -111,8 +138,10 @@ class Ball extends Projectile { //----------------------------------------- ball
       stroke(projectileColor);
       fill(projectileColor);
     }
-    ellipse(coord.x, coord.y, size, size);
-    line(coord.x, coord.y, coord.x +(speed.x)*10, coord.y+(speed.y)*10);
+    //ellipse(coord.x, coord.y, size, size);
+    // line(coord.x, coord.y, coord.x +(speed.x)*10, coord.y+(speed.y)*10);
+    ellipse(x, y, size, size);
+    line(x, y, x +(vx)*10, y+(vy)*10);
   }
 
   void move() {
@@ -123,12 +152,26 @@ class Ball extends Projectile { //----------------------------------------- ball
         if (reverse) {
           angle=degrees( PVector.angleBetween(speed, coord));
           coord.set(coord.x-speed.x*F*S, coord.y-speed.y*F*S);
+          x-=vx*F*S;
+          y-=vy*F*S;
         } else {
           coord.set(coord.x+speed.x*F*S, coord.y+speed.y*F*S);
           angle=degrees( PVector.angleBetween(coord, speed));
+          x+=vx*F*S;
+          y+=vy*F*S;
         }
       }
     }
+  }
+
+
+  void update() {
+    checkBounds();
+    move();
+  }
+
+  @Override
+    void revert() {
   }
 }
 
@@ -220,14 +263,16 @@ class IceDagger extends Projectile {//----------------------------------------- 
 }
 
 class forceBall extends Projectile { //----------------------------------------- forceBall objects ----------------------------------------------------
-  float vx, vy,v, ax, ay, angleV;
+  //scaled object by velocity
+  float vx, vy, v, ax, ay, angleV;
   boolean charging;
-  forceBall(int _playerIndex, int _x, int _y,float _v, int _size, color _projectileColor, int  _time, float _angle ,float _damage) {
+  forceBall(int _playerIndex, int _x, int _y, float _v, int _size, color _projectileColor, int  _time, float _angle, float _damage) {
     super(_playerIndex, _x, _y, _size, _projectileColor, _time);
     angle=_angle;
     angleV=10;
     damage=int(_damage);
     v=_v;
+    force=_v;
     vx= cos(radians(angle))*_v;
     vy= sin(radians(angle))*_v;
     background(150);
@@ -242,12 +287,12 @@ class forceBall extends Projectile { //-----------------------------------------
     if (!dead && !freeze) { 
       if (reverse) {
         //  opacity+=8*F;
-        if (charging) angle+=angleV*F*S;
+        //if (charging) angle+=angleV*F*S;
         x-=vx*F*S;
         y-=vy*F*S;
       } else {
         //  opacity-=8*F;
-        if (charging) angle-=angleV*F*S;
+        // if (charging) angle-=angleV*F*S;
         x+=vx*F*S;
         y+=vy*F*S;
       }
@@ -278,18 +323,18 @@ class forceBall extends Projectile { //-----------------------------------------
   @Override
     void hit(Player enemy) {
     // super.hit();
-    deathTime=stampTime;   // dead on collision
+    deathTime=stampTime;   // projectile is dead on collision
     dead=true;
-    for (int i=0; i<8; i++) {
-      particles.add(new Particle(int(x), int(y), random(20)-10, random(20)-10, int(random(20)+5), 800, 255));
+    for (int i=0; i<int (v*0.4); i++) { // particles
+      particles.add(new Particle(int(x), int(y), random(-int(v*0.2), int(v*0.2)), random(-int(v*0.2), int(v*0.2)), int(random(5, 30)), 800, 255));
     }
-    for (int i=0; i<4; i++) {
-      particles.add(new Particle(int(x), int(y), random(40)-20, random(40)-20, int(random(30)+10), 800, projectileColor));
+    for (int i=0; i<int (v*0.6); i++) {
+      particles.add(new Particle(int(x), int(y), random(-int(v*0.4), int(v*0.4)), random(-int(v*0.4), int(v*0.4)), int(random(10, 50)), 800, projectileColor));
     }
-    particles.add(new Flash(200, 32, 255));  
+    particles.add(new Flash(int(v*4), 32, 255));  
     particles.add(new ShockWave(int(enemy.x+enemy.w/2), int(enemy.y+enemy.h/2), 20, 200, projectileColor));
-    particles.add(new ShockWave(int(x), int(y), 300, 400, projectileColor));
-    particles.add(new ShockWave(int(x), int(y), 200, 500, color(255,0,255)));
+    particles.add(new ShockWave(int(x), int(y), int(v*4), int(v*4), projectileColor));
+    particles.add(new ShockWave(int(x), int(y), int( v*2), int(v*5), color(255, 0, 255)));
     shakeTimer=30;
   }
 }

@@ -1,4 +1,4 @@
-class Particle {
+class Particle  implements Cloneable{
   int  size, opacity;
   float x, y, vx, vy, angle;
   long spawnTime, deathTime, time;
@@ -19,7 +19,7 @@ class Particle {
 
   void update() {
     if (!dead && !freeze) { 
-      f =(fastForward)?speedFactor:1;
+     // f =(fastForward)?speedFactor:1;
       if (reverse) {
         opacity+=8*F;
         x-=vx*F*S;
@@ -47,6 +47,9 @@ class Particle {
     } else if (stampTime<deathTime) {
       dead=false;
     }
+  }
+    public Particle clone()throws CloneNotSupportedException {  
+    return (Particle)super.clone();
   }
 }
 

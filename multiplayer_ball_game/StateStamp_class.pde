@@ -1,3 +1,89 @@
+
+class CheckPoint extends TimeStamp {
+  int index;
+  ArrayList<TimeStamp> checkPointStamps=new   ArrayList<TimeStamp>();  // all stamps
+  ArrayList<Projectile> clonedProjectiles=new   ArrayList<Projectile>();  // all cloned projectile
+  ArrayList<Particle> clonedParticles=new   ArrayList<Particle>();  // all cloned projectile
+
+  boolean  savedSlow, savedReverse, savedFastForward, savedFreeze, musicPause;
+  long  savedForwardTime, savedReversedTime, savedFreezeTime, savedStampTime;
+  double musicTime;
+
+  CheckPoint() {
+    super(-1);
+
+    // save all states
+
+    for (int i=0; i<players.size (); i++) {
+      checkPointStamps.add( new ControlStamp(players.get(i).index, int(players.get(i).x), int(players.get(i).y), players.get(i).vx, players.get(i).vy, players.get(i).ax, players.get(i).ay)); //save coords and controll
+      checkPointStamps.add( new StateStamp(players.get(i).index, int(players.get(i).x), int(players.get(i).y), players.get(i).state, players.get(i).health, players.get(i).dead)); //save players state
+    }
+
+    for (int i=0; i<projectiles.size (); i++) {  // clone projectiles
+      try {
+        clonedProjectiles.add( projectiles.get(i).clone());
+      }
+      catch(CloneNotSupportedException e) {
+      }
+    }
+
+    for (int i=0; i<particles.size (); i++) { // clone particles
+      try {
+        clonedParticles.add( particles.get(i).clone());
+      }
+      catch(CloneNotSupportedException e) {
+      }
+    }
+
+    //-----------------------
+
+    // time lapse
+    savedForwardTime=forwardTime;
+    savedReversedTime=reversedTime; 
+    savedFreezeTime=freezeTime;
+    savedStampTime=stampTime;
+
+    // time state
+    savedSlow=slow; 
+    savedReverse=reverse; 
+    savedFastForward=fastForward; 
+    savedFreeze=freeze;
+
+     musicPause=musicPlayer.isPaused();
+    musicTime=musicPlayer.getPosition();
+  }
+
+  void call() {
+    //   players.clear();
+    //  players=savedPlayers;
+    projectiles.clear();
+    projectiles.addAll(clonedProjectiles); // add all from the saved list
+    //  projectiles=savedProjectiles;
+    particles.clear();
+    particles.addAll(clonedParticles); // add all from the saved list
+    //  particles=savedParticles;
+    //   stamps.clear();
+    //   stamps=savedTimeStamps;
+
+
+    forwardTime=savedForwardTime;
+    reversedTime=savedReversedTime; 
+    freezeTime=savedFreezeTime;
+    stampTime=savedStampTime;
+
+    slow=savedSlow; 
+    reverse=savedReverse; 
+    fastForward=savedFastForward; 
+    freeze=savedFreeze;
+
+    for (int i=0; i<checkPointStamps.size (); i++) {
+      checkPointStamps.get(i).call();
+    }
+     musicPlayer.pause(musicPause);
+    musicPlayer.setPosition(musicTime);
+  }
+}
+
 class StateStamp extends TimeStamp {
   int playerState=0;
   int playerHealth=0;
@@ -28,12 +114,15 @@ class StateStamp extends TimeStamp {
 
   void revert() {
     if (reverse && ! players.get(playerIndex).reverseImmunity && stampTime<time) {
-      players.get(playerIndex).state=playerState;
-      players.get(playerIndex).health=playerHealth;
-      players.get(playerIndex).dead=playerDead;
+      call();
       stamps.remove(this);
       // super.revert();
     }
+  }
+  void call() {
+    players.get(playerIndex).state=playerState;
+    players.get(playerIndex).health=playerHealth;
+    players.get(playerIndex).dead=playerDead;
   }
 }
 
@@ -62,15 +151,18 @@ class AbilityStamp extends TimeStamp {
 
   void revert() {
     if (reverse && ! players.get(playerIndex).reverseImmunity && stampTime<time) {
-      background(255);
-      players.get(playerIndex).ability.energy=energy;
-      players.get(playerIndex).ability.regen=regen;
-      players.get(playerIndex).ability.active=active;
-      players.get(playerIndex).ability.channeling=channeling;
-      players.get(playerIndex).ability.cooling=cooling;
+      //background(255);
+      call();
       stamps.remove(this);
       // super.revert();
     }
+  }
+  void call() {
+    players.get(playerIndex).ability.energy=energy;
+    players.get(playerIndex).ability.regen=regen;
+    players.get(playerIndex).ability.active=active;
+    players.get(playerIndex).ability.channeling=channeling;
+    players.get(playerIndex).ability.cooling=cooling;
   }
 }
 
