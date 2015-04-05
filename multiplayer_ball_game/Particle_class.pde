@@ -62,7 +62,6 @@ class ShockWave extends Particle {
   }
   void update() {
     if (!dead && !freeze) { 
-      f =(fastForward)?speedFactor:1;
       if (reverse) {
         size-=16*F*S;
         opacity+=8*F*S;
@@ -90,7 +89,7 @@ class LineWave extends Particle {
   }
   void update() {
     if (!dead && !freeze) { 
-      f =(fastForward)?speedFactor:1;
+
       if (reverse) {
         size-=16*F*S;
         opacity+=8*F*S;
@@ -152,13 +151,13 @@ class Feather extends Particle {
       if (reverse) {
         angle+=16*F*S;
         size+=shrinkRate*F*S;
-        opacity+=8*F;
+        opacity+=8*F*S;
         x-=vx*F*S;
         y-=vy*F*S;
       } else {
         angle-=16*F*S;
         size-=shrinkRate*F*S;
-        opacity-=8*F;
+        opacity-=8*F*S;
         x+=vx*F*S;
         y+=vy*F*S;
       }

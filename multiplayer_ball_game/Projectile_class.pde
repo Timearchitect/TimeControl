@@ -178,10 +178,10 @@ class Ball extends Projectile { //----------------------------------------- ball
 class IceDagger extends Projectile {//----------------------------------------- IceDagger objects ----------------------------------------------------
   PShape  sh, c ;
   float vx, vy;
-  IceDagger(int _playerIndex, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy) {
+  IceDagger(int _playerIndex, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage) {
     super(_playerIndex, _x, _y, _size, _projectileColor, _time);
     angle=_angle;
-    damage=6;
+    damage=_damage;
     vx= _vx;
     vy= _vy;
     background(150);
@@ -337,5 +337,45 @@ class forceBall extends Projectile { //-----------------------------------------
     particles.add(new ShockWave(int(x), int(y), int( v*2), int(v*5), color(255, 0, 255)));
     shakeTimer=30;
   }
+}
+
+class ChargeLaser extends Projectile { //----------------------------------------- forceBall objects ----------------------------------------------------
+  //scaled object by velocity
+
+  long chargeTime, MaxChargeTime=500;
+  float laserWidth, laserLength=2500, laserChange;
+
+  ChargeLaser( int _playerIndex, int _x, int _y, color _projectileColor, int  _time, float _angle, float _damage  ) {
+    super(_playerIndex, _x, _y, 1, _projectileColor, _time);
+    damage= int(_damage);
+    angle=_angle;
+  }
+
+  void display() {
+    if (!dead) { 
+      strokeWeight(int(laserWidth));
+      stroke(projectileColor);
+      line(int(x), int(y), cos(radians(angle))*laserLength+int(x), sin(radians(angle))*laserLength+int(y));
+      stroke(255);
+      strokeWeight(int(laserWidth*0.6));
+      line(int(x), int(y), cos(radians(angle))*laserLength+int(x), sin(radians(angle))*laserLength+int(y));
+    }
+  }
+  void update() {
+    if (!dead && !freeze) { 
+      if (reverse) {
+        laserChange-=2;
+        laserWidth= sin(radians(laserChange))*100;
+      } else {
+        laserChange+=2;
+        laserWidth= sin(radians(laserChange))*100;
+   
+     //   particles.add( new  Particle(int(x+random(-laserWidth*1.5,laserWidth*1.5)-50), int(y+random(-laserWidth*1.5,laserWidth*1.5)-50), int( cos(radians(angle))*60), int(sin(radians(angle))*60), int(random(-laserWidth*0.5,laserWidth*0.5)), 400, projectileColor));
+            //particles.add( new  Particle(int(x), int(y), 0, 0, int(125), 0, color(255, 0, 255)));
+        if(laserWidth<0)dead=true;
+      }
+    }
+  }
+
 }
 

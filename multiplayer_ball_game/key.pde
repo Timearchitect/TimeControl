@@ -19,7 +19,7 @@ void keyPressed() {
       }
     }
     if (key==Character.toLowerCase(keyIceDagger)) {
-      projectiles.add( new IceDagger(1, int( players.get(1).x+players.get(1).w/2), int(players.get(1).y+players.get(1).h/2), 30, players.get(1).playerColor, 800, players.get(1).angle, players.get(1).ax*15, players.get(1).ay*15));
+      projectiles.add( new IceDagger(1, int( players.get(1).x+players.get(1).w/2), int(players.get(1).y+players.get(1).h/2), 30, players.get(1).playerColor, 800, players.get(1).angle, players.get(1).ax*15, players.get(1).ay*15,8));
     }
     if (key==Character.toLowerCase( keySlow)) {
       quitOrigo();
@@ -140,7 +140,7 @@ void keyReleased() {
   for (int i=0; i< players.size (); i++) {
   
       if (key==Character.toLowerCase(players.get(i).triggKey)) {// ability trigg key
-        if ( players.get(i).ability.meta)  players.get(i).ability.release(players.get(i));
+        if ( players.get(i).ability.meta || !reverse)  players.get(i).ability.release(players.get(i));
         players.get(i).holdTrigg=false;
       }
 

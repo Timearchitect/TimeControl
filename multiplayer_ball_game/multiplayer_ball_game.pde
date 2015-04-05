@@ -17,7 +17,7 @@ AudioContext an= new AudioContext();
 Noise n = new Noise(an);
 SamplePlayer musicPlayer;
 Envelope speedControl;
-Gain   g = new Gain(ac, 1, 0.1); //volume
+Gain   g = new Gain(ac, 1, 0.05); //volume
 
 PFont font;
 PGraphics GUILayer;
@@ -30,8 +30,8 @@ final String version="0.6.5";
 import processing.serial.*;
 final int baudRate= 19200;
 final static float FRICTION=0.1;
-final int AmountOfPlayers=3; // start players
-final int startBalls=10;
+final int AmountOfPlayers=4; // start players
+final int startBalls=5;
 final int  ballSize=50;
 final int playerSize=100;
 
@@ -46,11 +46,13 @@ final int keyResponseDelay=30;  // eventhe refreashrate equa to arduino devices
 //Ability[] abilities={new Freeze(),new Freeze(),new Freeze(),new Freeze(),new Freeze()};
 //Ability[] abilities= {  new FastForward(), new Freeze(), new Slow(), new Reverse()};
 //Ability[] abilities= { new ThrowDagger(), new ThrowDagger(), new ThrowDagger(), new ThrowDagger(), new ThrowDagger()};
+
 Ability[] abilities= { 
-  new Reverse(), new SaveState(), new ForceShoot(), new ThrowDagger(), new ForceShoot()
+  new ForceShoot(), new Laser(), new ForceShoot(), new ForceShoot(), new Blink()
   };
 
-  Serial port[]=new Serial[AmountOfPlayers];  // Create object from Serial class
+
+Serial port[]=new Serial[AmountOfPlayers];  // Create object from Serial class
 String portName[]=new String[AmountOfPlayers];
 //int playerControl[]= new int[AmountOfPlayers];
 //ArrayList <Ball> balls= new ArrayList<Ball>();
@@ -79,10 +81,11 @@ int playerControl[][]= {
 
 };
 boolean sketchFullScreen() {
-  return true;
+  return false;
 }
 
 void setup() {
+
   size(displayWidth, displayHeight, P3D);
   font= loadFont("PressStart2P-Regular-28.vlw");
   Blur= loadShader("blur.glsl");
@@ -367,6 +370,30 @@ void checkPlayerVSProjectileColloision() {
       }
     }
   }
+}
+
+
+void checkPlayerVSProjectileColloisionLine() {
+/*    E is the starting point of the ray,
+    L is the end point of the ray,
+    C is the center of sphere you're testing against
+    r is the radius of that sphere
+
+Compute:
+d = L - E ( Direction vector of ray, from start to end )
+f = E - C ( Vector from center sphere to ray start )
+
+Then the intersection is found by..
+Plugging:
+P = E + t * d
+This is a parametric equation:
+Px = Ex + tdx
+Py = Ey + tdy
+into
+(x - h)2 + (y - k)2 = r2
+(h,k) = center of circle. */
+
+
 }
 
 void checkWinner() {

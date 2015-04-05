@@ -1,7 +1,7 @@
 class Player {
   PShape arrowSVG = loadShape("arrow.svg");
   int  index, ally, w, h, up, down, left, right, triggKey, deColor;
-  int state=1, health=200, maxHealth=200, barDiameter=100,damage=1;
+  int state=1, health=300, maxHealth=300, barDiameter=100, damage=1;
   float barFraction;
   float x, y, vx, vy, ax, ay, angle, f, s;
   boolean holdTrigg, holdUp, holdDown, holdLeft, holdRight, dead, stealth, hit, arduino, mouse, clone;
@@ -53,6 +53,7 @@ class Player {
       accel.set(0.0, accel.y);
       speed.set(0.0, speed.y);
       coord.set(int(0.0), int(coord.y));
+      hit(0);
     } else if (x>width-w) {
       stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
       x=width-w;
@@ -61,6 +62,7 @@ class Player {
       coord.set(width-w, coord.y);
       accel.set(0.0, accel.y);
       speed.set(0.0, speed.y);
+      hit(0);
     }
     if (y<0) {
       stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
@@ -70,6 +72,7 @@ class Player {
       accel.set(accel.x, 0.0);
       speed.set(speed.x, 0.0);
       coord.set(coord.x, 0.0);
+      hit(0);
     } else if (y>height-h) {
       stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
       y=height-h;
@@ -78,6 +81,7 @@ class Player {
       coord.set(coord.x, height-h);
       speed.set(speed.x, 0.0);
       accel.set(accel.x, 0.0);
+      hit(0);
     }
     // }
     /*
@@ -125,11 +129,11 @@ class Player {
         if (cheatEnabled) text("                              left:"+holdLeft+" right:"+holdRight+" up:"+holdUp+" down:"+holdDown, x+w/2, y+h/2-100);
       }
 
-      if (ability.active)text("A", x+w/2, y-h*2);
-      if (holdTrigg)text("H", x+w/2, y+h/2-h);
+      if (cheatEnabled && ability.active)text("A", x+w/2, y-h*2);
+      if (cheatEnabled && holdTrigg)text("H", x+w/2, y+h/2-h);
       if (deColor>0)deColor-=int(10*s*f);
     } else { //stealth
-      stroke(255, 10);
+      stroke(255, 20);
       noFill();
       strokeWeight(1);
       ellipse(x+w/2, y+h/2, w, h);
@@ -313,21 +317,24 @@ class Player {
     // for (int i=0; i<2; i++) {
     particles.add(new Particle(int(x+w/2), int(y+h/2), random(-10, 10)+vx/2, random(-10, 10)+vy/2, int(random(5, 20)), 500, playerColor));
     // }
-    //  println("hit");
+    invisStampTime=millis()+invinsTime;
+    invis=true;
     if (health<0) {
-      dead=true;
-      shakeTimer=20;
-      for (int i=0; i<64; i++) {
-        particles.add(new Particle(int(x+w/2), int(y+h/2), random(50)-25, random(50)-25, int(random(40)+10), 1500, playerColor));
-      }
-      particles.add(new ShockWave(int(x+w/2), int(y+h/2), int(random(40)+10), 500, playerColor));
-      particles.add(new LineWave(int(x+w/2), int(y+h/2), int(random(40)+10), 500, playerColor));
-      particles.add(new Flash(1000, 8, playerColor));  
-      state=0;
-      invisStampTime=millis()+invinsTime;
-      invis=true;
-      //stamps.add( new StateStamp(index, int(x), int(y), state, health,dead));
+      death();
     }
+  }
+
+  void death() {
+    dead=true;
+    shakeTimer=20;
+    for (int i=0; i<64; i++) {
+      particles.add(new Particle(int(x+w/2), int(y+h/2), random(50)-25, random(50)-25, int(random(40)+10), 1500, playerColor));
+    }
+    particles.add(new ShockWave(int(x+w/2), int(y+h/2), int(random(40)+10), 500, playerColor));
+    particles.add(new LineWave(int(x+w/2), int(y+h/2), int(random(40)+10), 400, playerColor));
+    particles.add(new Flash(900, 8, playerColor));  
+    state=0;
+    //stamps.add( new StateStamp(index, int(x), int(y), state, health,dead));
   }
 
   void displayHealth() {

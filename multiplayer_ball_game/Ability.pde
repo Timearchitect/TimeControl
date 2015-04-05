@@ -152,7 +152,7 @@ class Freeze extends Ability { //-----------------------------------------------
     quitOrigo();
     if (player.freezeImmunity) {
       for (int i =0; i<4; i++) {
-        particles.add( new Feather(500, int(player.x+player.w/2), int(player.y+player.h/2), random(-5, 5), random(-5, 5), 15, player.playerColor));
+        particles.add( new Feather(400, int(player.x+player.w/2), int(player.y+player.h/2), random(-5, 5), random(-5, 5), 15, player.playerColor));
       }
       particles.add( new  Particle(int(player.x+player.w/2), int(player.y+player.h/2), 0, 0, player.w, 50, player.playerColor));
     }
@@ -319,7 +319,7 @@ class SaveState extends Ability { //--------------------------------------------
   SaveState() {
     super();
     name=this.toString();
-    activeCost=80;
+    activeCost=70;
     deactiveCost=40;
     active=false;
     meta=true;
@@ -356,7 +356,7 @@ class SaveState extends Ability { //--------------------------------------------
     super.deActivate();
     saved.call();
     shakeTimer=50;
-    particles.add(new Flash(1500, 5, color(255)));   // flash
+    particles.add(new Flash(1200, 5, color(255)));   // flash
     regen=true;
     speedControl.clear();
     speedControl.addSegment((reverse)?-1*S*F:1*S*F, 100); 
@@ -376,6 +376,7 @@ class SaveState extends Ability { //--------------------------------------------
 
 
 class ThrowDagger extends Ability {//---------------------------------------------------    ThrowDagger   ---------------------------------
+  int damage=8;
 
   ThrowDagger() {
     super();
@@ -384,7 +385,7 @@ class ThrowDagger extends Ability {//-------------------------------------------
   } 
   @Override
     void action(Player player) {
-    projectiles.add( new IceDagger(player.index, int( player.x+player.w/2), int(player.y+player.h/2), 30, player.playerColor, 1000, player.angle, player.ax*24, player.ay*24));
+    projectiles.add( new IceDagger(player.index, int( player.x+player.w/2), int(player.y+player.h/2), 30, player.playerColor, 1000, player.angle, player.ax*24, player.ay*24,damage));
   }
   @Override
     void press(Player player) {
@@ -415,12 +416,11 @@ class ForceShoot extends Ability {//--------------------------------------------
   }
   @Override
     void press(Player player) {
-    if ((!reverse || player.reverseImmunity) && energy>0+activeCost && !active && !player.dead) {
+    if ((!reverse || player.reverseImmunity) && energy>(0+activeCost) && !active && !channeling && !player.dead) {
       activate();
       stamps.add( new AbilityStamp(player.index, int(player.x), int(player.y), energy, active, channeling, cooling, regen, hold));
       regen=false;
     }
-    //  projectiles.add( new forceBall(player.index, int( player.x+player.w/2), int(player.y+player.h/2), 30, player.playerColor, 1500, player.angle, player.ax*20, player.ay*20));
   }
   @Override
     void hold(Player player) {
@@ -429,7 +429,7 @@ class ForceShoot extends Ability {//--------------------------------------------
       player.MAX_ACCEL=MODIFIED_MAX_ACCEL;
       if (MAX_FORCE>forceAmount) { 
         channel();
-        if (!channeling) {
+        if (!active || energy<0 ) {
           release(player);
         }
         restForce = MAX_FORCE-forceAmount;
@@ -442,12 +442,12 @@ class ForceShoot extends Ability {//--------------------------------------------
       }
     }
     if (!active)press(player); // cancel
-    if (player.hit)release(player);
+    if (player.hit)release(player); // cancel
   }
   @Override
     void release(Player player) {
-    if ((!reverse || player.reverseImmunity) && active) {
-      if (!player.dead && (!freeze || player.freezeImmunity)) {
+    if ((!reverse || player.reverseImmunity ) ) {
+      if (!player.dead && (!freeze || player.freezeImmunity)&& active && channeling) {
         stamps.add( new AbilityStamp(player.index, int(player.x), int(player.y), energy, active, channeling, cooling, regen, hold));
         regen=true;
         action(player);
@@ -471,9 +471,9 @@ class Blink extends Ability {//-------------------------------------------------
     void action(Player player) {
     stamps.add( new ControlStamp(player.index, int(player.x), int(player.y), player.vx, player.vy, player.ax, player.ay));
     particles.add(new ShockWave(int(player.x+player.w/2), int(player.y+player.h/2), 20, 200, player.playerColor));
-    particles.add( new  Particle(int(player.x+player.w/2), int(player.y+player.h/2), 0, 0, int(player.w), 1000, color(255, 0, 255)));
+    particles.add( new  Particle(int(player.x+player.w/2), int(player.y+player.h/2), 0, 0, int(player.w), 800, color(255, 0, 255)));
     for (int i =0; i<3; i++) {
-      particles.add( new Feather(400, int(player.x+player.w/2), int(player.y+player.h/2), random(-2, 2), random(-2, 2), 15, player.playerColor));
+      particles.add( new Feather(300, int(player.x+player.w/2), int(player.y+player.h/2), random(-2, 2), random(-2, 2), 15, player.playerColor));
     }
     player.x+=cos(radians(player.angle))*range;
     player.y+= sin(radians(player.angle))*range;
@@ -537,7 +537,7 @@ class Multiply extends Ability {//----------------------------------------------
   }
 }
 class Stealth extends Ability {//---------------------------------------------------    Stealth   ---------------------------------
-
+ int projectileDamage=10;
   Stealth() {
     super();
     active=false;
@@ -550,7 +550,7 @@ class Stealth extends Ability {//-----------------------------------------------
     stamps.add( new StateStamp(player.index, int(player.x), int(player.y), player.state, player.health, player.dead));
     particles.add( new  Particle(int(player.x+player.w/2), int(player.y+player.h/2), 0, 0, int(player.w), 300, color(255, 0, 255)));
     for (int i =0; i<10; i++) {
-      particles.add( new Feather(1000, int(player.x+player.w/2), int(player.y+player.h/2), random(-2, 2), random(-2, 2), 500, player.playerColor));
+      particles.add( new Feather(500, int(player.x+player.w/2), int(player.y+player.h/2), random(-2, 2), random(-2, 2), 500, player.playerColor));
     }
     player.stealth=true;
   }
@@ -561,17 +561,16 @@ class Stealth extends Ability {//-----------------------------------------------
       if (energy>0+activeCost && !active) { 
         stamps.add( new AbilityStamp(player.index, int(player.x), int(player.y), energy, active, channeling, cooling, regen, hold));
         regen=false;
-        active=true;
         activate();
-        particles.add(new Flash(1500, 4, player.playerColor));  
+        particles.add(new Flash(400, 4, player.playerColor));  
         action(player);
       } else if (player.stealth) {
         deActivate();
         regen=true;
         player.stealth=false;
         particles.add(new ShockWave(int(player.x+player.w/2), int(player.y+player.h/2), 20, 200, player.playerColor));
-        for (int i=0; i<360; i+=360/16) {
-          projectiles.add( new IceDagger(player.index, int( player.x+player.w/2), int(player.y+player.h/2), 30, player.playerColor, 150, i, cos(radians(i))*20, sin(radians(i))*20));
+        for (int i=0; i<=360; i+=30) {
+          projectiles.add( new IceDagger(player.index, int( player.x+player.w/2), int(player.y+player.h/2), 30, player.playerColor, 150, i, cos(radians(i))*20, sin(radians(i))*20,projectileDamage));
         }
       }
     }
@@ -581,4 +580,32 @@ class Stealth extends Ability {//-----------------------------------------------
     if (int(random(60))==0)particles.add(new Particle(int(player.x+player.w/2), int(player.y+player.h/2), random(-5, 5), random(-5, 5), int(random(20)+5), 600, 255));
   }
 }
+class Laser extends Ability {//---------------------------------------------------    Stealth   ---------------------------------
+ int damage=40;
+  Laser() {
+    super();
+    name=this.toString();
+    activeCost=16;
+  } 
+  @Override
+    void action(Player player) {
+    projectiles.add( new ChargeLaser(player.index, int( player.x+player.w/2), int(player.y+player.h/2), player.playerColor, 450, player.angle,damage));
+                                
+}
+  @Override
+    void press(Player player) {
+    if ((!reverse || player.reverseImmunity)&& energy>0+activeCost && !player.dead && (!freeze || player.freezeImmunity)) {
+      stamps.add( new AbilityStamp(player.index, int(player.x), int(player.y), energy, active, channeling, cooling, regen, hold));
+      regen=true;
+      activate();
+      player.vx=0;
+      player.vy=0;
+      player.ax=0;
+      player.ay=0;
+      action(player);
+      deActivate();
+    }
+  }
+}
+
 
