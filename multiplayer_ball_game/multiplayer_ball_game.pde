@@ -34,7 +34,7 @@ final int AmountOfPlayers=4; // start players
 final int startBalls=5;
 final int  ballSize=50;
 final int playerSize=100;
-
+int playersAlive; // amount of players alive
 int offsetX=950, offsetY=100;
 static int shakeTimer;
 static float F=1, S=1;
@@ -48,7 +48,7 @@ final int keyResponseDelay=30;  // eventhe refreashrate equa to arduino devices
 //Ability[] abilities= { new ThrowDagger(), new ThrowDagger(), new ThrowDagger(), new ThrowDagger(), new ThrowDagger()};
 
 Ability[] abilities= { 
-  new ForceShoot(), new Laser(), new ForceShoot(), new ForceShoot(), new Blink()
+  new MachineGunFire(), new Laser(), new Multiply(), new ThrowBoomerang(), new Blink()
   };
 
 
@@ -60,7 +60,7 @@ ArrayList <Player> players = new ArrayList<Player>();
 ArrayList <TimeStamp> stamps= new ArrayList<TimeStamp>();
 ArrayList <Projectile> projectiles = new ArrayList<Projectile>();
 ArrayList <Particle> particles = new ArrayList<Particle>();
-char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p';
+char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p',ResetKey='0';
 int playerControl[][]= {
   {
     UP, DOWN, LEFT, RIGHT, int(',')
@@ -92,14 +92,15 @@ void setup() {
   textFont(font, 18);
   randomSeed(12345);
   noSmooth();
-  noCursor();
+  //noCursor();
   colorMode(HSB);
   for (int i=0; i< AmountOfPlayers; i++) {
     players.add(new Player(i, color((255/AmountOfPlayers)*i, 255, 255), int(random(width-playerSize*1)+playerSize), int(random(height-playerSize*1)+playerSize), playerSize, playerSize, playerControl[i][0], playerControl[i][1], playerControl[i][2], playerControl[i][3], playerControl[i][4], abilities[i]));
+
     if (players.get(i).mouse)players.get(i).friction=0.11; //mouse
   }
   for (int i=0; i< startBalls; i++) {
-    projectiles.add(new Ball(int(random(width-ballSize)+ballSize/2), int(random(height-ballSize)+ballSize/2), int(random(20)-10), int(random(20)-10), int(random(ballSize)+10), color(random(255), 0, 0)));
+    projectiles.add(new Ball(int(random(width-ballSize)+ballSize*0.5), int(random(height-ballSize)+ballSize*0.5), int(random(20)-10), int(random(20)-10), int(random(ballSize)+10), color(random(255), 0, 0)));
   }
   println("amount of serial ports: "+Serial.list().length);
   for (int i=0; i<Serial.list ().length; i++) {
@@ -155,6 +156,7 @@ void setup() {
 
 void draw() {
   addMillis=millis()-prevMillis;
+  prevMillis=millis();
   if (origo) {
     fallenTime+=addMillis*F*S;
     background(255);
@@ -281,9 +283,7 @@ void draw() {
       }
       image(GUILayer, 0, 0);
     }
-    strokeWeight(5);
-    ellipse(pmouseX, pmouseY, 10, 10);
-    point(mouseX, mouseY);
+    //mouseDot();
     //mouseControl();
     checkKeyHold();
     for (int i=stamps.size ()-1; i>= 0; i--) { // checkStamps
@@ -291,7 +291,7 @@ void draw() {
       stamps.get(i).revert();
     }
     checkWinner();
-    println(stamps.size()); // timestamps current in game
+    //println(stamps.size()); // timestamps current in game
 
       popMatrix();
 
@@ -302,7 +302,7 @@ void draw() {
       }
     }
   }// origo
-  prevMillis=millis();
+ // prevMillis=millis();
   if (cheatEnabled) {
     displayInfo();
   } else {
@@ -321,22 +321,22 @@ void dispose() {
 
 void displayInfo() {
   fill(0);
-  text("add Time: "+addMillis+" freezeTime: " + freezeTime+" reversed: " + reversedTime+" forward: " + forwardTime+ " current: "+  stampTime +" fallenTime: "+fallenTime, width/2, 50);
-  text("version: "+version, width/2, 20);
-  text("players: "+players.size()+" projectiles: "+projectiles.size()+" particles: "+particles.size()+" stamps: "+stamps.size(), width/2, 75);
+  text("add Time: "+addMillis+" freezeTime: " + freezeTime+" reversed: " + reversedTime+" forward: " + forwardTime+ " current: "+  stampTime +" fallenTime: "+fallenTime, width*0.5, 50);
+  text("version: "+version, width*0.5, 20);
+  text("players: "+players.size()+" projectiles: "+projectiles.size()+" particles: "+particles.size()+" stamps: "+stamps.size(), width*0.5, 75);
   text(frameRate, width-80, 50);
 
 }
 void displayClock() {
   fill(0);
   textSize(40);
-  text(" Time: "+  int(stampTime*0.001), width/2, 60);
+  text(" Time: "+  int(stampTime*0.001), width*0.5, 60);
   textSize(18);
-  text("version: "+version, width/2, 20);
+  text("version: "+version, width*0.5, 20);
 }
 
 void shake(int amount) {
-  translate( int(random(amount)-amount/2), int(random(amount)-amount/2));
+  translate( int(random(amount)-amount*0.5), int(random(amount)-amount*0.5));
 }
 
 void checkPlayerVSPlayerColloision() {
@@ -361,8 +361,8 @@ void checkPlayerVSProjectileColloision() {
     for (int i=0; i< projectiles.size (); i++) {    
       for (int j=0; j<players.size (); j++) {      
         if (!players.get(j).dead && !projectiles.get(i).dead && projectiles.get(i).playerIndex!=j  ) {
-          if (dist(projectiles.get(i).x, projectiles.get(i).y, players.get(j).x+players.get(j).w/2, players.get(j).y+players.get(j).h/2)<playerSize) {
-            players.get(j).hit(projectiles.get(i).damage);
+          if (dist(projectiles.get(i).x, projectiles.get(i).y, players.get(j).x+players.get(j).w*0.5, players.get(j).y+players.get(j).h*0.5)<playerSize) {
+          //  players.get(j).hit(projectiles.get(i).damage);
             players.get(j).pushForce(projectiles.get(i).force, projectiles.get(i).angle);
             projectiles.get(i).hit(players.get(j));
           }
@@ -374,30 +374,12 @@ void checkPlayerVSProjectileColloision() {
 
 
 void checkPlayerVSProjectileColloisionLine() {
-/*    E is the starting point of the ray,
-    L is the end point of the ray,
-    C is the center of sphere you're testing against
-    r is the radius of that sphere
-
-Compute:
-d = L - E ( Direction vector of ray, from start to end )
-f = E - C ( Vector from center sphere to ray start )
-
-Then the intersection is found by..
-Plugging:
-P = E + t * d
-This is a parametric equation:
-Px = Ex + tdx
-Py = Ey + tdy
-into
-(x - h)2 + (y - k)2 = r2
-(h,k) = center of circle. */
-
 
 }
 
 void checkWinner() {
-  int playersAlive=0, playerAliveIndex=0;
+  int playerAliveIndex=0;
+  playersAlive=0;
   for (int i=0; i<players.size (); i++) {      
     if (!players.get(i).dead) {
       playersAlive++;
@@ -406,7 +388,8 @@ void checkWinner() {
   }
   if (playersAlive==1) {
     textSize(80);
-    text(" Winner is player "+(playerAliveIndex+1), width/2, height/2);
+    text(" Winner is player "+(playerAliveIndex+1), width*0.5, height*0.5);
+      text(" Press ["+ResetKey+"] to restart", width*0.5, height*0.6);
      textSize(18);
   }
 }
@@ -451,4 +434,10 @@ void quitOrigo() {
     particles.add(new Flash(1500, 5, color(255)));   // flash
   }
 }
+void mouseDot(){
 
+    strokeWeight(5);
+    ellipse(pmouseX, pmouseY, 10, 10);
+    point(mouseX, mouseY);
+
+}

@@ -1,24 +1,24 @@
 class Ability {
   String name;
-  Player player;
+  Player owner;  
   float energy=90, maxEnergy=100, activeCost=5, channelCost, deChannelCost, deactiveCost, cooldown, maxCooldown, regenRate=0.1, ammo, maxAmmo, loadRate;
   boolean active, channeling, cooling, hold, regen=true, meta;
   void Ability() { 
     energy=100;
     maxEnergy=energy;
   }
-  void Ability(  Player _player) { 
-    player=_player;
+  void Ability( Player _owner) { 
+    owner=_owner;
     energy=100;
     maxEnergy=energy;
   }
-  void press(Player player) {
+  void press() {
   }
-  void release(Player player) {
+  void release() {
   }
-  void hold(Player player) {
+  void hold() {
   }
-  void action(Player player) {
+  void action() {
   }
 
   void update() {
@@ -51,8 +51,8 @@ class Ability {
     cooldown=maxCooldown;
     cooling=true;
   }
-  void regen(Player player) {
-    if (reverse && !player.reverseImmunity) {
+  void regen() {
+    if (reverse && !owner.reverseImmunity) {
       if (regen && energy>0) {
         energy -= regenRate*S*F;
       }
@@ -60,7 +60,7 @@ class Ability {
       if (regen && energy<maxEnergy) {
         energy += regenRate*S*F;
       } else if (regen) {
-        stamps.add( new AbilityStamp(player.index, int(player.x), int(player.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
         regen=false;
       }
     }
@@ -86,7 +86,7 @@ class FastForward extends Ability { //------------------------------------------
     meta=true;
   }
   @Override
-    void action(Player player) {
+    void action() {
     origo=false;
     if (stampTime<0) {
       stampTime=0;
@@ -99,7 +99,7 @@ class FastForward extends Ability { //------------------------------------------
     //controlable=(controlable)?false:true;
     drawTimeSymbol();
   }
-  void press(Player player) {
+  void press() {
     if (!active) {
       if (energy>0+activeCost) {
         activate();
@@ -111,14 +111,14 @@ class FastForward extends Ability { //------------------------------------------
   void activate() { 
     active=true;
     energy -= activeCost;
-    action(player);
+    action();
     regen=false;
   }
   @Override
     void deActivate() {
     super.deActivate();
     regen=true;
-    action(player);
+    action();
   }
   @Override
     void passive() {
@@ -148,29 +148,33 @@ class Freeze extends Ability { //-----------------------------------------------
     meta=true;
   }
   @Override
-    void action(Player player) {
+    void action() {
     quitOrigo();
-    if (player.freezeImmunity) {
+    if (owner.freezeImmunity) {
       for (int i =0; i<4; i++) {
-        particles.add( new Feather(400, int(player.x+player.w/2), int(player.y+player.h/2), random(-5, 5), random(-5, 5), 15, player.playerColor));
+        particles.add( new Feather(400, int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), random(-5, 5), random(-5, 5), 15, owner.playerColor));
       }
-      particles.add( new  Particle(int(player.x+player.w/2), int(player.y+player.h/2), 0, 0, player.w, 50, player.playerColor));
+      particles.add( new  Particle(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 0, 0, owner.w, 50, owner.playerColor));
     }
-    stamps.add( new ControlStamp(player.index, int(player.x), int(player.y), player.vx, player.vy, player.ax, player.ay));
+    stamps.add( new ControlStamp(owner.index, int(owner.x), int(owner.y), owner.vx, owner.vy, owner.ax, owner.ay));
     freeze=(freeze)?false:true;
     speedControl.clear();
     speedControl.addSegment((freeze)?0:1, 150); //now stop
     controlable=(controlable)?false:true;
-    for (int i=0; i< players.size (); i++) {
-      stamps.add( new ControlStamp(i, int(players.get(i).x), int( players.get(i).y), 0, 0, 0, 0));
-      stamps.add( new ControlStamp(i, int(players.get(i).x), int( players.get(i).y), players.get(i).vx, players.get(i).vy, players.get(i).ax, players.get(i).ay));
+    /* for (int i=0; i< players.size (); i++) {
+     stamps.add( new ControlStamp(i, int(players.get(i).x), int( players.get(i).y), 0, 0, 0, 0));
+     stamps.add( new ControlStamp(i, int(players.get(i).x), int( players.get(i).y), players.get(i).vx, players.get(i).vy, players.get(i).ax, players.get(i).ay));
+     }*/
+    for (Player P : players) {
+      stamps.add( new ControlStamp(P.index, int(P.x), int( P.y), 0, 0, 0, 0));
+      stamps.add( new ControlStamp(P.index, int(P.x), int( P.y), P.vx, P.vy, P.ax, P.ay));
     }
     controlable=(controlable)?false:true;
     drawTimeSymbol();
   }
 
   @Override
-    void press(Player player) {
+    void press() {
     if (!active) {
       if (energy>0+activeCost) {
         activate();
@@ -182,18 +186,18 @@ class Freeze extends Ability { //-----------------------------------------------
   void activate() { 
     active=true;
     energy -= activeCost;
-    particles.add(new ShockWave(int(player.x+player.w/2), int(player.y+player.h/2), 20, 150, player.playerColor));
-    stamps.add( new ControlStamp(player.index, int(player.x), int( player.y), player.vx, player.vy, player.ax, player.ay));
-    action(player);
+    particles.add(new ShockWave(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 20, 150, owner.playerColor));
+    stamps.add( new ControlStamp(owner.index, int(owner.x), int( owner.y), owner.vx, owner.vy, owner.ax, owner.ay));
+    action();
     regen=false;
   }
 
   @Override
     void deActivate() {
     super.deActivate();
-    particles.add(new ShockWave(int(player.x+player.w/2), int(player.y+player.h/2), 200, 850, player.playerColor));
-    action(player);
-    //  stamps.add( new AbilityStamp(player.index, int(player.x), int(player.y), energy, active, channeling, cooling, regen, hold));
+    particles.add(new ShockWave(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 200, 850, owner.playerColor));
+    action();
+    //  stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
     regen=true;
   }
   @Override
@@ -223,7 +227,7 @@ class Reverse extends Ability { //----------------------------------------------
     meta=true;
   }
   @Override
-    void action(Player player) {
+    void action() {
     musicPlayer.pause(false);
     reverse=(reverse)?false:true;
     speedControl.clear();
@@ -233,7 +237,7 @@ class Reverse extends Ability { //----------------------------------------------
     quitOrigo();
   }
   @Override
-    void press(Player player) {
+    void press() {
     if (!active) {
       if (energy>0+activeCost) {
         activate();
@@ -245,15 +249,15 @@ class Reverse extends Ability { //----------------------------------------------
   @Override
     void activate() { 
     energy -= activeCost;
-    action(player);
+    action();
     active=true;
     regen=false;
   }
   @Override
     void deActivate() {
     super.deActivate();
-    //  stamps.add( new AbilityStamp(player.index, int(player.x), int(player.y), energy, active, channeling, cooling, regen, hold));
-    action(player);
+    //  stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    action();
     active=false;
     regen=true;
   }
@@ -262,7 +266,6 @@ class Reverse extends Ability { //----------------------------------------------
       channel();
       if (energy<0) {
         deActivate();
-        
       }
     }
   }
@@ -283,7 +286,7 @@ class Slow extends Ability { //-------------------------------------------------
     meta=true;
   }
   @Override
-    void action(Player player) {
+    void action() {
     quitOrigo();
     musicPlayer.pause(false);
     slow=(slow)?false:true;
@@ -294,21 +297,21 @@ class Slow extends Ability { //-------------------------------------------------
     drawTimeSymbol();
   }
   @Override
-    void press(Player player) {
+    void press() {
     if (!active) {
       if (energy>0+activeCost) {
         activate();
-        action(player);
+        action();
       }
     } else {
       deActivate();
-      action(player);
+      action();
     }
   }
   @Override
     void deActivate() {
     super.deActivate();
-    // stamps.add( new AbilityStamp(player.index, int(player.x), int(player.y), energy, active, channeling, cooling, regen, hold));
+    // stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
     regen=true;
   }
 }
@@ -325,13 +328,13 @@ class SaveState extends Ability { //--------------------------------------------
     meta=true;
   }
   @Override
-    void action(Player player) {
+    void action() {
     musicPlayer.pause(false);
 
     for (int i=0; i< players.size (); i++) {  
       if (!players.get(i).dead) {
-        particles.add(new ShockWave(int(players.get(i).x+players.get(i).w/2), int(players.get(i).y+players.get(i).h/2), 20, 500, players.get(i).playerColor));
-        particles.add( new  Particle(int(players.get(i).x+players.get(i).w/2), int(players.get(i).y+players.get(i).h/2), 0, 0, int(players.get(i).w), 1000, players.get(i).playerColor));
+        particles.add(new ShockWave(int(players.get(i).x+players.get(i).w*0.5), int(players.get(i).y+players.get(i).h*0.5), 20, 500, players.get(i).playerColor));
+        particles.add( new  Particle(int(players.get(i).x+players.get(i).w*0.5), int(players.get(i).y+players.get(i).h*0.5), 0, 0, int(players.get(i).w), 1000, players.get(i).playerColor));
       }
       // speedControl.clear();
       saved =new CheckPoint(); // timeStamps special object
@@ -340,11 +343,11 @@ class SaveState extends Ability { //--------------------------------------------
     drawTimeSymbol();
   }
   @Override
-    void press(Player player) {
+    void press() {
     if (!active) {
       if (energy>0+activeCost) {
         activate();
-        action(player);
+        action();
       }
     } else {
       deActivate();
@@ -368,8 +371,8 @@ class SaveState extends Ability { //--------------------------------------------
       stroke(255);
       strokeWeight(1);
       noFill();
-      // point(player.x+player.w/2+cos(radians(player.angle))*range, player.y+player.h/2+sin(radians(player.angle))*range);
-      ellipse(player.x+player.w/2, player.y+player.h/2, player.w*2, player.h*2);
+      // point(owner.x+owner.w*0.5+cos(radians(owner.angle))*range, owner.y+owner.h*0.5+sin(radians(owner.angle))*range);
+      ellipse(owner.x+owner.w*0.5, owner.y+owner.h*0.5, owner.w*2, owner.h*2);
     }
   }
 }
@@ -384,16 +387,20 @@ class ThrowDagger extends Ability {//-------------------------------------------
     activeCost=8;
   } 
   @Override
-    void action(Player player) {
-    projectiles.add( new IceDagger(player.index, int( player.x+player.w/2), int(player.y+player.h/2), 30, player.playerColor, 1000, player.angle, player.ax*24, player.ay*24,damage));
+    void action() {
+    if (int(random(4))==0) {
+      projectiles.add( new IceDagger(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 30, owner.playerColor, 1000, owner.keyAngle, owner.ax*30, owner.ay*30, damage));
+    } else {
+      projectiles.add( new ArchingIceDagger(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 30, owner.playerColor, 1000, owner.keyAngle, owner.ax*24, owner.ay*24, damage));
+    }
   }
   @Override
-    void press(Player player) {
-    if ((!reverse || player.reverseImmunity)&& energy>0+activeCost && !player.dead && (!freeze || player.freezeImmunity)) {
-      stamps.add( new AbilityStamp(player.index, int(player.x), int(player.y), energy, active, channeling, cooling, regen, hold));
+    void press() {
+    if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
+      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
       regen=true;
       activate();
-      action(player);
+      action();
       deActivate();
     }
   }
@@ -411,49 +418,49 @@ class ForceShoot extends Ability {//--------------------------------------------
     channelCost=0.1;
   } 
   @Override
-    void action(Player player) {
-    projectiles.add( new forceBall(player.index, int( player.x+player.w/2), int(player.y+player.h/2), forceAmount*2, 30, player.playerColor, 2000, player.angle, forceAmount));
+    void action() {
+    projectiles.add( new forceBall(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), forceAmount*2, 30, owner.playerColor, 2000, owner.angle, forceAmount));
   }
   @Override
-    void press(Player player) {
-    if ((!reverse || player.reverseImmunity) && energy>(0+activeCost) && !active && !channeling && !player.dead) {
+    void press() {
+    if ((!reverse || owner.reverseImmunity) && energy>(0+activeCost) && !active && !channeling && !owner.dead) {
       activate();
-      stamps.add( new AbilityStamp(player.index, int(player.x), int(player.y), energy, active, channeling, cooling, regen, hold));
+      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
       regen=false;
     }
   }
   @Override
-    void hold(Player player) {
+    void hold() {
 
-    if ((!reverse || player.reverseImmunity) &&  active && !player.dead) {
-      player.MAX_ACCEL=MODIFIED_MAX_ACCEL;
+    if ((!reverse || owner.reverseImmunity) &&  active && !owner.dead) {
+      owner.MAX_ACCEL=MODIFIED_MAX_ACCEL;
       if (MAX_FORCE>forceAmount) { 
         channel();
         if (!active || energy<0 ) {
-          release(player);
+          release();
         }
         restForce = MAX_FORCE-forceAmount;
         forceAmount+=ChargeRate*S*F; 
-        particles.add(new Particle(int(player.x+player.w/2), int(player.y+player.h/2), random(-restForce/2, restForce/2), random(-restForce/2, restForce/2), int(random(30)+10), 300, player.playerColor));
-        particles.add(new ShockWave(int(player.x+player.w/2), int(player.y+player.h/2), int(forceAmount), 50, player.playerColor));
+        particles.add(new Particle(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), random(-restForce*0.5, restForce*0.5), random(-restForce*0.5, restForce*0.5), int(random(30)+10), 300, owner.playerColor));
+        particles.add(new ShockWave(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), int(forceAmount/3), int(forceAmount/3), owner.playerColor));
       } else {
-        //  particles.add(new ShockWave(int(player.x+player.w/2), int(player.y+player.h/2), int(forceAmount), 50, color(255, 0, 255)));
-        particles.add( new  Particle(int(player.x+player.w/2), int(player.y+player.h/2), 0, 0, int(MAX_FORCE*2), 50, color(255, 0, 255)));
+        //  particles.add(new ShockWave(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), int(forceAmount), 50, color(255, 0, 255)));
+        particles.add( new  Particle(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 0, 0, int(MAX_FORCE*2), 50, color(255, 0, 255)));
       }
     }
-    if (!active)press(player); // cancel
-    if (player.hit)release(player); // cancel
+    if (!active)press(); // cancel
+    if (owner.hit)release(); // cancel
   }
   @Override
-    void release(Player player) {
-    if ((!reverse || player.reverseImmunity ) ) {
-      if (!player.dead && (!freeze || player.freezeImmunity)&& active && channeling) {
-        stamps.add( new AbilityStamp(player.index, int(player.x), int(player.y), energy, active, channeling, cooling, regen, hold));
+    void release() {
+    if ((!reverse || owner.reverseImmunity ) ) {
+      if (!owner.dead && (!freeze || owner.freezeImmunity)&& active && channeling) {
+        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
         regen=true;
-        action(player);
+        action();
         deChannel();
         deActivate();
-        player.MAX_ACCEL=player.DEFAULT_MAX_ACCEL;
+        owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
         forceAmount=0;
       }
     }
@@ -468,144 +475,381 @@ class Blink extends Ability {//-------------------------------------------------
     activeCost=10;
   } 
   @Override
-    void action(Player player) {
-    stamps.add( new ControlStamp(player.index, int(player.x), int(player.y), player.vx, player.vy, player.ax, player.ay));
-    particles.add(new ShockWave(int(player.x+player.w/2), int(player.y+player.h/2), 20, 200, player.playerColor));
-    particles.add( new  Particle(int(player.x+player.w/2), int(player.y+player.h/2), 0, 0, int(player.w), 800, color(255, 0, 255)));
+    void action() {
+    stamps.add( new ControlStamp(owner.index, int(owner.x), int(owner.y), owner.vx, owner.vy, owner.ax, owner.ay));
+    particles.add(new ShockWave(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 20, 200, owner.playerColor));
+    particles.add( new  Particle(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 0, 0, int(owner.w), 800, color(255, 0, 255)));
     for (int i =0; i<3; i++) {
-      particles.add( new Feather(300, int(player.x+player.w/2), int(player.y+player.h/2), random(-2, 2), random(-2, 2), 15, player.playerColor));
+      particles.add( new Feather(300, int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), random(-2, 2), random(-2, 2), 15, owner.playerColor));
     }
-    player.x+=cos(radians(player.angle))*range;
-    player.y+= sin(radians(player.angle))*range;
+    owner.x+=cos(radians(owner.angle))*range;
+    owner.y+= sin(radians(owner.angle))*range;
 
-    // particles.add( new  Particle(int(player.x+player.w/2), int(player.y+player.h/2), 0, 0, int(player.w), 1000, color(255, 0, 255)));
-    particles.add(new ShockWave(int(player.x+player.w/2), int(player.y+player.h/2), 20, 200, player.playerColor));
-    //projectiles.add( new IceDagger(player.index, int( player.x+player.w/2), int(player.y+player.h/2), 30, player.playerColor, 1000, player.angle, player.ax*24, player.ay*24));
+    particles.add(new ShockWave(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 20, 200, owner.playerColor));
   }
   @Override
-    void press(Player player) {
-    if ((!reverse || player.reverseImmunity)&& energy>0+activeCost && !player.dead && (!freeze || player.freezeImmunity)) {
-      stamps.add( new AbilityStamp(player.index, int(player.x), int(player.y), energy, active, channeling, cooling, regen, hold));
+    void press() {
+    if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
+      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
       regen=true;
       activate();
-      action(player);
+      action();
       deActivate();
     }
   }
-  /*@Override
-   void passive() {
-   stroke(255);
-   strokeWeight(1);
-   noFill();
-   point(player.x+player.w/2+cos(radians(player.angle))*range, player.y+player.h/2+sin(radians(player.angle))*range);
-   ellipse(player.x+player.w/2+cos(radians(player.angle))*range, player.y+player.h/2+sin(radians(player.angle))*range,player.w,player.h);
-   }*/
 }
 class Multiply extends Ability {//---------------------------------------------------    Multiply   ---------------------------------
   int range=playerSize;
+  ArrayList<Player> clone= new ArrayList();
+
   Multiply() {
     super();
     name=this.toString();
-    activeCost=100;
+    activeCost=99;
   } 
   @Override
-    void action(Player player) {
+    void action() {
     for (int i=0; i<12; i++) {
-      particles.add(new Particle(int(player.x+player.w/2), int(player.y+player.h/2), random(-10, 10), random(-10, 10), int(random(20)+5), 800, 255));
+      particles.add(new Particle(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), random(-10, 10), random(-10, 10), int(random(20)+5), 800, 255));
     }
-    stamps.add( new ControlStamp(player.index, int(player.x), int(player.y), player.vx, player.vy, player.ax, player.ay));
-    players.add(new Player(players.size(), player.playerColor, int(player.x-cos(radians(player.angle))*range), int(player.y-sin(radians(player.angle))*range), playerSize, playerSize, player.down, player.up, player.right, player.left, player.triggKey, player.ability));
-    player.x+=cos(radians(player.angle))*range;
-    player.y+= sin(radians(player.angle))*range;
-    players.get(players.size()-1).clone=true;
-    players.get(players.size()-1).ally=player.ally; //same ally
-    players.get(players.size()-1).dead=true;
-    stamps.add( new StateStamp(players.size()-1, int(player.x), int(player.y), player.state, player.health, true));
-    players.get(players.size()-1).dead=false;
-    players.get(players.size()-1).maxHealth=player.maxHealth/2;
-    players.get(players.size()-1).health=player.health/2;
+    stamps.add( new ControlStamp(owner.index, int(owner.x), int(owner.y), owner.vx, owner.vy, owner.ax, owner.ay));
+
+    players.add(new Player(players.size(), owner.playerColor, int(owner.x-cos(radians(owner.angle))*range), int(owner.y-sin(radians(owner.angle))*range), playerSize, playerSize, owner.down, owner.up, owner.right, owner.left, owner.triggKey, new CloneMultiply()));
+    clone.add(players.get(players.size()-1));
+    Player currentClone=clone.get(clone.size()-1);
+
+    owner.x+=cos(radians(owner.angle))*range;
+    owner.y+= sin(radians(owner.angle))*range;
+    currentClone.clone=true;
+    currentClone.ally=owner.ally; //same ally
+    currentClone.dead=true;
+    stamps.add( new StateStamp(players.size()-1, int(owner.x), int(owner.y), owner.state, owner.health, true));
+    currentClone.dead=false;
+    currentClone.maxHealth=int(owner.maxHealth*0.5);
+    currentClone.health=int(owner.health*0.5);
+    currentClone.ability.energy=int(owner.ability.energy);
+
+    //   owner.ability.owner=owner;
   }
   @Override
-    void press(Player player) {
-    if ((!reverse || player.reverseImmunity)&& energy>0+activeCost && !player.dead && (!freeze || player.freezeImmunity)) {
-      stamps.add( new AbilityStamp(player.index, int(player.x), int(player.y), energy, active, channeling, cooling, regen, hold));
+    void press() {
+    if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
+      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
       regen=true;
       activate();
-      action(player);
+      action();
       deActivate();
     }
   }
 }
+class CloneMultiply extends Multiply {
+  CloneMultiply() {
+    super();
+    name=this.toString();
+  }
+  @Override
+    void action() {
+    for (int i=0; i<12; i++) {
+      particles.add(new Particle(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), random(-10, 10), random(-10, 10), int(random(20)+5), 800, 255));
+    }
+  }
+  @Override
+    void press() {
+    if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
+      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+      regen=true;
+      activate();
+      action();
+      deActivate();
+    }
+  }
+}
+
 class Stealth extends Ability {//---------------------------------------------------    Stealth   ---------------------------------
- int projectileDamage=10;
+  int projectileDamage=24;
   Stealth() {
     super();
     active=false;
     name=this.toString();
     activeCost=24;
-        energy=-50;
+    energy=0;
   } 
   @Override
-    void action(Player player) {
-    stamps.add( new StateStamp(player.index, int(player.x), int(player.y), player.state, player.health, player.dead));
-    particles.add( new  Particle(int(player.x+player.w/2), int(player.y+player.h/2), 0, 0, int(player.w), 300, color(255, 0, 255)));
+    void action() {
+    stamps.add( new StateStamp(owner.index, int(owner.x), int(owner.y), owner.state, owner.health, owner.dead));
+    particles.add( new  Particle(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 0, 0, int(owner.w), 300, color(255, 0, 255)));
     for (int i =0; i<10; i++) {
-      particles.add( new Feather(500, int(player.x+player.w/2), int(player.y+player.h/2), random(-2, 2), random(-2, 2), 500, player.playerColor));
+      particles.add( new Feather(300, int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), random(-2, 2), random(-2, 2), 500, owner.playerColor));
     }
-    player.stealth=true;
+    owner.stealth=true;
   }
   @Override
-    void press(Player player) {
+    void press() {
 
-    if ((!reverse || player.reverseImmunity)&& !player.dead && (!freeze || player.freezeImmunity)) {
+    if ((!reverse || owner.reverseImmunity)&& !owner.dead && (!freeze || owner.freezeImmunity)) {
       if (energy>0+activeCost && !active) { 
-        stamps.add( new AbilityStamp(player.index, int(player.x), int(player.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
         regen=false;
         activate();
-        particles.add(new Flash(400, 4, player.playerColor));  
-        action(player);
-      } else if (player.stealth) {
+        particles.add(new Flash(300, 6, owner.playerColor));  
+        action();
+      } else if (owner.stealth) {
         deActivate();
         regen=true;
-        player.stealth=false;
-        particles.add(new ShockWave(int(player.x+player.w/2), int(player.y+player.h/2), 20, 200, player.playerColor));
-        for (int i=0; i<=360; i+=30) {
-          projectiles.add( new IceDagger(player.index, int( player.x+player.w/2), int(player.y+player.h/2), 30, player.playerColor, 150, i, cos(radians(i))*20, sin(radians(i))*20,projectileDamage));
-        }
+        owner.stealth=false;
+        particles.add(new ShockWave(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 20, 200, owner.playerColor));
+        float range=200, duration=200;
+        projectiles.add( new Slash(owner.index, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 30, owner.playerColor, int(duration), owner.angle, range, 0, 0, projectileDamage));
       }
     }
   }
   @Override
     void passive() {
-    if (int(random(60))==0)particles.add(new Particle(int(player.x+player.w/2), int(player.y+player.h/2), random(-5, 5), random(-5, 5), int(random(20)+5), 600, 255));
+    if (int(random(60))==0)particles.add(new Particle(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), random(-5, 5), random(-5, 5), int(random(20)+5), 600, 255));
   }
 }
-class Laser extends Ability {//---------------------------------------------------    Stealth   ---------------------------------
- int damage=40;
+class Laser extends Ability {//---------------------------------------------------    Laser   ---------------------------------
+  int damage=40;
+  int duration=2000;
+  float MODIFIED_ANGLE_FACTOR=0.004;
+  float MODIFIED_MAX_ACCEL=0.01; 
+  long startTime;
   Laser() {
     super();
     name=this.toString();
     activeCost=16;
   } 
   @Override
-    void action(Player player) {
-    projectiles.add( new ChargeLaser(player.index, int( player.x+player.w/2), int(player.y+player.h/2), player.playerColor, 450, player.angle,damage));
-                                
-}
+    void action() {
+    projectiles.add( new ChargeLaser(owner.index, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), owner.playerColor, duration, owner.angle, damage));
+  }
   @Override
-    void press(Player player) {
-    if ((!reverse || player.reverseImmunity)&& energy>0+activeCost && !player.dead && (!freeze || player.freezeImmunity)) {
-      stamps.add( new AbilityStamp(player.index, int(player.x), int(player.y), energy, active, channeling, cooling, regen, hold));
+    void press() {
+    if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
+      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
       regen=true;
       activate();
-      player.vx=0;
-      player.vy=0;
-      player.ax=0;
-      player.ay=0;
-      action(player);
+      /*owner.vx=0;
+       owner.vy=0;
+       owner.ax=0;
+       owner.ay=0;*/
+      owner.ANGLE_FACTOR= MODIFIED_ANGLE_FACTOR;
+      owner.MAX_ACCEL=MODIFIED_MAX_ACCEL;
+      action();
+      startTime=stampTime;
+      deActivate();
+    }
+  }
+  void passive() {
+
+    owner.ANGLE_FACTOR=(owner.DEFAULT_ANGLE_FACTOR/duration)*(stampTime-startTime)*0.3;
+    owner.MAX_ACCEL=(owner.DEFAULT_MAX_ACCEL/duration)*(stampTime-startTime);
+    if (stampTime>=duration+startTime) {
+      owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
+      owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+    }
+  }
+}
+
+class TimeBomb extends Ability {//---------------------------------------------------    TimeBomb   ---------------------------------
+  int damage=40;
+  int shootSpeed=25;
+  TimeBomb() {
+    super();
+    name=this.toString();
+    activeCost=16;
+  } 
+  @Override
+    void action() {
+    owner.pushForce(-8, owner.angle);
+    if (int(random(5))!=0) {
+      projectiles.add( new Bomb(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 50, owner.playerColor, int(random(800, 2400)), owner.angle, cos(radians(owner.angle))*shootSpeed, sin(radians(owner.angle))*shootSpeed, damage));
+    } else {
+      projectiles.add( new Mine(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 50, owner.playerColor, 80000, owner.angle, cos(radians(owner.angle))*shootSpeed*0.5, sin(radians(owner.angle))*shootSpeed*0.5, damage));
+    }
+  }
+  @Override
+    void press() {
+    if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
+      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+      regen=true;
+      activate();
+      owner.vx=0;
+      owner.vy=0;
+      owner.ax=0;
+      owner.ay=0;
+      action();
       deActivate();
     }
   }
 }
 
+class RapidFire extends Ability {//---------------------------------------------------    RapidFire   ---------------------------------
+  float accuracy = 1, MODIFIED_ANGLE_FACTOR=-0.001;
+  int Interval=120;
+  long  PastTime;
+  int projectileDamage=2;
+  RapidFire() {
+    super();
+    name=this.toString();
+    deactiveCost=8;
+    channelCost=0.15;
+  } 
+
+  @Override
+    void press() {
+    if ((!reverse || owner.reverseImmunity) && energy>(0+activeCost) && !active && !channeling && !owner.dead) {
+      activate();
+      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+      regen=false;
+    }
+  }
+  @Override
+    void hold() {
+    if ((!reverse || owner.reverseImmunity) &&  active && !owner.dead &&(stampTime-PastTime) >= Interval) {
+      float InAccurateAngle=random(-accuracy, accuracy);
+      projectiles.add( new Needle(owner.index, int( owner.x+owner.w*0.5+cos(radians(owner.angle))*owner.w), int(owner.y+owner.h*0.5+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*36, sin(radians(owner.angle+InAccurateAngle))*36, projectileDamage));
+      owner.ANGLE_FACTOR=MODIFIED_ANGLE_FACTOR;
+      channel();
+      if (!active || energy<0 ) {
+        release();
+      }
+      PastTime=stampTime;
+    } else if ((!freeze || owner.freezeImmunity) &&  active && !owner.dead &&(stampTime+freezeTime-PastTime) >= Interval) {
+      float InAccurateAngle=random(-accuracy, accuracy);
+      projectiles.add( new Needle(owner.index, int( owner.x+owner.w*0.5+cos(radians(owner.angle))*owner.w), int(owner.y+owner.h*0.5+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*36, sin(radians(owner.angle+InAccurateAngle))*36, projectileDamage));
+      owner.ANGLE_FACTOR=MODIFIED_ANGLE_FACTOR;
+      channel();
+      if (!active || energy<0 ) {
+        release();
+      }
+      PastTime=freezeTime+stampTime;
+    }
+    // if (!active)press(); // cancel
+    if (owner.hit)release(); // cancel
+  }
+  @Override
+    void release() {
+    if ((!reverse || owner.reverseImmunity ) ) {
+      if (!owner.dead && (!freeze || owner.freezeImmunity)&& active && channeling) {
+        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        regen=true;
+        deChannel();
+        deActivate();
+        owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+        owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
+      }
+    }
+  }
+}
+
+class MachineGunFire extends RapidFire {//---------------------------------------------------    RapidFire   ---------------------------------
+
+  long coolDown;
+  int coolDownTime=1500;
+  float sutainCount, MAX_sutainCount=20;
+  MachineGunFire() {
+    super();
+    name=this.toString();
+    deactiveCost=12;
+    channelCost=0.2;
+    Interval=40;
+    accuracy = 0;
+    projectileDamage=1;
+  } 
+  void press() {
+ super.press();
+  }
+  void hold() {
+    if (coolDown<stampTime) {
+      super.hold();
+      sutainCount+=0.4;
+      if (sutainCount>MAX_sutainCount)sutainCount=MAX_sutainCount;
+      accuracy=sutainCount;
+      Interval=int((MAX_sutainCount-sutainCount)*5);
+      owner.pushForce(1, owner.angle+180);
+    }
+  }
+
+  void release() {
+    if ((!reverse || owner.reverseImmunity ) ) {
+      if (!owner.dead && (!freeze || owner.freezeImmunity)&& active && channeling) {
+        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        regen=true;
+        deChannel();
+        deActivate();
+        owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+        owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
+        sutainCount=0;
+        owner.pushForce(8, owner.angle+180);
+        for (int i=0; 8>i; i++) {
+          float InAccurateAngle=random(-accuracy*2, accuracy*2);
+          projectiles.add( new Needle(owner.index, int( owner.x+owner.w*0.5+cos(radians(owner.angle))*owner.w), int(owner.y+owner.h*0.5+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*40, sin(radians(owner.angle+InAccurateAngle))*40, projectileDamage));
+        }
+        coolDown=stampTime+coolDownTime;
+      }
+    }
+  }
+}
+
+class ThrowBoomerang extends Ability {//---------------------------------------------------    Boomerang   ---------------------------------
+  //boolean charging;
+  final float MAX_FORCE=64;
+  float forceAmount=0, MODIFIED_MAX_ACCEL=0.04;
+  float ChargeRate=0.8, restForce, recoveryEnergy;
+  int damage=2;
+  ThrowBoomerang() {
+    super();
+    name=this.toString();
+    activeCost=16;
+    channelCost=0.1;
+    recoveryEnergy=activeCost*0.5;
+  } 
+  @Override
+    void action() {
+    projectiles.add( new Boomerang(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 50, owner.playerColor, 20000, owner.angle, cos(radians(owner.angle))*(forceAmount+2), sin(radians(owner.angle))*(forceAmount+2), damage, recoveryEnergy));
+  }
+  @Override
+    void press() {
+    if ((!reverse || owner.reverseImmunity) && energy>(0+activeCost) && !active && !channeling && !owner.dead) {
+      activate();
+      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+      regen=false;
+    }
+  }
+  @Override
+    void hold() {
+
+    if ((!reverse || owner.reverseImmunity) &&  active && !owner.dead) {
+      owner.MAX_ACCEL=MODIFIED_MAX_ACCEL;
+      if (MAX_FORCE>forceAmount) { 
+        channel();
+        if (!active || energy<0 ) {
+          release();
+        }
+        restForce = MAX_FORCE-forceAmount;
+        forceAmount+=ChargeRate*S*F; 
+        particles.add(new Particle(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), random(-restForce*0.5, restForce*0.5), random(-restForce*0.5, restForce*0.5), int(random(30)+10), 300, owner.playerColor));
+        particles.add(new ShockWave(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), int(forceAmount/3), int(forceAmount/3), owner.playerColor));
+      } else {
+        //  particles.add(new ShockWave(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), int(forceAmount), 50, color(255, 0, 255)));
+        particles.add( new  Particle(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 0, 0, int(MAX_FORCE*2), 50, color(255, 0, 255)));
+      }
+    }
+  }
+  @Override
+    void release() {
+    if ((!reverse || owner.reverseImmunity ) ) {
+      if (!owner.dead && (!freeze || owner.freezeImmunity)&& active && channeling) {
+        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        regen=true;
+        action();
+        deChannel();
+        deActivate();
+        owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+        forceAmount=0;
+      }
+    }
+  }
+}
 

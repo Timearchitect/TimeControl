@@ -2,11 +2,10 @@ class Player {
   PShape arrowSVG = loadShape("arrow.svg");
   int  index, ally, w, h, up, down, left, right, triggKey, deColor;
   int state=1, health=300, maxHealth=300, barDiameter=100, damage=1;
-  float barFraction;
-  float x, y, vx, vy, ax, ay, angle, f, s;
+  float  x, y, vx, vy, ax, ay, angle ,keyAngle, f, s,barFraction;
   boolean holdTrigg, holdUp, holdDown, holdLeft, holdRight, dead, stealth, hit, arduino, mouse, clone;
   public PVector coord, speed, accel, arrow;
-  float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=0.15, friction;
+  float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=0.15,DEFAULT_ANGLE_FACTOR=0.3,ANGLE_FACTOR=0.3, friction;
   int invinsTime=400, buttonHoldTime=300;
   long invisStampTime;
   boolean invis, freezeImmunity=true, reverseImmunity, fastforwardImmunity, slowImmunity;
@@ -21,7 +20,7 @@ class Player {
     index=_index;
     ally=_index;
     ability= _ability;
-    ability.player=this;
+    ability.owner=this;
     if (_ability==null) ability= new Ability();
     playerColor=_playerColor;
     triggKey=_triggKey;
@@ -41,7 +40,7 @@ class Player {
     // arrowSVG = loadShape("arrow.svg");
     shapeMode(CENTER);
     arrowSVG.disableStyle();
-    shape(arrowSVG, -arrowSVG.width/2+30, -arrowSVG.height+0, arrowSVG.width, arrowSVG.height);
+    shape(arrowSVG, -arrowSVG.width*0.5+30, -arrowSVG.height+0, arrowSVG.width, arrowSVG.height);
   }
   void checkBounds() {
     //if (!reverse && reverseImmunity) {
@@ -101,20 +100,20 @@ class Player {
     if (!stealth) {
       stroke((freeze && !freezeImmunity)?255:0);
       strokeWeight(2);
-      fill(255, 0, 255-deColor/2, 50+deColor);
+      fill(255, 0, 255-deColor*0.5, 50+deColor);
       textAlign(CENTER, CENTER);
       textMode(CENTER);
       //rect(x, y, w, h);
-      ellipse(x+w/2, y+h/2, w, h);
+      ellipse(x+w*0.5, y+h*0.5, w, h);
       //line((100)*cos(radians(angle))+x+(50), (100)*sin(radians(angle))+y+(50), x+(50), y+(50)); // lineangle
       // ellipse((100)*cos(radians(angle))+x+w/2, (100)*sin(radians(angle))+y+h/2, 50, 50); 
       //tint(255, 255*S, 255);
       pushMatrix();
-      translate(x+w/2, y+h/2);
+      translate(x+w*0.5, y+h*0.5);
       rotate(radians(angle+90));
       // shape(arrowSVG,x+w/2- arrowSVG.width/2, y-arrowSVG.height/2, arrowSVG.width, arrowSVG.height); // default render
       fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s, 50+deColor);
-      shape(arrowSVG, -arrowSVG.width/2+30, -arrowSVG.height+0, arrowSVG.width, arrowSVG.height);
+      shape(arrowSVG, -arrowSVG.width*0.5+30, -arrowSVG.height+0, arrowSVG.width, arrowSVG.height);
       popMatrix();
 
       fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s);
@@ -122,21 +121,21 @@ class Player {
       displayHealth();
       fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s);
       if (clone) {
-        text("P"+ (ally+1), x+w/2, y+h/2);
+        text("P"+ (ally+1), x+w*0.5, y+h*0.5);
       } else {
-        text("P"+ (index+1), x+w/2, y+h/2);
-        if (cheatEnabled) text("                              vx:"+int(vx)+" vy:"+int(vy)+" ax:"+int(ax)+" ay:"+int(ay), x+w/2, y+h/2);
-        if (cheatEnabled) text("                              left:"+holdLeft+" right:"+holdRight+" up:"+holdUp+" down:"+holdDown, x+w/2, y+h/2-100);
+        text("P"+ (index+1), x+w*0.5, y+h*0.5);
+        if (cheatEnabled) text("                              vx:"+int(vx)+" vy:"+int(vy)+" ax:"+int(ax)+" ay:"+int(ay) + " A:"+ angle, x+w*0.5, y+h*0.5);
+        if (cheatEnabled) text("                              left:"+holdLeft+" right:"+holdRight+" up:"+holdUp+" down:"+holdDown, x+w*0.5, y+h*0.5-100);
       }
 
-      if (cheatEnabled && ability.active)text("A", x+w/2, y-h*2);
-      if (cheatEnabled && holdTrigg)text("H", x+w/2, y+h/2-h);
+      if (cheatEnabled && ability.active)text("A", x+w*0.5, y-h*2);
+      if (cheatEnabled && holdTrigg)text("H", x+w*0.5, y+h*0.5-h);
       if (deColor>0)deColor-=int(10*s*f);
     } else { //stealth
       stroke(255, 20);
       noFill();
       strokeWeight(1);
-      ellipse(x+w/2, y+h/2, w, h);
+      ellipse(x+w*0.5, y+h*0.5, w, h);
     }
   }
 
@@ -163,9 +162,9 @@ class Player {
           vy-=ay*f*s;
           vx-=ax*f*s;
           speed.set(speed.x-(accel.x*f*s), speed.y-(accel.y*f*s));
-          ability.regen(this);
+          ability.regen();
         } else {
-          ability.regen(this);
+          ability.regen();
           speed.set(speed.x+(accel.x*f*s), speed.y+(accel.y*f*s));
           vx+=ax*f*s;
           vy+=ay*f*s;
@@ -189,13 +188,13 @@ class Player {
 
   void control(int dir) {
     if (dir==8) { // ability control
-      ability.press(this); 
+      ability.press(); 
 
       //---------------    hold    --------------------
       int temp =int(prevMillis-millis());
       if (buttonHoldTime< temp) {
 
-        ability.hold(this);
+        ability.hold();
         //   TimeSpan t = new TimeSpan(DateTime.Now.Ticks);
       }
 
@@ -294,17 +293,24 @@ class Player {
 
 
   void calcAngle() {
-    if (((-0.02) <accel.y && accel.y<(0.02)) && ((-0.02) <accel.x && accel.x<(0.02))) {  // volitile low value calc of angle is no alowed
+    
+    if (((-0.01) <accel.y && accel.y<(0.01)) && ((-0.02) <accel.x && accel.x<(0.01))) {  // volitile low value calc of angle is no alowed
       //  println("ax:"+ax + " ay:"+ay);
     } else {
-      angle=degrees( atan2( (accel.y+coord.y) - coord.y, (accel.x+coord.x) -coord.x ));
+      keyAngle=degrees( atan2( (accel.y+coord.y) - coord.y, (accel.x+coord.x) -coord.x ));
     }
-    if (((-0.02) <ay && ay<(0.02)) && ((-0.02) <ax && ax<(0.02))) {  // volitile low value calc of angle is no alowed
+    if (((-0.01) <ay && ay<(0.01)) && ((-0.02) <ax && ax<(0.01))) {  // volitile low value calc of angle is no alowed
       //  println("ax:"+ax + " ay:"+ay);
     } else {
-      angle=degrees( atan2( (ay+y) - y, (ax+x) -x ));
+      keyAngle=degrees( atan2( (ay+y) - y, (ax+x) -x ));
     }
-    //arrow.set(sin(radians(angle)),cos(radians(angle)));
+    keyAngle= keyAngle % 360; 
+    angle = angle % 360; 
+   //angle-= (angle-keyAngle)*0.2;
+   
+   angle+= (keyAngle-angle)*ANGLE_FACTOR;
+   if(Float.isNaN(angle))angle=keyAngle; // if bugged out
+   //arrow.set(sin(radians(angle)),cos(radians(angle)));
   }
 
 
@@ -315,7 +321,7 @@ class Player {
     state=2;
     hit=true;
     // for (int i=0; i<2; i++) {
-    particles.add(new Particle(int(x+w/2), int(y+h/2), random(-10, 10)+vx/2, random(-10, 10)+vy/2, int(random(5, 20)), 500, playerColor));
+    particles.add(new Particle(int(x+w*0.5), int(y+h*0.5), random(-10, 10)+vx*0.5, random(-10, 10)+vy*0.5, int(random(5, 20)), 500, playerColor));
     // }
     invisStampTime=millis()+invinsTime;
     invis=true;
@@ -328,10 +334,10 @@ class Player {
     dead=true;
     shakeTimer=20;
     for (int i=0; i<64; i++) {
-      particles.add(new Particle(int(x+w/2), int(y+h/2), random(50)-25, random(50)-25, int(random(40)+10), 1500, playerColor));
+      particles.add(new Particle(int(x+w*0.5), int(y+h*0.5), random(50)-25, random(50)-25, int(random(40)+10), 1500, playerColor));
     }
-    particles.add(new ShockWave(int(x+w/2), int(y+h/2), int(random(40)+10), 500, playerColor));
-    particles.add(new LineWave(int(x+w/2), int(y+h/2), int(random(40)+10), 400, playerColor));
+    particles.add(new ShockWave(int(x+w*0.5), int(y+h*0.5), int(random(40)+10), 400, playerColor));
+    particles.add(new LineWave(int(x+w*0.5), int(y+h*0.5), int(random(40)+10), 400, playerColor,random(360)));
     particles.add(new Flash(900, 8, playerColor));  
     state=0;
     //stamps.add( new StateStamp(index, int(x), int(y), state, health,dead));
@@ -344,9 +350,9 @@ class Player {
     strokeCap(SQUARE);
     noFill();
     stroke(hue(playerColor), 80*S, (80-deColor)*S);
-    ellipse(x+w/2, y+h/2, barDiameter, barDiameter);
-    stroke(hue(playerColor), (255-deColor/2)*S, 255*S);
-    arc(x+w/2, y+h/2, barDiameter, barDiameter, -HALF_PI +(PI*2)-fraction, PI+HALF_PI);
+    ellipse(x+w*0.5, y+h*0.5, barDiameter, barDiameter);
+    stroke(hue(playerColor), (255-deColor*0.5)*S, 255*S);
+    arc(x+w*0.5, y+h*0.5, barDiameter, barDiameter, -HALF_PI +(PI*2)-fraction, PI+HALF_PI);
     strokeWeight(1);
   }
   void displayAbilityEnergy() {
@@ -358,7 +364,7 @@ class Player {
       strokeWeight(5);
       stroke(hue(playerColor), 255*S, 255*S);
     }
-    arc(x+w/2, y+h/2, barDiameter, barDiameter, -HALF_PI +(PI*2)-barFraction, PI+HALF_PI);
+    arc(x+w*0.5, y+h*0.5, barDiameter, barDiameter, -HALF_PI +(PI*2)-barFraction, PI+HALF_PI);
     strokeWeight(1);
   }
   void pushForce(float amount, float angle) {

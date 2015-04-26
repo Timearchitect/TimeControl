@@ -1,4 +1,4 @@
-class Particle  implements Cloneable{
+class Particle  implements Cloneable {
   int  size, opacity;
   float x, y, vx, vy, angle;
   long spawnTime, deathTime, time;
@@ -19,7 +19,7 @@ class Particle  implements Cloneable{
 
   void update() {
     if (!dead && !freeze) { 
-     // f =(fastForward)?speedFactor:1;
+      // f =(fastForward)?speedFactor:1;
       if (reverse) {
         opacity+=8*F;
         x-=vx*F*S;
@@ -48,7 +48,7 @@ class Particle  implements Cloneable{
       dead=false;
     }
   }
-    public Particle clone()throws CloneNotSupportedException {  
+  public Particle clone()throws CloneNotSupportedException {  
     return (Particle)super.clone();
   }
 }
@@ -74,7 +74,7 @@ class ShockWave extends Particle {
   void display() {
     if (!dead && !freeze) {  
       noFill();
-      stroke(hue(particleColor),saturation(particleColor),brightness(particleColor)*S, opacity);
+      stroke(hue(particleColor), saturation(particleColor), brightness(particleColor)*S, opacity);
       strokeWeight(int(0.1*opacity));
       ellipse(x, y, size, size);
     }
@@ -84,8 +84,10 @@ class ShockWave extends Particle {
 //-------------------------------------------------------------//    LineWave    //-------------------------------------------------------------------------
 
 class LineWave extends Particle {
-  LineWave(int _x, int _y, int _size, int _time, color _particleColor) {
+  float angle;
+  LineWave(int _x, int _y, int _size, int _time, color _particleColor, float _angle) {
     super( _x, _y, 0, 0, _size, _time, _particleColor);
+    angle=_angle;
   }
   void update() {
     if (!dead && !freeze) { 
@@ -102,9 +104,9 @@ class LineWave extends Particle {
   void display() {
     if (!dead && !freeze) {
       noFill();
-      stroke(hue(particleColor),saturation(particleColor),brightness(particleColor)*S, opacity);
+      stroke(hue(particleColor), saturation(particleColor), brightness(particleColor)*S, opacity);
       strokeWeight(int(0.1*opacity));
-      line(x-size, y-size, x+size, y+size);
+      line(x-cos(radians(angle))*size, y-sin(radians(angle))*size, x+cos(radians(angle))*size, y+sin(radians(angle))*size);
     }
   }
 }
@@ -136,7 +138,7 @@ class Flash extends Particle {
   }
 }
 
-//-------------------------------------------------------------//    Flash    //-------------------------------------------------------------------------
+//-------------------------------------------------------------//    Feather    //-------------------------------------------------------------------------
 
 class Feather extends Particle {
   float shrinkRate;
@@ -167,9 +169,45 @@ class Feather extends Particle {
   void display() {
     if (!dead && !freeze) {
       noFill();
-      stroke(hue(particleColor),saturation(particleColor),brightness(particleColor)*S, opacity);
+      stroke(hue(particleColor), saturation(particleColor), brightness(particleColor)*S, opacity);
       strokeWeight(opacity*0.1);
       arc(x, y, size, size, radians(angle), radians(angle+180));
+    }
+  }
+}
+
+class Spark extends Particle {
+  float shrinkRate,maxSize,brightness=255;
+  Spark(int _time, int _x, int _y, float _vx,float _vy, float _shrinkRate, float _angle, color _particleColor) {
+    super( _x, _y, _vx, _vy, 100, _time, _particleColor);
+    angle=_angle;
+    maxSize=size;
+    shrinkRate=_shrinkRate;
+  }
+  void update() {
+    if (!dead && !freeze) { 
+      //f =(fastForward)?speedFactor:1;
+      if (reverse) {       
+        size+=shrinkRate*F*S;
+        brightness+=16*F*S;
+        x-=vx*F*S;
+        y-=vy*F*S;
+      } else {
+        size-=shrinkRate*F*S;
+         brightness-=16*F*S;
+        x+=vx*F*S;
+        y+=vy*F*S;
+      }
+      if(size<=0)dead=true;
+    }
+  }
+
+  void display() {
+    if (!dead) {
+      noFill();
+      stroke(hue(particleColor), saturation(particleColor)-brightness, brightness(particleColor)*S);
+         strokeWeight(8);
+      line(x+cos(radians(angle))*(maxSize-size), y+sin(radians(angle))*(maxSize-size), x+cos(radians(angle))*(maxSize), y+sin(radians(angle))*(maxSize));
     }
   }
 }
