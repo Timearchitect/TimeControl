@@ -10,20 +10,22 @@ void keyPressed() {
     musicPlayer.pause(true);
     particles.add(new Flash(3000, 3, 0));
   }
-  
 
-    if ((cheatEnabled||playersAlive<=1 ) && key==ResetKey) {
-      for (int i=0; i<players.size (); i++) {      
+
+  if ((cheatEnabled||playersAlive<=1 ) && key==ResetKey) {
+    for (int i=0; i<players.size (); i++) {      
+      if (!players.get(i).clone) {
         players.get(i).health=players.get(i).maxHealth;
         players.get(i).dead=false;
         players.get(i).ability.energy=players.get(i).ability.maxEnergy;
       }
     }
-    
+  }
+
   if (cheatEnabled ) {
 
     if (key==Character.toLowerCase(keyIceDagger)) {
-      projectiles.add( new IceDagger(players.get(1), int( players.get(1).x+players.get(1).w/2), int(players.get(1).y+players.get(1).h/2), 30, players.get(1).playerColor, 800, players.get(1).angle, players.get(1).ax*15, players.get(1).ay*15,8));
+      projectiles.add( new IceDagger(players.get(1), int( players.get(1).x+players.get(1).w/2), int(players.get(1).y+players.get(1).h/2), 30, players.get(1).playerColor, 800, players.get(1).angle, players.get(1).ax*15, players.get(1).ay*15, 8));
     }
     if (key==Character.toLowerCase( keySlow)) {
       quitOrigo();
@@ -94,29 +96,25 @@ void keyPressed() {
 
     if (keyCode==players.get(i).up) {//up
       if ((!reverse || players.get(i).reverseImmunity))players.get(i).control(1);
-        players.get(i).holdUp=true;
-      
+      players.get(i).holdUp=true;
     }
     if (keyCode==players.get(i).down) {//down
       if ((!reverse || players.get(i).reverseImmunity)) players.get(i).control(0);
-        players.get(i).holdDown=true;
-      
+      players.get(i).holdDown=true;
     }
     if (keyCode==players.get(i).left) {//left
       if ((!reverse || players.get(i).reverseImmunity)) players.get(i).control(4);
-        players.get(i).holdLeft=true;
-      
+      players.get(i).holdLeft=true;
     }
     if (keyCode==players.get(i).right) {//right
       if ((!reverse || players.get(i).reverseImmunity)) players.get(i).control(5);
-        players.get(i).holdRight=true;
-      
+      players.get(i).holdRight=true;
     }
   }
   //   keyCooldown[i]=keyResponseDelay;
 
-// keyCooldown[i]--;
-//  }
+  // keyCooldown[i]--;
+  //  }
 }
 void checkKeyHold() { // hold keys
   for (int i=0; i< players.size (); i++) {
@@ -142,28 +140,27 @@ void checkKeyHold() { // hold keys
 
 void keyReleased() {
   for (int i=0; i< players.size (); i++) {
-  
-      if (key==Character.toLowerCase(players.get(i).triggKey)) {// ability trigg key
-        if ( players.get(i).ability.meta || !reverse)  players.get(i).ability.release();
-        players.get(i).holdTrigg=false;
-      }
 
-   // if (!reverse || players.get(i).reverseImmunity) { 
+    if (key==Character.toLowerCase(players.get(i).triggKey)) {// ability trigg key
+      if ( players.get(i).ability.meta || !reverse)  players.get(i).ability.release();
+      players.get(i).holdTrigg=false;
+    }
 
-      if (keyCode==players.get(i).up) {//up
-        players.get(i).holdUp=false;
-      }
-      if (keyCode==players.get(i).down) {//down
-        players.get(i).holdDown=false;
-      }
-      if (keyCode==players.get(i).left) {//left
-        players.get(i).holdLeft=false;
-      }
-      if (keyCode==players.get(i).right) {//right
-        players.get(i).holdRight=false;
-      }
-   }
-  
+    // if (!reverse || players.get(i).reverseImmunity) { 
+
+    if (keyCode==players.get(i).up) {//up
+      players.get(i).holdUp=false;
+    }
+    if (keyCode==players.get(i).down) {//down
+      players.get(i).holdDown=false;
+    }
+    if (keyCode==players.get(i).left) {//left
+      players.get(i).holdLeft=false;
+    }
+    if (keyCode==players.get(i).right) {//right
+      players.get(i).holdRight=false;
+    }
+  }
 }
 
 void mousePressed() {

@@ -177,8 +177,8 @@ class Feather extends Particle {
 }
 
 class Spark extends Particle {
-  float shrinkRate,maxSize,brightness=255;
-  Spark(int _time, int _x, int _y, float _vx,float _vy, float _shrinkRate, float _angle, color _particleColor) {
+  float shrinkRate, maxSize, brightness=255;
+  Spark(int _time, int _x, int _y, float _vx, float _vy, float _shrinkRate, float _angle, color _particleColor) {
     super( _x, _y, _vx, _vy, 100, _time, _particleColor);
     angle=_angle;
     maxSize=size;
@@ -194,11 +194,11 @@ class Spark extends Particle {
         y-=vy*F*S;
       } else {
         size-=shrinkRate*F*S;
-         brightness-=16*F*S;
+        brightness-=16*F*S;
         x+=vx*F*S;
         y+=vy*F*S;
       }
-      if(size<=0)dead=true;
+      if (size<=0)dead=true;
     }
   }
 
@@ -206,9 +206,95 @@ class Spark extends Particle {
     if (!dead) {
       noFill();
       stroke(hue(particleColor), saturation(particleColor)-brightness, brightness(particleColor)*S);
-         strokeWeight(8);
+      strokeWeight(8);
       line(x+cos(radians(angle))*(maxSize-size), y+sin(radians(angle))*(maxSize-size), x+cos(radians(angle))*(maxSize), y+sin(radians(angle))*(maxSize));
     }
   }
 }
+
+class gradient extends Particle {
+  float shrinkRate, opacity=200, size=100;
+  gradient(int _time, int _x, int _y, float _vx, float _vy, float _shrinkRate, float _angle, color _particleColor) {
+    super( _x, _y, _vx, _vy, 100, _time, _particleColor);
+    angle=_angle;
+    shrinkRate=_shrinkRate;
+  }
+  void update() {
+    if (!dead && !freeze) { 
+
+      if (reverse) {       
+        size+=shrinkRate*F*S;
+        opacity+=shrinkRate*2*F*S;
+        x-=vx*F*S;
+        y-=vy*F*S;
+      } else {
+        size-=shrinkRate*F*S;
+        opacity-=shrinkRate*2*F*S;
+        x+=vx*F*S;
+        y+=vy*F*S;
+        if (size<0)dead=true;
+      }
+    }
+  }
+
+  void display() {
+    if (!dead) {
+
+      // stroke(hue(particleColor), saturation(particleColor)-brightness, brightness(particleColor)*S);
+      noStroke();
+      pushMatrix();
+      translate(x, y);
+      rotate(radians(angle));
+      fill(particleColor, opacity);
+      // ellipse(x, y, size*(deathTime-stampTime)/time, size*(deathTime-stampTime)/time );
+      //  stroke(projectileColor);
+      //ellipse(x, y, size, size);
+      rect(-(size/2), -(size/2), 2000, size);
+      popMatrix();
+      //   strokeWeight(8);
+      //     line(x+cos(radians(angle))*(maxSize-size), y+sin(radians(angle))*(maxSize-size), x+cos(radians(angle))*(maxSize), y+sin(radians(angle))*(maxSize));
+    }
+  }
+}
+
+class Shock extends Particle {
+  float shrinkRate, brightness=255;
+  Shock(int _time, int _x, int _y, float _vx, float _vy, float _shrinkRate, float _angle, color _particleColor) {
+    super( _x, _y, _vx, _vy, 100, _time, _particleColor);
+    angle=_angle;
+    shrinkRate=_shrinkRate;
+  }
+  void update() {
+    if (!dead && !freeze) { 
+      
+      if (reverse) {       
+        size+=shrinkRate*F*S;
+        brightness+=16*F*S;
+        x-=vx*F*S;
+        y-=vy*F*S;
+      } else {
+        size-=shrinkRate*F*S;
+        brightness-=16*F*S;
+        x+=vx*F*S;
+        y+=vy*F*S;
+        if(size<0) dead=true;
+      }
+
+    }
+  }
+
+  void display() {
+    if (!dead) {
+      noFill();
+      stroke(hue(particleColor), saturation(particleColor)-brightness, brightness(particleColor));
+      strokeWeight(4);
+        beginShape();
+       for (int i=0; i<360; i+= (360/6)) {
+        vertex(x+cos(radians(angle+random(-i,i)*0.05))*(size+random(i*2)), y+sin(radians(angle+random(-i,i)*0.05))*(size+random(i*2)));
+      }
+      endShape();
+    }
+  }
+}
+
 

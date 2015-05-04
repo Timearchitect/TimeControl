@@ -3,7 +3,7 @@ class Player {
   int  index, ally, w, h, up, down, left, right, triggKey, deColor;
   int state=1, health=300, maxHealth=300, barDiameter=100, damage=1;
   float  x, y, vx, vy, ax, ay, angle ,keyAngle, f, s,barFraction;
-  boolean holdTrigg, holdUp, holdDown, holdLeft, holdRight, dead, stealth, hit, arduino, mouse, clone;
+  boolean holdTrigg, holdUp, holdDown, holdLeft, holdRight, dead, stealth, hit, arduino,arduinoHold, mouse, clone;
   public PVector coord, speed, accel, arrow;
   float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=0.15,DEFAULT_ANGLE_FACTOR=0.3,ANGLE_FACTOR=0.3, friction;
   int invinsTime=400, buttonHoldTime=300;
@@ -16,6 +16,8 @@ class Player {
     if (_up==888) { 
       mouse=true;
       friction=0.045;
+      maxHealth=400;
+      health=maxHealth;
     }
     index=_index;
     ally=_index;
@@ -132,7 +134,7 @@ class Player {
       if (cheatEnabled && holdTrigg)text("H", x+w*0.5, y+h*0.5-h);
       if (deColor>0)deColor-=int(10*s*f);
     } else { //stealth
-      stroke(255, 20);
+      stroke(255, 40);
       noFill();
       strokeWeight(1);
       ellipse(x+w*0.5, y+h*0.5, w, h);
@@ -199,7 +201,7 @@ class Player {
       }
 
       //---------------    released    ----------------
-
+     // if(arduinoHold){
       //key=ability.triggKey;
       //keyPressed();
     }
