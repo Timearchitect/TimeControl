@@ -2,7 +2,7 @@
 /**------------------------------------------------------------//
  //                                                            //
  //  Coding dojo  - Prototype of a timecontrol game            //
- //  av: Alrik He    v.0.6.5                                  //
+ //  av: Alrik He    v.0.6.5                                   //
  //  Arduino verstad Malmö                                     //
  //                                                            //
  //      2014-09-21                                            //
@@ -31,7 +31,7 @@ import processing.serial.*;
 final int baudRate= 19200;
 final static float FRICTION=0.1;
 final int AmountOfPlayers=4; // start players
-final int startBalls=0;
+final int startBalls=5;
 final int  ballSize=50;
 final int playerSize=100;
 int playersAlive; // amount of players alive
@@ -49,7 +49,7 @@ final int keyResponseDelay=30;  // eventhe refreashrate equa to arduino devices
 //Ability[] abilities= { new DeployThunder(), new ThrowDagger(), new ThrowDagger(), new ThrowDagger(), new ThrowDagger()};
 
 
-  Serial port[]=new Serial[AmountOfPlayers];  // Create object from Serial class
+Serial port[]=new Serial[AmountOfPlayers];  // Create object from Serial class
 String portName[]=new String[AmountOfPlayers];
 //int playerControl[]= new int[AmountOfPlayers];
 //ArrayList <Ball> balls= new ArrayList<Ball>();
@@ -59,7 +59,7 @@ ArrayList <Projectile> projectiles = new ArrayList<Projectile>();
 ArrayList <Particle> particles = new ArrayList<Particle>();
 
 Ability[] abilities= { 
-  new Battery(), new ThrowBoomerang(), new PhotonicPursuit(), new Multiply(), new Blink()
+  new ThrowBoomerang(), new DeployElectron(), new TimeBomb(), new ThrowDagger(), new Blink()
   };
 
 char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0';
@@ -216,7 +216,6 @@ void draw() {
     // println("stampTime"+stampTime);
     // println("forward"+forwardTime);
     // println("reverse"+reversedTime);
-
     noStroke();
     rect(0-10, 0-10, width+20, height+20); // background
 
@@ -348,7 +347,7 @@ void checkPlayerVSPlayerColloision() {
         if (players.get(i).ally!=players.get(j).ally && j!=i && !players.get(i).dead && !players.get(j).dead ) {
           if (dist(players.get(i).x, players.get(i).y, players.get(j).x, players.get(j).y)<playerSize) {
             players.get(i).hit(players.get(j).damage);
-            // players.get(i).pushForce( players.get(j).vx,players.get(j).vy, players.get(j).angle);
+            players.get(i).pushForce( players.get(j).vx,players.get(j).vy, players.get(j).angle+180);
             // players.get(i).ax=players.get(j).ax;
             //  players.get(i).ay=players.get(j).ay;
           }

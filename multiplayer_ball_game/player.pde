@@ -107,9 +107,7 @@ class Player {
       textMode(CENTER);
       //rect(x, y, w, h);
       ellipse(x+w*0.5, y+h*0.5, w, h);
-      //line((100)*cos(radians(angle))+x+(50), (100)*sin(radians(angle))+y+(50), x+(50), y+(50)); // lineangle
-      // ellipse((100)*cos(radians(angle))+x+w/2, (100)*sin(radians(angle))+y+h/2, 50, 50); 
-      //tint(255, 255*S, 255);
+
       pushMatrix();
       translate(x+w*0.5, y+h*0.5);
       rotate(radians(angle+90));
