@@ -1250,6 +1250,8 @@ class Electron extends Projectile {//----------------------------------------- I
     orbit=false;
     vx=cos(radians(orbitAngle+90))*0.02*orbitAngleSpeed*distance;
     vy=sin(radians(orbitAngle+90))*0.02*orbitAngleSpeed*distance;
+    vx+= owner.ax*5;
+    vy+= owner.ay*5;
   }
   @Override
     void fizzle() {    // when fizzle

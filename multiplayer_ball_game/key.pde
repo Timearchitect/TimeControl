@@ -18,6 +18,8 @@ void keyPressed() {
         players.get(i).health=players.get(i).maxHealth;
         players.get(i).dead=false;
         players.get(i).ability.energy=players.get(i).ability.maxEnergy;
+        players.get(i).ability.reset();
+
       }
     }
   }

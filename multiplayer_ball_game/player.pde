@@ -124,8 +124,8 @@ class Player {
         text("P"+ (ally+1), x+w*0.5, y+h*0.5);
       } else {
         text("P"+ (index+1), x+w*0.5, y+h*0.5);
-        if (cheatEnabled) text("                              vx:"+int(vx)+" vy:"+int(vy)+" ax:"+int(ax)+" ay:"+int(ay) + " A:"+ angle, x+w*0.5, y+h*0.5);
-        if (cheatEnabled) text("                              left:"+holdLeft+" right:"+holdRight+" up:"+holdUp+" down:"+holdDown, x+w*0.5, y+h*0.5-100);
+       // if (cheatEnabled) text("                              vx:"+int(vx)+" vy:"+int(vy)+" ax:"+int(ax)+" ay:"+int(ay) + " A:"+ angle, x+w*0.5, y+h*0.5);
+       // if (cheatEnabled) text("                              left:"+holdLeft+" right:"+holdRight+" up:"+holdUp+" down:"+holdDown, x+w*0.5, y+h*0.5-100);
       }
 
       if (cheatEnabled && ability.active)text("A", x+w*0.5, y-h*2);

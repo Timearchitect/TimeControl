@@ -1,3 +1,5 @@
+
+
 class Ability {
   String name;
   Player owner;  
@@ -69,6 +71,8 @@ class Ability {
     if (ammo<maxAmmo)ammo+=loadRate;
   }
   void passive() {
+  }
+  void reset(){
   }
 }
 
@@ -1061,6 +1065,44 @@ class DeployElectron extends Ability {//----------------------------------------
       action();
       deActivate();
     }
+  }
+}
+
+class Gravity extends Ability {//---------------------------------------------------    Gravity   ---------------------------------
+  int damage=24;
+  Gravity() {
+    super();
+    name=this.toString();
+    activeCost=24;
+  } 
+  @Override
+    void action() {
+
+      
+  //  particles.add( new Electron( owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5),50, owner.playerColor, 10000, owner.angle,-5,-5, damage ));
+
+    
+  }
+  @Override
+    void press() {
+    if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
+      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+      regen=true;
+      activate();
+      action();
+      deActivate();
+    }
+  }
+}
+
+class Random extends Ability {//---------------------------------------------------    Gravity   ---------------------------------
+  int damage=24;
+   Random() {
+    super();
+  } 
+  Ability randomize(){
+  
+     return abilityList[int(random(abilityList.length))];
   }
 }
 

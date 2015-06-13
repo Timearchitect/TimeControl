@@ -51,15 +51,38 @@ final int keyResponseDelay=30;  // eventhe refreashrate equa to arduino devices
 
 Serial port[]=new Serial[AmountOfPlayers];  // Create object from Serial class
 String portName[]=new String[AmountOfPlayers];
-//int playerControl[]= new int[AmountOfPlayers];
-//ArrayList <Ball> balls= new ArrayList<Ball>();
+
 ArrayList <Player> players = new ArrayList<Player>();
 ArrayList <TimeStamp> stamps= new ArrayList<TimeStamp>();
 ArrayList <Projectile> projectiles = new ArrayList<Projectile>();
 ArrayList <Particle> particles = new ArrayList<Particle>();
 
+Ability abilityList[] = new Ability[]{
+  new FastForward(),
+  new Freeze(),
+  new Reverse(),
+  new Slow(),
+  new SaveState(),
+  new ThrowDagger(),
+  new ForceShoot(),
+  new Blink(),
+  new Multiply(),
+  new Stealth(),
+  new Laser(),
+  new TimeBomb(),
+  new RapidFire(),
+  new MachineGunFire(),
+  new Battery(),
+  new ThrowBoomerang(),
+  new PhotonicPursuit(),
+  new DeployThunder(),
+  new DeployShield(),
+  new DeployElectron(),
+  new Gravity()
+};
+
 Ability[] abilities= { 
-  new ThrowBoomerang(), new DeployElectron(), new TimeBomb(), new ThrowDagger(), new Blink()
+  new ThrowBoomerang(), new DeployElectron(), new TimeBomb(),  new Random().randomize(), new Blink()
   };
 
 char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0';
@@ -347,7 +370,7 @@ void checkPlayerVSPlayerColloision() {
         if (players.get(i).ally!=players.get(j).ally && j!=i && !players.get(i).dead && !players.get(j).dead ) {
           if (dist(players.get(i).x, players.get(i).y, players.get(j).x, players.get(j).y)<playerSize) {
             players.get(i).hit(players.get(j).damage);
-            players.get(i).pushForce( players.get(j).vx,players.get(j).vy, players.get(j).angle+180);
+            //players.get(i).pushForce( players.get(j).vx,players.get(j).vy, players.get(j).angle+180);
             // players.get(i).ax=players.get(j).ax;
             //  players.get(i).ay=players.get(j).ay;
           }
