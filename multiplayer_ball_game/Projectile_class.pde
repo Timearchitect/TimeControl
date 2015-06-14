@@ -1271,7 +1271,7 @@ class Electron extends Projectile {//----------------------------------------- I
 class Graviton extends Projectile {//----------------------------------------- Graviton objects ----------------------------------------------------
 
   float vx, vy, friction=0.95;
-  int dragForce=-1, dragRadius=230;
+  int dragForce=-1, dragRadius=230,count=1;
   Graviton(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage) {
     super(_owner, _x, _y, _size, _projectileColor, _time);
     angle=_angle;
@@ -1298,7 +1298,9 @@ class Graviton extends Projectile {//----------------------------------------- G
         y+=vy*F*S;
         vx*=friction;
         vy*=friction;
-        hitPlayersInRadius(dragRadius, false);
+        dragPlayersInRadius(dragRadius, false);
+        if((count%20)==0)particles.add(new RShockWave(int(x), int(y), int(dragRadius*2), 400, color(projectileColor)));
+        count++;
       }
     }
   }
@@ -1312,8 +1314,12 @@ class Graviton extends Projectile {//----------------------------------------- G
       noFill();
       stroke(projectileColor);
       ellipse(x, y, size, size);
-      ellipse(x, y, dragRadius*2, dragRadius*2);
-      if ((deathTime-stampTime)<=100)size=400;
+      //ellipse(x, y, dragRadius*2, dragRadius*2);
+      if ((deathTime-stampTime)<=100){
+        size=400;
+      }else {
+        size=50;
+      }
     }
   }
 
@@ -1323,12 +1329,11 @@ class Graviton extends Projectile {//----------------------------------------- G
     return (float)Math.atan2(deltaY, deltaX) * 180 / PI;
   }
 
-  void hitPlayersInRadius(int range, boolean friendlyFire) {
+  void dragPlayersInRadius(int range, boolean friendlyFire) {
     if (!freeze &&!reverse) { 
       for (int i=0; i<players.size (); i++) { 
         if (!players.get(i).dead &&(players.get(i).index!= playerIndex || friendlyFire)) {
           if (dist(x, y, players.get(i).x+players.get(i).w*0.5, players.get(i).y+players.get(i).h*0.5)<range) {
-          
             players.get(i).pushForce(dragForce, calcAngleFromBlastZone(x, y, players.get(i).x+players.get(i).w*0.5, players.get(i).y+players.get(i).h*0.5));
           }
         }
@@ -1336,15 +1341,14 @@ class Graviton extends Projectile {//----------------------------------------- G
     }
   }
 
-
   @Override
     void fizzle() {    // when fizzle
     if ( !dead) {         
       for (int i=0; i<8; i++) {
         particles.add(new Particle(int(x), int(y), random(-80, 80), random(-80, 80), int(random(30)+10), 800, 255));
       }
-      particles.add(new Flash(200, 12, color(255)));
-      shakeTimer=10;
+     // particles.add(new Flash(200, 12, color(255)));
+      shakeTimer=5;
     }
   }
 }

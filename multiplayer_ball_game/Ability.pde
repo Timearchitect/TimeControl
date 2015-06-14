@@ -1,6 +1,6 @@
 
 
-class Ability {
+class Ability implements Cloneable{
   String name;
   Player owner;  
   PImage icon;
@@ -79,7 +79,9 @@ class Ability {
   void setOwner(Player _owner){
   owner=_owner;
   }
-
+  public Ability clone()throws CloneNotSupportedException {  
+    return (Ability)super.clone();
+  }
 }
 
 
@@ -610,7 +612,8 @@ class CloneMultiply extends Multiply {
 }
 
 class Stealth extends Ability {//---------------------------------------------------    Stealth   ---------------------------------
-  int projectileDamage=32;
+  int projectileDamage=34;
+  float MODIFIED_MAX_ACCEL=0.06;
   Stealth() {
     super();
     active=false;
@@ -637,8 +640,10 @@ class Stealth extends Ability {//-----------------------------------------------
         activate();
         particles.add(new Flash(300, 6, owner.playerColor));  
         action();
+        owner.MAX_ACCEL=MODIFIED_MAX_ACCEL;
       } else if (owner.stealth) {
         deActivate();
+        owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
         regen=true;
         owner.stealth=false;
         particles.add(new ShockWave(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 20, 200, owner.playerColor));
@@ -1125,8 +1130,13 @@ class Random extends Ability {//------------------------------------------------
     super();
   } 
   Ability randomize(){
-  
-     return abilityList[int(random(abilityList.length))];
+    Ability rA=null;
+    try{
+       rA = abilityList[int(random(abilityList.length))].clone();
+    }catch(CloneNotSupportedException e){
+      println("not cloned from Random");
+    }
+     return rA;  // clone it
   }
 }
 

@@ -81,6 +81,33 @@ class ShockWave extends Particle {
   }
 }
 
+class RShockWave extends Particle {
+  RShockWave(int _x, int _y, int _size, int _time, color _particleColor) {
+    super( _x, _y, 0, 0, _size, _time, _particleColor);
+    opacity=0;
+  }
+  void update() {
+    if (!dead && !freeze) { 
+      if (reverse) {
+        size+=16*F*S;
+        opacity-=8*F*S;
+      } else {
+        size-=16*F*S;
+        opacity+=8*F*S;
+        if (size<=0)dead=true;
+      }
+    }
+  }
+  void display() {
+    if (!dead && !freeze) {  
+      noFill();
+      stroke(hue(particleColor), saturation(particleColor), brightness(particleColor)*S, opacity);
+      strokeWeight(int(0.1*opacity));
+      ellipse(x, y, size, size);
+    }
+  }
+}
+
 //-------------------------------------------------------------//    LineWave    //-------------------------------------------------------------------------
 
 class LineWave extends Particle {
