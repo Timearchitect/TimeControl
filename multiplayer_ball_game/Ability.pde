@@ -3,16 +3,17 @@
 class Ability {
   String name;
   Player owner;  
+  PImage icon;
   float energy=90, maxEnergy=100, activeCost=5, channelCost, deChannelCost, deactiveCost, cooldown, maxCooldown, regenRate=0.1, ammo, maxAmmo, loadRate;
   boolean active, channeling, cooling, hold, regen=true, meta;
   void Ability() { 
+    icon = loadImage("Ability Icons-04.jpg");
     energy=100;
     maxEnergy=energy;
   }
   void Ability( Player _owner) { 
+   Ability();
     owner=_owner;
-    energy=100;
-    maxEnergy=energy;
   }
   void press() {
   }
@@ -73,7 +74,9 @@ class Ability {
   void passive() {
   }
   void reset(){
+    energy=maxEnergy;
   }
+
 }
 
 

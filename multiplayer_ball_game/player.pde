@@ -379,5 +379,10 @@ class Player {
     vy+=_vy;
     stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
   }
+  void reset(){
+    health=maxHealth;
+    dead=false;
+    ability.reset();
+  }
 }
 

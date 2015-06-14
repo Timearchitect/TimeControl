@@ -15,11 +15,7 @@ void keyPressed() {
   if ((cheatEnabled||playersAlive<=1 ) && key==ResetKey) {
     for (int i=0; i<players.size (); i++) {      
       if (!players.get(i).clone) {
-        players.get(i).health=players.get(i).maxHealth;
-        players.get(i).dead=false;
-        players.get(i).ability.energy=players.get(i).ability.maxEnergy;
-        players.get(i).ability.reset();
-
+        players.get(i).reset();
       }
     }
   }
@@ -165,36 +161,6 @@ void keyReleased() {
   }
 }
 
-void mousePressed() {
-  for (int i=0; i< players.size (); i++) {
-    if (players.get(i).mouse &&(!reverse || players.get(i).reverseImmunity)) { 
-      if (mouseButton==LEFT) {
-        players.get(i).ability.press();
-        players.get(i).holdTrigg=true;
-      }
-    }
-  }
-}
-void mouseHold() {
-  for (int i=0; i< players.size (); i++) {
-    if (players.get(i).mouse &&(!reverse || players.get(i).reverseImmunity)) { 
-
-      if (players.get(i).holdTrigg) {// ability trigg key
-        players.get(i).ability.hold();
-      }
-    }
-  }
-}
-void mouseReleased() {
-  for (int i=0; i< players.size (); i++) {
-    if (players.get(i).mouse &&(!reverse || players.get(i).reverseImmunity)) { 
-      if (mouseButton==LEFT) {
-        players.get(i).holdTrigg=false;
-        players.get(i).ability.release();
-      }
-    }
-  }
-}
 /*void mouseControl() {
  int margin=200;
  float MAX_MOUSE_ACCEL=0.0055;

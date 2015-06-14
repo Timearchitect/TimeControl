@@ -40,14 +40,6 @@ static int shakeTimer;
 static float F=1, S=1;
 //int keyCooldown[]= new int[AmountOfPlayers];
 final int keyResponseDelay=30;  // eventhe refreashrate equa to arduino devices
-//Ability[] abilities=  new  Ability[AmountOfPlayers];
-//Ability[] abilities={new Reverse(),new Reverse(),new Reverse(),new Reverse(),new Reverse()};
-//Ability[] abilities={new FastForward(),new FastForward(),new FastForward(),new FastForward(),new FastForward()};
-//Ability[] abilities={new Freeze(),new Freeze(),new Freeze(),new Freeze(),new Freeze()};
-//Ability[] abilities= {  new FastForward(), new Freeze(), new Slow(), new Reverse()};
-//Ability[] abilities= { new ThrowDagger(), new ThrowDagger(), new ThrowDagger(), new ThrowDagger(), new ThrowDagger()};
-//Ability[] abilities= { new DeployThunder(), new ThrowDagger(), new ThrowDagger(), new ThrowDagger(), new ThrowDagger()};
-
 
 Serial port[]=new Serial[AmountOfPlayers];  // Create object from Serial class
 String portName[]=new String[AmountOfPlayers];
@@ -82,7 +74,7 @@ Ability abilityList[] = new Ability[]{
 };
 
 Ability[] abilities= { 
-  new ThrowBoomerang(), new DeployElectron(), new TimeBomb(),  new Random().randomize(), new Blink()
+  new ThrowBoomerang(), new DeployElectron(), new TimeBomb(){{ reset();}},  new Random().randomize(), new Blink()
   };
 
 char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0';
@@ -144,7 +136,7 @@ void setup() {
   GUILayer.fill(0);
   GUILayer.endDraw();
   drawTimeSymbol();
-  prevMillis=millis();
+  prevMillis=millis(); // init time
 
   try {  
     // initialize the SamplePlayer
@@ -179,6 +171,7 @@ void setup() {
   particles.add(new Flash(1500, 5, color(255)));   // flash
   particles.get(0).opacity=0;
 }
+
 
 void draw() {
   addMillis=millis()-prevMillis;
@@ -309,7 +302,6 @@ void draw() {
       image(GUILayer, 0, 0);
     }
     mouseDot();
-    //mouseControl();
     checkKeyHold();
     for (int i=stamps.size ()-1; i>= 0; i--) { // checkStamps
       // stamps.get(i).display(); // hid this when not DEBUGGING
@@ -333,134 +325,5 @@ void draw() {
   } else {
     displayClock();
   }
-}
-/*void stop() {
- ac.stop();
- super.stop();
- } */
-void dispose() {
-  ac.stop();
-  an.stop();
-  super.dispose();
-}
-
-void displayInfo() {
-  fill(0);
-  text("add Time: "+addMillis+" freezeTime: " + freezeTime+" reversed: " + reversedTime+" forward: " + forwardTime+ " current: "+  stampTime +" fallenTime: "+fallenTime, width*0.5, 50);
-  text("version: "+version, width*0.5, 20);
-  text("players: "+players.size()+" projectiles: "+projectiles.size()+" particles: "+particles.size()+" stamps: "+stamps.size(), width*0.5, 75);
-  text(frameRate, width-80, 50);
-}
-void displayClock() {
-  fill(0);
-  textSize(40);
-  text(" Time: "+  int(stampTime*0.001), width*0.5, 60);
-  textSize(18);
-  text("version: "+version, width*0.5, 20);
-}
-
-void shake(int amount) {
-  translate( int(random(amount)-amount*0.5), int(random(amount)-amount*0.5));
-}
-
-void checkPlayerVSPlayerColloision() {
-  if (!freeze &&!reverse) {
-    for (int i=0; i<players.size (); i++) {       
-      for (int j=0; j<players.size (); j++) {       
-        if (players.get(i).ally!=players.get(j).ally && j!=i && !players.get(i).dead && !players.get(j).dead ) {
-          if (dist(players.get(i).x, players.get(i).y, players.get(j).x, players.get(j).y)<playerSize) {
-            players.get(i).hit(players.get(j).damage);
-            //players.get(i).pushForce( players.get(j).vx,players.get(j).vy, players.get(j).angle+180);
-            // players.get(i).ax=players.get(j).ax;
-            //  players.get(i).ay=players.get(j).ay;
-          }
-        }
-      }
-    }
-  }
-}
-
-void checkPlayerVSProjectileColloision() {
-  if (!freeze &&!reverse) {
-    for (int i=0; i< projectiles.size (); i++) {    
-      for (int j=0; j<players.size (); j++) {      
-        if (!players.get(j).dead && !projectiles.get(i).dead && projectiles.get(i).playerIndex!=j  ) {
-          if (dist(projectiles.get(i).x, projectiles.get(i).y, players.get(j).x+players.get(j).w*0.5, players.get(j).y+players.get(j).h*0.5)<playerSize) {
-            //  players.get(j).hit(projectiles.get(i).damage);
-            players.get(j).pushForce(projectiles.get(i).force, projectiles.get(i).angle);
-            projectiles.get(i).hit(players.get(j));
-          }
-        }
-      }
-    }
-  }
-}
-
-
-void checkPlayerVSProjectileColloisionLine() {
-}
-
-void checkWinner() {
-  int playerAliveIndex=0;
-  playersAlive=0;
-  for (int i=0; i<players.size (); i++) {      
-    if (!players.get(i).dead) {
-      playersAlive++;
-      playerAliveIndex=players.get(i).index;
-    }
-  }
-  if (playersAlive==1) {
-    textSize(80);
-    text(" Winner is player "+(playerAliveIndex+1), width*0.5, height*0.5);
-    text(" Press ["+ResetKey+"] to restart", width*0.5, height*0.6);
-    textSize(18);
-  }
-}
-
-void drawTimeSymbol() {
-  if (freeze) {
-    GUILayer.beginDraw();
-    GUILayer.clear();
-    GUILayer.rect(offsetX-50, offsetY, 50, 200);
-    GUILayer.rect(offsetX+50, offsetY, 50, 200);
-    GUILayer.endDraw();
-  } else {
-    if (reverse) {
-      GUILayer.beginDraw();
-      GUILayer.clear();
-      GUILayer.beginShape();
-      GUILayer.vertex(offsetX, offsetY);
-      GUILayer.vertex(offsetX-(75*S*F), offsetY+100);
-      GUILayer.vertex(offsetX, offsetY+200);
-      GUILayer.endShape();
-      GUILayer.endDraw();
-    }
-    if (!reverse) {
-      GUILayer.beginDraw();
-      GUILayer.clear();
-      GUILayer.beginShape();
-      GUILayer.vertex(offsetX, offsetY);
-      GUILayer.vertex(offsetX+(75*S*F), offsetY+100);
-      GUILayer.vertex(offsetX, offsetY+200);
-      GUILayer.endShape();
-      GUILayer.endDraw();
-    }
-  }
-}
-
-void quitOrigo() {
-  origo=false;
-  if (stampTime<0) {
-    stampTime=0;
-    reverse=false;
-    musicPlayer.setPosition(1); //resetmusic s
-    particles.add(new Flash(1500, 5, color(255)));   // flash
-  }
-}
-void mouseDot() {
-
-  strokeWeight(5);
-  ellipse(pmouseX, pmouseY, 10, 10);
-  point(mouseX, mouseY);
 }
 

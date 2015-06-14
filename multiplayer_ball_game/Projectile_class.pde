@@ -26,27 +26,17 @@ class Projectile  implements Cloneable {
     time=_time;
   }
   Projectile(int _playerIndex, int _x, int _y, int _size, color _color, int  _time) {
+    this(_x,  _y,  _size,  _color,   _time);
     playerIndex=_playerIndex;
     ally=players.get(_playerIndex).ally;
-    x= _x;
-    y= _y;
-    size=_size;
-    projectileColor=_color;
-    spawnTime=stampTime;
-    deathTime=stampTime + _time;
-    time=_time;
+
   }
   Projectile(Player _owner, int _x, int _y, int _size, color _color, int  _time) {
+    this(_x,  _y,  _size,  _color,   _time);
     owner=_owner;
     playerIndex=owner.index;
     ally=owner.ally;
-    x= _x;
-    y= _y;
-    size=_size;
-    projectileColor=_color;
-    spawnTime=stampTime;
-    deathTime=stampTime + _time;
-    time=_time;
+
   }
   void update() {
   }
