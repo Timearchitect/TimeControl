@@ -509,14 +509,11 @@ class Bomb extends Projectile {//----------------------------------------- Bomb 
     if (!dead && !freeze) { 
 
       if (reverse) {
-        //  opacity+=8*F;
         x-=vx*F*S;
         y-=vy*F*S;
         vx/=friction;
         vy/=friction;
       } else {
-        //  opacity-=8*F;
-        //  particles.add(new Particle(int(x), int(y), 0, 0, 10, 200, projectileColor));
         x+=vx*F*S;
         y+=vy*F*S;
         vx*=friction;
@@ -527,17 +524,14 @@ class Bomb extends Projectile {//----------------------------------------- Bomb 
   void display() {
     if (!dead) { 
 
-
       strokeWeight(5);
       stroke(0);
       fill(0);
       ellipse(x, y, (size*(deathTime-stampTime)/time)-size, (size*(deathTime-stampTime)/time)-size );
-      //  stroke(projectileColor);
       noFill();
       stroke(random(255));
       ellipse(x, y, size, size);
       if ((deathTime-stampTime)<=100)size=400;
-      // rect(-(size/2), -(size/2), (size), (size));
     }
   }
 
@@ -853,10 +847,10 @@ class Boomerang extends Projectile {//----------------------------------------- 
     if (!dead && !freeze) { 
 
       if (reverse) {
-
+        angle=degrees(atan2(vy, vx));
         displayAngle-=angleSpeed*F*S;
-        vy/=(1-0.98)*F*S;
-        vx/=(1-0.98)*F*S;
+        vy/=1-0.98*F*S;
+        vx/=1-0.98*F*S;
         vx += (x-players.get(playerIndex).x-players.get(playerIndex).w*0.5)*0.002;
         vy += (y-players.get(playerIndex).y-players.get(playerIndex).w*0.5)*0.002;
         x-=vx*F*S;
@@ -905,8 +899,8 @@ class Boomerang extends Projectile {//----------------------------------------- 
 
   void retrieve() {
     if (owner.angle-selfHitAngle<angle && owner.angle+selfHitAngle>angle) { 
-      owner.hit(damage*10);
-      owner.pushForce(vx*0.8, vy*0.8, angle);
+      owner.hit(int(damage*(abs(vx)+abs(vy))));
+      owner.pushForce(vx*1, vy*1, angle);
       for (int i=0; i<16; i++) {
         particles.add(new Spark( 1000, int(x), int(y), (vx+random(-spray, spray))*random(0, 0.8), (vy+random(-spray, spray))*random(0, 0.8), 6, angle, projectileColor));
       }
@@ -922,7 +916,7 @@ class Boomerang extends Projectile {//----------------------------------------- 
   @Override
     void hit(Player enemy) {
     // super.hit();
-    enemy.hit(damage);
+    enemy.hit(floor(damage*(abs(vx)+abs(vy))*0.08));
     enemy.pushForce(vx*0.05, vy*0.05, angle);
     //dead=true;
     for (int i=0; i<2; i++) {
@@ -1089,7 +1083,7 @@ class HomingMissile extends Projectile {//--------------------------------------
   }
 }
 
-class Shield extends Projectile { //----------------------------------------- forceBall objects ----------------------------------------------------
+class Shield extends Projectile { //----------------------------------------- Shield objects ----------------------------------------------------
 
 
   Shield( Player _owner, int _x, int _y, color _projectileColor, int  _time, float _angle, float _damage  ) {
@@ -1271,6 +1265,87 @@ class Electron extends Projectile {//----------------------------------------- I
     }
     // particles.add(new Flash(200, 32, 255));  
     // particles.add(new LineWave(int(enemy.x+enemy.w*0.5), int(enemy.y+enemy.h*0.5), 10, 300, projectileColor, angle));
+  }
+}
+
+class Graviton extends Projectile {//----------------------------------------- Graviton objects ----------------------------------------------------
+
+  float vx, vy, friction=0.95;
+  int dragForce=-1, dragRadius=230;
+  Graviton(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage) {
+    super(_owner, _x, _y, _size, _projectileColor, _time);
+    angle=_angle;
+    damage=_damage;
+    vx= _vx;
+    vy= _vy;
+
+    for (int i=0; i<2; i++) {
+      particles.add(new Particle(int(x), int(y), random(10)-5+vx*0.5, random(10)-5+vy*0.5, int(random(20)+5), 800, 255));
+    }
+      particles.add(new ShockWave(int(x), int(y), int(dragRadius*0.5), 200, color(_projectileColor)));
+      particles.add(new ShockWave(int(x), int(y), int(dragRadius*0.4), 150, color(255)));
+  }
+  void update() {
+    if (!dead && !freeze) { 
+
+      if (reverse) {
+        x-=vx*F*S;
+        y-=vy*F*S;
+        vx/=friction;
+        vy/=friction;
+      } else {
+        x+=vx*F*S;
+        y+=vy*F*S;
+        vx*=friction;
+        vy*=friction;
+        hitPlayersInRadius(dragRadius, false);
+      }
+    }
+  }
+  void display() {
+    if (!dead) { 
+
+      strokeWeight(5);
+      stroke(255);
+      fill(projectileColor);
+      ellipse(x, y, (size*(deathTime-stampTime)/time)-size, (size*(deathTime-stampTime)/time)-size );
+      noFill();
+      stroke(projectileColor);
+      ellipse(x, y, size, size);
+      ellipse(x, y, dragRadius*2, dragRadius*2);
+      if ((deathTime-stampTime)<=100)size=400;
+    }
+  }
+
+  float calcAngleFromBlastZone(float x, float y, float px, float py) {
+    double deltaY = py - y;
+    double deltaX = px - x;
+    return (float)Math.atan2(deltaY, deltaX) * 180 / PI;
+  }
+
+  void hitPlayersInRadius(int range, boolean friendlyFire) {
+    if (!freeze &&!reverse) { 
+      for (int i=0; i<players.size (); i++) { 
+        if (!players.get(i).dead &&(players.get(i).index!= playerIndex || friendlyFire)) {
+          if (dist(x, y, players.get(i).x+players.get(i).w*0.5, players.get(i).y+players.get(i).h*0.5)<range) {
+          
+            players.get(i).pushForce(dragForce, calcAngleFromBlastZone(x, y, players.get(i).x+players.get(i).w*0.5, players.get(i).y+players.get(i).h*0.5));
+          }
+        }
+      }
+    }
+  }
+
+
+  @Override
+    void fizzle() {    // when fizzle
+    if ( !dead) {         
+      for (int i=0; i<8; i++) {
+        particles.add(new Particle(int(x), int(y), random(-80, 80), random(-80, 80), int(random(30)+10), 800, 255));
+      }
+      particles.add(new Flash(200, 12, color(255)));
+      shakeTimer=10;
+    }
   }
 }
 

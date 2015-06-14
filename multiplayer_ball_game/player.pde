@@ -8,7 +8,7 @@ class Player {
   float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=0.15,DEFAULT_ANGLE_FACTOR=0.3,ANGLE_FACTOR=0.3, friction;
   int invinsTime=400, buttonHoldTime=300;
   long invisStampTime;
-  boolean invis, freezeImmunity=true, reverseImmunity, fastforwardImmunity, slowImmunity;
+  boolean invis, freezeImmunity, reverseImmunity, fastforwardImmunity, slowImmunity;
   Ability ability;  
   color playerColor;
   Player(int _index, color _playerColor, int _x, int _y, int _w, int _h, int _up, int _down, int _left, int _right, int _triggKey, Ability _ability) {
@@ -22,8 +22,9 @@ class Player {
     index=_index;
     ally=_index;
     ability= _ability;
-    ability.owner=this;
+    ability.setOwner(this);
     if (_ability==null) ability= new Ability();
+    
     playerColor=_playerColor;
     triggKey=_triggKey;
     speed= new PVector(0.0, 0.0);
@@ -84,18 +85,7 @@ class Player {
       accel.set(accel.x, 0.0);
       hit(0);
     }
-    // }
-    /*
-    if (coord.x<0) {
-     coord.set(0, coord.y);
-     } else if (coord.x>width-w) {
-     coord.set(width-w, coord.y);
-     }
-     if (coord.y<0) {
-     coord.set(coord.x, 0);
-     } else if (coord.y>height-h) {
-     coord.set(coord.x, height-h);
-     }*/
+
   }
 
   void display() {
@@ -137,6 +127,11 @@ class Player {
       strokeWeight(1);
       ellipse(x+w*0.5, y+h*0.5, w, h);
     }
+    if(freezeImmunity || reverseImmunity || fastforwardImmunity || slowImmunity){
+      noFill();
+      ellipse(x+w*0.5, y+h*0.5, w*1.1, h*1.1);
+    }
+
   }
 
   void update() {

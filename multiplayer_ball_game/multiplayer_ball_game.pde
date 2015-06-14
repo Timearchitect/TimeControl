@@ -65,7 +65,7 @@ Ability abilityList[] = new Ability[]{
   new RapidFire(),
   new MachineGunFire(),
   new Battery(),
-  new ThrowBoomerang(),
+  new ThrowBoomerang(){{ reset();}},
   new PhotonicPursuit(),
   new DeployThunder(),
   new DeployShield(),
@@ -74,7 +74,7 @@ Ability abilityList[] = new Ability[]{
 };
 
 Ability[] abilities= { 
-  new ThrowBoomerang(), new DeployElectron(), new TimeBomb(){{ reset();}},  new Random().randomize(), new Blink()
+  new Random().randomize(), new Random().randomize(), new Random().randomize(), new Random().randomize(), new Random().randomize()
   };
 
 char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0';

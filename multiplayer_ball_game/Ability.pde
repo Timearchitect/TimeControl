@@ -76,6 +76,9 @@ class Ability {
   void reset(){
     energy=maxEnergy;
   }
+  void setOwner(Player _owner){
+  owner=_owner;
+  }
 
 }
 
@@ -136,6 +139,11 @@ class FastForward extends Ability { //------------------------------------------
       }
     }
   }
+  @Override
+  void setOwner(Player _owner){
+    super.setOwner(_owner);
+    if(round(random(1))==0)owner.fastforwardImmunity=true;
+  } 
 }
 
 
@@ -214,6 +222,11 @@ class Freeze extends Ability { //-----------------------------------------------
       }
     }
   }
+  @Override
+  void setOwner(Player _owner){
+    super.setOwner(_owner);
+    owner.freezeImmunity=true;
+  } 
 }
 
 
@@ -274,6 +287,11 @@ class Reverse extends Ability { //----------------------------------------------
       }
     }
   }
+  @Override
+  void setOwner(Player _owner){
+    super.setOwner(_owner);
+    if(round(random(1))==0)owner.reverseImmunity=true;
+  } 
 }
 
 
@@ -319,6 +337,11 @@ class Slow extends Ability { //-------------------------------------------------
     // stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
     regen=true;
   }
+    @Override
+  void setOwner(Player _owner){
+    super.setOwner(_owner);
+    if(round(random(1))==0)owner.slowImmunity=true;
+  } 
 }
 
 class SaveState extends Ability { //---------------------------------------------------    SaveState   ---------------------------------
@@ -439,7 +462,7 @@ class ForceShoot extends Ability {//--------------------------------------------
   } 
   @Override
     void action() {
-    projectiles.add( new forceBall(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), forceAmount*2, 30, owner.playerColor, 2000, owner.angle, forceAmount));
+    projectiles.add( new forceBall(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), forceAmount*2, 30, owner.playerColor, 2000, owner.angle, forceAmount*2));
   }
   @Override
     void press() {
@@ -905,7 +928,7 @@ class ThrowBoomerang extends Ability {//----------------------------------------
   } 
   @Override
     void action() {
-    projectiles.add( new Boomerang(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 50, owner.playerColor, int(400*forceAmount), owner.angle, cos(radians(owner.angle))*(forceAmount+2), sin(radians(owner.angle))*(forceAmount+2), damage, recoveryEnergy, int(forceAmount*0.5+12)));
+    projectiles.add( new Boomerang(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 50, owner.playerColor, int(300*forceAmount)+100, owner.angle, cos(radians(owner.angle))*(forceAmount+2), sin(radians(owner.angle))*(forceAmount+2), damage, recoveryEnergy, int(forceAmount*0.5+12)));
   }
   @Override
     void press() {
@@ -942,6 +965,7 @@ class ThrowBoomerang extends Ability {//----------------------------------------
         stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
         regen=true;
         action();
+        owner.pushForce(-forceAmount*0.5, owner.angle);
         deChannel();
         deActivate();
         owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
@@ -1080,12 +1104,9 @@ class Gravity extends Ability {//-----------------------------------------------
   } 
   @Override
     void action() {
-
-      
-  //  particles.add( new Electron( owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5),50, owner.playerColor, 10000, owner.angle,-5,-5, damage ));
-
-    
-  }
+      projectiles.add( new  Graviton(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5),  50, owner.playerColor, 10000, owner.angle, 0, 0,  damage));
+    }
+  
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
