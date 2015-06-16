@@ -74,7 +74,7 @@ Ability abilityList[] = new Ability[]{
 };
 
 Ability[] abilities= { 
-  new Gravity(), new Random().randomize(), new Random().randomize(), new Random().randomize(), new Random().randomize()
+  new Random().randomize(), new Random().randomize(), new Random().randomize(), new Random().randomize(), new Random().randomize()
   };
 
 char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0';
@@ -85,7 +85,6 @@ int playerControl[][]= {
   , {
     int('w')-32, int('s')-32, int('a')-32, int('d')-32, int('t')-32
   }
-
   , 
   {
     888, 888, 888, 888, 888 // mouse
@@ -181,12 +180,7 @@ void draw() {
     background(255);
   } else {
     pushMatrix();
-    if (shakeTimer>0) {
-      shake(2*shakeTimer);
-      shakeTimer--;
-    } else {
-      shakeTimer=0;
-    } // shake screen
+  screenShake();
 
     fill(100);
 
@@ -308,7 +302,6 @@ void draw() {
       stamps.get(i).revert();
     }
     checkWinner();
-    //println(stamps.size()); // timestamps current in game
 
     popMatrix();
 

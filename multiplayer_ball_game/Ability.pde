@@ -400,14 +400,23 @@ class SaveState extends Ability { //--------------------------------------------
   }
   @Override
     void passive() {
-    if (active) {
-      if (endTime<stampTime) {
-        super.deActivate();
-        regen=true;
-        energy+=deactiveCost;
+     if(!freeze){ passiveUpdate();}
+     passiveDisplay();
+    }
+    
+    void passiveUpdate(){
+       if (active) {
+          if (endTime<stampTime) {
+            super.deActivate();
+            regen=true;
+            energy+=deactiveCost;
+          }
+        pulse+=4;
       }
-      pulse+=4;
-      stroke(255);
+    }
+    
+    void passiveDisplay(){
+     stroke(255);
       strokeWeight(int(sin(radians(pulse))*8)+1);
       fill(255);
       float f = (float)(endTime-stampTime)/duration;
@@ -419,7 +428,6 @@ class SaveState extends Ability { //--------------------------------------------
       // point(owner.x+owner.w*0.5+cos(radians(owner.angle))*range, owner.y+owner.h*0.5+sin(radians(owner.angle))*range);
       ellipse(owner.x+owner.w*0.5, owner.y+owner.h*0.5, owner.w*2, owner.h*2);
     }
-  }
 }
 
 
@@ -1105,7 +1113,7 @@ class Gravity extends Ability {//-----------------------------------------------
   Gravity() {
     super();
     name=this.toString();
-    activeCost=24;
+    activeCost=30;
   } 
   @Override
     void action() {

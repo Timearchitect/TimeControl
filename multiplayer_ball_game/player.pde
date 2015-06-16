@@ -142,9 +142,7 @@ class Player {
       if (!freeze || freezeImmunity) {
         calcAngle() ;
         if (reverse && !reverseImmunity) {
-          /* if ((0.001<vx || vx>-0.001) && (0.001<vy || vy>-0.001)) {
-           background(255);
-           }*/
+
           vy/=1-friction*f*s;
           vx/=1-friction*f*s;
           speed.set(speed.x/(1-friction*f*s), speed.y/(1-friction*f*s));
@@ -172,9 +170,7 @@ class Player {
           accel.set(accel.x*(1-friction*f*s), accel.y*(1-friction*f*s));
           ax*=1-friction*f*s;
           ay*=1-friction*f*s;
-          /* if ((0.001<vx || vx>-0.001) && (0.001<vy || vy>-0.001)) {
-           background(255);
-           }*/
+
         }
       }
       ability.passive();

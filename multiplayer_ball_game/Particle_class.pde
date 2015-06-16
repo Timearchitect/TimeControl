@@ -72,7 +72,7 @@ class ShockWave extends Particle {
     }
   }
   void display() {
-    if (!dead && !freeze) {  
+    if (!dead ) {  
       noFill();
       stroke(hue(particleColor), saturation(particleColor), brightness(particleColor)*S, opacity);
       strokeWeight(int(0.1*opacity));
@@ -99,7 +99,7 @@ class RShockWave extends Particle {
     }
   }
   void display() {
-    if (!dead && !freeze) {  
+    if (!dead ) {  
       noFill();
       stroke(hue(particleColor), saturation(particleColor), brightness(particleColor)*S, opacity);
       strokeWeight(int(0.1*opacity));
@@ -129,7 +129,7 @@ class LineWave extends Particle {
     }
   }
   void display() {
-    if (!dead && !freeze) {
+    if (!dead ) {
       noFill();
       stroke(hue(particleColor), saturation(particleColor), brightness(particleColor)*S, opacity);
       strokeWeight(int(0.1*opacity));
@@ -194,7 +194,7 @@ class Feather extends Particle {
   }
 
   void display() {
-    if (!dead && !freeze) {
+    if (!dead ) {
       noFill();
       stroke(hue(particleColor), saturation(particleColor), brightness(particleColor)*S, opacity);
       strokeWeight(opacity*0.1);

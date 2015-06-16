@@ -22,9 +22,21 @@ void displayClock() {
   textSize(18);
   text("version: "+version, width*0.5, 20);
 }
-
+void screenShake(){
+    if (shakeTimer>0) {
+      shake(2*shakeTimer);
+    } else {
+      shakeTimer=0;
+    } // shake screen
+}
 void shake(int amount) {
-  translate( int(random(amount)-amount*0.5), int(random(amount)-amount*0.5));
+  int shakeX=0,shakeY=0;
+  if(!freeze){
+     shakeX=int(random(amount)-amount*0.5);
+     shakeY=int(random(amount)-amount*0.5);
+     shakeTimer--;
+  }
+  translate( shakeX, shakeY);
 }
 
 void checkPlayerVSPlayerColloision() {
