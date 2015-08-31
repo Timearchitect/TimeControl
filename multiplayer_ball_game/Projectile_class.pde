@@ -570,7 +570,7 @@ class Bomb extends Projectile {//----------------------------------------- Bomb 
 }
 
 class Mine extends Bomb {//----------------------------------------- Mine objects ----------------------------------------------------
-
+  int vAngle= 6;
 
   Mine(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage) {
     super(_owner, _x, _y, _size, _projectileColor, _time, _angle, _vx, _vy, _damage);
@@ -579,7 +579,13 @@ class Mine extends Bomb {//----------------------------------------- Mine object
   @Override
   void update(){
      super.update();
-     angle+=6*F*S;
+     if(!dead && !freeze){
+       if(reverse) {
+          angle-=vAngle*F*S;
+       }else{  
+          angle+=vAngle*F*S;
+       }
+   }  
   }
   
   @Override
@@ -619,9 +625,16 @@ class Thunder extends Bomb {//----------------------------------------- Mine obj
 
   void update(){
       super.update();
-      electryfiy+=0.005*F*S;
-      opacity+=1.4*F*S;
-  }
+      if(!freeze && !dead){
+        if(reverse){
+          electryfiy-=0.005*F*S;
+          opacity-=1.4*F*S;
+        }else{
+          electryfiy+=0.005*F*S;
+          opacity+=1.4*F*S;
+        }  
+      }
+}
   
   void display() {
     if (!dead) { 

@@ -43,3 +43,34 @@ class ControlStamp extends TimeStamp {
   }
 }
 
+class AngleControlStamp extends TimeStamp {
+  float  keyAngle, angle, ANGLE_FACTOR;
+
+  AngleControlStamp(int _player, float _keyAngle, float _angle, float _ANGLE_FACTOR) {
+    super(_player);
+    keyAngle=_keyAngle;
+    angle=_angle;
+    ANGLE_FACTOR=_ANGLE_FACTOR;
+  }
+
+
+  void display() {
+    super.display();
+    point(x, y);
+    point(coord.x, coord.y);
+  }
+  void revert() {
+    if (reverse && ! players.get(playerIndex).reverseImmunity && stampTime<time) {
+      call();
+      //  super.revert();
+      stamps.remove(this);
+    }
+  }
+  void call() {
+    // players.get(playerIndex).coord=coord;
+    players.get(playerIndex).keyAngle=this.keyAngle;
+    players.get(playerIndex).angle=this.angle;
+    players.get(playerIndex).ANGLE_FACTOR= this.ANGLE_FACTOR;
+  }
+}
+

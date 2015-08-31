@@ -74,6 +74,7 @@ class Ability implements Cloneable{
   void passive() {
   }
   void reset(){
+    active=false;
     energy=maxEnergy;
   }
   void setOwner(Player _owner){

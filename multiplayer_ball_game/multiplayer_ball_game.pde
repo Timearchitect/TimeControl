@@ -56,21 +56,21 @@ Ability abilityList[] = new Ability[]{
   new Slow(),
   new SaveState(),
   new ThrowDagger(),
-  new ForceShoot(),
+  //new ForceShoot(),
   new Blink(),
   new Multiply(),
   new Stealth(),
-  new Laser(),
-  new TimeBomb(),
+  //new Laser(),
+  //new TimeBomb(),
   new RapidFire(),
   new MachineGunFire(),
   new Battery(),
-  new ThrowBoomerang(){{ reset();}},
-  new PhotonicPursuit(){{ reset();}},
-  new DeployThunder(){{ reset();}},
-  new DeployShield(){{ reset();}},
+  //new ThrowBoomerang(){{ reset();}},
+  //new PhotonicPursuit(){{ reset();}},
+  //new DeployThunder(){{ reset();}},
+  //new DeployShield(){{ reset();}},
   new DeployElectron(){{ reset();}},
-  new Gravity(){{ reset();}}
+ // new Gravity(){{ reset();}}
 };
 
 Ability[] abilities= { 

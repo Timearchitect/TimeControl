@@ -5,7 +5,7 @@ class Player {
   float  x, y, vx, vy, ax, ay, angle ,keyAngle, f, s,barFraction;
   boolean holdTrigg, holdUp, holdDown, holdLeft, holdRight, dead, stealth, hit, arduino,arduinoHold, mouse, clone;
   public PVector coord, speed, accel, arrow;
-  float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=0.15,DEFAULT_ANGLE_FACTOR=0.3,ANGLE_FACTOR=0.3, friction;
+  float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL,DEFAULT_ANGLE_FACTOR=0.3,ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, friction;
   int invinsTime=400, buttonHoldTime=300;
   long invisStampTime;
   boolean invis, freezeImmunity, reverseImmunity, fastforwardImmunity, slowImmunity;
@@ -170,7 +170,7 @@ class Player {
           accel.set(accel.x*(1-friction*f*s), accel.y*(1-friction*f*s));
           ax*=1-friction*f*s;
           ay*=1-friction*f*s;
-
+         // calcAngle() ;
         }
       }
       ability.passive();
@@ -298,10 +298,10 @@ class Player {
     keyAngle= keyAngle % 360; 
     angle = angle % 360; 
    //angle-= (angle-keyAngle)*0.2;
-   
    angle+= (keyAngle-angle)*ANGLE_FACTOR;
    if(Float.isNaN(angle))angle=keyAngle; // if bugged out
-   //arrow.set(sin(radians(angle)),cos(radians(angle)));
+   
+   
   }
 
 
