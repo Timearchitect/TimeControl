@@ -5,7 +5,7 @@
  //  av: Alrik He    v.0.6.5                                   //
  //  Arduino verstad Malmö                                     //
  //                                                            //
- //      2014-09-21                                            //
+ //      2014-09-21    -     2016-01-06                        //
  //                                                            //
  //                                                            //
  --------------------------------------------------------------*/
@@ -50,34 +50,59 @@ ArrayList <Projectile> projectiles = new ArrayList<Projectile>();
 ArrayList <Particle> particles = new ArrayList<Particle>();
 
 Ability abilityList[] = new Ability[]{
-  new FastForward(),
-  new Freeze(),
-  new Reverse(),
-  new Slow(),
-  new SaveState(),
-  new ThrowDagger(),
-  //new ForceShoot(),
-  new Blink(),
-  new Multiply(),
-  new Stealth(),
-  //new Laser(),
-  //new TimeBomb(),
-  new RapidFire(),
-  new MachineGunFire(),
-  new Battery(),
-  //new ThrowBoomerang(){{ reset();}},
-  //new PhotonicPursuit(){{ reset();}},
-  //new DeployThunder(){{ reset();}},
-  //new DeployShield(){{ reset();}},
-  new DeployElectron(){{ reset();}},
- // new Gravity(){{ reset();}}
+  new FastForward(), 
+  new Freeze(), 
+  new Reverse(), 
+  new Slow(), 
+  new SaveState(), 
+  new ThrowDagger(), 
+  new ForceShoot(), 
+  new Blink(), 
+  new Multiply(), 
+  new Stealth(), 
+  new Laser(), 
+  new TimeBomb(), 
+  new RapidFire(), 
+  new MachineGunFire(), 
+  new Battery(), 
+  new ThrowBoomerang(){{ reset();
+}}, 
+  new PhotonicPursuit() {
+  { 
+    reset();
+  }
+}
+, 
+  new DeployThunder() {
+  { 
+    reset();
+  }
+}
+, 
+  new DeployShield() {
+  { 
+    reset();
+  }
+}
+, 
+  new DeployElectron() {
+  { 
+    reset();
+  }
+}
+, 
+  new Gravity() {
+  { 
+    reset();
+  }
+}
 };
 
 Ability[] abilities= { 
   new Random().randomize(), new Random().randomize(), new Random().randomize(), new Random().randomize(), new Random().randomize()
-  };
+};
 
-char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0';
+char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0' ,RandomKey='+';
 int playerControl[][]= {
   {
     UP, DOWN, LEFT, RIGHT, int(',')
@@ -89,17 +114,17 @@ int playerControl[][]= {
   {
     888, 888, 888, 888, 888 // mouse
   }
-    , {
+  , {
     int('i')-32, int('k')-32, int('j')-32, int('l')-32, int('ö')-32
   }
   , {
     int('g')-32, int('b')-32, int('v')-32, int('n')-32, int('m')-32
   }
 };
-boolean sketchFullScreen() {
-  return false;
-}
-
+/*boolean sketchFullScreen() {
+ return false;
+ }
+ */
 void setup() {
 
   size(displayWidth, displayHeight, P3D);
@@ -140,11 +165,11 @@ void setup() {
   try {  
     // initialize the SamplePlayer
     //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/TooManyCooksAdultSwim.mp3"));
-      musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
+    musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
     //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Branching time.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/orange caramel -aing.mp3"));
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/goodbye.mp3"));
-   // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/wierd.mp3"));
+    // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/wierd.mp3"));
   }
   catch(Exception e) {
     println("Exception while attempting to load sample!");
@@ -170,7 +195,11 @@ void setup() {
   particles.add(new Flash(1500, 5, color(255)));   // flash
   particles.get(0).opacity=0;
 }
+void stop(){
+   musicPlayer.pause(true);
+  super.stop();
 
+}
 
 void draw() {
   addMillis=millis()-prevMillis;
@@ -180,7 +209,7 @@ void draw() {
     background(255);
   } else {
     pushMatrix();
-  screenShake();
+    screenShake();
 
     fill(100);
 
@@ -220,7 +249,6 @@ void draw() {
         origo=true;
       }
       stampTime=forwardTime-reversedTime;
-  
     }
     // prevMillis=millis();
     // println("stampTime"+stampTime);
@@ -319,4 +347,3 @@ void draw() {
     displayClock();
   }
 }
-

@@ -21,6 +21,13 @@ void keyPressed() {
   }
 
   if (cheatEnabled ) {
+    if (key==Character.toLowerCase(RandomKey)) {
+      for (int i=0; i<players.size()-1; i++) {
+      abilities[i]=new Random().randomize();
+      abilities[i].owner=players.get(i);
+        players.get(i).ability=abilities[i];
+      }
+    }
 
     if (key==Character.toLowerCase(keyIceDagger)) {
       projectiles.add( new IceDagger(players.get(1), int( players.get(1).x+players.get(1).w/2), int(players.get(1).y+players.get(1).h/2), 30, players.get(1).playerColor, 800, players.get(1).angle, players.get(1).ax*15, players.get(1).ay*15, 8));
@@ -160,5 +167,3 @@ void keyReleased() {
     }
   }
 }
-
-

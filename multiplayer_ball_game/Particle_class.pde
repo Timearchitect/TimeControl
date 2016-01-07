@@ -230,7 +230,8 @@ class Spark extends Particle {
   }
 
   void display() {
-    if (!dead) {
+    if (!dead ) { 
+
       noFill();
       stroke(hue(particleColor), saturation(particleColor)-brightness, brightness(particleColor)*S);
       strokeWeight(8);
@@ -286,14 +287,26 @@ class gradient extends Particle {
 
 class Shock extends Particle {
   float shrinkRate, brightness=255;
+  PShape circle = createShape();       // First create the shape
+ // star.beginShape();          // now call beginShape();
+
+
+  //star.endShape(CLOSE);       // now call endShape(CLOSE);
   Shock(int _time, int _x, int _y, float _vx, float _vy, float _shrinkRate, float _angle, color _particleColor) {
     super( _x, _y, _vx, _vy, 100, _time, _particleColor);
     angle=_angle;
     shrinkRate=_shrinkRate;
+    
+   circle.beginShape();
+   circle.noFill();
+      for (int i=0; i<360; i+= (360/6)) {
+        circle.vertex(x+cos(radians(angle+random(-i, i)*0.05))*(size+random(i*2)), y+sin(radians(angle+random(-i, i)*0.05))*(size+random(i*2)));
+      }
+     circle.endShape(OPEN);
   }
   void update() {
     if (!dead && !freeze) { 
-      
+
       if (reverse) {       
         size+=shrinkRate*F*S;
         brightness+=16*F*S;
@@ -304,24 +317,24 @@ class Shock extends Particle {
         brightness-=16*F*S;
         x+=vx*F*S;
         y+=vy*F*S;
-        if(size<0) dead=true;
+        if (size<0) dead=true;
       }
-
     }
   }
 
   void display() {
-    if (!dead) {
+    if (!dead && !freeze) {
       noFill();
       stroke(hue(particleColor), saturation(particleColor)-brightness, brightness(particleColor));
       strokeWeight(4);
-        beginShape();
-       for (int i=0; i<360; i+= (360/6)) {
-        vertex(x+cos(radians(angle+random(-i,i)*0.05))*(size+random(i*2)), y+sin(radians(angle+random(-i,i)*0.05))*(size+random(i*2)));
+      beginShape();
+      for (int i=0; i<360; i+= (360/6)) {
+        vertex(x+cos(radians(angle+random(-i, i)*0.05))*(size+random(i*2)), y+sin(radians(angle+random(-i, i)*0.05))*(size+random(i*2)));
       }
       endShape();
     }
+    if (!dead && freeze) { 
+      shape(circle,circle.X + circle.width/2,circle.Y+circle.height/2);
+    }
   }
 }
-
-

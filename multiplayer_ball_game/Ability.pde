@@ -1,6 +1,6 @@
 
 
-class Ability implements Cloneable{
+class Ability implements Cloneable {
   String name;
   Player owner;  
   PImage icon;
@@ -12,7 +12,7 @@ class Ability implements Cloneable{
     maxEnergy=energy;
   }
   void Ability( Player _owner) { 
-   Ability();
+    Ability();
     owner=_owner;
   }
   void press() {
@@ -63,7 +63,7 @@ class Ability implements Cloneable{
       if (regen && energy<maxEnergy) {
         energy += regenRate*S*F;
       } else if (regen) {
-        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        // stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
         regen=false;
       }
     }
@@ -73,12 +73,12 @@ class Ability implements Cloneable{
   }
   void passive() {
   }
-  void reset(){
+  void reset() {
     active=false;
     energy=maxEnergy;
   }
-  void setOwner(Player _owner){
-  owner=_owner;
+  void setOwner(Player _owner) {
+    owner=_owner;
   }
   public Ability clone()throws CloneNotSupportedException {  
     return (Ability)super.clone();
@@ -143,10 +143,10 @@ class FastForward extends Ability { //------------------------------------------
     }
   }
   @Override
-  void setOwner(Player _owner){
+    void setOwner(Player _owner) {
     super.setOwner(_owner);
-    if(round(random(1))==0)owner.fastforwardImmunity=true;
-  } 
+    if (round(random(1))==0)owner.fastforwardImmunity=true;
+  }
 }
 
 
@@ -226,10 +226,10 @@ class Freeze extends Ability { //-----------------------------------------------
     }
   }
   @Override
-  void setOwner(Player _owner){
+    void setOwner(Player _owner) {
     super.setOwner(_owner);
     owner.freezeImmunity=true;
-  } 
+  }
 }
 
 
@@ -291,10 +291,10 @@ class Reverse extends Ability { //----------------------------------------------
     }
   }
   @Override
-  void setOwner(Player _owner){
+    void setOwner(Player _owner) {
     super.setOwner(_owner);
-    if(round(random(1))==0)owner.reverseImmunity=true;
-  } 
+    if (round(random(1))==0)owner.reverseImmunity=true;
+  }
 }
 
 
@@ -337,14 +337,14 @@ class Slow extends Ability { //-------------------------------------------------
   @Override
     void deActivate() {
     super.deActivate();
-    // stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
     regen=true;
   }
-    @Override
-  void setOwner(Player _owner){
+  @Override
+    void setOwner(Player _owner) {
     super.setOwner(_owner);
-    if(round(random(1))==0)owner.slowImmunity=true;
-  } 
+    if (round(random(1))==0)owner.slowImmunity=true;
+  }
 }
 
 class SaveState extends Ability { //---------------------------------------------------    SaveState   ---------------------------------
@@ -398,37 +398,43 @@ class SaveState extends Ability { //--------------------------------------------
     speedControl.clear();
     speedControl.addSegment((reverse)?-1*S*F:1*S*F, 100); 
     drawTimeSymbol();
+    pulse=0;
+
   }
   @Override
     void passive() {
-     if(!freeze){ passiveUpdate();}
-     passiveDisplay();
+    if (!freeze && active) { 
+      passiveUpdate();
     }
-    
-    void passiveUpdate(){
-       if (active) {
-          if (endTime<stampTime) {
-            super.deActivate();
-            regen=true;
-            energy+=deactiveCost;
-          }
-        pulse+=4;
+    passiveDisplay();
+  }
+
+  void passiveUpdate() {
+    if (active) {
+      if (endTime<stampTime) {
+        super.deActivate();
+        regen=true;
+        energy+=deactiveCost;
       }
+      pulse+=4;
     }
-    
-    void passiveDisplay(){
-     stroke(255);
-      strokeWeight(int(sin(radians(pulse))*8)+1);
-      fill(255);
+  }
+
+  void passiveDisplay() {
+    stroke(255);
+    strokeWeight(int(sin(radians(pulse))*8)+1);
+    fill(255);
+    if (active) { 
       float f = (float)(endTime-stampTime)/duration;
       for (int i=0; i<360*f; i+= (360/12)) {
         line(owner.x+owner.w*0.5+ cos(radians(-90-i))*80, owner.y+owner.w*0.5+sin(radians(-90-i))*80, owner.x+owner.w*0.5+ cos(radians(-90-i))*130, owner.y+owner.w*0.5+sin(radians(-90-i))*130);
       }
-      text(displayTime, owner.x+owner.w*0.5, owner.y-owner.h*1);
-      noFill();
-      // point(owner.x+owner.w*0.5+cos(radians(owner.angle))*range, owner.y+owner.h*0.5+sin(radians(owner.angle))*range);
-      ellipse(owner.x+owner.w*0.5, owner.y+owner.h*0.5, owner.w*2, owner.h*2);
     }
+    text(displayTime, owner.x+owner.w*0.5, owner.y-owner.h*1);
+    noFill();
+    // point(owner.x+owner.w*0.5+cos(radians(owner.angle))*range, owner.y+owner.h*0.5+sin(radians(owner.angle))*range);
+    ellipse(owner.x+owner.w*0.5, owner.y+owner.h*0.5, owner.w*2, owner.h*2);
+  }
 }
 
 
@@ -891,7 +897,7 @@ class Battery extends Ability {//-----------------------------------------------
         inAccuracy =random(-accuracy*2, accuracy*2);
         projectiles.add(new Needle(owner.index, int( owner.x+owner.w*0.5+cos(radians(owner.angle))*owner.w), int(owner.y+owner.h*0.5+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800*maxInterval, owner.angle+inAccuracy, cos(radians(owner.angle+inAccuracy))*40, sin(radians(owner.angle+inAccuracy))*40, damage));
       }
-        owner.pushForce(10, owner.angle+180);
+      owner.pushForce(10, owner.angle+180);
     }
     owner.pushForce(3, owner.angle+180);
   }
@@ -1079,7 +1085,7 @@ class DeployShield extends Ability {//------------------------------------------
 
 class DeployElectron extends Ability {//---------------------------------------------------    DeployElectron   ---------------------------------
   int damage=24;
-   ArrayList<Electron> stored =new ArrayList<Electron> ();
+  ArrayList<Electron> stored =new ArrayList<Electron> ();
   DeployElectron() {
     super();
     name=this.toString();
@@ -1087,15 +1093,14 @@ class DeployElectron extends Ability {//----------------------------------------
   } 
   @Override
     void action() {
-    for(Electron p: stored){
-    p.derail();
+    for (Electron p : stored) {
+      p.derail();
     }
-      
-    stored.add( new Electron( owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5),50, owner.playerColor, 10000, owner.angle,-5,-5, damage ));
+
+    stored.add( new Electron( owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 50, owner.playerColor, 10000, owner.angle, -5, -5, damage ));
     projectiles.add(stored.get(stored.size()-1));
-    stored.add( new Electron( owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5),50, owner.playerColor, 10000, owner.angle+180,-5,-5, damage ));
+    stored.add( new Electron( owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 50, owner.playerColor, 10000, owner.angle+180, -5, -5, damage ));
     projectiles.add(stored.get(stored.size()-1));
-    
   }
   @Override
     void press() {
@@ -1118,9 +1123,9 @@ class Gravity extends Ability {//-----------------------------------------------
   } 
   @Override
     void action() {
-      projectiles.add( new  Graviton(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5),  50, owner.playerColor, 10000, owner.angle, 0, 0,  damage));
-    }
-  
+    projectiles.add( new  Graviton(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 50, owner.playerColor, 10000, owner.angle, 0, 0, damage));
+  }
+
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
@@ -1135,17 +1140,17 @@ class Gravity extends Ability {//-----------------------------------------------
 
 class Random extends Ability {//---------------------------------------------------    Gravity   ---------------------------------
   int damage=24;
-   Random() {
+  Random() {
     super();
   } 
-  Ability randomize(){
+  Ability randomize() {
     Ability rA=null;
-    try{
-       rA = abilityList[int(random(abilityList.length))].clone();
-    }catch(CloneNotSupportedException e){
+    try {
+      rA = abilityList[int(random(abilityList.length))].clone();
+    }
+    catch(CloneNotSupportedException e) {
       println("not cloned from Random");
     }
-     return rA;  // clone it
+    return rA;  // clone it
   }
 }
-

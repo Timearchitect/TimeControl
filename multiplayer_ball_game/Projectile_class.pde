@@ -546,7 +546,7 @@ class Bomb extends Projectile {//----------------------------------------- Bomb 
         if (!players.get(i).dead &&(players.get(i).index!= playerIndex || friendlyFire)) {
           if (dist(x, y, players.get(i).x+players.get(i).w*0.5, players.get(i).y+players.get(i).h*0.5)<range) {
             players.get(i).hit(damage);
-            players.get(i).pushForce(blastForce, -calcAngleFromBlastZone(x, y, players.get(i).x+players.get(i).w*0.5, players.get(i).y+players.get(i).h*0.5));
+            players.get(i).pushForce(blastForce, calcAngleFromBlastZone(x, y, players.get(i).x+players.get(i).w*0.5, players.get(i).y+players.get(i).h*0.5));
           }
         }
       }
@@ -660,7 +660,7 @@ class Thunder extends Bomb {//----------------------------------------- Mine obj
       for (int i=0; i<8; i++) {
         particles.add(new Particle(int(x), int(y), random(-80, 80), random(-80, 80), int(random(30)+10), 800, 255));
       }
-      for (int i=0; i<360; i+= (360/6)) {
+      for (int i=0; i<360; i+= (360/5)) {
         particles.add( new Shock(400, int( x), int(y), 0, 0, 2, i, projectileColor)) ;
       }
       particles.add(new ShockWave(int(x), int(y), int(blastRadius*0.5), blastRadius, color(255)));
@@ -1370,4 +1370,3 @@ class Graviton extends Projectile {//----------------------------------------- G
     }
   }
 }
-
