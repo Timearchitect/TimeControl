@@ -1,4 +1,4 @@
-class ControlStamp extends TimeStamp {
+class ControlStamp extends TimeStamp {  // save movements & speed 
   float  vx, vy, ax, ay;
   boolean holdLeft, holdRight, holdUp, holdDown, holdTrigg;
   PVector speed, accel;
@@ -43,7 +43,7 @@ class ControlStamp extends TimeStamp {
   }
 }
 
-class AngleControlStamp extends TimeStamp {
+class AngleControlStamp extends TimeStamp {  // save angle  
   float  keyAngle, angle, ANGLE_FACTOR;
 
   AngleControlStamp(int _player, float _keyAngle, float _angle, float _ANGLE_FACTOR) {
@@ -73,4 +73,3 @@ class AngleControlStamp extends TimeStamp {
     players.get(playerIndex).ANGLE_FACTOR= this.ANGLE_FACTOR;
   }
 }
-

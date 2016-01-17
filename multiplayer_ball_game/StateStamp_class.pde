@@ -1,5 +1,5 @@
 
-class CheckPoint extends TimeStamp {
+class CheckPoint extends TimeStamp {  // save states
   int index;
   ArrayList<TimeStamp> checkPointStamps=new   ArrayList<TimeStamp>();  // all stamps
   ArrayList<Projectile> clonedProjectiles=new   ArrayList<Projectile>();  // all cloned projectile
@@ -49,7 +49,7 @@ class CheckPoint extends TimeStamp {
     savedFastForward=fastForward; 
     savedFreeze=freeze;
 
-     musicPause=musicPlayer.isPaused();
+    musicPause=musicPlayer.isPaused();
     musicTime=musicPlayer.getPosition();
   }
 
@@ -79,16 +79,16 @@ class CheckPoint extends TimeStamp {
     for (int i=0; i<checkPointStamps.size (); i++) {
       checkPointStamps.get(i).call();
     }
-     musicPlayer.pause(musicPause);
+    musicPlayer.pause(musicPause);
     musicPlayer.setPosition(musicTime);
   }
 }
 
-class StateStamp extends TimeStamp {
+class StateStamp extends TimeStamp {  // save player 
   int playerState=0;
   int playerHealth=0;
   boolean playerDead;
-
+  boolean stealth;
   StateStamp(int _player, int _x, int _y, int _state, int _health, boolean _dead) {
     super(_player);
     x=_x;
@@ -96,6 +96,7 @@ class StateStamp extends TimeStamp {
     playerState=_state;
     playerHealth=_health;
     playerDead=_dead;
+    stealth=players.get(_player).stealth;
   }
   StateStamp(int _player, PVector _coord, int _state, int _health, boolean _dead) {
     super(_player);
@@ -103,6 +104,7 @@ class StateStamp extends TimeStamp {
     playerState=_state;
     playerHealth=_health;
     playerDead=_dead;
+    stealth=players.get(_player).stealth;
   }
 
   void display() {
@@ -123,10 +125,11 @@ class StateStamp extends TimeStamp {
     players.get(playerIndex).state=playerState;
     players.get(playerIndex).health=playerHealth;
     players.get(playerIndex).dead=playerDead;
+    players.get(playerIndex).stealth= stealth;
   }
 }
 
-class AbilityStamp extends TimeStamp {
+class AbilityStamp extends TimeStamp { //save player ability
   float energy;
   boolean active, channeling, cooling, regen, hold;
 
@@ -165,4 +168,3 @@ class AbilityStamp extends TimeStamp {
     players.get(playerIndex).ability.cooling=cooling;
   }
 }
-

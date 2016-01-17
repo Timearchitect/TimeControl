@@ -5,7 +5,10 @@
  //  av: Alrik He    v.0.6.5                                   //
  //  Arduino verstad Malmö                                     //
  //                                                            //
- //      2014-09-21    -     2016-01-06                        //
+ //      2014-09-21    -     2016-01-15                        //
+ //                                                            //
+ //                                                            //
+ //         Used for weapon test & prototyping                 //
  //                                                            //
  //                                                            //
  --------------------------------------------------------------*/
@@ -25,8 +28,8 @@ PShader  Blur;
 boolean slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, origo, noisy;
 final int speedFactor= 3;
 final float slowFactor= 0.3;
+final String version="0.6.8";
 static long prevMillis, addMillis, forwardTime, reversedTime, freezeTime, stampTime, fallenTime;
-final String version="0.6.5";
 import processing.serial.*;
 final int baudRate= 19200;
 final static float FRICTION=0.1;
@@ -65,6 +68,7 @@ Ability abilityList[] = new Ability[]{
   new RapidFire(), 
   new MachineGunFire(), 
   new Battery(), 
+  new Ram(), 
   new ThrowBoomerang(){{ reset();
 }}, 
   new PhotonicPursuit() {
@@ -96,13 +100,20 @@ Ability abilityList[] = new Ability[]{
     reset();
   }
 }
-};
+, 
+  new DeployTurret() {
+  { 
+    reset();
+  }
+}
+, 
+  };
 
 Ability[] abilities= { 
   new Random().randomize(), new Random().randomize(), new Random().randomize(), new Random().randomize(), new Random().randomize()
 };
 
-char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0' ,RandomKey='+';
+char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='+';
 int playerControl[][]= {
   {
     UP, DOWN, LEFT, RIGHT, int(',')
@@ -121,13 +132,13 @@ int playerControl[][]= {
     int('g')-32, int('b')-32, int('v')-32, int('n')-32, int('m')-32
   }
 };
-/*boolean sketchFullScreen() {
+/*boolean sketchFullScreen() { // p2 legacy
  return false;
  }
  */
 void setup() {
-
-  size(displayWidth, displayHeight, P3D);
+  fullScreen(P3D);
+  //size(displayWidth, displayHeight, P3D);
   font= loadFont("PressStart2P-Regular-28.vlw");
   Blur= loadShader("blur.glsl");
   textFont(font, 18);
@@ -165,7 +176,8 @@ void setup() {
   try {  
     // initialize the SamplePlayer
     //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/TooManyCooksAdultSwim.mp3"));
-    musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
+   // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
+        musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
     //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Branching time.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/orange caramel -aing.mp3"));
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/goodbye.mp3"));
@@ -195,10 +207,9 @@ void setup() {
   particles.add(new Flash(1500, 5, color(255)));   // flash
   particles.get(0).opacity=0;
 }
-void stop(){
-   musicPlayer.pause(true);
+void stop() {
+  musicPlayer.pause(true);
   super.stop();
-
 }
 
 void draw() {
@@ -206,7 +217,7 @@ void draw() {
   prevMillis=millis();
   if (origo) {
     fallenTime+=addMillis*F*S;
-    background(255);
+    // background(255);
   } else {
     pushMatrix();
     screenShake();
@@ -309,12 +320,12 @@ void draw() {
         }
       }
       if (freeze) {
-        colorMode(RGB);
-        for (int b=0; b<2; b++) {
+       // colorMode(RGB);
+        //for (int b=0; b<2; b++) {
           filter(Blur);
-        }
+       // }
       } else {   
-        colorMode(HSB);
+        //colorMode(HSB);
       }
       if (slow) {
         noStroke();

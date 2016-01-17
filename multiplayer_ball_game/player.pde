@@ -2,10 +2,10 @@ class Player {
   PShape arrowSVG = loadShape("arrow.svg");
   int  index, ally, w, h, up, down, left, right, triggKey, deColor;
   int state=1, health=300, maxHealth=300, barDiameter=100, damage=1;
-  float  x, y, vx, vy, ax, ay, angle ,keyAngle, f, s,barFraction;
-  boolean holdTrigg, holdUp, holdDown, holdLeft, holdRight, dead, stealth, hit, arduino,arduinoHold, mouse, clone;
+  float  x, y, vx, vy, ax, ay, angle, keyAngle, f, s, barFraction;
+  boolean holdTrigg, holdUp, holdDown, holdLeft, holdRight, dead, stealth, hit, arduino, arduinoHold, mouse, clone, turret;
   public PVector coord, speed, accel, arrow;
-  float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL,DEFAULT_ANGLE_FACTOR=0.3,ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, friction;
+  float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, friction;
   int invinsTime=400, buttonHoldTime=300;
   long invisStampTime;
   boolean invis, freezeImmunity, reverseImmunity, fastforwardImmunity, slowImmunity;
@@ -24,7 +24,7 @@ class Player {
     ability= _ability;
     ability.setOwner(this);
     if (_ability==null) ability= new Ability();
-    
+
     playerColor=_playerColor;
     triggKey=_triggKey;
     speed= new PVector(0.0, 0.0);
@@ -85,7 +85,6 @@ class Player {
       accel.set(accel.x, 0.0);
       hit(0);
     }
-
   }
 
   void display() {
@@ -109,14 +108,7 @@ class Player {
       fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s);
       displayAbilityEnergy();
       displayHealth();
-      fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s);
-      if (clone) {
-        text("P"+ (ally+1), x+w*0.5, y+h*0.5);
-      } else {
-        text("P"+ (index+1), x+w*0.5, y+h*0.5);
-       // if (cheatEnabled) text("                              vx:"+int(vx)+" vy:"+int(vy)+" ax:"+int(ax)+" ay:"+int(ay) + " A:"+ angle, x+w*0.5, y+h*0.5);
-       // if (cheatEnabled) text("                              left:"+holdLeft+" right:"+holdRight+" up:"+holdUp+" down:"+holdDown, x+w*0.5, y+h*0.5-100);
-      }
+      displayName();
 
       if (cheatEnabled && ability.active)text("A", x+w*0.5, y-h*2);
       if (cheatEnabled && holdTrigg)text("H", x+w*0.5, y+h*0.5-h);
@@ -127,11 +119,10 @@ class Player {
       strokeWeight(1);
       ellipse(x+w*0.5, y+h*0.5, w, h);
     }
-    if(freezeImmunity || reverseImmunity || fastforwardImmunity || slowImmunity){
+    if (freezeImmunity || reverseImmunity || fastforwardImmunity || slowImmunity) {
       noFill();
       ellipse(x+w*0.5, y+h*0.5, w*1.1, h*1.1);
     }
-
   }
 
   void update() {
@@ -170,7 +161,7 @@ class Player {
           accel.set(accel.x*(1-friction*f*s), accel.y*(1-friction*f*s));
           ax*=1-friction*f*s;
           ay*=1-friction*f*s;
-         // calcAngle() ;
+          // calcAngle() ;
         }
       }
       ability.passive();
@@ -190,7 +181,7 @@ class Player {
       }
 
       //---------------    released    ----------------
-     // if(arduinoHold){
+      // if(arduinoHold){
       //key=ability.triggKey;
       //keyPressed();
     }
@@ -284,7 +275,7 @@ class Player {
 
 
   void calcAngle() {
-    
+
     if (((-0.01) <accel.y && accel.y<(0.01)) && ((-0.02) <accel.x && accel.x<(0.01))) {  // volitile low value calc of angle is no alowed
       //  println("ax:"+ax + " ay:"+ay);
     } else {
@@ -297,11 +288,9 @@ class Player {
     }
     keyAngle= keyAngle % 360; 
     angle = angle % 360; 
-   //angle-= (angle-keyAngle)*0.2;
-   angle+= (keyAngle-angle)*ANGLE_FACTOR;
-   if(Float.isNaN(angle))angle=keyAngle; // if bugged out
-   
-   
+    //angle-= (angle-keyAngle)*0.2;
+    angle+= (keyAngle-angle)*ANGLE_FACTOR;
+    if (Float.isNaN(angle))angle=keyAngle; // if bugged out
   }
 
 
@@ -328,12 +317,21 @@ class Player {
       particles.add(new Particle(int(x+w*0.5), int(y+h*0.5), random(50)-25, random(50)-25, int(random(40)+10), 1500, playerColor));
     }
     particles.add(new ShockWave(int(x+w*0.5), int(y+h*0.5), int(random(40)+10), 400, playerColor));
-    particles.add(new LineWave(int(x+w*0.5), int(y+h*0.5), int(random(40)+10), 400, playerColor,random(360)));
+    particles.add(new LineWave(int(x+w*0.5), int(y+h*0.5), int(random(40)+10), 400, playerColor, random(360)));
     particles.add(new Flash(900, 8, playerColor));  
     state=0;
     //stamps.add( new StateStamp(index, int(x), int(y), state, health,dead));
   }
-
+  void displayName() {
+    fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s);
+    if (clone) {
+      text("P"+ (ally+1), x+w*0.5, y+h*0.5);
+    } else {
+      text("P"+ (index+1), x+w*0.5, y+h*0.5);
+      // if (cheatEnabled) text("                              vx:"+int(vx)+" vy:"+int(vy)+" ax:"+int(ax)+" ay:"+int(ay) + " A:"+ angle, x+w*0.5, y+h*0.5);
+      // if (cheatEnabled) text("                              left:"+holdLeft+" right:"+holdRight+" up:"+holdUp+" down:"+holdDown, x+w*0.5, y+h*0.5-100);
+    }
+  }
   void displayHealth() {
     int barSize=12, barDiameter=75;
     float fraction=((PI*2)/maxHealth)*health;
@@ -370,10 +368,9 @@ class Player {
     vy+=_vy;
     stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
   }
-  void reset(){
+  void reset() {
     health=maxHealth;
     dead=false;
     ability.reset();
   }
 }
-

@@ -22,19 +22,19 @@ void displayClock() {
   textSize(18);
   text("version: "+version, width*0.5, 20);
 }
-void screenShake(){
-    if (shakeTimer>0) {
-      shake(2*shakeTimer);
-    } else {
-      shakeTimer=0;
-    } // shake screen
+void screenShake() {
+  if (shakeTimer>0) {
+    shake(2*shakeTimer);
+  } else {
+    shakeTimer=0;
+  } // shake screen
 }
 void shake(int amount) {
-  int shakeX=0,shakeY=0;
-  if(!freeze){
-     shakeX=int(random(amount)-amount*0.5);
-     shakeY=int(random(amount)-amount*0.5);
-     shakeTimer--;
+  int shakeX=0, shakeY=0;
+  if (!freeze) {
+    shakeX=int(random(amount)-amount*0.5);
+    shakeY=int(random(amount)-amount*0.5);
+    shakeTimer--;
   }
   translate( shakeX, shakeY);
 }
@@ -60,7 +60,7 @@ void checkPlayerVSProjectileColloision() {
   if (!freeze &&!reverse) {
     for (int i=0; i< projectiles.size (); i++) {    
       for (int j=0; j<players.size (); j++) {      
-        if (!players.get(j).dead && !projectiles.get(i).dead && projectiles.get(i).playerIndex!=j  ) {
+        if (players.get(j).ally!=projectiles.get(i).ally && !players.get(j).dead && !projectiles.get(i).dead && projectiles.get(i).playerIndex!=j  ) {
           if (dist(projectiles.get(i).x, projectiles.get(i).y, players.get(j).x+players.get(j).w*0.5, players.get(j).y+players.get(j).h*0.5)<playerSize) {
             //  players.get(j).hit(projectiles.get(i).damage);
             players.get(j).pushForce(projectiles.get(i).force, projectiles.get(i).angle);
@@ -71,7 +71,23 @@ void checkPlayerVSProjectileColloision() {
     }
   }
 }
-
+/*void checkProjectileVSProjectileColloision() {
+  if (!freeze &&!reverse) {
+    for (int i=0; i< projectiles.size (); i++) {    
+      for (int j=0; j<projectiles.size (); j++) {      
+        if (projectiles.get(j).ally!=projectiles.get(i).ally && !projectiles.get(j).dead && !projectiles.get(i).dead && projectiles.get(i)!=projectiles.get(j)  ) {
+          if (dist(projectiles.get(i).x, projectiles.get(i).y, projectiles.get(j).x, projectiles.get(j).y)<projectiles.get(i).size+projectiles.get(j).size) {
+            if (projectiles.get(i) instanceof  Reflectable) {
+              
+              projectiles.get(i).reflect(projectiles.get(j).angle,projectiles.get(j).owner);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+*/
 
 void checkPlayerVSProjectileColloisionLine() {
 }
@@ -80,7 +96,7 @@ void checkWinner() {
   int playerAliveIndex=0;
   playersAlive=0;
   for (int i=0; i<players.size (); i++) {      
-    if (!players.get(i).dead) {
+    if (!players.get(i).dead && !players.get(i).turret && !players.get(i).clone) {
       playersAlive++;
       playerAliveIndex=players.get(i).index;
     }
@@ -139,4 +155,3 @@ void mouseDot() {
   ellipse(pmouseX, pmouseY, 10, 10);
   point(mouseX, mouseY);
 }
-
