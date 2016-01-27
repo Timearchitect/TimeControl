@@ -93,7 +93,7 @@ class Player {
       strokeWeight(2);
       fill(255, 0, 255-deColor*0.5, 50+deColor);
       textAlign(CENTER, CENTER);
-      textMode(CENTER);
+      //textMode(CENTER);
       //rect(x, y, w, h);
       ellipse(x+w*0.5, y+h*0.5, w, h);
 

@@ -642,7 +642,7 @@ class CloneMultiply extends Multiply { // ability that have no effect as clones.
 class Stealth extends Ability {//---------------------------------------------------    Stealth   ---------------------------------
   int projectileDamage=34;
   float MODIFIED_MAX_ACCEL=0.06;
-  float range=200, duration=200;
+  float range=200, duration=300;
   Stealth() {
     super();
     active=false;
@@ -1176,6 +1176,7 @@ class Ram extends Ability {//---------------------------------------------------
     activeCost=16;
     channelCost=0.2;
     energy=50;
+    regenRate=0.4;
   } 
   @Override
     void action() {

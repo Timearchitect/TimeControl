@@ -276,7 +276,7 @@ class IceDagger extends Projectile {//----------------------------------------- 
 }
 
 class ArchingIceDagger extends IceDagger {//----------------------------------------- IceDagger objects ----------------------------------------------------
-  float startCurveAngle, angleCurve, currentAngle, transition,eVx,eVy,sVx,sVy;
+  float startCurveAngle, angleCurve, currentAngle, transition, eVx, eVy, sVx, sVy;
   ArchingIceDagger(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _angleCurve, float _vx, float _vy, int _damage) {
     super(_owner, _x, _y, _size, _projectileColor, _time*2, _angle, _vx, _vy, _damage);
     float totalVelocity= (abs(_vx)+abs(_vy));
@@ -291,11 +291,11 @@ class ArchingIceDagger extends IceDagger {//------------------------------------
     if (!dead && !freeze) { 
 
       if (reverse) {
+        angleCurve();
         if (transition>0)transition-=0.01*F*S;
         x-=vx*F*S;
         y-=vy*F*S;
         angle-=15*F*S;
-        angleCurve();
       } else {
         angle+=15*F*S;
         x+=vx*F*S;
@@ -308,10 +308,10 @@ class ArchingIceDagger extends IceDagger {//------------------------------------
   void display() {
     if (!dead) { 
       // rect(x-(size/2), y-(size/2), (size), (size));
-     // fill(0);
-    //  text("s: "+ angleCurve, x, y-100);
-    //  text("e: "+ startCurveAngle, x, y-75);
-    //  text("c: "+ currentAngle, x, y-50);
+      // fill(0);
+      //  text("s: "+ angleCurve, x, y-100);
+      //  text("e: "+ startCurveAngle, x, y-75);
+      //  text("c: "+ currentAngle, x, y-50);
       pushMatrix();
       translate(x, y);
 
@@ -327,12 +327,12 @@ class ArchingIceDagger extends IceDagger {//------------------------------------
   void angleCurve() {
     vx=sVx*(1-transition) + eVx*transition;
     vy=sVy*(1-transition) + eVy*transition;
-/*
+    /*
     float totalVelocity= (abs(vx)+abs(vy))/1.2;
-    currentAngle= startCurveAngle*(1-transition) + angleCurve*transition;
-    vx = sin(currentAngle)*totalVelocity;
-    vy = cos(currentAngle)*totalVelocity;
-    */
+     currentAngle= startCurveAngle*(1-transition) + angleCurve*transition;
+     vx = sin(currentAngle)*totalVelocity;
+     vy = cos(currentAngle)*totalVelocity;
+     */
   }
 }
 
@@ -416,8 +416,10 @@ class forceBall extends Projectile { //-----------------------------------------
 }
 
 class ChargeLaser extends Projectile { //----------------------------------------- forceBall objects ----------------------------------------------------
-  long chargeTime, MaxChargeTime=500;
-  float maxLaserWidth, laserWidth, laserLength=2500, laserChange;
+  long chargeTime;
+  final long MaxChargeTime=500;
+  final int laserLength=2500;
+  float maxLaserWidth, laserWidth, laserChange;
 
   ChargeLaser( int _playerIndex, int _x, int _y, int _maxLaserWidth, color _projectileColor, int  _time, float _angle, float _damage  ) {
     super(_playerIndex, _x, _y, 1, _projectileColor, _time);
@@ -442,22 +444,22 @@ class ChargeLaser extends Projectile { //---------------------------------------
       if (reverse) {
         laserChange-=2;
         laserWidth= sin(radians(laserChange))*maxLaserWidth;
-        angle=players.get(playerIndex).angle;
-        x=players.get(playerIndex).x+50;
-        y=players.get(playerIndex).y+50;
+        angle=owner.angle;
+        x=owner.x+50;
+        y=owner.y+50;
       } else {
         laserChange+=2;
         laserWidth= sin(radians(laserChange))*maxLaserWidth;
-        angle=players.get(playerIndex).angle;
-        x=players.get(playerIndex).x+50;
-        y=players.get(playerIndex).y+50;
+        angle=owner.angle;
+        x=owner.x+50;
+        y=owner.y+50;
         //   particles.add( new  Particle(int(x+random(-laserWidth*1.5,laserWidth*1.5)-50), int(y+random(-laserWidth*1.5,laserWidth*1.5)-50), int( cos(radians(angle))*60), int(sin(radians(angle))*60), int(random(-laserWidth*0.5,laserWidth*0.5)), 400, projectileColor));
         //particles.add( new  Particle(int(x), int(y), 0, 0, int(125), 0, color(255, 0, 255)));
         if (laserWidth<0) {
           dead=true;
           deathTime=stampTime;
         }
-        players.get(playerIndex).pushForce(-0.2, angle);
+        owner.pushForce(-0.2, angle);
         shakeTimer=int(laserWidth*0.1);
         particles.add(new  gradient(1000, int(x+size*0.5), int(y+size*0.5), 0, 0, 4, angle, projectileColor));
 
@@ -740,7 +742,7 @@ class Thunder extends Bomb {//----------------------------------------- Mine obj
   }
 }
 
-class Needle extends Projectile implements Reflectable{//----------------------------------------- Needle objects ----------------------------------------------------
+class Needle extends Projectile implements Reflectable {//----------------------------------------- Needle objects ----------------------------------------------------
   float v, vx, vy, spray=30;
   Needle(int _playerIndex, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage) {
     super(_playerIndex, _x, _y, _size, _projectileColor, _time);
@@ -778,7 +780,7 @@ class Needle extends Projectile implements Reflectable{//-----------------------
       // strokeCap(NORMAL);
     }
   }
-  
+
   @Override
     void hit(Player enemy) {
     // super.hit();
@@ -793,7 +795,7 @@ class Needle extends Projectile implements Reflectable{//-----------------------
     }
     // particles.add(new LineWave(int(x), int(y), 80, 100, color(255), angle+90));
   }
-  void reflect(float _angle, Player _player){
+  void reflect(float _angle, Player _player) {
     angle=_angle;
     owner=_player;
     ally=owner.ally;
