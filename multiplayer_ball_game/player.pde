@@ -369,6 +369,10 @@ class Player {
     stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
   }
   void reset() {
+    vx=0;
+    vy=0;
+    ax=0;
+    ay=0;
     health=maxHealth;
     dead=false;
     ability.reset();

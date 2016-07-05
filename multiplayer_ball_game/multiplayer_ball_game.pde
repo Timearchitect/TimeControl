@@ -69,6 +69,7 @@ Ability abilityList[] = new Ability[]{
   new MachineGunFire(), 
   new Battery(), 
   new Ram(), 
+  new Detonator(),
   new ThrowBoomerang(){{ reset();
 }}, 
   new PhotonicPursuit() {
@@ -110,7 +111,7 @@ Ability abilityList[] = new Ability[]{
   };
 
 Ability[] abilities= { 
-  new Random().randomize(), new Random().randomize(), new Random().randomize(), new Random().randomize(), new Random().randomize()
+new DeployShield(), new ForceShoot(), new TimeBomb(), new ThrowBoomerang(), new Random().randomize()
 };
 
 char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='+';
@@ -299,7 +300,7 @@ void draw() {
 
     checkPlayerVSPlayerColloision();
     checkPlayerVSProjectileColloision();
-
+    checkProjectileVSProjectileColloision();
     for (int i=0; i<players.size (); i++) {       
       if (!players.get(i).dead) {
 

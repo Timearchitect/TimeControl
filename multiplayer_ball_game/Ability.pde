@@ -442,7 +442,7 @@ class SaveState extends Ability { //--------------------------------------------
 
 
 class ThrowDagger extends Ability {//---------------------------------------------------    ThrowDagger   ---------------------------------
-  int damage=16, threashold =1;
+  int damage=16, threashold =3;
   int slashDuration=190, slashRange=110;
   boolean alternate;
   ThrowDagger() {
@@ -459,6 +459,7 @@ class ThrowDagger extends Ability {//-------------------------------------------
         projectiles.add( new ArchingIceDagger(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 30, owner.playerColor, 1000, owner.keyAngle, owner.angle, owner.ax*24, owner.ay*24, damage));
       }
     } else {
+      owner.pushForce(12,owner.angle);
       projectiles.add( new Slash(owner.index, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 30, owner.playerColor, int(slashDuration), owner.angle+45, slashRange, sin(owner.keyAngle)*5, cos(owner.keyAngle)*5, damage));
     }
   }
@@ -477,8 +478,9 @@ class ThrowDagger extends Ability {//-------------------------------------------
 class ForceShoot extends Ability {//---------------------------------------------------    forceShoot   ---------------------------------
   //boolean charging;
   final float MAX_FORCE=64;
-  float forceAmount=0, MODIFIED_MAX_ACCEL=0.02;
+  float forceAmount=0, MODIFIED_MAX_ACCEL=0.02, MODIFIED_ANGLE_FACTOR=0.2;
   float ChargeRate=0.4, restForce;
+
   ForceShoot() {
     super();
     name=this.toString();
@@ -487,6 +489,12 @@ class ForceShoot extends Ability {//--------------------------------------------
   } 
   @Override
     void action() {
+    if (forceAmount>=MAX_FORCE) { 
+      particles.add(new Flash(100, 6, color(255))); 
+        particles.add(new  gradient(1000, int(owner.x+playerSize*0.5), int(owner.y+playerSize*0.5), 0, 0, 4, owner.angle, owner.playerColor));
+
+      shakeTimer=20;
+    }
     projectiles.add( new forceBall(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), forceAmount*2, 30, owner.playerColor, 2000, owner.angle, forceAmount*4));
   }
   @Override
@@ -501,6 +509,7 @@ class ForceShoot extends Ability {//--------------------------------------------
     void hold() {
     if ((!reverse || owner.reverseImmunity) &&  active && !owner.dead) {
       owner.MAX_ACCEL=MODIFIED_MAX_ACCEL;
+      owner.ANGLE_FACTOR=MODIFIED_ANGLE_FACTOR;
       if (MAX_FORCE>forceAmount) { 
         channel();
         if (!active || energy<0 ) {
@@ -523,11 +532,13 @@ class ForceShoot extends Ability {//--------------------------------------------
     if ((!reverse || owner.reverseImmunity ) ) {
       if (!owner.dead && (!freeze || owner.freezeImmunity)&& active && channeling) {
         stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        owner.pushForce(-forceAmount, owner.angle);
         regen=true;
         action();
         deChannel();
         deActivate();
         owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+        owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
         forceAmount=0;
       }
     }
@@ -730,6 +741,8 @@ class Laser extends Ability {//-------------------------------------------------
   void passive() {
     if (charging && (timer+delay)<millis()) {
       particles.add(new ShockWave(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 200*chargelevel, 500, owner.playerColor));
+      particles.add(new Flash(50, 6, color(255))); 
+
       for (int i=0; i<chargelevel; i++) {
         projectiles.add( new ChargeLaser(owner.index, int( owner.x+owner.w*0.5+random(50, -50)), int(owner.y+owner.h*0.5+random(50, -50)), laserWidth*chargelevel, owner.playerColor, duration, owner.angle, damage+10*chargelevel));
       }
@@ -752,7 +765,7 @@ class TimeBomb extends Ability {//----------------------------------------------
   TimeBomb() {
     super();
     name=this.toString();
-    activeCost=16;
+    activeCost=14;
   } 
   @Override
     void action() {
@@ -1064,7 +1077,7 @@ class DeployThunder extends TimeBomb {//----------------------------------------
     shootSpeed=0;
     regenRate=0.5;
     name=this.toString();
-    activeCost=60;
+    activeCost=55;
   } 
   @Override
     void action() {
@@ -1267,6 +1280,36 @@ class DeployTurret extends Ability {//------------------------------------------
       regen=true;
       activate();
 
+      action();
+      deActivate();
+    }
+  }
+}
+class Detonator extends Ability {//---------------------------------------------------    Gravity   ---------------------------------
+  int damage=24;
+  SlowBomb bomb;
+  boolean detonated;
+  Detonator() {
+    super();
+    name=this.toString();
+    activeCost=40;
+  } 
+  @Override
+    void action() {
+      bomb = new  SlowBomb(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 50, owner.playerColor, 60000, owner.angle, 0, 0, damage);
+      projectiles.add(bomb);
+  }
+
+  @Override
+    void press() {
+    if ( bomb!= null && !bomb.dead && bomb.deathTime>stampTime) {
+      bomb.deathTime=stampTime;
+       //bomb.detonate();
+      particles.add(new ShockWave(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 50, 50, owner.playerColor));
+    } else if ((!reverse|| owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)   ) {
+      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+      regen=true;
+      activate();
       action();
       deActivate();
     }

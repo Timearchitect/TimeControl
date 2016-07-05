@@ -20,6 +20,3 @@ abstract class TimeStamp {
   }
   void call(){} // execute timestamp without respect for currenttime
 }
-
-
-

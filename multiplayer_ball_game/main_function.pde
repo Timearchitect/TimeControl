@@ -46,9 +46,9 @@ void checkPlayerVSPlayerColloision() {
         if (players.get(i).ally!=players.get(j).ally && j!=i && !players.get(i).dead && !players.get(j).dead ) {
           if (dist(players.get(i).x, players.get(i).y, players.get(j).x, players.get(j).y)<playerSize) {
             players.get(i).hit(players.get(j).damage);
-            //players.get(i).pushForce( players.get(j).vx,players.get(j).vy, players.get(j).angle+180);
-            // players.get(i).ax=players.get(j).ax;
-            //  players.get(i).ay=players.get(j).ay;
+            float deltaY =  players.get(i).y -  players.get(j).y;
+            float  deltaX =  players.get(i).x -  players.get(j).x;
+            players.get(i).pushForce( playerSize-dist(players.get(j).x, players.get(j).y, players.get(i).x, players.get(i).y), atan2(deltaY, deltaX) * 180 / PI);
           }
         }
       }
@@ -71,15 +71,17 @@ void checkPlayerVSProjectileColloision() {
     }
   }
 }
-/*void checkProjectileVSProjectileColloision() {
+void checkProjectileVSProjectileColloision() {
   if (!freeze &&!reverse) {
     for (int i=0; i< projectiles.size (); i++) {    
       for (int j=0; j<projectiles.size (); j++) {      
         if (projectiles.get(j).ally!=projectiles.get(i).ally && !projectiles.get(j).dead && !projectiles.get(i).dead && projectiles.get(i)!=projectiles.get(j)  ) {
-          if (dist(projectiles.get(i).x, projectiles.get(i).y, projectiles.get(j).x, projectiles.get(j).y)<projectiles.get(i).size+projectiles.get(j).size) {
-            if (projectiles.get(i) instanceof  Reflectable) {
-              
-              projectiles.get(i).reflect(projectiles.get(j).angle,projectiles.get(j).owner);
+          if (dist(projectiles.get(i).x, projectiles.get(i).y, projectiles.get(j).x, projectiles.get(j).y)<projectiles.get(i).size*0.5+projectiles.get(j).size*0.5) {
+            if (projectiles.get(i) instanceof  Reflectable  && projectiles.get(j) instanceof Reflector) {
+             Reflectable reflectObject = (Reflectable)projectiles.get(i);
+             Reflector reflectorObject = (Reflector)projectiles.get(j);
+              reflectObject.reflect(projectiles.get(j).angle, projectiles.get(j).owner);
+              reflectorObject.reflecting();
             }
           }
         }
@@ -87,7 +89,7 @@ void checkPlayerVSProjectileColloision() {
     }
   }
 }
-*/
+
 
 void checkPlayerVSProjectileColloisionLine() {
 }
@@ -150,8 +152,7 @@ void quitOrigo() {
   }
 }
 void mouseDot() {
-
   strokeWeight(5);
-  ellipse(pmouseX, pmouseY, 10, 10);
+  //ellipse(pmouseX, pmouseY, 10, 10);
   point(mouseX, mouseY);
 }

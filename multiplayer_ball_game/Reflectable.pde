@@ -7,3 +7,13 @@ interface Destroyable{
   Boolean destroyable=true;
   void destroy();
 }
+
+interface Reflector{
+  Boolean reflectable=true;
+  void reflecting();
+}
+
+interface Destroyer{
+  Boolean destroyable=true;
+  void destroying();
+}
