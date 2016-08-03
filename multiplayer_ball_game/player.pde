@@ -1,7 +1,7 @@
 class Player {
   PShape arrowSVG = loadShape("arrow.svg");
   int  index, ally, w, h, up, down, left, right, triggKey, deColor;
-  int state=1, health=300, maxHealth=300, barDiameter=100, damage=1;
+  int state=1, maxHealth=200, health=maxHealth, barDiameter=100, damage=1;
   float  x, y, vx, vy, ax, ay, angle, keyAngle, f, s, barFraction;
   boolean holdTrigg, holdUp, holdDown, holdLeft, holdRight, dead, stealth, hit, arduino, arduinoHold, mouse, clone, turret;
   public PVector coord, speed, accel, arrow;
@@ -288,8 +288,40 @@ class Player {
     }
     keyAngle= keyAngle % 360; 
     angle = angle % 360; 
-    //angle-= (angle-keyAngle)*0.2;
-    angle+= (keyAngle-angle)*ANGLE_FACTOR;
+
+
+    if (cheatEnabled) {
+      line(x+w*0.5, y+w*0.5, x+w*0.5+cos(radians(keyAngle))*200, y+w*0.5+sin(radians(keyAngle))*200);
+      fill(0);
+      text(angle, x, y);
+    }
+    /*angle-=keyAngle;
+     float diff=keyAngle;
+     keyAngle=0;
+     
+     //if(angle<0)angle+=360;
+     if (angle < 360-angle) {
+     //  angle+= angle*ANGLE_FACTOR;
+     // text(angle, x, y);
+     } else {
+     //text(angle, x, y);
+     // angle-=360-angle*ANGLE_FACTOR;
+     }
+     keyAngle+=diff;
+     angle+=diff;*/
+    if (angle<0 && (180+angle)+(180-keyAngle)<keyAngle-angle) {
+      //text("L", x-50, y-50);
+      angle-= (abs(angle+180)-abs(keyAngle-180))*ANGLE_FACTOR;
+      angle +=  360;
+    } else if (keyAngle<0 && (180+keyAngle)+(180-angle)<angle-keyAngle) {
+      // text("H", x-50, y-50);
+      angle+= (abs(keyAngle+180)-abs(angle-180))*ANGLE_FACTOR;
+      angle -=  360;
+    } else    angle+= (keyAngle-angle)*ANGLE_FACTOR;
+
+
+
+
     if (Float.isNaN(angle))angle=keyAngle; // if bugged out
   }
 

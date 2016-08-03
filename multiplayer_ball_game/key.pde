@@ -22,9 +22,9 @@ void keyPressed() {
 
   if (cheatEnabled ) {
     if (key==Character.toLowerCase(RandomKey)) {
-      for (int i=0; i<players.size()-1; i++) {
+      for (int i=0; i<players.size(); i++) {
         if (!players.get(i).clone &&  !players.get(i).turret) {  // no turret or clone weapon switch
-           abilities[i].reset();
+          abilities[i].reset();
           abilities[i]=new Random().randomize();
           //abilities[i].owner=players.get(i);
           abilities[i].setOwner(players.get(i));
@@ -46,6 +46,46 @@ void keyPressed() {
           players.get(i).ability=abilities[i];
         }
       }
+    }
+    if (key==Character.toLowerCase('8')) {
+      for (int i=0; i<players.size(); i++) {
+        if (!players.get(i).clone &&  !players.get(i).turret) {  //infinate energy
+
+          //abilities[i].owner=players.get(i);
+          players.get(i).ability.energy=9999999;
+        }
+      }
+    }
+    if (key==Character.toLowerCase('-')) {
+      for (  int i=0; i<abilityList.length; i++) {
+        if (players.get(0).ability==abilityList[i]) {
+          if (i<=0)i=abilityList.length;
+          try {
+            abilities[0]= abilityList[i-1].clone();
+          }
+          catch(CloneNotSupportedException e) {
+            println("not cloned from Random");
+          }
+        }
+      }
+
+  abilities[0].setOwner(players.get(0));
+    }
+    if (key==Character.toLowerCase('+')) {
+
+      for (  int i=0; i<abilityList.length; i++) {
+        if (players.get(0).ability==abilityList[i]) {
+          if (i>abilityList.length)i=0;
+          try {
+            abilities[0]= abilityList[i+1].clone();
+          }
+          catch(CloneNotSupportedException e) {
+            println("not cloned from Random");
+          }
+        }
+      }
+     
+     abilities[0].setOwner(players.get(0));
     }
     if (key==Character.toLowerCase(keyIceDagger)) {
       projectiles.add( new IceDagger(players.get(1), int( players.get(1).x+players.get(1).w/2), int(players.get(1).y+players.get(1).h/2), 30, players.get(1).playerColor, 800, players.get(1).angle, players.get(1).ax*15, players.get(1).ay*15, 8));

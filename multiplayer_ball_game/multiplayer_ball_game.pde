@@ -111,7 +111,7 @@ Ability abilityList[] = new Ability[]{
   };
 
 Ability[] abilities= { 
-new DeployShield(), new ForceShoot(), new TimeBomb(), new ThrowBoomerang(), new Random().randomize()
+new RapidFire(), new DeployShield(), new Random().randomize(), new Random().randomize(), new Random().randomize()
 };
 
 char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='+';

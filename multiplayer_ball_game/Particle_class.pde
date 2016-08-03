@@ -4,7 +4,7 @@ class Particle  implements Cloneable {
   long spawnTime, deathTime, time;
   color particleColor;
   boolean dead;
-  int f;
+//  int f;
   Particle(int _x, int _y, float _vx, float _vy, int _size, int _time, color _particleColor) {
     size=_size;
     spawnTime=stampTime;
