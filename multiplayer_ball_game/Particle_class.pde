@@ -232,9 +232,9 @@ class Spark extends Particle {
   void display() {
     if (!dead ) { 
 
-      noFill();
+      //noFill();
       stroke(hue(particleColor), saturation(particleColor)-brightness, brightness(particleColor)*S);
-      strokeWeight(8);
+      strokeWeight(6);
       line(x+cos(radians(angle))*(maxSize-size), y+sin(radians(angle))*(maxSize-size), x+cos(radians(angle))*(maxSize), y+sin(radians(angle))*(maxSize));
     }
   }
@@ -242,8 +242,9 @@ class Spark extends Particle {
 
 class gradient extends Particle {
   float shrinkRate, opacity=200, size=100;
-  gradient(int _time, int _x, int _y, float _vx, float _vy, float _shrinkRate, float _angle, color _particleColor) {
-    super( _x, _y, _vx, _vy, 100, _time, _particleColor);
+  gradient(int _time, int _x, int _y, float _vx, float _vy,int _maxSize, float _shrinkRate, float _angle, color _particleColor) {
+    super( _x, _y, _vx, _vy,_maxSize, _time, _particleColor);
+    size=_maxSize;
     angle=_angle;
     shrinkRate=_shrinkRate;
   }
@@ -325,9 +326,10 @@ class Shock extends Particle {
   void display() {
     if (!dead && !freeze) {
       noFill();
+
+      beginShape();
       stroke(hue(particleColor), saturation(particleColor)-brightness, brightness(particleColor));
       strokeWeight(4);
-      beginShape();
       for (int i=0; i<360; i+= (360/6)) {
         vertex(x+cos(radians(angle+random(-i, i)*0.05))*(size+random(i*2)), y+sin(radians(angle+random(-i, i)*0.05))*(size+random(i*2)));
       }

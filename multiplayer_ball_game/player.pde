@@ -344,6 +344,7 @@ class Player {
 
   void death() {
     dead=true;
+    ability.reset();
     shakeTimer=20;
     for (int i=0; i<64; i++) {
       particles.add(new Particle(int(x+w*0.5), int(y+h*0.5), random(50)-25, random(50)-25, int(random(40)+10), 1500, playerColor));

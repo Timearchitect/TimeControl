@@ -28,13 +28,13 @@ PShader  Blur;
 boolean slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, origo, noisy;
 final int speedFactor= 3;
 final float slowFactor= 0.3;
-final String version="0.6.8";
+final String version="0.7.0";
 static long prevMillis, addMillis, forwardTime, reversedTime, freezeTime, stampTime, fallenTime;
 import processing.serial.*;
 final int baudRate= 19200;
 final static float FRICTION=0.1;
-final int AmountOfPlayers=4; // start players
-final int startBalls=5;
+final int AmountOfPlayers=3; // start players
+final int startBalls=0;
 final int  ballSize=50;
 final int playerSize=100;
 int playersAlive; // amount of players alive
@@ -53,11 +53,11 @@ ArrayList <Projectile> projectiles = new ArrayList<Projectile>();
 ArrayList <Particle> particles = new ArrayList<Particle>();
 
 Ability abilityList[] = new Ability[]{
-  new FastForward(), 
-  new Freeze(), 
-  new Reverse(), 
-  new Slow(), 
-  new SaveState(), 
+  //new FastForward(), 
+//  new Freeze(), 
+ // new Reverse(), 
+ // new Slow(), 
+ //T new SaveState(), 
   new ThrowDagger(), 
   new ForceShoot(), 
   new Blink(), 
@@ -69,7 +69,9 @@ Ability abilityList[] = new Ability[]{
   new MachineGunFire(), 
   new Battery(), 
   new Ram(), 
-  new Detonator(),
+  new Detonator(), 
+  new PhotonicWall(),
+  new Sniper(),
   new ThrowBoomerang(){{ reset();
 }}, 
   new PhotonicPursuit() {
@@ -111,7 +113,7 @@ Ability abilityList[] = new Ability[]{
   };
 
 Ability[] abilities= { 
-new RapidFire(), new DeployShield(), new Random().randomize(), new Random().randomize(), new Random().randomize()
+  new Laser(), new Combo(), new DeployShield(), new TimeBomb(),new Random().randomize()
 };
 
 char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='+';
@@ -145,7 +147,7 @@ void setup() {
   textFont(font, 18);
   randomSeed(12345);
   noSmooth();
-  //noCursor();
+  noCursor();
   colorMode(HSB);
   for (int i=0; i< AmountOfPlayers; i++) {
     players.add(new Player(i, color((255/AmountOfPlayers)*i, 255, 255), int(random(width-playerSize*1)+playerSize), int(random(height-playerSize*1)+playerSize), playerSize, playerSize, playerControl[i][0], playerControl[i][1], playerControl[i][2], playerControl[i][3], playerControl[i][4], abilities[i]));
@@ -177,8 +179,8 @@ void setup() {
   try {  
     // initialize the SamplePlayer
     //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/TooManyCooksAdultSwim.mp3"));
-   // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
-        musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
+    musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
+    //   musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
     //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Branching time.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/orange caramel -aing.mp3"));
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/goodbye.mp3"));
@@ -214,6 +216,7 @@ void stop() {
 }
 
 void draw() {
+
   addMillis=millis()-prevMillis;
   prevMillis=millis();
   if (origo) {
@@ -321,10 +324,10 @@ void draw() {
         }
       }
       if (freeze) {
-       // colorMode(RGB);
+        // colorMode(RGB);
         //for (int b=0; b<2; b++) {
-          filter(Blur);
-       // }
+        filter(Blur);
+        // }
       } else {   
         //colorMode(HSB);
       }

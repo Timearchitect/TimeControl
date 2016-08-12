@@ -13,9 +13,13 @@ void keyPressed() {
 
 
   if ((cheatEnabled||playersAlive<=1 ) && key==ResetKey) {
-    for (int i=0; i<players.size (); i++) {      
+    background(255);
+    for (int i=0; i<players.size (); i++) {    
       if (!players.get(i).clone &&  !players.get(i).turret) {  // no turret or clone respawn
         players.get(i).reset();
+      } else {
+        players.get(i).dead=true;
+        players.get(i).state=0;
       }
     }
   }
@@ -36,7 +40,7 @@ void keyPressed() {
       for (int i=0; i<players.size()-1; i++) {
         if (!players.get(i).clone &&  !players.get(i).turret) {  // no turret or clone weapon switch
           try {
-            abilities[i]=new ThrowDagger().clone();
+            abilities[i]=new Detonator().clone();
           }
           catch(CloneNotSupportedException e) {
             println("not cloned from Random");
@@ -69,7 +73,7 @@ void keyPressed() {
         }
       }
 
-  abilities[0].setOwner(players.get(0));
+      abilities[0].setOwner(players.get(0));
     }
     if (key==Character.toLowerCase('+')) {
 
@@ -84,8 +88,8 @@ void keyPressed() {
           }
         }
       }
-     
-     abilities[0].setOwner(players.get(0));
+
+      abilities[0].setOwner(players.get(0));
     }
     if (key==Character.toLowerCase(keyIceDagger)) {
       projectiles.add( new IceDagger(players.get(1), int( players.get(1).x+players.get(1).w/2), int(players.get(1).y+players.get(1).h/2), 30, players.get(1).playerColor, 800, players.get(1).angle, players.get(1).ax*15, players.get(1).ay*15, 8));
