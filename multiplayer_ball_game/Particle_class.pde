@@ -4,7 +4,7 @@ class Particle  implements Cloneable {
   long spawnTime, deathTime, time;
   color particleColor;
   boolean dead;
-//  int f;
+  //  int f;
   Particle(int _x, int _y, float _vx, float _vy, int _size, int _time, color _particleColor) {
     size=_size;
     spawnTime=stampTime;
@@ -57,17 +57,19 @@ class Particle  implements Cloneable {
 //-------------------------------------------------------------//    ShockWave    //-------------------------------------------------------------------------
 
 class ShockWave extends Particle {
-  ShockWave(int _x, int _y, int _size, int _time, color _particleColor) {
+  int sizeRate;
+  ShockWave(int _x, int _y, int _size, int _sizeRate, int _time, color _particleColor) {
     super( _x, _y, 0, 0, _size, _time, _particleColor);
+    sizeRate=_sizeRate;
   }
   void update() {
     if (!dead && !freeze) { 
       if (reverse) {
-        size-=16*F*S;
-        opacity+=8*F*S;
+        size-=sizeRate*F*S;
+        opacity+=sizeRate*0.5*F*S;
       } else {
-        size+=16*F*S;
-        opacity-=8*F*S;
+        size+=sizeRate*F*S;
+        opacity-=sizeRate*0.5*F*S;
       }
     }
   }
@@ -81,29 +83,21 @@ class ShockWave extends Particle {
   }
 }
 
-class RShockWave extends Particle {
-  RShockWave(int _x, int _y, int _size, int _time, color _particleColor) {
-    super( _x, _y, 0, 0, _size, _time, _particleColor);
+class RShockWave extends ShockWave {
+  RShockWave(int _x, int _y, int _size, int _sizeRate, int _time, color _particleColor) {
+    super( _x, _y, _size, _sizeRate, _time, _particleColor);
     opacity=0;
   }
   void update() {
     if (!dead && !freeze) { 
       if (reverse) {
-        size+=16*F*S;
-        opacity-=8*F*S;
+        size+=sizeRate*F*S;
+        opacity-=sizeRate*0.5*F*S;
       } else {
-        size-=16*F*S;
-        opacity+=8*F*S;
+        size-=sizeRate*F*S;
+        opacity+=sizeRate*0.5*F*S;
         if (size<=0)dead=true;
       }
-    }
-  }
-  void display() {
-    if (!dead ) {  
-      noFill();
-      stroke(hue(particleColor), saturation(particleColor), brightness(particleColor)*S, opacity);
-      strokeWeight(int(0.1*opacity));
-      ellipse(x, y, size, size);
     }
   }
 }
@@ -242,8 +236,8 @@ class Spark extends Particle {
 
 class gradient extends Particle {
   float shrinkRate, opacity=200, size=100;
-  gradient(int _time, int _x, int _y, float _vx, float _vy,int _maxSize, float _shrinkRate, float _angle, color _particleColor) {
-    super( _x, _y, _vx, _vy,_maxSize, _time, _particleColor);
+  gradient(int _time, int _x, int _y, float _vx, float _vy, int _maxSize, float _shrinkRate, float _angle, color _particleColor) {
+    super( _x, _y, _vx, _vy, _maxSize, _time, _particleColor);
     size=_maxSize;
     angle=_angle;
     shrinkRate=_shrinkRate;
@@ -289,7 +283,7 @@ class gradient extends Particle {
 class Shock extends Particle {
   float shrinkRate, brightness=255;
   PShape circle = createShape();       // First create the shape
- // star.beginShape();          // now call beginShape();
+  // star.beginShape();          // now call beginShape();
 
 
   //star.endShape(CLOSE);       // now call endShape(CLOSE);
@@ -297,13 +291,13 @@ class Shock extends Particle {
     super( _x, _y, _vx, _vy, 100, _time, _particleColor);
     angle=_angle;
     shrinkRate=_shrinkRate;
-    
-   circle.beginShape();
-   circle.noFill();
-      for (int i=0; i<360; i+= (360/6)) {
-        circle.vertex(x+cos(radians(angle+random(-i, i)*0.05))*(size+random(i*2)), y+sin(radians(angle+random(-i, i)*0.05))*(size+random(i*2)));
-      }
-     circle.endShape(OPEN);
+
+    circle.beginShape();
+    circle.noFill();
+    for (int i=0; i<360; i+= (360/6)) {
+      circle.vertex(x+cos(radians(angle+random(-i, i)*0.05))*(size+random(i*2)), y+sin(radians(angle+random(-i, i)*0.05))*(size+random(i*2)));
+    }
+    circle.endShape(OPEN);
   }
   void update() {
     if (!dead && !freeze) { 
@@ -336,7 +330,44 @@ class Shock extends Particle {
       endShape();
     }
     if (!dead && freeze) { 
-      shape(circle,circle.X + circle.width/2,circle.Y+circle.height/2);
+      shape(circle, circle.X + circle.width/2, circle.Y+circle.height/2);
+    }
+  }
+}
+
+class Text extends Particle {
+  float shrinkRate, brightness=255;
+  String text="";
+
+  //star.endShape(CLOSE);       // now call endShape(CLOSE);
+  Text(String _text, int _x, int _y, float _vx, float _vy, float _size, float _shrinkRate, int _time, color _particleColor) {
+    super( _x, _y, _vx, _vy, int(_size), _time, _particleColor);
+    shrinkRate=_shrinkRate;
+    text=_text;
+  }
+  void update() {
+    if (!dead && !freeze) { 
+
+      if (reverse) {       
+        size+=shrinkRate*F*S;
+        x-=vx*F*S;
+        y-=vy*F*S;
+      } else {
+        size-=shrinkRate*F*S;
+        x+=vx*F*S;
+        y+=vy*F*S;
+        //if (size<0) dead=true;
+      }
+    }
+  }
+
+  void display() {
+    if (!dead && !freeze) {
+      noStroke();
+      fill(particleColor);
+      //stroke(hue(particleColor), saturation(particleColor)-brightness, brightness(particleColor));
+      textSize(size);
+      text(text, x, y);
     }
   }
 }

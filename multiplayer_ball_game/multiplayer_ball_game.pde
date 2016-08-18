@@ -15,6 +15,8 @@
 import processing.opengl.*;
 import beads.*;
 import java.util.Arrays; 
+import processing.serial.*;
+
 AudioContext  ac = new AudioContext();
 AudioContext an= new AudioContext();
 Noise n = new Noise(an);
@@ -25,24 +27,25 @@ Gain   g = new Gain(ac, 1, 0.05); //volume
 PFont font;
 PGraphics GUILayer;
 PShader  Blur;
-boolean slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, origo, noisy;
-final int speedFactor= 3;
+boolean slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, origo, noisy, mute;
+final int speedFactor= 2;
 final float slowFactor= 0.3;
 final String version="0.7.0";
 static long prevMillis, addMillis, forwardTime, reversedTime, freezeTime, stampTime, fallenTime;
-import processing.serial.*;
 final int baudRate= 19200;
-final static float FRICTION=0.1;
-final int AmountOfPlayers=3; // start players
+final static float DEFAULT_FRICTION=0.1;
+final int AmountOfPlayers=4; // start players
 final int startBalls=0;
 final int  ballSize=50;
 final int playerSize=100;
-int playersAlive; // amount of players alive
-int offsetX=950, offsetY=100;
+static int playersAlive; // amount of players alive
+
+final int offsetX=950, offsetY=100;
 static int shakeTimer;
-static float F=1, S=1;
+static float F=1, S=1, zoom=1;
 //int keyCooldown[]= new int[AmountOfPlayers];
-final int keyResponseDelay=30;  // eventhe refreashrate equa to arduino devices
+final int keyResponseDelay=30;  // eventhe refreashrate equal to arduino devices
+final char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='7';
 
 Serial port[]=new Serial[AmountOfPlayers];  // Create object from Serial class
 String portName[]=new String[AmountOfPlayers];
@@ -52,13 +55,14 @@ ArrayList <TimeStamp> stamps= new ArrayList<TimeStamp>();
 ArrayList <Projectile> projectiles = new ArrayList<Projectile>();
 ArrayList <Particle> particles = new ArrayList<Particle>();
 
-Ability abilityList[] = new Ability[]{
-  //new FastForward(), 
-//  new Freeze(), 
- // new Reverse(), 
- // new Slow(), 
- //T new SaveState(), 
+final Ability abilityList[] = new Ability[]{
+  // new FastForward(), 
+  // new Freeze(), 
+  // new Reverse(), 
+  // new Slow(), 
+  // new SaveState(), 
   new ThrowDagger(), 
+  new Revolver(),
   new ForceShoot(), 
   new Blink(), 
   new Multiply(), 
@@ -70,53 +74,23 @@ Ability abilityList[] = new Ability[]{
   new Battery(), 
   new Ram(), 
   new Detonator(), 
-  new PhotonicWall(),
-  new Sniper(),
-  new ThrowBoomerang(){{ reset();
-}}, 
-  new PhotonicPursuit() {
-  { 
-    reset();
-  }
-}
-, 
-  new DeployThunder() {
-  { 
-    reset();
-  }
-}
-, 
-  new DeployShield() {
-  { 
-    reset();
-  }
-}
-, 
-  new DeployElectron() {
-  { 
-    reset();
-  }
-}
-, 
-  new Gravity() {
-  { 
-    reset();
-  }
-}
-, 
-  new DeployTurret() {
-  { 
-    reset();
-  }
-}
-, 
-  };
-
-Ability[] abilities= { 
-  new Laser(), new Combo(), new DeployShield(), new TimeBomb(),new Random().randomize()
+  new PhotonicWall(), 
+  new Sniper(), 
+  new ThrowBoomerang(), 
+  new PhotonicPursuit(), 
+  new DeployThunder(), 
+  new DeployShield(), 
+  new DeployElectron(), 
+  new Gravity(), 
+  new DeployTurret(), 
+  new Bazooka(), 
+  new AutoGun()
 };
 
-char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='+';
+Ability[] abilities= { 
+  new Revolver(), new Combo(), new AutoGun(), new DeployThunder(), new Random().randomize(), new Random().randomize()
+};
+
 int playerControl[][]= {
   {
     UP, DOWN, LEFT, RIGHT, int(',')
@@ -133,6 +107,10 @@ int playerControl[][]= {
   }
   , {
     int('g')-32, int('b')-32, int('v')-32, int('n')-32, int('m')-32
+  }
+  , 
+  {
+    '8', '5', '4', '6', '3'
   }
 };
 /*boolean sketchFullScreen() { // p2 legacy
@@ -152,7 +130,7 @@ void setup() {
   for (int i=0; i< AmountOfPlayers; i++) {
     players.add(new Player(i, color((255/AmountOfPlayers)*i, 255, 255), int(random(width-playerSize*1)+playerSize), int(random(height-playerSize*1)+playerSize), playerSize, playerSize, playerControl[i][0], playerControl[i][1], playerControl[i][2], playerControl[i][3], playerControl[i][4], abilities[i]));
 
-    if (players.get(i).mouse)players.get(i).friction=0.11; //mouse
+    if (players.get(i).mouse)players.get(i).FRICTION_FACTOR=0.11; //mouse
   }
   for (int i=0; i< startBalls; i++) {
     projectiles.add(new Ball(int(random(width-ballSize)+ballSize*0.5), int(random(height-ballSize)+ballSize*0.5), int(random(20)-10), int(random(20)-10), int(random(ballSize)+10), color(random(255), 0, 0)));
@@ -166,7 +144,7 @@ void setup() {
     players.get(i).MAX_ACCEL=0.16;
     players.get(i).DEFAULT_MAX_ACCEL=0.16;
     players.get(i).arduino=true;
-    players.get(i).friction=0.062;
+    players.get(i).FRICTION_FACTOR=0.062;
   }
   GUILayer= createGraphics(width, height);
   GUILayer.beginDraw();
@@ -179,11 +157,11 @@ void setup() {
   try {  
     // initialize the SamplePlayer
     //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/TooManyCooksAdultSwim.mp3"));
-    musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
-    //   musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
+    //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
+    musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
     //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Branching time.mp3")); 
-    // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/orange caramel -aing.mp3"));
-    // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/goodbye.mp3"));
+    //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/orange caramel -aing.mp3"));
+   //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/goodbye.mp3"));
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/wierd.mp3"));
   }
   catch(Exception e) {
@@ -269,7 +247,11 @@ void draw() {
     // println("stampTime"+stampTime);
     // println("forward"+forwardTime);
     // println("reverse"+reversedTime);
-    noStroke();
+    pushMatrix();
+    translate(width*(1-zoom)*.5, height*(1-zoom)*.5);
+    scale(zoom, zoom);
+
+    //noStroke();
     rect(0-10, 0-10, width+20, height+20); // background
 
 
@@ -304,40 +286,58 @@ void draw() {
     checkPlayerVSPlayerColloision();
     checkPlayerVSProjectileColloision();
     checkProjectileVSProjectileColloision();
-    for (int i=0; i<players.size (); i++) {       
-      if (!players.get(i).dead) {
-
-        if (reverse && !players.get(i).reverseImmunity) {
-          players.get(i).display();
-          if (!freeze ||  players.get(i).freezeImmunity) {
-            // players.get(i).checkBounds();
-            players.get(i).mouseControl() ;
-            players.get(i).update();
+    /*for (int i=0; i<players.size (); i++) {       
+     if (!players.get(i).dead) {
+     
+     if (reverse && !players.get(i).reverseImmunity) {
+     
+     if (!freeze ||  players.get(i).freezeImmunity) {
+     // players.get(i).checkBounds();
+     players.get(i).mouseControl() ;
+     players.get(i).update();
+     }
+     players.get(i).display();
+     } else {
+     if (!freeze || players.get(i).freezeImmunity) {
+     players.get(i).mouseControl() ;
+     players.get(i).update();
+     players.get(i).checkBounds();
+     }
+     players.get(i).display();
+     }
+     }
+     }*/
+    for (Player p : players) {       
+      if (!p.dead) {
+        if (reverse && !p.reverseImmunity) {
+          if (!freeze ||  p.freezeImmunity) {
+            p.mouseControl() ;
+            p.update();
           }
         } else {
-          if (!freeze || players.get(i).freezeImmunity) {
-            players.get(i).mouseControl() ;
-            players.get(i).update();
-            players.get(i).checkBounds();
+          if (!freeze || p.freezeImmunity) {
+            p.mouseControl() ;
+            p.update();
+            p.checkBounds();
           }
-          players.get(i).display();
         }
+        p.display();
       }
-      if (freeze) {
-        // colorMode(RGB);
-        //for (int b=0; b<2; b++) {
-        filter(Blur);
-        // }
-      } else {   
-        //colorMode(HSB);
-      }
-      if (slow) {
-        noStroke();
-        fill(0, 0, 0, 30);
-        rect(0-10, 0-10, width+20, height+20); // background
-      }
-      image(GUILayer, 0, 0);
     }
+    if (freeze) {
+      // colorMode(RGB);
+      //for (int b=0; b<2; b++) {
+      filter(Blur);
+      // }
+    } else {   
+      //colorMode(HSB);
+    }
+    if (slow) {
+      noStroke();
+      fill(0, 0, 0, 30);
+      rect(0-10, 0-10, width+20, height+20); // background
+    }
+    image(GUILayer, 0, 0);
     mouseDot();
     checkKeyHold();
     for (int i=stamps.size ()-1; i>= 0; i--) { // checkStamps
@@ -348,12 +348,19 @@ void draw() {
 
     popMatrix();
 
-    for (int i=0; i<players.size (); i++) {    // resetstate
-      if (!players.get(i).dead) {
-        players.get(i).state=0;
-        players.get(i).hit=false;
+    /*for (int i=0; i<players.size (); i++) {    // resetstate
+     if (!players.get(i).dead) {
+     players.get(i).state=0;
+     players.get(i).hit=false;
+     }
+     }*/
+    for (Player p : players) {    // resetstate
+      if (!p.dead) {
+        p.state=0;
+        p.hit=false;
       }
     }
+    popMatrix();
   }// origo
   // prevMillis=millis();
   if (cheatEnabled) {

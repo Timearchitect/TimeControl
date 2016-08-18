@@ -7,12 +7,13 @@ class Turret extends Player {
   Turret(int _index, Player _owner, int _x, int _y, int _w, int _h, int _health, Ability _ability) {
     super( _index, _owner.playerColor, _x, _y, _w, _h, 999, 999, 999, 999, 999, _ability) ;
     owner=_owner;
-    this.ally=_owner.index;
+    this.ally=_owner.ally;
     turret=true;
     spawnTime=stampTime;
     deathTime=stampTime + duration;
     maxHealth=_health;
     health=maxHealth;
+    println(ability.name);
   }
   void displayAbilityEnergy() {
   }
@@ -21,7 +22,7 @@ class Turret extends Player {
       stroke((freeze && !freezeImmunity)?255:0);
       strokeWeight(2);
       fill(255, 0, 255-deColor*0.5, 50+deColor);
-      textAlign(CENTER, CENTER);
+
       //textMode(CENTER);
       //rect(x, y, w, h);
       ellipse(x+w*0.5, y+h*0.5, w, h);
@@ -30,17 +31,17 @@ class Turret extends Player {
       translate(x+w*0.5, y+h*0.5);
       rotate(radians(angle+90));
       // shape(arrowSVG,x+w/2- arrowSVG.width/2, y-arrowSVG.height/2, arrowSVG.width, arrowSVG.height); // default render
-      fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s, 50+deColor);
+      //fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s, 50+deColor);
       shape(arrowSVG, -arrowSVG.width*0.5+30, -arrowSVG.height+0, arrowSVG.width, arrowSVG.height);
       popMatrix();
 
       fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s);
-      displayAbilityEnergy();
+      //displayAbilityEnergy();
       displayHealth();
       displayName();
 
-      if (cheatEnabled && ability.active)text("A", x+w*0.5, y-h*2);
-      if (cheatEnabled && holdTrigg)text("H", x+w*0.5, y+h*0.5-h);
+     //if (cheatEnabled && ability.active)text("A", x+w*0.5, y-h*2);
+      //if (cheatEnabled && holdTrigg)text("H", x+w*0.5, y+h*0.5-h);
       if (deColor>0)deColor-=int(10*s*f);
     } else { //stealth
       stroke(255, 40);
@@ -65,8 +66,8 @@ class Turret extends Player {
         keyAngle-=1*F*S;
       }
     }
-    super.update();
-
+   // super.update();
+      ability.passive();
     if (random(100)<1) {
       ability.press();
     }
@@ -80,5 +81,11 @@ class Turret extends Player {
     if (!stationary) super.pushForce( _vx, _vy, _angle);
   }
   void displayName() {
+    //pushStyle();
+    fill(playerColor);
+    textAlign(CENTER, CENTER);
+    textSize(26);
+    text(ability.name.substring(0,1).toUpperCase(),x+w*0.5, y+h*0.5);
+  //popStyle();
   }
 }

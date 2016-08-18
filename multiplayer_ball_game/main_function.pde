@@ -78,8 +78,8 @@ void checkProjectileVSProjectileColloision() {
         if (projectiles.get(j).ally!=projectiles.get(i).ally && !projectiles.get(j).dead && !projectiles.get(i).dead && projectiles.get(i)!=projectiles.get(j)  ) {
           if (dist(projectiles.get(i).x, projectiles.get(i).y, projectiles.get(j).x, projectiles.get(j).y)<projectiles.get(i).size*0.5+projectiles.get(j).size*0.5) {
             if (projectiles.get(i) instanceof  Reflectable  && projectiles.get(j) instanceof Reflector) {
-             Reflectable reflectObject = (Reflectable)projectiles.get(i);
-             Reflector reflectorObject = (Reflector)projectiles.get(j);
+              Reflectable reflectObject = (Reflectable)projectiles.get(i);
+              Reflector reflectorObject = (Reflector)projectiles.get(j);
               reflectObject.reflect(projectiles.get(j).angle, projectiles.get(j).owner);
               reflectorObject.reflecting();
             }
@@ -96,13 +96,14 @@ void checkPlayerVSProjectileColloisionLine() {
 
 void checkWinner() {
   int playerAliveIndex=0;
-  playersAlive=0;
+   playersAlive=0;
   for (int i=0; i<players.size (); i++) {      
     if (!players.get(i).dead && !players.get(i).turret && !players.get(i).clone) {
       playersAlive++;
       playerAliveIndex=players.get(i).index;
     }
   }
+
   if (playersAlive==1) {
     textSize(80);
     text(" Winner is player "+(playerAliveIndex+1), width*0.5, height*0.5);
@@ -155,4 +156,8 @@ void mouseDot() {
   strokeWeight(5);
   //ellipse(pmouseX, pmouseY, 10, 10);
   point(mouseX, mouseY);
+}
+
+void announceAbility(Player p) {
+  particles.add( new Text(p.ability.name, int( p.x+p.w*0.5), int(p.y+p.h*0.5)-75, 0, 0, 30, 0, 2000, color(0)));
 }

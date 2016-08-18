@@ -1,21 +1,21 @@
 class Player {
   PShape arrowSVG = loadShape("arrow.svg");
   int  index, ally, w, h, up, down, left, right, triggKey, deColor;
-  int state=1, maxHealth=200, health=maxHealth, barDiameter=100, damage=1;
+  int state=1, maxHealth=200, health=maxHealth, damage=1,barSize=12, barDiameter=75;
   float  x, y, vx, vy, ax, ay, angle, keyAngle, f, s, barFraction;
   boolean holdTrigg, holdUp, holdDown, holdLeft, holdRight, dead, stealth, hit, arduino, arduinoHold, mouse, clone, turret;
   public PVector coord, speed, accel, arrow;
-  float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, friction;
+  float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR;
   int invinsTime=400, buttonHoldTime=300;
   long invisStampTime;
   boolean invis, freezeImmunity, reverseImmunity, fastforwardImmunity, slowImmunity;
   Ability ability;  
   color playerColor;
   Player(int _index, color _playerColor, int _x, int _y, int _w, int _h, int _up, int _down, int _left, int _right, int _triggKey, Ability _ability) {
-    friction=FRICTION;
+    FRICTION_FACTOR=DEFAULT_FRICTION;
     if (_up==888) { 
       mouse=true;
-      friction=0.045;
+      FRICTION_FACTOR=0.045;
       maxHealth=400;
       health=maxHealth;
     }
@@ -52,18 +52,18 @@ class Player {
       x=0;
       vx=0;
       ax=0;
-      accel.set(0.0, accel.y);
-      speed.set(0.0, speed.y);
-      coord.set(int(0.0), int(coord.y));
+      //accel.set(0.0, accel.y);
+      //speed.set(0.0, speed.y);
+      //coord.set(int(0.0), int(coord.y));
       hit(0);
     } else if (x>width-w) {
       stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
       x=width-w;
       vx=0;
       ax=0;
-      coord.set(width-w, coord.y);
-      accel.set(0.0, accel.y);
-      speed.set(0.0, speed.y);
+      //coord.set(width-w, coord.y);
+      //accel.set(0.0, accel.y);
+      //speed.set(0.0, speed.y);
       hit(0);
     }
     if (y<0) {
@@ -71,18 +71,18 @@ class Player {
       y=0;
       vy=0;
       ay=0;
-      accel.set(accel.x, 0.0);
-      speed.set(speed.x, 0.0);
-      coord.set(coord.x, 0.0);
+      //accel.set(accel.x, 0.0);
+      //speed.set(speed.x, 0.0);
+      //coord.set(coord.x, 0.0);
       hit(0);
     } else if (y>height-h) {
       stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
       y=height-h;
       vy=0;
       ay=0;
-      coord.set(coord.x, height-h);
-      speed.set(speed.x, 0.0);
-      accel.set(accel.x, 0.0);
+      //coord.set(coord.x, height-h);
+      //speed.set(speed.x, 0.0);
+      //accel.set(accel.x, 0.0);
       hit(0);
     }
   }
@@ -134,33 +134,33 @@ class Player {
         calcAngle() ;
         if (reverse && !reverseImmunity) {
 
-          vy/=1-friction*f*s;
-          vx/=1-friction*f*s;
-          speed.set(speed.x/(1-friction*f*s), speed.y/(1-friction*f*s));
-          ay/=1-friction*f*s;
-          ax/=1-friction*f*s;
-          accel.set(accel.x/(1-friction*f*s), accel.y/(1-friction*f*s));
+          vy/=1-FRICTION_FACTOR*f*s;
+          vx/=1-FRICTION_FACTOR*f*s;
+          //speed.set(speed.x/(1-FRICTION_FACTOR*f*s), speed.y/(1-FRICTION_FACTOR*f*s));
+          ay/=1-FRICTION_FACTOR*f*s;
+          ax/=1-FRICTION_FACTOR*f*s;
+          //accel.set(accel.x/(1-FRICTION_FACTOR*f*s), accel.y/(1-FRICTION_FACTOR*f*s));
           y-=vy*f*s;
           x-=vx*f*s;
-          coord.set(coord.x-(speed.x*f*s), coord.y-(speed.y*f*s));
+          //coord.set(coord.x-(speed.x*f*s), coord.y-(speed.y*f*s));
           vy-=ay*f*s;
           vx-=ax*f*s;
-          speed.set(speed.x-(accel.x*f*s), speed.y-(accel.y*f*s));
+          //speed.set(speed.x-(accel.x*f*s), speed.y-(accel.y*f*s));
           ability.regen();
         } else {
           ability.regen();
-          speed.set(speed.x+(accel.x*f*s), speed.y+(accel.y*f*s));
+          //speed.set(speed.x+(accel.x*f*s), speed.y+(accel.y*f*s));
           vx+=ax*f*s;
           vy+=ay*f*s;
-          coord.set(coord.x+(speed.x*f*s), coord.y+(speed.y*f*s));
+          //coord.set(coord.x+(speed.x*f*s), coord.y+(speed.y*f*s));
           x+=vx*f*s;
           y+=vy*f*s;
-          speed.set(speed.x*(1-friction*f*s), speed.y*(1-friction*f*s));
-          vx*=1-friction*f*s;
-          vy*=1-friction*f*s;
-          accel.set(accel.x*(1-friction*f*s), accel.y*(1-friction*f*s));
-          ax*=1-friction*f*s;
-          ay*=1-friction*f*s;
+          //speed.set(speed.x*(1-FRICTION_FACTOR*f*s), speed.y*(1-FRICTION_FACTOR*f*s));
+          vx*=1-FRICTION_FACTOR*f*s;
+          vy*=1-FRICTION_FACTOR*f*s;
+         // accel.set(accel.x*(1-FRICTION_FACTOR*f*s), accel.y*(1-FRICTION_FACTOR*f*s));
+          ax*=1-FRICTION_FACTOR*f*s;
+          ay*=1-FRICTION_FACTOR*f*s;
           // calcAngle() ;
         }
       }
@@ -175,7 +175,6 @@ class Player {
       //---------------    hold    --------------------
       int temp =int(prevMillis-millis());
       if (buttonHoldTime< temp) {
-
         ability.hold();
         //   TimeSpan t = new TimeSpan(DateTime.Now.Ticks);
       }
@@ -191,12 +190,12 @@ class Player {
       case 0: // down
         // vy+=0.0;
         ay+=MAX_ACCEL*f*s;
-        accel.set(accel.x, accel.y+MAX_ACCEL*f*s);
+        //accel.set(accel.x, accel.y+MAX_ACCEL*f*s);
         break;
       case 1: // up
         // vy+=-0.0;
         ay+=-MAX_ACCEL*f*s;
-        accel.set(accel.x, accel.y-MAX_ACCEL*f*s);
+        //accel.set(accel.x, accel.y-MAX_ACCEL*f*s);
         break;
       case 2: // hold
         //ay=0;
@@ -206,12 +205,12 @@ class Player {
       case 4: // left
         // vx+=-0.0;
         ax+=-MAX_ACCEL*f*s;
-        accel.set(accel.x-MAX_ACCEL*f*s, accel.y);
+       // accel.set(accel.x-MAX_ACCEL*f*s, accel.y);
         break;
       case 5: // right
         //vx+=0.0;
         ax+=MAX_ACCEL*f*s;
-        accel.set(accel.x+MAX_ACCEL*f*s, accel.y);
+        //accel.set(accel.x+MAX_ACCEL*f*s, accel.y);
         break;
       }
     }
@@ -276,11 +275,11 @@ class Player {
 
   void calcAngle() {
 
-    if (((-0.01) <accel.y && accel.y<(0.01)) && ((-0.02) <accel.x && accel.x<(0.01))) {  // volitile low value calc of angle is no alowed
+   /* if (((-0.01) <accel.y && accel.y<(0.01)) && ((-0.02) <accel.x && accel.x<(0.01))) {  // volitile low value calc of angle is no alowed
       //  println("ax:"+ax + " ay:"+ay);
     } else {
       keyAngle=degrees( atan2( (accel.y+coord.y) - coord.y, (accel.x+coord.x) -coord.x ));
-    }
+    }*/
     if (((-0.01) <ay && ay<(0.01)) && ((-0.02) <ax && ax<(0.01))) {  // volitile low value calc of angle is no alowed
       //  println("ax:"+ax + " ay:"+ay);
     } else {
@@ -337,19 +336,20 @@ class Player {
     // }
     invisStampTime=millis()+invinsTime;
     invis=true;
-    if (health<0) {
+    if (health<=0) {
       death();
     }
   }
 
   void death() {
+    ability.onDeath();
     dead=true;
     ability.reset();
     shakeTimer=20;
     for (int i=0; i<64; i++) {
       particles.add(new Particle(int(x+w*0.5), int(y+h*0.5), random(50)-25, random(50)-25, int(random(40)+10), 1500, playerColor));
     }
-    particles.add(new ShockWave(int(x+w*0.5), int(y+h*0.5), int(random(40)+10), 400, playerColor));
+    particles.add(new ShockWave(int(x+w*0.5), int(y+h*0.5), int(random(40)+10), 16, 400, playerColor));
     particles.add(new LineWave(int(x+w*0.5), int(y+h*0.5), int(random(40)+10), 400, playerColor, random(360)));
     particles.add(new Flash(900, 8, playerColor));  
     state=0;
@@ -357,6 +357,8 @@ class Player {
   }
   void displayName() {
     fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s);
+    textSize(20);
+
     if (clone) {
       text("P"+ (ally+1), x+w*0.5, y+h*0.5);
     } else {
@@ -366,16 +368,16 @@ class Player {
     }
   }
   void displayHealth() {
-    int barSize=12, barDiameter=75;
+
     float fraction=((PI*2)/maxHealth)*health;
     strokeWeight(barSize);
-    strokeCap(SQUARE);
+    //strokeCap(SQUARE);
     noFill();
     stroke(hue(playerColor), 80*S, (80-deColor)*S);
     ellipse(x+w*0.5, y+h*0.5, barDiameter, barDiameter);
     stroke(hue(playerColor), (255-deColor*0.5)*S, 255*S);
     arc(x+w*0.5, y+h*0.5, barDiameter, barDiameter, -HALF_PI +(PI*2)-fraction, PI+HALF_PI);
-    strokeWeight(1);
+    //strokeWeight(1);
   }
   void displayAbilityEnergy() {
     barFraction=((PI*2)/ability.maxEnergy)*ability.energy;
@@ -383,11 +385,11 @@ class Player {
     if (ability.regen) { 
       noStroke();
     } else {
-      strokeWeight(5);
+      strokeWeight(6);
       stroke(hue(playerColor), 255*S, 255*S);
     }
     arc(x+w*0.5, y+h*0.5, barDiameter, barDiameter, -HALF_PI +(PI*2)-barFraction, PI+HALF_PI);
-    strokeWeight(1);
+   // strokeWeight(1);
   }
   void pushForce(float amount, float angle) {
     stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
