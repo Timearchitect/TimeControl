@@ -59,11 +59,11 @@ class Turret extends Player {
 
       if (reverse && !reverseImmunity) {
 
-        angle+=1*F*S;
-        keyAngle+=1*F*S;
+        angle+=1*timeBend;
+        keyAngle+=1*timeBend;
       } else {
-        angle-=1*F*S;
-        keyAngle-=1*F*S;
+        angle-=1*timeBend;
+        keyAngle-=1*timeBend;
       }
     }
    // super.update();

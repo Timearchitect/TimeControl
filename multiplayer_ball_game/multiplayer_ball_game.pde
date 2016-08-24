@@ -28,9 +28,10 @@ PFont font;
 PGraphics GUILayer;
 PShader  Blur;
 boolean slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, origo, noisy, mute;
+int mouseSelectedPlayerIndex=0;
 final int speedFactor= 2;
 final float slowFactor= 0.3;
-final String version="0.7.0";
+final String version="0.7.1";
 static long prevMillis, addMillis, forwardTime, reversedTime, freezeTime, stampTime, fallenTime;
 final int baudRate= 19200;
 final static float DEFAULT_FRICTION=0.1;
@@ -42,7 +43,7 @@ static int playersAlive; // amount of players alive
 
 final int offsetX=950, offsetY=100;
 static int shakeTimer;
-static float F=1, S=1, zoom=1;
+static float F=1, S=1,timeBend=1, zoom=.8;
 //int keyCooldown[]= new int[AmountOfPlayers];
 final int keyResponseDelay=30;  // eventhe refreashrate equal to arduino devices
 final char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='7';
@@ -70,7 +71,7 @@ final Ability abilityList[] = new Ability[]{
   new Laser(), 
   new TimeBomb(), 
   new RapidFire(), 
-  new MachineGunFire(), 
+  new MachineGun(), 
   new Battery(), 
   new Ram(), 
   new Detonator(), 
@@ -84,11 +85,12 @@ final Ability abilityList[] = new Ability[]{
   new Gravity(), 
   new DeployTurret(), 
   new Bazooka(), 
-  new AutoGun()
+  new AutoGun(),
+  new Combo()
 };
 
 Ability[] abilities= { 
-  new Revolver(), new Combo(), new AutoGun(), new DeployThunder(), new Random().randomize(), new Random().randomize()
+  new Sniper(), new Combo(), new AutoGun(), new DeployThunder(), new Random().randomize(), new Random().randomize()
 };
 
 int playerControl[][]= {
@@ -125,7 +127,8 @@ void setup() {
   textFont(font, 18);
   randomSeed(12345);
   noSmooth();
-  noCursor();
+  //noCursor();
+  //cursor();
   colorMode(HSB);
   for (int i=0; i< AmountOfPlayers; i++) {
     players.add(new Player(i, color((255/AmountOfPlayers)*i, 255, 255), int(random(width-playerSize*1)+playerSize), int(random(height-playerSize*1)+playerSize), playerSize, playerSize, playerControl[i][0], playerControl[i][1], playerControl[i][2], playerControl[i][3], playerControl[i][4], abilities[i]));
@@ -194,16 +197,16 @@ void stop() {
 }
 
 void draw() {
-
+  background(255);
   addMillis=millis()-prevMillis;
   prevMillis=millis();
   if (origo) {
-    fallenTime+=addMillis*F*S;
+    fallenTime+=addMillis*timeBend;
     // background(255);
   } else {
     pushMatrix();
     screenShake();
-
+    
     fill(100);
 
     if (fastForward) {
@@ -232,10 +235,10 @@ void draw() {
 
           shake(4);
         }
-        fill(40, 200*F*S, 255*F);
-        reversedTime+=addMillis*F*S;
+        fill(40, 200*timeBend, 255*F);
+        reversedTime+=addMillis*timeBend;
       } else {
-        forwardTime+=addMillis*F*S;
+        forwardTime+=addMillis*timeBend;
       }
       if (stampTime<0 && reverse) {   // origin of time
         musicPlayer.pause(true);
@@ -251,7 +254,7 @@ void draw() {
     translate(width*(1-zoom)*.5, height*(1-zoom)*.5);
     scale(zoom, zoom);
 
-    //noStroke();
+    noStroke();
     rect(0-10, 0-10, width+20, height+20); // background
 
 

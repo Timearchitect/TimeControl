@@ -61,7 +61,6 @@ void keyPressed() {
     if (key==Character.toLowerCase('8')) {
       for (int i=0; i<players.size(); i++) {
         if (!players.get(i).clone &&  !players.get(i).turret) {  //infinate energy
-
           //abilities[i].owner=players.get(i);
           players.get(i).ability.energy=9999999;
         }
@@ -84,35 +83,36 @@ void keyPressed() {
       }
     }
     if (key==Character.toLowerCase('-')) {
+      players.get(mouseSelectedPlayerIndex).ability.reset();
       for (  int i=0; i<abilityList.length; i++) {
         //if (players.get(0).ability==abilityList[i]) {
-        if (players.get(0).ability.getClass()==abilityList[i].getClass()) {
+        if (players.get(mouseSelectedPlayerIndex).ability.getClass()==abilityList[i].getClass()) {
           //println("ability match "+i+" "+abilityList[i].getClass());
           //if (i>=abilityList.length)i=0;
           if (i<=0)i=abilityList.length;
           try {
             //abilities[0]= abilityList[i-1].clone();
             //abilityList[i-1].clone().setOwner(players.get(0));
-            players.get(0).ability=abilityList[i-1].clone();
-            players.get(0).ability.setOwner(players.get(0));
-            announceAbility( players.get(0));
+            players.get(mouseSelectedPlayerIndex).ability=abilityList[i-1].clone();
+            players.get(mouseSelectedPlayerIndex).ability.setOwner(players.get(mouseSelectedPlayerIndex));
+            announceAbility( players.get(mouseSelectedPlayerIndex));
           }
           catch(CloneNotSupportedException e) {
             println("not cloned from Random");
           }
-        }
+        }else println("not player"+ i);
       }
     }
     if (key==Character.toLowerCase('+')) {
-
+      players.get(mouseSelectedPlayerIndex).ability.reset();
       for (  int i=0; i<abilityList.length; i++) {
-        if (players.get(0).ability.getClass()==abilityList[i].getClass()) {
+        if (players.get(mouseSelectedPlayerIndex).ability.getClass()==abilityList[i].getClass()) {
           //println("ability match "+i+" "+abilityList[i].getClass());
           if (i>=abilityList.length-1)i=-1;
           try {
-            players.get(0).ability=abilityList[i+1].clone();
-            players.get(0).ability.setOwner(players.get(0));
-            announceAbility( players.get(0));
+            players.get(mouseSelectedPlayerIndex).ability=abilityList[i+1].clone();
+            players.get(mouseSelectedPlayerIndex).ability.setOwner(players.get(mouseSelectedPlayerIndex));
+            announceAbility( players.get(mouseSelectedPlayerIndex));
           }
           catch(CloneNotSupportedException e) {
             println("not cloned from Random");
@@ -129,8 +129,9 @@ void keyPressed() {
       musicPlayer.pause(false);
       slow=(slow)?false:true;
       S =(slow)?slowFactor:1;
+      timeBend=S*F;
       speedControl.clear();
-      speedControl.addSegment((reverse)?-1*S*F:1*S*F, 800); //now slow
+      speedControl.addSegment((reverse)?-1*timeBend:1*timeBend, 800); //now slow
       drawTimeSymbol();
     }
     if (key==Character.toLowerCase(keyRewind)) {
@@ -146,7 +147,7 @@ void keyPressed() {
       musicPlayer.pause(false);
       reverse=(reverse)?false:true;
       speedControl.clear();
-      speedControl.addSegment((reverse)?-1*S*F:1*S*F, 600); //now rewind
+      speedControl.addSegment((reverse)?-1*timeBend:1*timeBend, 600); //now rewind
       controlable=(controlable)?false:true;
       drawTimeSymbol();
       quitOrigo();
@@ -173,8 +174,9 @@ void keyPressed() {
       background(0, 255, 255);
       fastForward=(fastForward)?false:true;
       F =(fastForward)?speedFactor:1;
+      timeBend=S*F;
       speedControl.clear();
-      speedControl.addSegment((reverse)?-1*S*F:1*S*F, 400); //now fastforward
+      speedControl.addSegment((reverse)?-1*timeBend:1*timeBend, 400); //now fastforward
       //controlable=(controlable)?false:true;
       drawTimeSymbol();
     }

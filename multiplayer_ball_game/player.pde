@@ -1,16 +1,19 @@
 class Player {
   PShape arrowSVG = loadShape("arrow.svg");
   int  index, ally, w, h, up, down, left, right, triggKey, deColor;
-  int state=1, maxHealth=200, health=maxHealth, damage=1,barSize=12, barDiameter=75;
+  int state=1, maxHealth=200, health=maxHealth, damage=1,armor;
+  final int barSize=12, barDiameter=75;
   float  x, y, vx, vy, ax, ay, angle, keyAngle, f, s, barFraction;
   boolean holdTrigg, holdUp, holdDown, holdLeft, holdRight, dead, stealth, hit, arduino, arduinoHold, mouse, clone, turret;
   public PVector coord, speed, accel, arrow;
   float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR;
-  int invinsTime=400, buttonHoldTime=300;
+  final int invinsTime=400, buttonHoldTime=300;
   long invisStampTime;
   boolean invis, freezeImmunity, reverseImmunity, fastforwardImmunity, slowImmunity;
   Ability ability;  
   color playerColor;
+  Particle textParticle;
+  
   Player(int _index, color _playerColor, int _x, int _y, int _w, int _h, int _up, int _down, int _left, int _right, int _triggKey, Ability _ability) {
     FRICTION_FACTOR=DEFAULT_FRICTION;
     if (_up==888) { 
@@ -126,7 +129,7 @@ class Player {
   }
 
   void update() {
-    // println(pow(1-FRICTION,F*S));
+    // println(pow(1-FRICTION,timeBend));
     if (!dead) {
       f =(fastforwardImmunity)?1:F;
       s =(slowImmunity)?1:S;
@@ -219,7 +222,7 @@ class Player {
   void mouseControl() {
     if ((!freeze || freezeImmunity) && !dead && (controlable || reverseImmunity) && mouse) {
       int margin=200;
-      float MAX_MOUSE_ACCEL=0.0035;
+      //float MAX_MOUSE_ACCEL=0.0035;
       float maxAccel=1.4;
 
       stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
@@ -292,6 +295,7 @@ class Player {
     if (cheatEnabled) {
       line(x+w*0.5, y+w*0.5, x+w*0.5+cos(radians(keyAngle))*200, y+w*0.5+sin(radians(keyAngle))*200);
       fill(0);
+      textSize(20);
       text(angle, x, y);
     }
     /*angle-=keyAngle;
@@ -327,6 +331,7 @@ class Player {
 
   void hit(int damage) {
     stamps.add( new StateStamp(index, int(x), int(y), state, health, dead));
+    if(damage-armor>=0)damage-=armor;
     health-=damage;
     deColor=255;
     state=2;

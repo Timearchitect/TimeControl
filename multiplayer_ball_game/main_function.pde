@@ -125,7 +125,7 @@ void drawTimeSymbol() {
       GUILayer.clear();
       GUILayer.beginShape();
       GUILayer.vertex(offsetX, offsetY);
-      GUILayer.vertex(offsetX-(75*S*F), offsetY+100);
+      GUILayer.vertex(offsetX-(75*timeBend), offsetY+100);
       GUILayer.vertex(offsetX, offsetY+200);
       GUILayer.endShape();
       GUILayer.endDraw();
@@ -135,7 +135,7 @@ void drawTimeSymbol() {
       GUILayer.clear();
       GUILayer.beginShape();
       GUILayer.vertex(offsetX, offsetY);
-      GUILayer.vertex(offsetX+(75*S*F), offsetY+100);
+      GUILayer.vertex(offsetX+(75*timeBend), offsetY+100);
       GUILayer.vertex(offsetX, offsetY+200);
       GUILayer.endShape();
       GUILayer.endDraw();
@@ -159,5 +159,9 @@ void mouseDot() {
 }
 
 void announceAbility(Player p) {
-  particles.add( new Text(p.ability.name, int( p.x+p.w*0.5), int(p.y+p.h*0.5)-75, 0, 0, 30, 0, 2000, color(0)));
+      particles.remove( p.textParticle );
+
+  //particles.add( new Text(p.ability.name, int( p.x+p.w*0.5), int(p.y+p.h*0.5)-75, 0, 0, 30, 0, 2000, color(0)));
+    p.textParticle = new Text(p,p.ability.name, 0, -75, 30, 0, 1500, color(0),0);
+    particles.add( p.textParticle );
 }

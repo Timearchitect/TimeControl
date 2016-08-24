@@ -20,6 +20,14 @@ void mousePressed() {
   }
   catch(Exception e) {
   }
+  if (cheatEnabled) {
+    for (int i=0; i<players.size(); i++) {
+      if (!players.get(i).dead && dist(players.get(i).x+players.get(i).w*.5, players.get(i).y+players.get(i).h*.5, mouseX, mouseY)<100) {
+        mouseSelectedPlayerIndex=i;
+        particles.add( new Text("player "+(i+1)+" selected", mouseX, mouseY-75, 0, 0, 40, 0, 500, color(players.get(i).playerColor),1));
+      }
+    }
+  }
 }
 void mouseHold() {
   /*for (int i=0; i< players.size (); i++) {

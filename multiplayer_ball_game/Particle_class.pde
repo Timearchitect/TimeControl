@@ -22,12 +22,12 @@ class Particle  implements Cloneable {
       // f =(fastForward)?speedFactor:1;
       if (reverse) {
         opacity+=8*F;
-        x-=vx*F*S;
-        y-=vy*F*S;
+        x-=vx*timeBend;
+        y-=vy*timeBend;
       } else {
-        opacity-=8*F*S;
-        x+=vx*F*S;
-        y+=vy*F*S;
+        opacity-=8*timeBend;
+        x+=vx*timeBend;
+        y+=vy*timeBend;
       }
     }
   }
@@ -65,11 +65,11 @@ class ShockWave extends Particle {
   void update() {
     if (!dead && !freeze) { 
       if (reverse) {
-        size-=sizeRate*F*S;
-        opacity+=sizeRate*0.5*F*S;
+        size-=sizeRate*timeBend;
+        opacity+=sizeRate*0.5*timeBend;
       } else {
-        size+=sizeRate*F*S;
-        opacity-=sizeRate*0.5*F*S;
+        size+=sizeRate*timeBend;
+        opacity-=sizeRate*0.5*timeBend;
       }
     }
   }
@@ -91,11 +91,11 @@ class RShockWave extends ShockWave {
   void update() {
     if (!dead && !freeze) { 
       if (reverse) {
-        size+=sizeRate*F*S;
-        opacity-=sizeRate*0.5*F*S;
+        size+=sizeRate*timeBend;
+        opacity-=sizeRate*0.5*timeBend;
       } else {
-        size-=sizeRate*F*S;
-        opacity+=sizeRate*0.5*F*S;
+        size-=sizeRate*timeBend;
+        opacity+=sizeRate*0.5*timeBend;
         if (size<=0)dead=true;
       }
     }
@@ -114,11 +114,11 @@ class LineWave extends Particle {
     if (!dead && !freeze) { 
 
       if (reverse) {
-        size-=16*F*S;
-        opacity+=8*F*S;
+        size-=16*timeBend;
+        opacity+=8*timeBend;
       } else {
-        size+=16*F*S;
-        opacity-=8*F*S;
+        size+=16*timeBend;
+        opacity-=8*timeBend;
       }
     }
   }
@@ -129,6 +129,127 @@ class LineWave extends Particle {
       strokeWeight(int(0.1*opacity));
       line(x-cos(radians(angle))*size, y-sin(radians(angle))*size, x+cos(radians(angle))*size, y+sin(radians(angle))*size);
     }
+  }
+}
+
+//-------------------------------------------------------------//    TempSlow   //-------------------------------------------------------------------------
+
+class TempSlow extends Particle {
+  float slow, decay;
+  TempSlow(int _time, float _rate, float _decayRate) {
+    super( 0, 0, 0, 0, 0, _time, 255);
+    S=_rate;
+    //println("slow! "+ _time+" :"+_rate);
+    decay= _decayRate;
+  }
+  void update() {
+    if (!dead && !freeze) { 
+      // f =(fastForward)?speedFactor:1;
+      if (reverse) {
+        if (deathTime>stampTime && S>0 && S<1)S/=decay;
+        else {
+          // println(deathTime+" : "+stampTime);
+          dead=true;
+          S=1; 
+          timeBend=S*F;
+          // println( "dead");
+        }
+        if (S<0) {
+          S=0;
+          println( "too low");
+        }
+        if (S>1) {
+          S=1;
+          println( "too high");
+        }
+        timeBend=S*F;
+        // println( timeBend +" : "+S);
+      } else {
+        if (deathTime>stampTime && S>0 && S<1)S*=decay;
+        else {
+          // println(deathTime+" : "+stampTime);
+          dead=true;
+          S=1; 
+          timeBend=S*F;
+          // println( "dead");
+        }
+        if (S<0) {
+          S=0;
+          println( "too low");
+        }
+        if (S>1) {
+          S=1;
+          println( "too high");
+        }
+        timeBend=S*F;
+        //  println( timeBend +" : "+S);
+      }
+    }
+  }
+  void revert() {
+    if (reverse && stampTime<spawnTime) {
+      particles.remove(this);
+    } else if (stampTime>deathTime && !dead) {
+      dead=true;
+      S=1; 
+      timeBend=S*F;
+    } else if (stampTime<deathTime) {
+      dead=false;
+    }
+  }
+  void display() {
+    /*if (!dead && !freeze) {
+     noStroke();
+     fill(particleColor, opacity);
+     rect(0-shakeTimer, 0-shakeTimer, width+shakeTimer, height+shakeTimer);
+     }*/
+  }
+}
+//-------------------------------------------------------------//    TempFreeze   //-------------------------------------------------------------------------
+
+class TempFreeze extends Particle {
+  float slow, decay;
+  TempFreeze(int _time) {
+    super( 0, 0, 0, 0, 0, _time, 255);
+   deathTime= millis()+_time;
+  }
+  void update() {
+    if (!dead ) { 
+      // f =(fastForward)?speedFactor:1;
+      if (reverse) {
+        if (deathTime>millis())freeze=true;
+        else {
+          // println(deathTime+" : "+stampTime);
+          dead=true;
+          freeze=false;
+        }
+      } else {
+
+        if (deathTime>millis())freeze=true;
+        else {
+          // println(deathTime+" : "+stampTime);
+          dead=true;
+          freeze=false;
+        }
+      }
+    }
+  }
+  void revert() {
+    if (reverse && stampTime<spawnTime) {
+      particles.remove(this);
+    } else if (millis()>deathTime && !dead) {
+      dead=true;
+      freeze=false;
+    } else if (millis()<deathTime) {
+      dead=false;
+    }
+  }
+  void display() {
+    /*if (!dead && !freeze) {
+     noStroke();
+     fill(particleColor, opacity);
+     rect(0-shakeTimer, 0-shakeTimer, width+shakeTimer, height+shakeTimer);
+     }*/
   }
 }
 //-------------------------------------------------------------//    Flash    //-------------------------------------------------------------------------
@@ -143,9 +264,9 @@ class Flash extends Particle {
     if (!dead && !freeze) { 
       // f =(fastForward)?speedFactor:1;
       if (reverse) {
-        opacity+=rate*F*S;
+        opacity+=rate*timeBend;
       } else {
-        opacity-=rate*F*S;
+        opacity-=rate*timeBend;
       }
     }
   }
@@ -172,17 +293,17 @@ class Feather extends Particle {
     if (!dead && !freeze) { 
       //f =(fastForward)?speedFactor:1;
       if (reverse) {
-        angle+=16*F*S;
-        size+=shrinkRate*F*S;
-        opacity+=8*F*S;
-        x-=vx*F*S;
-        y-=vy*F*S;
+        angle+=16*timeBend;
+        size+=shrinkRate*timeBend;
+        opacity+=8*timeBend;
+        x-=vx*timeBend;
+        y-=vy*timeBend;
       } else {
-        angle-=16*F*S;
-        size-=shrinkRate*F*S;
-        opacity-=8*F*S;
-        x+=vx*F*S;
-        y+=vy*F*S;
+        angle-=16*timeBend;
+        size-=shrinkRate*timeBend;
+        opacity-=8*timeBend;
+        x+=vx*timeBend;
+        y+=vy*timeBend;
       }
     }
   }
@@ -209,15 +330,15 @@ class Spark extends Particle {
     if (!dead && !freeze) { 
       //f =(fastForward)?speedFactor:1;
       if (reverse) {       
-        size+=shrinkRate*F*S;
-        brightness+=16*F*S;
-        x-=vx*F*S;
-        y-=vy*F*S;
+        size+=shrinkRate*timeBend;
+        brightness+=16*timeBend;
+        x-=vx*timeBend;
+        y-=vy*timeBend;
       } else {
-        size-=shrinkRate*F*S;
-        brightness-=16*F*S;
-        x+=vx*F*S;
-        y+=vy*F*S;
+        size-=shrinkRate*timeBend;
+        brightness-=16*timeBend;
+        x+=vx*timeBend;
+        y+=vy*timeBend;
       }
       if (size<=0)dead=true;
     }
@@ -246,15 +367,15 @@ class gradient extends Particle {
     if (!dead && !freeze) { 
 
       if (reverse) {       
-        size+=shrinkRate*F*S;
-        opacity+=shrinkRate*2*F*S;
-        x-=vx*F*S;
-        y-=vy*F*S;
+        size+=shrinkRate*timeBend;
+        opacity+=shrinkRate*2*timeBend;
+        x-=vx*timeBend;
+        y-=vy*timeBend;
       } else {
-        size-=shrinkRate*F*S;
-        opacity-=shrinkRate*2*F*S;
-        x+=vx*F*S;
-        y+=vy*F*S;
+        size-=shrinkRate*timeBend;
+        opacity-=shrinkRate*2*timeBend;
+        x+=vx*timeBend;
+        y+=vy*timeBend;
         if (size<0)dead=true;
       }
     }
@@ -303,15 +424,15 @@ class Shock extends Particle {
     if (!dead && !freeze) { 
 
       if (reverse) {       
-        size+=shrinkRate*F*S;
-        brightness+=16*F*S;
-        x-=vx*F*S;
-        y-=vy*F*S;
+        size+=shrinkRate*timeBend;
+        brightness+=16*timeBend;
+        x-=vx*timeBend;
+        y-=vy*timeBend;
       } else {
-        size-=shrinkRate*F*S;
-        brightness-=16*F*S;
-        x+=vx*F*S;
-        y+=vy*F*S;
+        size-=shrinkRate*timeBend;
+        brightness-=16*timeBend;
+        x+=vx*timeBend;
+        y+=vy*timeBend;
         if (size<0) dead=true;
       }
     }
@@ -338,33 +459,64 @@ class Shock extends Particle {
 class Text extends Particle {
   float shrinkRate, brightness=255;
   String text="";
-
+  int  offsetX, offsetY, type, count;
+  boolean follow;
+  Player owner;
   //star.endShape(CLOSE);       // now call endShape(CLOSE);
-  Text(String _text, int _x, int _y, float _vx, float _vy, float _size, float _shrinkRate, int _time, color _particleColor) {
+  Text(String _text, int _x, int _y, float _vx, float _vy, float _size, float _shrinkRate, int _time, color _particleColor, int _type) {
     super( _x, _y, _vx, _vy, int(_size), _time, _particleColor);
+    type= _type;
     shrinkRate=_shrinkRate;
     text=_text;
   }
+
+  Text(Player _owner, String _text, int _offsetX, int _offsetY, float _size, float _shrinkRate, int _time, color _particleColor, int _type) {
+    super( 0, 0, 0, 0, int(_size), _time, _particleColor);
+    type= _type;
+    shrinkRate=_shrinkRate;
+    text=_text;
+    follow=true;
+    offsetX=_offsetX;
+    offsetY=_offsetY;
+    owner=_owner;
+  }
   void update() {
     if (!dead && !freeze) { 
-
       if (reverse) {       
-        size+=shrinkRate*F*S;
-        x-=vx*F*S;
-        y-=vy*F*S;
+        size+=shrinkRate*timeBend;
+        if (follow) {
+          x=owner.x+owner.w*.5+offsetX;
+          y=owner.y+owner.h*.5+offsetY;
+        } else {
+          x-=vx*timeBend;
+          y-=vy*timeBend;
+        }
       } else {
-        size-=shrinkRate*F*S;
-        x+=vx*F*S;
-        y+=vy*F*S;
+        size-=shrinkRate*timeBend;
+        if (follow) {
+          x=owner.x+owner.w*.5+offsetX;
+          y=owner.y+owner.h*.5+offsetY;
+        } else {
+          x+=vx*timeBend;
+          y+=vy*timeBend;
+        }
         //if (size<0) dead=true;
       }
     }
   }
 
   void display() {
-    if (!dead && !freeze) {
+    if (!dead) {
       noStroke();
-      fill(particleColor);
+      switch(type) {
+      case 1:
+        count++;
+        if (count%2==0)fill(particleColor);
+        else fill(255);
+        break;
+      default:
+        fill(particleColor);
+      }
       //stroke(hue(particleColor), saturation(particleColor)-brightness, brightness(particleColor));
       textSize(size);
       text(text, x, y);
