@@ -1,9 +1,9 @@
 class Player {
   PShape arrowSVG = loadShape("arrow.svg");
   int  index, ally, w, h, up, down, left, right, triggKey, deColor;
-  int state=1, maxHealth=200, health=maxHealth, damage=1,armor;
+  int state=1, maxHealth=200, health=maxHealth, damage=1, armor;
   final int barSize=12, barDiameter=75;
-  float  x, y, vx, vy, ax, ay, angle, keyAngle, f, s, barFraction;
+  float  x, y, vx, vy, ax, ay, cx, cy, angle, keyAngle, f, s, barFraction;
   boolean holdTrigg, holdUp, holdDown, holdLeft, holdRight, dead, stealth, hit, arduino, arduinoHold, mouse, clone, turret;
   public PVector coord, speed, accel, arrow;
   float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR;
@@ -13,7 +13,7 @@ class Player {
   Ability ability;  
   color playerColor;
   Particle textParticle;
-  
+
   Player(int _index, color _playerColor, int _x, int _y, int _w, int _h, int _up, int _down, int _left, int _right, int _triggKey, Ability _ability) {
     FRICTION_FACTOR=DEFAULT_FRICTION;
     if (_up==888) { 
@@ -38,7 +38,8 @@ class Player {
     y=_y;
     w=_w;
     h=_h;
-
+    cx=x+w*.5;
+    cy=y+h*.5;
     up=_up;
     down= _down;
     left=_left;
@@ -55,6 +56,8 @@ class Player {
       x=0;
       vx=0;
       ax=0;
+      cx=x+w*.5;
+      cy=y+h*.5;
       //accel.set(0.0, accel.y);
       //speed.set(0.0, speed.y);
       //coord.set(int(0.0), int(coord.y));
@@ -64,6 +67,8 @@ class Player {
       x=width-w;
       vx=0;
       ax=0;
+      cx=x+w*.5;
+      cy=y+h*.5;
       //coord.set(width-w, coord.y);
       //accel.set(0.0, accel.y);
       //speed.set(0.0, speed.y);
@@ -74,6 +79,8 @@ class Player {
       y=0;
       vy=0;
       ay=0;
+      cx=x+w*.5;
+      cy=y+h*.5;
       //accel.set(accel.x, 0.0);
       //speed.set(speed.x, 0.0);
       //coord.set(coord.x, 0.0);
@@ -83,6 +90,8 @@ class Player {
       y=height-h;
       vy=0;
       ay=0;
+      cx=x+w*.5;
+      cy=y+h*.5;
       //coord.set(coord.x, height-h);
       //speed.set(speed.x, 0.0);
       //accel.set(accel.x, 0.0);
@@ -148,11 +157,15 @@ class Player {
           //coord.set(coord.x-(speed.x*f*s), coord.y-(speed.y*f*s));
           vy-=ay*f*s;
           vx-=ax*f*s;
+          cx=x+w*.5;
+          cy=y+h*.5;
           //speed.set(speed.x-(accel.x*f*s), speed.y-(accel.y*f*s));
           ability.regen();
         } else {
           ability.regen();
           //speed.set(speed.x+(accel.x*f*s), speed.y+(accel.y*f*s));
+          cx=x+w*.5;
+          cy=y+h*.5;
           vx+=ax*f*s;
           vy+=ay*f*s;
           //coord.set(coord.x+(speed.x*f*s), coord.y+(speed.y*f*s));
@@ -161,7 +174,7 @@ class Player {
           //speed.set(speed.x*(1-FRICTION_FACTOR*f*s), speed.y*(1-FRICTION_FACTOR*f*s));
           vx*=1-FRICTION_FACTOR*f*s;
           vy*=1-FRICTION_FACTOR*f*s;
-         // accel.set(accel.x*(1-FRICTION_FACTOR*f*s), accel.y*(1-FRICTION_FACTOR*f*s));
+          // accel.set(accel.x*(1-FRICTION_FACTOR*f*s), accel.y*(1-FRICTION_FACTOR*f*s));
           ax*=1-FRICTION_FACTOR*f*s;
           ay*=1-FRICTION_FACTOR*f*s;
           // calcAngle() ;
@@ -208,7 +221,7 @@ class Player {
       case 4: // left
         // vx+=-0.0;
         ax+=-MAX_ACCEL*f*s;
-       // accel.set(accel.x-MAX_ACCEL*f*s, accel.y);
+        // accel.set(accel.x-MAX_ACCEL*f*s, accel.y);
         break;
       case 5: // right
         //vx+=0.0;
@@ -278,11 +291,11 @@ class Player {
 
   void calcAngle() {
 
-   /* if (((-0.01) <accel.y && accel.y<(0.01)) && ((-0.02) <accel.x && accel.x<(0.01))) {  // volitile low value calc of angle is no alowed
-      //  println("ax:"+ax + " ay:"+ay);
-    } else {
-      keyAngle=degrees( atan2( (accel.y+coord.y) - coord.y, (accel.x+coord.x) -coord.x ));
-    }*/
+    /* if (((-0.01) <accel.y && accel.y<(0.01)) && ((-0.02) <accel.x && accel.x<(0.01))) {  // volitile low value calc of angle is no alowed
+     //  println("ax:"+ax + " ay:"+ay);
+     } else {
+     keyAngle=degrees( atan2( (accel.y+coord.y) - coord.y, (accel.x+coord.x) -coord.x ));
+     }*/
     if (((-0.01) <ay && ay<(0.01)) && ((-0.02) <ax && ax<(0.01))) {  // volitile low value calc of angle is no alowed
       //  println("ax:"+ax + " ay:"+ay);
     } else {
@@ -331,7 +344,7 @@ class Player {
 
   void hit(int damage) {
     stamps.add( new StateStamp(index, int(x), int(y), state, health, dead));
-    if(damage-armor>=0)damage-=armor;
+    if (damage-armor>=0)damage-=armor;
     health-=damage;
     deColor=255;
     state=2;
@@ -394,7 +407,7 @@ class Player {
       stroke(hue(playerColor), 255*S, 255*S);
     }
     arc(x+w*0.5, y+h*0.5, barDiameter, barDiameter, -HALF_PI +(PI*2)-barFraction, PI+HALF_PI);
-   // strokeWeight(1);
+    // strokeWeight(1);
   }
   void pushForce(float amount, float angle) {
     stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));

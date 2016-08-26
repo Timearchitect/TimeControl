@@ -129,10 +129,10 @@ void setup() {
   noSmooth();
   //noCursor();
   //cursor();
+
   colorMode(HSB);
   for (int i=0; i< AmountOfPlayers; i++) {
     players.add(new Player(i, color((255/AmountOfPlayers)*i, 255, 255), int(random(width-playerSize*1)+playerSize), int(random(height-playerSize*1)+playerSize), playerSize, playerSize, playerControl[i][0], playerControl[i][1], playerControl[i][2], playerControl[i][3], playerControl[i][4], abilities[i]));
-
     if (players.get(i).mouse)players.get(i).FRICTION_FACTOR=0.11; //mouse
   }
   for (int i=0; i< startBalls; i++) {

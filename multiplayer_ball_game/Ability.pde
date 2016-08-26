@@ -12,7 +12,6 @@ class Ability implements Cloneable {
   float energy=90, maxEnergy=100, activeCost=5, channelCost, deChannelCost, deactiveCost, maxCooldown, regenRate=0.1, ammo, maxAmmo, loadRate;
   boolean active, channeling, cooling, hold, regen=true, meta;
   void Ability() { 
-
     //name=this.getClass().getSimpleName();
     //name=this.getClass().getCanonicalName();
 
@@ -89,7 +88,6 @@ class Ability implements Cloneable {
   void onDeath() {
   }
   void reset() {
-
     active=false;
     energy=maxEnergy;
     if (owner!=null) {
@@ -166,10 +164,11 @@ class FastForward extends Ability { //------------------------------------------
 
   @Override
     void reset() {
+    super.reset();
     stamps.add( new ControlStamp(owner.index, int(owner.x), int(owner.y), owner.vx, owner.vy, owner.ax, owner.ay));
     fastForward=false;
     F =1;
-    timeBend=timeBend;
+    timeBend=1;
     speedControl.clear();
     speedControl.addSegment((reverse)?-1*timeBend:1*timeBend, 400); //now fastforward
     //controlable=(controlable)?false:true;
@@ -261,6 +260,7 @@ class Freeze extends Ability { //-----------------------------------------------
   }
   @Override
     void reset() {
+    super.reset();
     stamps.add( new ControlStamp(owner.index, int(owner.x), int(owner.y), owner.vx, owner.vy, owner.ax, owner.ay));
     freeze=false;
     speedControl.clear();
@@ -390,11 +390,12 @@ class Slow extends Ability { //-------------------------------------------------
   }
   @Override
     void reset() {
+    super.reset();
     stamps.add( new ControlStamp(owner.index, int(owner.x), int(owner.y), owner.vx, owner.vy, owner.ax, owner.ay));
     if (mute)musicPlayer.pause(false);
     slow=false;
     S =1;
-    timeBend=timeBend;
+    timeBend=1;
     speedControl.clear();
     speedControl.addSegment((reverse)?-1*timeBend:1*timeBend, 800); //now slow
     //controlable=(controlable)?false:true;
@@ -521,6 +522,7 @@ class ThrowDagger extends Ability {//-------------------------------------------
     super();
     name=getClassName(this);
     activeCost=8;
+    regenRate=0.15;
   } 
   @Override
     void action() {
@@ -701,6 +703,7 @@ class ForceShoot extends Ability {//--------------------------------------------
     }
   }
   void reset() {
+    hold=false;
     active=false;
     regen=true;
     channeling=false;
@@ -753,9 +756,10 @@ class Blink extends Ability {//-------------------------------------------------
   }
   void checkInside() {
     for (Player enemy : players) {
-      if (!enemy.dead  && owner.ally != enemy.ally && dist(owner.x, owner.y, enemy.x, enemy.y)<100) {
+      if (!enemy.dead  && owner.ally != enemy.ally && dist(owner.x, owner.y, enemy.x, enemy.y)<90) {
         enemy.hit(damage);
         particles.add(new Flash(100, 8, color(0)));  
+        particles.add( new TempFreeze(200));
         for (int i =0; i<2; i++) {
           particles.add( new Feather(300, int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), random(-4, 4), random(-4, 4 ), 20, enemy.playerColor));
         }
@@ -773,7 +777,7 @@ class Multiply extends Ability {//----------------------------------------------
   Multiply() {
     super();
     name=getClassName(this);
-    activeCost=99;
+    activeCost=80;
   } 
   @Override
     void action() {
@@ -901,7 +905,7 @@ class Stealth extends Ability {//-----------------------------------------------
         particles.add(new ShockWave(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 20, 16, 200, owner.playerColor));
         projectiles.add( new Slash(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 30, owner.playerColor, int(duration), owner.angle, 24, range, 0, 0, int(projectileDamage+wait*0.1), true));
         wait=0;
-    }
+      }
     }
   }
 
@@ -910,13 +914,14 @@ class Stealth extends Ability {//-----------------------------------------------
     owner.stealth=false;
     active=false;
     regen=true;
-        energy=25;
+    energy=25;
   }
   @Override
     void passive() {
     if (owner.stealth ) {
-      if(wait<400)wait++;
-      text(wait,owner.x,owner.y);
+      if (wait<400)wait++;
+      //text(wait, owner.x, owner.y);
+      //line(owner.x,owner.x,owner.x+cos(),owner.y+sin());
       if ( int(random(60))==0)particles.add(new Particle(int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), random(-5, 5), random(-5, 5), int(random(20)+5), 600, 255));
     }
   }
@@ -1007,9 +1012,10 @@ class Combo extends Ability {//-------------------------------------------------
   }
   @Override
     void reset() {
+    super.reset();
     active=false;
     regen=true;
-    energy=maxEnergy;
+    //energy=maxEnergy;
   }
   @Override
     void passive() {
@@ -1033,14 +1039,9 @@ class Combo extends Ability {//-------------------------------------------------
 }
 
 class Laser extends Ability {//---------------------------------------------------    Laser   ---------------------------------
-  int damage=2;
-  int duration=2400;
-  int delay=500;
-  int chargelevel;
-  int laserWidth=75;
+  int damage=3, duration=2400, delay=500, laserWidth=75,chargelevel;
   long timer;
-  float MODIFIED_ANGLE_FACTOR=0;
-  float MODIFIED_MAX_ACCEL=0.005; 
+  float MODIFIED_ANGLE_FACTOR=0, MODIFIED_MAX_ACCEL=0.006; 
   long startTime;
   boolean charging;
   Laser() {
@@ -1146,14 +1147,14 @@ class TimeBomb extends Ability {//----------------------------------------------
   }
 }
 class Bazooka extends Ability {//---------------------------------------------------    Bazooka   ---------------------------------
-  int  damage=25, shootSpeed=40, ammoType=2, maxAmmotype=4;
+  int  damage=28, shootSpeed=40, ammoType=2, maxAmmotype=4;
   float MODIFIED_MAX_ACCEL=0.06; 
   Bazooka() {
     super();
     cooldownTimer=1000;
     name=getClassName(this);
     activeCost=15;
-    regenRate=0.2;
+    regenRate=0.13;
     energy=130;
   } 
   @Override
@@ -1165,7 +1166,7 @@ class Bazooka extends Ability {//-----------------------------------------------
     switch(ammoType%maxAmmotype) {
 
     case 0:
-      projectiles.add( new RCRocket(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 50, owner.playerColor, 2000, owner.angle, cos(radians(owner.angle))*shootSpeed*.02+owner.vx, sin(radians(owner.angle))*shootSpeed*.02+owner.vy, damage, false));
+      projectiles.add( new RCRocket(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 50, owner.playerColor, 2500, owner.angle, cos(radians(owner.angle))*shootSpeed*.02+owner.vx, sin(radians(owner.angle))*shootSpeed*.02+owner.vy, damage, false));
       break;
 
     case 1:
@@ -1208,7 +1209,7 @@ class Bazooka extends Ability {//-----------------------------------------------
       break;
 
     case 2:
-      text("IN", int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5+100));
+      text("SN", int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5+100));
       break;
     case 3:
       text("MI", int(owner.x+owner.w*0.5), int(owner.y+owner.h*0.5+100));
@@ -1228,6 +1229,7 @@ class Bazooka extends Ability {//-----------------------------------------------
     }
   }
 }
+
 class RapidFire extends Ability {//---------------------------------------------------    RapidFire   ---------------------------------
   float accuracy = 1, MODIFIED_ANGLE_FACTOR=-0.0008, r=50  ;
   int Interval=110;
@@ -1409,6 +1411,7 @@ class MachineGun extends RapidFire {//------------------------------------------
   }
   @Override
     void reset() {
+    super.reset();
     energy=90;
     deActivate();
     deChannel();
@@ -1631,14 +1634,14 @@ class Battery extends Ability {//-----------------------------------------------
 
 class AutoGun extends Ability {//---------------------------------------------------    Battery   ---------------------------------
 
-  float  MODIFIED_MAX_ACCEL=0.1, count;
+  float  MODIFIED_MAX_ACCEL=0.09, count;
   int damage=5, alternate ;
   ArrayList<Player> targets= new ArrayList<Player>() ;
   int amountOfTargets;
   AutoGun() {
     super();
     name=getClassName(this);
-    activeCost=15;
+    activeCost=12;
     channelCost=0.1;
     regenRate=0.18;
   } 
@@ -1661,7 +1664,7 @@ class AutoGun extends Ability {//-----------------------------------------------
       if (!active || energy<0 ) {
         release();
       }
-      if (count>15) {
+      if (count>12) {
         count=0;
         int amountP=0;
         for (Player p : players) {
@@ -1670,6 +1673,7 @@ class AutoGun extends Ability {//-----------------------------------------------
             if (amountP==alternate) {
               calcAngle(p);
               projectiles.add( new Needle(owner, int( owner.x+owner.w*0.5+cos(radians(owner.angle))*60), int(owner.y+owner.h*0.5+sin(radians(owner.angle))*60), 60, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*60, sin(radians(owner.angle))*60, damage));
+              particles.add(new ShockWave(int(owner.x+owner.w*0.5+cos(radians(owner.angle))*85), int(owner.y+owner.h*0.5+sin(radians(owner.angle))*85), 5, 22, 20, color(255)));
             }
             amountP++;
           }
@@ -1678,7 +1682,7 @@ class AutoGun extends Ability {//-----------------------------------------------
         alternate++;
         alternate=alternate%amountOfTargets;
 
-        particles.add(new ShockWave(int(owner.x+owner.w*0.5+cos(radians(owner.angle))*85), int(owner.y+owner.h*0.5+sin(radians(owner.angle))*85), 5, 22, 20, color(255)));
+        //particles.add(new ShockWave(int(owner.x+owner.w*0.5+cos(radians(owner.angle))*85), int(owner.y+owner.h*0.5+sin(radians(owner.angle))*85), 5, 22, 20, color(255)));
       }
       count+=3*timeBend;
     }
@@ -1718,6 +1722,7 @@ class AutoGun extends Ability {//-----------------------------------------------
   }
   @Override
     void  reset() {
+    super.reset();
     owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
   }
 }
@@ -1796,6 +1801,7 @@ class ThrowBoomerang extends Ability {//----------------------------------------
   }
   @Override
     void  reset() {
+    super.reset();
     owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
     setOwner(owner);
   }
@@ -1854,7 +1860,7 @@ class PhotonicWall extends Ability {//------------------------------------------
   PhotonicWall() {
     super();
     name=getClassName(this);
-    activeCost=10;
+    activeCost=8;
     energy=40;
   } 
   @Override
@@ -2017,12 +2023,13 @@ class DeployThunder extends TimeBomb {//----------------------------------------
   }
   @Override
     void  reset() {
+    super.reset();
     owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
   }
 }
 
 class DeployShield extends Ability {//---------------------------------------------------    DeployShield   ---------------------------------
-  int damage=18, shell=80, pHealth;
+  int damage=12, shell=80, pHealth;
 
   DeployShield() {
     super();
@@ -2076,7 +2083,7 @@ class DeployShield extends Ability {//------------------------------------------
       owner.armor=1;
       stroke(owner.playerColor);
       strokeWeight(5);
-      fill(255, 50);
+      fill(255, owner.health-owner.maxHealth*.5);
       quad(owner.x+owner.w*.5+shell, owner.y+owner.h*.5, owner.x+owner.w*.5, owner.y+owner.h*.5+shell, owner.x+owner.w*.5-shell, owner.y+owner.h*.5, owner.x+owner.w*.5, owner.y+owner.h*.5-shell);
     } else {
       if (pHealth>=owner.maxHealth*.5) {
@@ -2090,8 +2097,10 @@ class DeployShield extends Ability {//------------------------------------------
   }
 
   void shatter() {
-    for (int i=0; i<12; i++) {
-      projectiles.add( new IceDagger(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 30, owner.playerColor, 500, radians(i*36), cos(radians(i*36))*50, sin(radians(i*36))*50, damage));
+    owner.vx=0;
+    owner.vy=0;
+    for (int i=0; i<24; i++) {
+      projectiles.add( new IceDagger(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 25, owner.playerColor, 500, i*36, cos(radians(i*36))*50, sin(radians(i*36))*50, damage));
     }
     projectiles.add( new Bomb(owner, int( owner.x+owner.w*0.5), int(owner.y+owner.h*0.5), 220, owner.playerColor, 1, owner.angle, owner.vx, owner.vy, damage, false));
 
@@ -2099,7 +2108,7 @@ class DeployShield extends Ability {//------------------------------------------
     particles.add(new Flash(200, 10, color(255)));   // flash
   }
   void reset() {
-
+    super.reset();
     owner.armor=0;
   }
 }
@@ -2151,6 +2160,7 @@ class DeployElectron extends Ability {//----------------------------------------
   }
   @Override
     void reset() {
+    super.reset();
     for (Electron p : stored) {
       //p.death();
       p.dead=true;
@@ -2192,6 +2202,11 @@ class Gravity extends Ability {//-----------------------------------------------
       enableCooldown();
       deActivate();
     }
+  }
+  @Override
+    void reset() {
+    super.reset();
+    owner.armor=0;
   }
   void passive() {
     float c =((cooldown>stampTime)?int(cooldownTimer-(cooldown-stampTime)):cooldownTimer)*0.15;
@@ -2293,21 +2308,28 @@ class DeployTurret extends Ability {//------------------------------------------
        break;*/
     case 1:
       currentTurret=new Turret(players.size(), owner, int(owner.x+cos(radians(owner.angle))*range), int(owner.y+sin(radians(owner.angle))*range), playerSize, playerSize, 200, new Battery());
+      turretList.add(currentTurret);
+      players.add(currentTurret);
       break;
     case 2:
       currentTurret=new Turret(players.size(), owner, int(owner.x+cos(radians(owner.angle))*range), int(owner.y+sin(radians(owner.angle))*range), playerSize, playerSize, 300, new TimeBomb());
+      turretList.add(currentTurret);
+      players.add(currentTurret);
       break;
     case 3:
       currentTurret=new Turret(players.size(), owner, int(owner.x+cos(radians(owner.angle))*range), int(owner.y+sin(radians(owner.angle))*range), playerSize, playerSize, 400, new Bazooka());
+      turretList.add(currentTurret);
+      players.add(currentTurret);
       break;
     case 4:
       currentTurret=new Turret(players.size(), owner, int(owner.x+cos(radians(owner.angle))*range), int(owner.y+sin(radians(owner.angle))*range), playerSize, playerSize, 500, new Laser());
+      turretList.add(currentTurret);
+      players.add(currentTurret);
       break;
     }
-    turretList.add(currentTurret);
-    players.add(currentTurret);
+
     activeCost=25;
-    turretLevel=1;
+    turretLevel=0;
   }
   @Override
     void activate() { 
@@ -2350,6 +2372,7 @@ class DeployTurret extends Ability {//------------------------------------------
   }
   @Override
     void reset() {
+    super.reset();
     players.remove(turretList);
   }
 }
@@ -2384,11 +2407,12 @@ class Detonator extends Ability {//---------------------------------------------
     }
   }
   void reset() {
+    super.reset();
     projectiles.remove(bomb);
   }
 }
 class Random extends Ability {//---------------------------------------------------    Random   ---------------------------------
-  int damage=24;
+  //int damage=24;
   Random() {
     super();
   } 

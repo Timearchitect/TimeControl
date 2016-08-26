@@ -68,6 +68,7 @@ class Turret extends Player {
     }
    // super.update();
       ability.passive();
+      ability.regen();
     if (random(100)<1) {
       ability.press();
     }

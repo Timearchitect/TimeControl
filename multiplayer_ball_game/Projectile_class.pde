@@ -472,7 +472,7 @@ class forceBall extends Projectile implements Reflectable { //------------------
   @Override
     void hit(Player enemy) {
     // super.hit();
-    if (damage>100)     particles.add(new TempSlow(1000, 0.05, 1.05));
+    if (damage>100) particles.add(new TempSlow(1000, 0.05, 1.05));
     if(damage>300) particles.add( new TempFreeze(500));
     enemy.hit(damage);
     deathTime=stampTime;   // projectile is dead on collision
@@ -974,6 +974,7 @@ class DetonateBomb extends Bomb {//----------------------------------------- Bom
       for (int i=0; i<players.size(); i++) { 
         if (!players.get(i).dead &&(players.get(i).index!= playerIndex || _friendlyFire )) {
           if (dist(x, y, players.get(i).x+players.get(i).w*0.5, players.get(i).y+players.get(i).h*0.5)<range) {
+            particles.add(new TempSlow(1000, 0.05, 1.05));
             players.get(i).hit(damage);
             players.get(i).pushForce(blastForce, calcAngleFromBlastZone(x, y, players.get(i).x+players.get(i).w*0.5, players.get(i).y+players.get(i).h*0.5));
           }
@@ -1058,6 +1059,7 @@ class Mine extends Bomb {//----------------------------------------- Mine object
     // enemy.hit(damage);
     if (spawnTime+1000<stampTime) {
       fizzle();
+        particles.add(new TempSlow(100, 0.15, 1.05));
       deathTime=stampTime;   // projectile is dead on collision
       dead=true;
     }
