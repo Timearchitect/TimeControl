@@ -5,16 +5,17 @@ class Player {
   final int barSize=12, barDiameter=75;
   float  x, y, vx, vy, ax, ay, cx, cy, angle, keyAngle, f, s, barFraction;
   boolean holdTrigg, holdUp, holdDown, holdLeft, holdRight, dead, stealth, hit, arduino, arduinoHold, mouse, clone, turret;
-  public PVector coord, speed, accel, arrow;
-  float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR;
+  PVector coord, speed, accel, arrow;
+  float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR,DEFAULT_ARMOR=0;
   final int invinsTime=400, buttonHoldTime=300;
   long invisStampTime;
   boolean invis, freezeImmunity, reverseImmunity, fastforwardImmunity, slowImmunity;
-  Ability ability;  
+  //Ability ability;  
+  ArrayList<Ability> abilityList= new ArrayList<Ability>();
   color playerColor;
   Particle textParticle;
 
-  Player(int _index, color _playerColor, int _x, int _y, int _w, int _h, int _up, int _down, int _left, int _right, int _triggKey, Ability _ability) {
+  Player(int _index, color _playerColor, int _x, int _y, int _w, int _h, int _up, int _down, int _left, int _right, int _triggKey, Ability ..._ability) {
     FRICTION_FACTOR=DEFAULT_FRICTION;
     if (_up==888) { 
       mouse=true;
@@ -24,10 +25,15 @@ class Player {
     }
     index=_index;
     ally=_index;
-    ability= _ability;
-    ability.setOwner(this);
-    if (_ability==null) ability= new Ability();
-
+    //ability= _ability[0];
+    //ability.setOwner(this);
+    //if (_ability[0]==null) ability= new Ability();
+    for (Ability a : _ability) {
+      this.abilityList.add(a);
+      this.abilityList.get(0).setOwner(this);
+      a.setOwner(this);
+        //if (a==null) this.abilityList.add(new Ability());
+    }
     playerColor=_playerColor;
     triggKey=_triggKey;
     speed= new PVector(0.0, 0.0);
@@ -107,10 +113,10 @@ class Player {
       textAlign(CENTER, CENTER);
       //textMode(CENTER);
       //rect(x, y, w, h);
-      ellipse(x+w*0.5, y+h*0.5, w, h);
+      ellipse(cx, cy, w, h);
 
       pushMatrix();
-      translate(x+w*0.5, y+h*0.5);
+      translate(cx, cy);
       rotate(radians(angle+90));
       // shape(arrowSVG,x+w/2- arrowSVG.width/2, y-arrowSVG.height/2, arrowSVG.width, arrowSVG.height); // default render
       fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s, 50+deColor);
@@ -118,22 +124,25 @@ class Player {
       popMatrix();
 
       fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s);
-      displayAbilityEnergy();
+      displayAbilityEnergy(0);
       displayHealth();
       displayName();
 
-      if (cheatEnabled && ability.active)text("A", x+w*0.5, y-h*2);
-      if (cheatEnabled && holdTrigg)text("H", x+w*0.5, y+h*0.5-h);
+      if (debug ) {
+        if (abilityList.get(0).active) text("A", cx, y-h*2);
+        if (holdTrigg)text("H", cx, cy-h);
+      }
+
       if (deColor>0)deColor-=int(10*s*f);
     } else { //stealth
       stroke(255, 40);
       noFill();
       strokeWeight(1);
-      ellipse(x+w*0.5, y+h*0.5, w, h);
+      ellipse(cx, cy, w, h);
     }
     if (freezeImmunity || reverseImmunity || fastforwardImmunity || slowImmunity) {
       noFill();
-      ellipse(x+w*0.5, y+h*0.5, w*1.1, h*1.1);
+      ellipse(cx, cy, w*1.1, h*1.1);
     }
   }
 
@@ -160,9 +169,10 @@ class Player {
           cx=x+w*.5;
           cy=y+h*.5;
           //speed.set(speed.x-(accel.x*f*s), speed.y-(accel.y*f*s));
-          ability.regen();
+
+          for (Ability a : this.abilityList) a.regen();
         } else {
-          ability.regen();
+          for (Ability a : this.abilityList) a.regen();
           //speed.set(speed.x+(accel.x*f*s), speed.y+(accel.y*f*s));
           cx=x+w*.5;
           cy=y+h*.5;
@@ -180,18 +190,20 @@ class Player {
           // calcAngle() ;
         }
       }
-      ability.passive();
+      //  ability.passive();
+      for (Ability a : this.abilityList)a.passive();
     }
   }
 
   void control(int dir) {
     if (dir==8) { // ability control
-      ability.press(); 
-
+      //ability.press(); 
+      for (Ability a : this.abilityList) a.press();
       //---------------    hold    --------------------
       int temp =int(prevMillis-millis());
       if (buttonHoldTime< temp) {
-        ability.hold();
+        //ability.hold();
+        for (Ability a : this.abilityList) a.hold();
         //   TimeSpan t = new TimeSpan(DateTime.Now.Ticks);
       }
 
@@ -234,55 +246,55 @@ class Player {
 
   void mouseControl() {
     if ((!freeze || freezeImmunity) && !dead && (controlable || reverseImmunity) && mouse) {
-      int margin=200;
+      int mouseMargin=200;
       //float MAX_MOUSE_ACCEL=0.0035;
-      float maxAccel=1.4;
+      float mouseMaxAccel=1.4;
 
       stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
       //*MAX_ACCEL*0.017*s*f;
       //*MAX_MOUSE_ACCEL*s*f;
       if (pmouseX-1<mouseX) {
         ax-=(pmouseX-mouseX)*MAX_ACCEL*0.028*s*f;
-        if (ax<-maxAccel) {
-          ax=-maxAccel;
+        if (ax<-mouseMaxAccel) {
+          ax=-mouseMaxAccel;
         }
         // players.get(0).control(5);
-        if (mouseX<margin) {
-          mouseX=margin;
-          pmouseX=margin;
+        if (mouseX<mouseMargin) {
+          mouseX=mouseMargin;
+          pmouseX=mouseMargin;
         }
       }
       if (pmouseX+1>mouseX) {
         ax-=(pmouseX-mouseX)*MAX_ACCEL*0.028*s*f;
-        if (players.get(0).ax>maxAccel) {
-          players.get(0).ax=maxAccel;
+        if (players.get(0).ax>mouseMaxAccel) {
+          players.get(0).ax=mouseMaxAccel;
         }
         //  players.get(0).control(4);
-        if (mouseX>(width-margin)) {
-          mouseX=(width-margin);
-          pmouseX=(width-margin);
+        if (mouseX>(width-mouseMargin)) {
+          mouseX=(width-mouseMargin);
+          pmouseX=(width-mouseMargin);
         }
       }
       if (pmouseY-1<mouseY) {
         ay-=(pmouseY-mouseY)*MAX_ACCEL*0.028*s*f;
-        if (ay<-maxAccel) {
-          ay=-maxAccel;
+        if (ay<-mouseMaxAccel) {
+          ay=-mouseMaxAccel;
         }
         // players.get(0).control(0);
-        if (mouseY<margin) {
-          mouseY=margin;
-          pmouseY=margin;
+        if (mouseY<mouseMargin) {
+          mouseY=mouseMargin;
+          pmouseY=mouseMargin;
         }
       }
       if (pmouseY+1>mouseY) {
         ay-=(pmouseY-mouseY)*MAX_ACCEL*0.028*s*f;
-        if (ay>maxAccel) {
-          ay=maxAccel;
+        if (ay>mouseMaxAccel) {
+          ay=mouseMaxAccel;
         }
         // players.get(0).control(1);
-        if (mouseY>(height-margin)) {
-          mouseY=(height-margin);
-          pmouseY=(height-margin);
+        if (mouseY>(height-mouseMargin)) {
+          mouseY=(height-mouseMargin);
+          pmouseY=(height-mouseMargin);
         }
       }
     }
@@ -305,8 +317,8 @@ class Player {
     angle = angle % 360; 
 
 
-    if (cheatEnabled) {
-      line(x+w*0.5, y+w*0.5, x+w*0.5+cos(radians(keyAngle))*200, y+w*0.5+sin(radians(keyAngle))*200);
+    if (debug) {
+      line(cx, y+w*0.5, cx+cos(radians(keyAngle))*200, y+w*0.5+sin(radians(keyAngle))*200);
       fill(0);
       textSize(20);
       text(angle, x, y);
@@ -336,8 +348,6 @@ class Player {
     } else    angle+= (keyAngle-angle)*ANGLE_FACTOR;
 
 
-
-
     if (Float.isNaN(angle))angle=keyAngle; // if bugged out
   }
 
@@ -350,9 +360,9 @@ class Player {
     state=2;
     hit=true;
     // for (int i=0; i<2; i++) {
-    particles.add(new Particle(int(x+w*0.5), int(y+h*0.5), random(-10, 10)+vx*0.5, random(-10, 10)+vy*0.5, int(random(5, 20)), 500, playerColor));
+    particles.add(new Particle(int(cx), int(cy), random(-10, 10)+vx*0.5, random(-10, 10)+vy*0.5, int(random(5, 20)), 500, playerColor));
     // }
-    invisStampTime=millis()+invinsTime;
+    invisStampTime=stampTime+invinsTime;
     invis=true;
     if (health<=0) {
       death();
@@ -360,15 +370,19 @@ class Player {
   }
 
   void death() {
-    ability.onDeath();
-    dead=true;
-    ability.reset();
-    shakeTimer=20;
-    for (int i=0; i<64; i++) {
-      particles.add(new Particle(int(x+w*0.5), int(y+h*0.5), random(50)-25, random(50)-25, int(random(40)+10), 1500, playerColor));
+    //ability.onDeath();
+    for (Ability a : this.abilityList) {
+      a.onDeath();
+      a.reset();
     }
-    particles.add(new ShockWave(int(x+w*0.5), int(y+h*0.5), int(random(40)+10), 16, 400, playerColor));
-    particles.add(new LineWave(int(x+w*0.5), int(y+h*0.5), int(random(40)+10), 400, playerColor, random(360)));
+    dead=true;
+    // ability.reset();
+      shakeTimer+=10;
+    for (int i=0; i<64; i++) {
+      particles.add(new Particle(int(cx), int(cy), random(50)-25, random(50)-25, int(random(40)+10), 1500, playerColor));
+    }
+    particles.add(new ShockWave(int(cx), int(cy), int(random(40)+10), 16, 400, playerColor));
+    particles.add(new LineWave(int(cx), int(cy), int(random(40)+10), 400, playerColor, random(360)));
     particles.add(new Flash(900, 8, playerColor));  
     state=0;
     //stamps.add( new StateStamp(index, int(x), int(y), state, health,dead));
@@ -378,11 +392,11 @@ class Player {
     textSize(20);
 
     if (clone) {
-      text("P"+ (ally+1), x+w*0.5, y+h*0.5);
+      text("P"+ (ally+1), cx, cy);
     } else {
-      text("P"+ (index+1), x+w*0.5, y+h*0.5);
-      // if (cheatEnabled) text("                              vx:"+int(vx)+" vy:"+int(vy)+" ax:"+int(ax)+" ay:"+int(ay) + " A:"+ angle, x+w*0.5, y+h*0.5);
-      // if (cheatEnabled) text("                              left:"+holdLeft+" right:"+holdRight+" up:"+holdUp+" down:"+holdDown, x+w*0.5, y+h*0.5-100);
+      text("P"+ (index+1), cx, cy);
+      // if (cheatEnabled) text("                              vx:"+int(vx)+" vy:"+int(vy)+" ax:"+int(ax)+" ay:"+int(ay) + " A:"+ angle, cx, cy);
+      // if (cheatEnabled) text("                              left:"+holdLeft+" right:"+holdRight+" up:"+holdUp+" down:"+holdDown, cx, cy-100);
     }
   }
   void displayHealth() {
@@ -392,21 +406,21 @@ class Player {
     //strokeCap(SQUARE);
     noFill();
     stroke(hue(playerColor), 80*S, (80-deColor)*S);
-    ellipse(x+w*0.5, y+h*0.5, barDiameter, barDiameter);
+    ellipse(cx, cy, barDiameter, barDiameter);
     stroke(hue(playerColor), (255-deColor*0.5)*S, 255*S);
-    arc(x+w*0.5, y+h*0.5, barDiameter, barDiameter, -HALF_PI +(PI*2)-fraction, PI+HALF_PI);
+    arc(cx, cy, barDiameter, barDiameter, -HALF_PI +(PI*2)-fraction, PI+HALF_PI);
     //strokeWeight(1);
   }
-  void displayAbilityEnergy() {
-    barFraction=((PI*2)/ability.maxEnergy)*ability.energy;
+  void displayAbilityEnergy(int index ) {
+    barFraction=((PI*2)/abilityList.get(index).maxEnergy)*abilityList.get(index).energy;
     fill(255);
-    if (ability.regen) { 
+    if (abilityList.get(index).regen) { 
       noStroke();
     } else {
       strokeWeight(6);
       stroke(hue(playerColor), 255*S, 255*S);
     }
-    arc(x+w*0.5, y+h*0.5, barDiameter, barDiameter, -HALF_PI +(PI*2)-barFraction, PI+HALF_PI);
+    arc(cx, cy, barDiameter, barDiameter, -HALF_PI +(PI*2)-barFraction, PI+HALF_PI);
     // strokeWeight(1);
   }
   void pushForce(float amount, float angle) {
@@ -428,6 +442,7 @@ class Player {
     ay=0;
     health=maxHealth;
     dead=false;
-    ability.reset();
+    //ability.reset();
+    for (Ability a : this.abilityList) a.reset();
   }
 }

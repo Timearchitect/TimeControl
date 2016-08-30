@@ -10,9 +10,10 @@ void mousePressed() {
    }*/
   try {
     for (Player p : players) {
-      if (p.mouse &&(!reverse || p.reverseImmunity || p.ability.meta)) { 
+      if (p.mouse &&(!reverse || p.reverseImmunity || p.abilityList.get(0).meta)) { 
         if (mouseButton==LEFT) {
-          p.ability.press();
+          //p.ability.press();
+            for (Ability a : p.abilityList)  a.press();
           p.holdTrigg=true;
         }
       }
@@ -24,7 +25,7 @@ void mousePressed() {
     for (int i=0; i<players.size(); i++) {
       if (!players.get(i).dead && dist(players.get(i).x+players.get(i).w*.5, players.get(i).y+players.get(i).h*.5, mouseX, mouseY)<100) {
         mouseSelectedPlayerIndex=i;
-        particles.add( new Text("player "+(i+1)+" selected", mouseX, mouseY-75, 0, 0, 40, 0, 500, color(players.get(i).playerColor),1));
+        particles.add( new Text("player "+(i+1)+" selected", mouseX, mouseY-75, 0, 0, 40, 0, 500, color(players.get(i).playerColor), 1));
       }
     }
   }
@@ -39,9 +40,10 @@ void mouseHold() {
    }
    }*/
   for (Player p : players) {
-    if (p.mouse &&(!reverse || p.reverseImmunity || p.ability.meta)) { 
+    if (p.mouse &&(!reverse || p.reverseImmunity || p.abilityList.get(0).meta)) { 
       if (p.holdTrigg) {// ability trigg key
-        p.ability.hold();
+        //p.ability.hold();
+        for (Ability a : p.abilityList) a.hold();
       }
     }
   }
@@ -56,10 +58,11 @@ void mouseReleased() {
    }
    }*/
   for (Player p : players) {
-    if (p.mouse &&(!reverse || p.reverseImmunity|| p.ability.meta)) { 
+    if (p.mouse &&(!reverse || p.reverseImmunity|| p.abilityList.get(0).meta)) { 
       if (mouseButton==LEFT) {
         p.holdTrigg=false;
-        p.ability.release();
+       // p.ability.release();
+        for (Ability a : p.abilityList)  a.release();
       }
     }
   }

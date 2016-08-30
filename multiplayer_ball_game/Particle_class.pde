@@ -53,7 +53,35 @@ class Particle  implements Cloneable {
   }
 }
 
+//-------------------------------------------------------------//    RParticles    //-------------------------------------------------------------------------
 
+class RParticles extends Particle {
+  RParticles(int _x, int _y, float _vx, float _vy,int _size, int _time, color _particleColor) {
+    super( _x, _y, _vx, _vy, _size, _time, _particleColor);
+    opacity=0;
+    x=_vx*_time*.06+_x;
+    y=_vy*_time*.06+_y;
+  }
+  void update() {
+      if (reverse) {
+        opacity-=8*F;
+        x+=vx*timeBend;
+        y+=vy*timeBend;
+      } else {
+        opacity+=8*timeBend;
+        x-=vx*timeBend;
+        y-=vy*timeBend;
+      }
+  }
+ /* void display() {
+    if (!dead ) {  
+      noFill();
+      stroke(hue(particleColor), saturation(particleColor), brightness(particleColor)*S, opacity);
+      strokeWeight(int(0.1*opacity));
+      ellipse(x, y, size, size);
+    }
+  }*/
+}
 //-------------------------------------------------------------//    ShockWave    //-------------------------------------------------------------------------
 
 class ShockWave extends Particle {
@@ -451,7 +479,7 @@ class Shock extends Particle {
       endShape();
     }
     if (!dead && freeze) { 
-      shape(circle, circle.X + circle.width/2, circle.Y+circle.height/2);
+      shape(circle, circle.X + circle.width*.5, circle.Y+circle.height*.5);
     }
   }
 }
@@ -485,8 +513,8 @@ class Text extends Particle {
       if (reverse) {       
         size+=shrinkRate*timeBend;
         if (follow) {
-          x=owner.x+owner.w*.5+offsetX;
-          y=owner.y+owner.h*.5+offsetY;
+          x=owner.cx+offsetX;
+          y=owner.cy+offsetY;
         } else {
           x-=vx*timeBend;
           y-=vy*timeBend;
@@ -494,8 +522,8 @@ class Text extends Particle {
       } else {
         size-=shrinkRate*timeBend;
         if (follow) {
-          x=owner.x+owner.w*.5+offsetX;
-          y=owner.y+owner.h*.5+offsetY;
+          x=owner.cx+offsetX;
+          y=owner.cy+offsetY;
         } else {
           x+=vx*timeBend;
           y+=vy*timeBend;

@@ -41,14 +41,27 @@ void shake(int amount) {
 
 void checkPlayerVSPlayerColloision() {
   if (!freeze &&!reverse) {
-    for (int i=0; i<players.size (); i++) {       
-      for (int j=0; j<players.size (); j++) {       
-        if (players.get(i).ally!=players.get(j).ally && j!=i && !players.get(i).dead && !players.get(j).dead ) {
-          if (dist(players.get(i).x, players.get(i).y, players.get(j).x, players.get(j).y)<playerSize) {
-            players.get(i).hit(players.get(j).damage);
-            float deltaY =  players.get(i).y -  players.get(j).y;
-            float  deltaX =  players.get(i).x -  players.get(j).x;
-            players.get(i).pushForce( playerSize-dist(players.get(j).x, players.get(j).y, players.get(i).x, players.get(i).y), atan2(deltaY, deltaX) * 180 / PI);
+    /* for (int i=0; i<players.size (); i++) {       
+     for (int j=0; j<players.size (); j++) {       
+     if (players.get(i).ally!=players.get(j).ally && j!=i && !players.get(i).dead && !players.get(j).dead ) {
+     if (dist(players.get(i).x, players.get(i).y, players.get(j).x, players.get(j).y)<playerSize) {
+     players.get(i).hit(players.get(j).damage);
+     float deltaY =  players.get(i).y -  players.get(j).y;
+     float  deltaX =  players.get(i).x -  players.get(j).x;
+     players.get(i).pushForce( playerSize-dist(players.get(j).x, players.get(j).y, players.get(i).x, players.get(i).y), atan2(deltaY, deltaX) * 180 / PI);
+     }
+     }
+     }
+     }
+     }*/
+    for (Player p1 : players) {       
+      for (Player p2 : players) {       
+        if (p1.ally!=p2.ally && !p1.dead && !p2.dead ) { //  && p1!=p2
+          if (dist(p1.x, p1.y, p2.x, p2.y)<playerSize) {
+            p1.hit(p2.damage);
+            float deltaY =  p1.y -  p2.y;
+            float  deltaX =  p1.x -  p2.x;
+            p1.pushForce( playerSize-dist(p2.x, p2.y, p1.x, p1.y), atan2(deltaY, deltaX) * 180 / PI);
           }
         }
       }
@@ -58,29 +71,58 @@ void checkPlayerVSPlayerColloision() {
 
 void checkPlayerVSProjectileColloision() {
   if (!freeze &&!reverse) {
-    for (int i=0; i< projectiles.size (); i++) {    
-      for (int j=0; j<players.size (); j++) {      
-        if (players.get(j).ally!=projectiles.get(i).ally && !players.get(j).dead && !projectiles.get(i).dead && projectiles.get(i).playerIndex!=j  ) {
-          if (dist(projectiles.get(i).x, projectiles.get(i).y, players.get(j).x+players.get(j).w*0.5, players.get(j).y+players.get(j).h*0.5)<playerSize) {
-            //  players.get(j).hit(projectiles.get(i).damage);
-            players.get(j).pushForce(projectiles.get(i).force, projectiles.get(i).angle);
-            projectiles.get(i).hit(players.get(j));
+    /*for (int i=0; i< projectiles.size (); i++) {    
+     for (int j=0; j<players.size (); j++) {      
+     if (players.get(j).ally!=projectiles.get(i).ally && !players.get(j).dead && !projectiles.get(i).dead && projectiles.get(i).playerIndex!=j  ) {
+     if (dist(projectiles.get(i).x, projectiles.get(i).y, players.get(j).cx, players.get(j).cy)<playerSize) {
+     //  players.get(j).hit(projectiles.get(i).damage);
+     players.get(j).pushForce(projectiles.get(i).force, projectiles.get(i).angle);
+     projectiles.get(i).hit(players.get(j));
+     }
+     }
+     }
+     }*/
+    try {
+      for (Projectile o : projectiles) {    
+        for (Player p : players) {      
+          if (p.ally!=o.ally && !p.dead && !o.dead ) { // && o.playerIndex!=p.ally
+            if (dist(o.x, o.y, p.cx, p.cy)<playerSize) {
+              //  players.get(j).hit(projectiles.get(i).damage);
+              p.pushForce(o.force, o.angle);
+              o.hit(p);
+            }
           }
         }
       }
+    }
+    catch(Exception e) {
     }
   }
 }
 void checkProjectileVSProjectileColloision() {
   if (!freeze &&!reverse) {
-    for (int i=0; i< projectiles.size (); i++) {    
-      for (int j=0; j<projectiles.size (); j++) {      
-        if (projectiles.get(j).ally!=projectiles.get(i).ally && !projectiles.get(j).dead && !projectiles.get(i).dead && projectiles.get(i)!=projectiles.get(j)  ) {
-          if (dist(projectiles.get(i).x, projectiles.get(i).y, projectiles.get(j).x, projectiles.get(j).y)<projectiles.get(i).size*0.5+projectiles.get(j).size*0.5) {
-            if (projectiles.get(i) instanceof  Reflectable  && projectiles.get(j) instanceof Reflector) {
-              Reflectable reflectObject = (Reflectable)projectiles.get(i);
-              Reflector reflectorObject = (Reflector)projectiles.get(j);
-              reflectObject.reflect(projectiles.get(j).angle, projectiles.get(j).owner);
+    /* for (int i=0; i< projectiles.size (); i++) {    
+     for (int j=0; j<projectiles.size (); j++) {      
+     if (projectiles.get(j).ally!=projectiles.get(i).ally && !projectiles.get(j).dead && !projectiles.get(i).dead && projectiles.get(i)!=projectiles.get(j)  ) {
+     if (dist(projectiles.get(i).x, projectiles.get(i).y, projectiles.get(j).x, projectiles.get(j).y)<projectiles.get(i).size*0.5+projectiles.get(j).size*0.5) {
+     if (projectiles.get(i) instanceof  Reflectable  && projectiles.get(j) instanceof Reflector) {
+     Reflectable reflectObject = (Reflectable)projectiles.get(i);
+     Reflector reflectorObject = (Reflector)projectiles.get(j);
+     reflectObject.reflect(projectiles.get(j).angle, projectiles.get(j).owner);
+     reflectorObject.reflecting();
+     }
+     }
+     }
+     }
+     }*/
+    for (Projectile p1 : projectiles) {    
+      for (Projectile p2 : projectiles) {      
+        if (p2.ally!=p1.ally && !p2.dead && !p1.dead ) { //  && p1!=p2
+          if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*0.5+p2.size*0.5) {
+            if (p1 instanceof  Reflectable  && p2 instanceof Reflector) {
+              Reflectable reflectObject = (Reflectable)p1;
+              Reflector reflectorObject = (Reflector)p2;
+              reflectObject.reflect(p2.angle, p2.owner);
               reflectorObject.reflecting();
             }
           }
@@ -96,11 +138,17 @@ void checkPlayerVSProjectileColloisionLine() {
 
 void checkWinner() {
   int playerAliveIndex=0;
-   playersAlive=0;
-  for (int i=0; i<players.size (); i++) {      
-    if (!players.get(i).dead && !players.get(i).turret && !players.get(i).clone) {
+  playersAlive=0;
+  /*for (int i=0; i<players.size (); i++) {      
+   if (!players.get(i).dead && !players.get(i).turret && !players.get(i).clone) {
+   playersAlive++;
+   playerAliveIndex=players.get(i).index;
+   }
+   }*/
+  for (Player p : players) {      
+    if (!p.dead && !p.turret && !p.clone) {
       playersAlive++;
-      playerAliveIndex=players.get(i).index;
+      playerAliveIndex=p.index;
     }
   }
 
@@ -158,10 +206,12 @@ void mouseDot() {
   point(mouseX, mouseY);
 }
 
-void announceAbility(Player p) {
-      particles.remove( p.textParticle );
+void announceAbility(Player p, int index ) {
+  particles.remove( p.textParticle );
 
   //particles.add( new Text(p.ability.name, int( p.x+p.w*0.5), int(p.y+p.h*0.5)-75, 0, 0, 30, 0, 2000, color(0)));
-    p.textParticle = new Text(p,p.ability.name, 0, -75, 30, 0, 1500, color(0),0);
-    particles.add( p.textParticle );
+  //p.textParticle = new Text(p,p.ability.name, 0, -75, 30, 0, 1500, color(0),0);
+  p.textParticle = new Text(p, p.abilityList.get(index).name, 0, -75, 30, 0, 1500, color(0), 0);
+
+  particles.add( p.textParticle );
 }

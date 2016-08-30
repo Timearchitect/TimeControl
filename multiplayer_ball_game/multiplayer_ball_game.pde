@@ -27,23 +27,23 @@ Gain   g = new Gain(ac, 1, 0.05); //volume
 PFont font;
 PGraphics GUILayer;
 PShader  Blur;
-boolean slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, origo, noisy, mute;
+boolean slow, reverse, fastForward, freeze, controlable=true, cheatEnabled,debug, origo, noisy, mute;
 int mouseSelectedPlayerIndex=0;
 final int speedFactor= 2;
 final float slowFactor= 0.3;
-final String version="0.7.1";
+final String version="0.7.2";
 static long prevMillis, addMillis, forwardTime, reversedTime, freezeTime, stampTime, fallenTime;
 final int baudRate= 19200;
 final static float DEFAULT_FRICTION=0.1;
 final int AmountOfPlayers=4; // start players
-final int startBalls=0;
-final int  ballSize=50;
+final int startBalls=5;
+final int  ballSize=100;
 final int playerSize=100;
 static int playersAlive; // amount of players alive
 
 final int offsetX=950, offsetY=100;
 static int shakeTimer;
-static float F=1, S=1,timeBend=1, zoom=.8;
+static float F=1, S=1, timeBend=1, zoom=.8;
 //int keyCooldown[]= new int[AmountOfPlayers];
 final int keyResponseDelay=30;  // eventhe refreashrate equal to arduino devices
 final char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='7';
@@ -61,9 +61,9 @@ final Ability abilityList[] = new Ability[]{
   // new Freeze(), 
   // new Reverse(), 
   // new Slow(), 
-  // new SaveState(), 
+
   new ThrowDagger(), 
-  new Revolver(),
+  new Revolver(), 
   new ForceShoot(), 
   new Blink(), 
   new Multiply(), 
@@ -84,13 +84,23 @@ final Ability abilityList[] = new Ability[]{
   new DeployElectron(), 
   new Gravity(), 
   new DeployTurret(), 
-  new Bazooka(), 
-  new AutoGun(),
-  new Combo()
+  new Bazooka(),
+  new MissleLauncher(),
+  new AutoGun(), 
+  new Combo(),
+  new KineticPulse()
+};
+
+final Ability passiveList[] = new Ability[]{
+  new Repel(), 
+  new Gravitation(), 
+  new Speed(), 
+  new Armor(), 
+  new HpRegen(), 
 };
 
 Ability[] abilities= { 
-  new Sniper(), new Combo(), new AutoGun(), new DeployThunder(), new Random().randomize(), new Random().randomize()
+  new KineticPulse(), new MissleLauncher(), new AutoGun(), new DeployThunder(), new Random().randomize(), new Random().randomize()
 };
 
 int playerControl[][]= {
@@ -127,12 +137,17 @@ void setup() {
   textFont(font, 18);
   randomSeed(12345);
   noSmooth();
+  //frameRate(60);
   //noCursor();
   //cursor();
 
   colorMode(HSB);
   for (int i=0; i< AmountOfPlayers; i++) {
-    players.add(new Player(i, color((255/AmountOfPlayers)*i, 255, 255), int(random(width-playerSize*1)+playerSize), int(random(height-playerSize*1)+playerSize), playerSize, playerSize, playerControl[i][0], playerControl[i][1], playerControl[i][2], playerControl[i][3], playerControl[i][4], abilities[i]));
+    try {
+      players.add(new Player(i, color((255/AmountOfPlayers)*i, 255, 255), int(random(width-playerSize*1)+playerSize), int(random(height-playerSize*1)+playerSize), playerSize, playerSize, playerControl[i][0], playerControl[i][1], playerControl[i][2], playerControl[i][3], playerControl[i][4], abilities[i], new RandomPassive().randomize().clone()));
+    }
+    catch(Exception e ) {
+    }
     if (players.get(i).mouse)players.get(i).FRICTION_FACTOR=0.11; //mouse
   }
   for (int i=0; i< startBalls; i++) {
@@ -159,12 +174,12 @@ void setup() {
 
   try {  
     // initialize the SamplePlayer
-    //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/TooManyCooksAdultSwim.mp3"));
+   // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/TooManyCooksAdultSwim.mp3"));
     //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
-    musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
-    //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Branching time.mp3")); 
+   // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
+    musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Branching time.mp3")); 
     //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/orange caramel -aing.mp3"));
-   //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/goodbye.mp3"));
+    //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/goodbye.mp3"));
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/wierd.mp3"));
   }
   catch(Exception e) {
@@ -190,6 +205,7 @@ void setup() {
 
   particles.add(new Flash(1500, 5, color(255)));   // flash
   particles.get(0).opacity=0;
+  frameRate(60);
 }
 void stop() {
   musicPlayer.pause(true);
@@ -206,7 +222,7 @@ void draw() {
   } else {
     pushMatrix();
     screenShake();
-    
+
     fill(100);
 
     if (fastForward) {
@@ -279,7 +295,7 @@ void draw() {
 
     //-----------------------  USB ------------------------
 
-    for (int i=0; i<Serial.list ().length; i++) {   // USB devices
+    for (int i=0; i<Serial.list().length; i++) {   // USB devices
       if (portName[i]!= null && port[i].available() > 0) {  //ta in data och ignorerar skräpdata    
         players.get(i).control(port[i].read());
         // println("INPUT!!!!!!!!!!!!!!!!!!!!!!!");
@@ -332,16 +348,16 @@ void draw() {
       //for (int b=0; b<2; b++) {
       filter(Blur);
       // }
-    } else {   
+    } /*else {   
       //colorMode(HSB);
-    }
+    }*/
     if (slow) {
       noStroke();
       fill(0, 0, 0, 30);
       rect(0-10, 0-10, width+20, height+20); // background
     }
     image(GUILayer, 0, 0);
-    mouseDot();
+    //mouseDot();
     checkKeyHold();
     for (int i=stamps.size ()-1; i>= 0; i--) { // checkStamps
       // stamps.get(i).display(); // hid this when not DEBUGGING

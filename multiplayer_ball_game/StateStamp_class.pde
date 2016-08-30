@@ -14,7 +14,7 @@ class CheckPoint extends TimeStamp {  // save states
 
     // save all states
 
-    for (int i=0; i<players.size (); i++) {
+    /*for (int i=0; i<players.size (); i++) {
       checkPointStamps.add( new ControlStamp(players.get(i).index, int(players.get(i).x), int(players.get(i).y), players.get(i).vx, players.get(i).vy, players.get(i).ax, players.get(i).ay)); //save coords and controll
       checkPointStamps.add( new StateStamp(players.get(i).index, int(players.get(i).x), int(players.get(i).y), players.get(i).state, players.get(i).health, players.get(i).dead)); //save players state
     }
@@ -30,6 +30,26 @@ class CheckPoint extends TimeStamp {  // save states
     for (int i=0; i<particles.size (); i++) { // clone particles
       try {
         clonedParticles.add( particles.get(i).clone());
+      }
+      catch(CloneNotSupportedException e) {
+      }
+    }*/
+     for (Player p:players) {
+      checkPointStamps.add( new ControlStamp(p.index, int(p.x), int(p.y), p.vx, p.vy, p.ax, p.ay)); //save coords and controll
+      checkPointStamps.add( new StateStamp(p.index, int(p.x), int(p.y), p.state, p.health, p.dead)); //save players state
+    }
+
+    for (Projectile p:projectiles) {  // clone projectiles
+      try {
+        clonedProjectiles.add( p.clone());
+      }
+      catch(CloneNotSupportedException e) {
+      }
+    }
+
+    for (Particle p:particles) { // clone particles
+      try {
+        clonedParticles.add( p.clone());
       }
       catch(CloneNotSupportedException e) {
       }
@@ -76,8 +96,11 @@ class CheckPoint extends TimeStamp {  // save states
     fastForward=savedFastForward; 
     freeze=savedFreeze;
 
-    for (int i=0; i<checkPointStamps.size (); i++) {
+   /* for (int i=0; i<checkPointStamps.size (); i++) {
       checkPointStamps.get(i).call();
+    }*/
+     for (TimeStamp t:checkPointStamps) {
+      t.call();
     }
     musicPlayer.pause(musicPause);
     musicPlayer.setPosition(musicTime);
@@ -161,10 +184,10 @@ class AbilityStamp extends TimeStamp { //save player ability
     }
   }
   void call() {
-    players.get(playerIndex).ability.energy=energy;
-    players.get(playerIndex).ability.regen=regen;
-    players.get(playerIndex).ability.active=active;
-    players.get(playerIndex).ability.channeling=channeling;
-    players.get(playerIndex).ability.cooling=cooling;
+    players.get(playerIndex).abilityList.get(0).energy=energy;
+    players.get(playerIndex).abilityList.get(0).regen=regen;
+    players.get(playerIndex).abilityList.get(0).active=active;
+    players.get(playerIndex).abilityList.get(0).channeling=channeling;
+    players.get(playerIndex).abilityList.get(0).cooling=cooling;
   }
 }

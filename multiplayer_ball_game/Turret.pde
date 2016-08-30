@@ -13,7 +13,7 @@ class Turret extends Player {
     deathTime=stampTime + duration;
     maxHealth=_health;
     health=maxHealth;
-    println(ability.name);
+    println(abilityList.get(0).name);
   }
   void displayAbilityEnergy() {
   }
@@ -67,10 +67,10 @@ class Turret extends Player {
       }
     }
    // super.update();
-      ability.passive();
-      ability.regen();
+      abilityList.get(0).passive();
+      abilityList.get(0).regen();
     if (random(100)<1) {
-      ability.press();
+      abilityList.get(0).press();
     }
   }
   void control(int dir) {
@@ -86,7 +86,7 @@ class Turret extends Player {
     fill(playerColor);
     textAlign(CENTER, CENTER);
     textSize(26);
-    text(ability.name.substring(0,1).toUpperCase(),x+w*0.5, y+h*0.5);
+    text(abilityList.get(0).name.substring(0,1).toUpperCase(),x+w*0.5, y+h*0.5);
   //popStyle();
   }
 }

@@ -95,28 +95,26 @@ class Ball extends Projectile implements Reflectable { //-----------------------
     vy=_speedY;
     angle=degrees( PVector.angleBetween(coord, speed));
   }
-
-
-  void playerBounds() {
-    if (!reverse) {
-      for (int i=0; i<players.size (); i++) {
-        if (coord.y-size*0.5+speedY<players.get(i).y+players.get(i).h+10+players.get(i).vy && coord.y+size*0.5+speedY>players.get(i).y-10+players.get(i).vy) {
-          if (coord.x+size*0.5+speedX> players.get(i).x+20 && coord.x-size*0.5+speedX< players.get(i).x + players.get(i).w-20 ) {
-            // speed.set( speed.x, speed.y*(-1));
-            // coord.set( coord.x+speed.x, coord.y+speed.y);
-            // y-=players.get(i).vy;
-          }
-        }
-        if (coord.y-size*0.5+speedY<players.get(i).y+players.get(i).h-20+players.get(i).vy && coord.y+size*0.5+speedY>players.get(i).y+20+players.get(i).vy) {
-          if (coord.x+size*0.5+speedX> players.get(i).x-10 && coord.x-size*0.5+speedX< players.get(i).x + players.get(i).w +10 ) {
-            //  speed.set( speed.x*(-1), speed.y);
-            //  coord.set( coord.x+speed.x+players.get(i).vx, coord.y+speed.y+players.get(i).vy);
-            //  x-=players.get(i).vx;
-          }
-        }
-      }
-    }
-  }
+  /*void playerBounds() {
+   if (!reverse) {
+   for (int i=0; i<players.size (); i++) {
+   if (coord.y-size*0.5+speedY<players.get(i).y+players.get(i).h+10+players.get(i).vy && coord.y+size*0.5+speedY>players.get(i).y-10+players.get(i).vy) {
+   if (coord.x+size*0.5+speedX> players.get(i).x+20 && coord.x-size*0.5+speedX< players.get(i).x + players.get(i).w-20 ) {
+   // speed.set( speed.x, speed.y*(-1));
+   // coord.set( coord.x+speed.x, coord.y+speed.y);
+   // y-=players.get(i).vy;
+   }
+   }
+   if (coord.y-size*0.5+speedY<players.get(i).y+players.get(i).h-20+players.get(i).vy && coord.y+size*0.5+speedY>players.get(i).y+20+players.get(i).vy) {
+   if (coord.x+size*0.5+speedX> players.get(i).x-10 && coord.x-size*0.5+speedX< players.get(i).x + players.get(i).w +10 ) {
+   //  speed.set( speed.x*(-1), speed.y);
+   //  coord.set( coord.x+speed.x+players.get(i).vx, coord.y+speed.y+players.get(i).vy);
+   //  x-=players.get(i).vx;
+   }
+   }
+   }
+   }
+   }*/
   void checkBounds() {
     /*
     if (coord.y-size*0.5<0 ) { // walls
@@ -155,7 +153,7 @@ class Ball extends Projectile implements Reflectable { //-----------------------
       //ellipse(coord.x, coord.y, size, size);
       // line(coord.x, coord.y, coord.x +(speed.x)*10, coord.y+(speed.y)*10);
       ellipse(x, y, size, size);
-      if (cheatEnabled) line(x, y, x +(vx)*10, y+(vy)*10);
+      if (debug) line(x, y, x +(vx)*10, y+(vy)*10);
     }
   }
 
@@ -165,13 +163,13 @@ class Ball extends Projectile implements Reflectable { //-----------------------
     if (stampTime%1==0) {
       if (!dead && !freeze) { 
         if (reverse) {
-          angle=degrees( PVector.angleBetween(speed, coord));
-          coord.set(coord.x-speed.x*timeBend, coord.y-speed.y*timeBend);
+          //angle=degrees( PVector.angleBetween(speed, coord));
+          //coord.set(coord.x-speed.x*timeBend, coord.y-speed.y*timeBend);
           x-=vx*timeBend;
           y-=vy*timeBend;
         } else {
-          coord.set(coord.x+speed.x*timeBend, coord.y+speed.y*timeBend);
-          angle=degrees( PVector.angleBetween(coord, speed));
+          //coord.set(coord.x+speed.x*timeBend, coord.y+speed.y*timeBend);
+          //angle=degrees( PVector.angleBetween(coord, speed));
           x+=vx*timeBend;
           y+=vy*timeBend;
         }
@@ -314,7 +312,7 @@ class IceDagger extends Projectile implements Reflectable {//-------------------
       particles.add(new Particle(int(x), int(y), random(40)-20, random(40)-20, int(random(30)+10), 800, projectileColor));
     }
     //particles.add(new Flash(200, 32, 255));  
-    particles.add(new LineWave(int(enemy.x+enemy.w*0.5), int(enemy.y+enemy.h*0.5), 10, 300, projectileColor, angle));
+    particles.add(new LineWave(int(enemy.cx), int(enemy.cy), 10, 300, projectileColor, angle));
   }
   public void reflect(float _angle, Player _player) {
     angle=_angle;
@@ -473,7 +471,7 @@ class forceBall extends Projectile implements Reflectable { //------------------
     void hit(Player enemy) {
     // super.hit();
     if (damage>100) particles.add(new TempSlow(1000, 0.05, 1.05));
-    if(damage>300) particles.add( new TempFreeze(500));
+    if (damage>300) particles.add( new TempFreeze(500));
     enemy.hit(damage);
     deathTime=stampTime;   // projectile is dead on collision
     dead=true;
@@ -484,7 +482,7 @@ class forceBall extends Projectile implements Reflectable { //------------------
       particles.add(new Particle(int(x), int(y), random(-int(v*0.4), int(v*0.4)), random(-int(v*0.4), int(v*0.4)), int(random(10, 50)), 800, projectileColor));
     }
     particles.add(new Flash(int(v*4), 32, 255));  
-    particles.add(new ShockWave(int(enemy.x+enemy.w*0.5), int(enemy.y+enemy.h*0.5), 20, 16, 200, projectileColor));
+    particles.add(new ShockWave(int(enemy.cx), int(enemy.cy), 20, 16, 200, projectileColor));
     particles.add(new ShockWave(int(x), int(y), int(v*4), 16, int(v*4), projectileColor));
     particles.add(new ShockWave(int(x), int(y), int( v*2), 16, int(v*5), color(255, 0, 255)));
     shakeTimer=int(force*0.8);
@@ -675,7 +673,7 @@ class ChargeLaser extends Projectile { //---------------------------------------
     }
   }
   public void lineVsCircleCollision(float x, float y, float x2, float y2, Player enemy) {
-    float cx= enemy.x+enemy.w*0.5, cy=enemy.y+enemy.w*0.5, cr= enemy.w*0.5;
+    float cx= enemy.cx, cy=enemy.cy, cr= enemy.w*0.5;
     // float segV = dist(x2, y2, x, y);
     // float segVAngle = degrees(atan2((y2-y), (x2-x)));
     // float segC = dist(cx, cy, x, y);
@@ -697,7 +695,7 @@ class ChargeLaser extends Projectile { //---------------------------------------
     float ca = dx/d;
     float sa = dy/d;
     float mX = (-x+cx)*ca + (-y+cy)*sa; 
-    float mY = (-y+cy)*ca + ( x-cx)*sa;
+    //float mY = (-y+cy)*ca + ( x-cx)*sa;
     if ( mX <= 0 ) {
       rx = x; 
       ry = y;
@@ -720,7 +718,7 @@ class ChargeLaser extends Projectile { //---------------------------------------
     enemy.hit(damage);
     enemy.pushForce(0.6, angle);
     particles.add(new Spark( 1000, int(enemy.x+random(enemy.w)), int(enemy.y+random(enemy.w)), cos(radians(angle))*random(10), sin(radians(angle))*random(10), 6, angle, projectileColor));
-    particles.add( new  Particle(int(enemy.x+enemy.w*0.5), int(enemy.y+enemy.h*0.5), cos(radians(angle))*12, sin(radians(angle))*12, 120, 100, color(255, 0, 255)));
+    particles.add( new  Particle(int(enemy.cx), int(enemy.cy), cos(radians(angle))*12, sin(radians(angle))*12, 120, 100, color(255, 0, 255)));
   }
 
   @Override
@@ -749,7 +747,6 @@ class SniperBullet extends ChargeLaser { //-------------------------------------
     particles.add(new ShockWave(int(x), int(y), int(size*0.25), 40, 80, color(255)));
     force=3;
     //particles.add( new TempFreeze(100));
-
   }
 
 
@@ -800,21 +797,21 @@ class SniperBullet extends ChargeLaser { //-------------------------------------
   }
   @Override
     void hit(Player enemy) {
-          enemy.hit(damage);
-          particles.add( new TempFreeze(100));
-        particles.add( new TempSlow(25, 0.1, 1.00));
-      
+    enemy.hit(damage);
+    particles.add( new TempFreeze(100));
+    particles.add( new TempSlow(25, 0.1, 1.00));
+
     //  particles.add(new Spark( 1000, int(x), int(y), cos(radians(sprayAngle))*sprayVelocity, sin(radians(sprayAngle))*sprayVelocity, 6, sprayAngle, projectileColor));
 
     enemy.pushForce(3, angle);
-     particles.add(new Flash(100, 24, color(0)));
-    particles.add(new LineWave(int(enemy.x+enemy.w*0.5), int(enemy.y+enemy.h*0.5), 10, 200, projectileColor, angle+90));
+    particles.add(new Flash(100, 24, color(0)));
+    particles.add(new LineWave(int(enemy.cx), int(enemy.cy), 10, 200, projectileColor, angle+90));
     particles.add(new Spark( 1000, int(enemy.x+random(enemy.w)), int(enemy.y+random(enemy.w)), cos(radians(angle))*random(10), sin(radians(angle))*random(10), 6, angle, projectileColor));
 
-     shakeTimer+=damage*0.3;    
-    particles.add( new  Particle(int(enemy.x+enemy.w*0.5), int(enemy.y+enemy.h*0.5), cos(radians(angle))*36, sin(radians(angle))*36, 100, 120, color(255, 0, 255)));
-    particles.add( new  Particle(int(enemy.x+enemy.w*0.5), int(enemy.y+enemy.h*0.5), cos(radians(angle))*24, sin(radians(angle))*24, 200, 120, color(255, 0, 255)));
-    particles.add( new  Particle(int(enemy.x+enemy.w*0.5), int(enemy.y+enemy.h*0.5), cos(radians(angle))*12, sin(radians(angle))*12, 300, 120, color(255, 0, 255)));
+    shakeTimer+=damage*0.3;    
+    particles.add( new  Particle(int(enemy.cx), int(enemy.cy), cos(radians(angle))*36, sin(radians(angle))*36, 100, 120, color(255, 0, 255)));
+    particles.add( new  Particle(int(enemy.cx), int(enemy.cy), cos(radians(angle))*24, sin(radians(angle))*24, 200, 120, color(255, 0, 255)));
+    particles.add( new  Particle(int(enemy.cx), int(enemy.cy), cos(radians(angle))*12, sin(radians(angle))*12, 300, 120, color(255, 0, 255)));
   }
 }
 
@@ -872,12 +869,21 @@ class Bomb extends Projectile implements Reflectable {//------------------------
   }
 
   void hitPlayersInRadius(int range, boolean _friendlyFire) {
-    if (!freeze &&!reverse) { 
+    if (!freeze &&!reverse) { /*
       for (int i=0; i<players.size(); i++) { 
-        if ( !players.get(i).dead && (players.get(i).ally !=owner.ally || _friendlyFire)) { //players.get(i).index!= playerIndex && 
-          if (dist(x, y, players.get(i).x+players.get(i).w*0.5, players.get(i).y+players.get(i).h*0.5)<range) {
-            players.get(i).hit(damage);
-            players.get(i).pushForce(blastForce, calcAngleFromBlastZone(x, y, players.get(i).x+players.get(i).w*0.5, players.get(i).y+players.get(i).h*0.5));
+     if ( !players.get(i).dead && (players.get(i).ally !=owner.ally || _friendlyFire)) { //players.get(i).index!= playerIndex && 
+     if (dist(x, y, players.get(i).cx, players.get(i).cy)<range) {
+     players.get(i).hit(damage);
+     players.get(i).pushForce(blastForce, calcAngleFromBlastZone(x, y, players.get(i).cx, players.get(i).cy));
+     }
+     }
+     }
+     }*/
+      for (Player p : players) { 
+        if ( !p.dead && (p.ally !=owner.ally || _friendlyFire)) { //players.get(i).index!= playerIndex && 
+          if (dist(x, y, p.cx, p.cy)<range) {
+            p.hit(damage);
+            p.pushForce(blastForce, calcAngleFromBlastZone(x, y, p.cx, p.cy));
           }
         }
       }
@@ -969,14 +975,28 @@ class DetonateBomb extends Bomb {//----------------------------------------- Bom
     return (float)Math.atan2(deltaY, deltaX) * 180 / PI;
   }
   @Override
+  /*void hitPlayersInRadius(int range, boolean _friendlyFire) {
+   if (!freeze &&!reverse) { 
+   for (int i=0; i<players.size(); i++) { 
+   if (!players.get(i).dead &&(players.get(i).index!= playerIndex || _friendlyFire )) {
+   if (dist(x, y, players.get(i).x+players.get(i).w*0.5, players.get(i).y+players.get(i).h*0.5)<range) {
+   particles.add(new TempSlow(1000, 0.05, 1.05));
+   players.get(i).hit(damage);
+   players.get(i).pushForce(blastForce, calcAngleFromBlastZone(x, y, players.get(i).x+players.get(i).w*0.5, players.get(i).y+players.get(i).h*0.5));
+   }
+   }
+   }
+   }
+   }*/
+
     void hitPlayersInRadius(int range, boolean _friendlyFire) {
-    if (!freeze &&!reverse) { 
-      for (int i=0; i<players.size(); i++) { 
-        if (!players.get(i).dead &&(players.get(i).index!= playerIndex || _friendlyFire )) {
-          if (dist(x, y, players.get(i).x+players.get(i).w*0.5, players.get(i).y+players.get(i).h*0.5)<range) {
+    if (!freeze &&!reverse) {
+      for (Player p : players) { 
+        if ( !p.dead && (p.ally !=owner.ally || _friendlyFire)) { //players.get(i).index!= playerIndex && 
+          if (dist(x, y, p.cx, p.cy)<range) {
             particles.add(new TempSlow(1000, 0.05, 1.05));
-            players.get(i).hit(damage);
-            players.get(i).pushForce(blastForce, calcAngleFromBlastZone(x, y, players.get(i).x+players.get(i).w*0.5, players.get(i).y+players.get(i).h*0.5));
+            p.hit(damage);
+            p.pushForce(blastForce, calcAngleFromBlastZone(x, y, p.cx, p.cy));
           }
         }
       }
@@ -992,7 +1012,9 @@ class DetonateBomb extends Bomb {//----------------------------------------- Bom
     void fizzle() {    // when fizzle
     if ( !dead) {    
       for (int i=0; i<360; i+=30) {
-        projectiles.add( new Needle(owner, int(x+cos(radians(i+15))*250), int(y+sin(radians(i+15))*250), 60, color(0), 600, i+195, -cos(radians(i+15))*35, -sin(radians(i+15))*35, 25));
+        Projectile p= new Needle(owner, int(x+cos(radians(i+15))*250), int(y+sin(radians(i+15))*250), 60, color(0), 600, i+195, -cos(radians(i+15))*35, -sin(radians(i+15))*35, 25);
+        p.ally=-1;
+        projectiles.add(p);
         projectiles.add( new Needle(owner, int(x+cos(radians(i))*200), int(y+sin(radians(i))*200), 60, owner.playerColor, 600, i+180, -cos(radians(i))*20, -sin(radians(i))*20, 10));
       }
       for (int i=0; i<8; i++) {
@@ -1059,7 +1081,7 @@ class Mine extends Bomb {//----------------------------------------- Mine object
     // enemy.hit(damage);
     if (spawnTime+1000<stampTime) {
       fizzle();
-        particles.add(new TempSlow(100, 0.15, 1.05));
+      particles.add(new TempSlow(100, 0.15, 1.05));
       deathTime=stampTime;   // projectile is dead on collision
       dead=true;
     }
@@ -1114,7 +1136,7 @@ class Rocket extends Bomb implements Reflectable {//----------------------------
   @Override
     void hit(Player enemy) {    // when hit
     super.hit(enemy);
-    particles.add( new TempSlow(25, 0.05, 1.05));
+    particles.add( new TempSlow(20, 0.08, 1.05));
 
     fizzle();
     deathTime=stampTime;   // projectile is dead on collision
@@ -1174,7 +1196,7 @@ class Missle extends Rocket implements Reflectable {//--------------------------
         vx/=friction;
         vy/=friction;
       } else {
-        particles.add(new Particle(int(x), int(y), 0, 0, int(random(25)+8), 800, owner.playerColor));
+        particles.add(new Particle(int(x), int(y), 0, 0, int(random(size*.5)+5), 800, owner.playerColor));
 
 
         //angle+=sin(radians(count))*10;
@@ -1185,10 +1207,23 @@ class Missle extends Rocket implements Reflectable {//--------------------------
 
         target= seek(1200);
         if (target!=owner) { 
-          float tx=target.x+target.w*.5, ty=target.y+target.h*.5;
-          angle = atan2(ty-y, tx-x) * 180 / PI;
-          stroke(255);
-          line(x, y, tx, ty);
+          float tx=target.cx, ty=target.cy, keyAngle=(atan2(ty-y, tx-x) * 180 / PI);
+          keyAngle+= 360; 
+           angle+= 360; 
+           keyAngle= keyAngle % 360; 
+           angle = angle % 360; 
+
+
+         float relativeAngleToTarget = keyAngle - angle;
+           println(relativeAngleToTarget+"more "+keyAngle+" : " +angle);
+
+          if (relativeAngleToTarget > 180)
+            relativeAngleToTarget -= 360;
+          else if (relativeAngleToTarget < -180)
+            relativeAngleToTarget += 360;
+          angle += relativeAngleToTarget * 0.15;
+          //stroke(255);
+          //line(x, y, tx, ty);
           targetHommingVarning(target);
         }
         //vx+=;
@@ -1533,8 +1568,8 @@ class Slash extends Projectile {//----------------------------------------- Slas
     vx= _vx;
     vy= _vy;
     range= _range;
-    pCX=_owner.x+_owner.w*0.5;
-    pCY= _owner.y+_owner.w*0.5;
+    pCX=_owner.cx;
+    pCY= _owner.cy;
     for (int i=0; i<7; i++) {
       particles.add(new Particle(int(x), int(y), vx/(2-0.12*i), vy/(2-0.12*i), 10+i*4, _time, _projectileColor));
     }
@@ -1550,8 +1585,8 @@ class Slash extends Projectile {//----------------------------------------- Slas
         //pCX=players.get(playerIndex).x+players.get(playerIndex).w*0.5;
         // pCY= players.get(playerIndex).y+players.get(playerIndex).w*0.5;
         if (follow) {
-          pCX=owner.x+owner.w*0.5;
-          pCY= owner.y+owner.w*0.5;
+          pCX=owner.cx;
+          pCY= owner.cy;
         }
         x=pCX-cos(radians(angle))*range;
         y=pCY-sin(radians(angle))*range;
@@ -1570,8 +1605,8 @@ class Slash extends Projectile {//----------------------------------------- Slas
         //pCX=players.get(playerIndex).x+players.get(playerIndex).w*0.5;
         //pCY= players.get(playerIndex).y+players.get(playerIndex).w*0.5;
         if (follow) {
-          pCX=owner.x+owner.w*0.5;
-          pCY= owner.y+owner.w*0.5;
+          pCX=owner.cx;
+          pCY= owner.cy;
         }
         x=pCX-cos(radians(angle))*range;
         y=pCY-sin(radians(angle))*range;
@@ -1639,8 +1674,8 @@ class Slash extends Projectile {//----------------------------------------- Slas
     }
     // enemy.pushForce(-10, angle);
     // particles.add(new Flash(200, 32, 255));  
-    particles.add(new LineWave(int(enemy.x+enemy.w*0.5), int(enemy.y+enemy.h*0.5), 10, 300, projectileColor, angle+90));
-    particles.add(new LineWave(int(enemy.x+enemy.w*0.5), int(enemy.y+enemy.h*0.5), 10, 300, color(255), angle+90));
+    particles.add(new LineWave(int(enemy.cx), int(enemy.cy), 10, 300, projectileColor, angle+90));
+    particles.add(new LineWave(int(enemy.cx), int(enemy.cy), 10, 300, color(255), angle+90));
   }
 }
 
@@ -1665,19 +1700,19 @@ class Boomerang extends Projectile implements Reflectable {//-------------------
         displayAngle-=angleSpeed*timeBend;
         vy/=1-0.98*timeBend;
         vx/=1-0.98*timeBend;
-        vx += (x-owner.x-owner.w*0.5)*0.002;
-        vy += (y-owner.y-owner.w*0.5)*0.002;
+        vx += (x-owner.cx)*0.002;
+        vy += (y-owner.cy)*0.002;
         x-=vx*timeBend;
         y-=vy*timeBend;
-        pCX=owner.x+owner.w*0.5;
-        pCY=owner.y+owner.w*0.5;
+        pCX=owner.cx;
+        pCY=owner.cy;
       } else {
-        pCX=owner.x+owner.w*0.5;
-        pCY=owner.y+owner.w*0.5;
+        pCX=owner.cx;
+        pCY=owner.cy;
         x+=vx*timeBend;
         y+=vy*timeBend;
-        vx -= (x-owner.x-owner.w*0.5)*0.002;
-        vy -= (y-owner.y-owner.w*0.5)*0.002;
+        vx -= (x-owner.cx)*0.002;
+        vy -= (y-owner.cy)*0.002;
         vx*=0.98;
         vy*=0.98;
         displayAngle+=angleSpeed*timeBend;
@@ -1710,14 +1745,16 @@ class Boomerang extends Projectile implements Reflectable {//-------------------
   void retrieve() {
     if (owner.angle-selfHitAngle<angle && owner.angle+selfHitAngle>angle) { 
       owner.hit(int(damage*(abs(vx)+abs(vy))));
-      owner.pushForce(vx*1, vy*1, angle);
+      particles.add( new TempFreeze(int((abs(vx)+abs(vy))*2)));
+      owner.pushForce(vx, vy, angle);
       for (int i=0; i<16; i++) {
         particles.add(new Spark( 1000, int(x), int(y), (vx+random(-spray, spray))*random(0, 0.8), (vy+random(-spray, spray))*random(0, 0.8), 6, angle, projectileColor));
       }
     } else {
+
       owner.pushForce(vx*0.2, vy*0.2, angle);
-      owner.ability.energy+=recoverEnergy;
-      particles.add(new RShockWave(int(owner.x+owner.w*0.5), int(owner.y+owner.w*0.5), 350, 32, 300, color(255)));
+      owner.abilityList.get(0).energy+=recoverEnergy;
+      particles.add(new RShockWave(int(owner.cx), int(owner.cy), 350, 32, 300, color(255)));
       // particles.add(new ShockWave(int(players.get(playerIndex).x+players.get(playerIndex).w*0.5), int(players.get(playerIndex).y+players.get(playerIndex).h*0.5), 20, 100, projectileColor));
     }
     deathTime=stampTime;   // dead on collision with owner
@@ -1850,8 +1887,8 @@ class HomingMissile extends Projectile implements Reflectable {//---------------
           calcAngle();
           vx+=cos(radians(angle))*homeRate*timeBend;
           vy+=sin(radians(angle))*homeRate*timeBend;
-          x+=((target.x+target.w*0.5)-x)*gravityRate*timeBend;
-          y+=((target.y+target.w*0.5)-y)*gravityRate*timeBend;
+          x+=((target.cx)-x)*gravityRate*timeBend;
+          y+=((target.cy)-y)*gravityRate*timeBend;
         }
         x+=vx*timeBend;
         y+=vy*timeBend;
@@ -1889,7 +1926,7 @@ class HomingMissile extends Projectile implements Reflectable {//---------------
     }
   }
   void targetVarning() {
-    float tcx=target.x+target.w*0.5, tcy=target.y+target.w*0.5;
+    float tcx=target.cx, tcy=target.cy;
     stroke(projectileColor);
     strokeWeight(4);
     if (locked) {
@@ -1926,7 +1963,7 @@ class HomingMissile extends Projectile implements Reflectable {//---------------
   }
 
   void calcAngle() {
-    angle = degrees(atan2(((target.y+target.w*0.5)-y), ((target.x+target.w*0.5)-x)));
+    angle = degrees(atan2(((target.cy)-y), ((target.cx)-x)));
   }
 
 
@@ -2004,7 +2041,9 @@ class Shield extends Projectile implements Reflector { //-----------------------
       //text(angle, x-100, y-100);
       strokeWeight(int(10));
       stroke(color(hue(projectileColor), 255-brightness, brightness(projectileColor)));
-      line(cos(radians(angle-90+90))*size*0.9+int(x), sin(radians(angle-90+90))*size*0.9+int(y), cos(radians(angle+90+90))*size*0.9+int(x), sin(radians(angle+90+90))*size*0.9+int(y));
+           // line(cos(radians(angle-90+90))*size*0.9+int(x), sin(radians(angle-90+90))*size*0.9+int(y), cos(radians(angle+90+90))*size*0.9+int(x), sin(radians(angle+90+90))*size*0.9+int(y));
+
+      line(cos(radians(angle))*size*0.9+int(x), sin(radians(angle))*size*0.9+int(y), cos(radians(angle+90+90))*size*0.9+int(x), sin(radians(angle+90+90))*size*0.9+int(y));
     }
   }
   void update() {
@@ -2016,13 +2055,13 @@ class Shield extends Projectile implements Reflector { //-----------------------
         //  x=players.get(playerIndex).x+50;
         // y=players.get(playerIndex).y+50;
         if (follow) {
-          x=owner.x+owner.w*.5+offsetX;
-          y=owner.y+owner.h*.5+offsetY;
+          x=owner.cx+offsetX;
+          y=owner.cy+offsetY;
         }
       } else {
         if (follow) {
-          x=owner.x+owner.w*.5+offsetX;
-          y=owner.y+owner.h*.5+offsetY;
+          x=owner.cx+offsetX;
+          y=owner.cy+offsetY;
         }
         if (brightness>0)brightness-=10;
         //  laserChange+=2;
@@ -2058,7 +2097,7 @@ class Shield extends Projectile implements Reflector { //-----------------------
   }
 
   void ProjectilelineVsProjectileCircleCollision(float x, float y, float x2, float y2, Projectile projectile) {
-    float cx= projectile.x+projectile.size*0.5, cy=projectile.y+projectile.size*0.5, cr= projectile.size*0.5;
+    float cx= projectile.x+projectile.size*0.5, cy=projectile.y+projectile.size*0.5; //cr= projectile.size*0.5;
     // float segV = dist(x2, y2, x, y);
     //  float segVAngle = degrees(atan2((y2-y), (x2-x)));
     //  float segC = dist(cx, cy, x, y);
@@ -2080,7 +2119,7 @@ class Shield extends Projectile implements Reflector { //-----------------------
     float ca = dx/d;
     float sa = dy/d;
     float mX = (-x+cx)*ca + (-y+cy)*sa; 
-    float mY = (-y+cy)*ca + ( x-cx)*sa;
+    //float mY = (-y+cy)*ca + ( x-cx)*sa;
     if ( mX <= 0 ) {
       rx = x; 
       ry = y;
@@ -2184,8 +2223,8 @@ class Electron extends Projectile implements Reflectable {//--------------------
             distance*=1+(0.02*timeBend);
           }
           if (owner.dead)orbit=false;
-          x=owner.x+owner.w*0.5+cos(radians(orbitAngle))*distance;
-          y=owner.y+owner.w*0.5+sin(radians(orbitAngle))*distance;
+          x=owner.cx+cos(radians(orbitAngle))*distance;
+          y=owner.cy+sin(radians(orbitAngle))*distance;
           orbitAngle+=orbitAngleSpeed*timeBend;
           angle+=12*timeBend;
         } else {
@@ -2246,7 +2285,7 @@ class Electron extends Projectile implements Reflectable {//--------------------
       enemy.hit(damage*2);
       enemy.pushForce(12*orbitAngleSpeed, angle);
       deathTime+=3000;
-      owner.ability.energy+=recoverEnergy;
+      owner.abilityList.get(0).energy+=recoverEnergy;
       orbit=true;
       particles.add(new ShockWave(int(x), int(y), 300, 16, 150, color(255)));
 
@@ -2255,9 +2294,9 @@ class Electron extends Projectile implements Reflectable {//--------------------
       }
       stroke(projectileColor);
       strokeWeight(size);
-      line(x, y, owner.x+owner.w*0.5+cos(radians(orbitAngle))*distance, owner.y+owner.w*0.5+sin(radians(orbitAngle))*distance);
-      x=owner.x+owner.w*.5;
-      y=owner.y+owner.h*.5;
+      line(x, y, owner.cx+cos(radians(orbitAngle))*distance, owner.cy+sin(radians(orbitAngle))*distance);
+      x=owner.cx;
+      y=owner.cy;
     }
 
     // particles.add(new Flash(200, 32, 255));  
@@ -2268,7 +2307,7 @@ class Electron extends Projectile implements Reflectable {//--------------------
     public void reflect(float _angle, Player _player) {
 
     try {
-      DeployElectron tempA=(DeployElectron)owner.ability;
+      DeployElectron tempA=(DeployElectron)owner.abilityList.get(0);
       for (  int i=tempA.stored.size()-1; i>=0; i--) {
         if (tempA.stored.get(i)==this)tempA.stored.remove(i);
       }
@@ -2376,8 +2415,8 @@ class Graviton extends Projectile {//----------------------------------------- G
     if (!freeze &&!reverse) { 
       for (int i=0; i<players.size (); i++) { 
         if (!players.get(i).dead &&(players.get(i).index!= playerIndex || friendlyFire)) {
-          if (dist(x, y, players.get(i).x+players.get(i).w*0.5, players.get(i).y+players.get(i).h*0.5)<range) {
-            players.get(i).pushForce(dragForce*timeBend, calcAngleFromBlastZone(x, y, players.get(i).x+players.get(i).w*0.5, players.get(i).y+players.get(i).h*0.5));
+          if (dist(x, y, players.get(i).cx, players.get(i).cy)<range) {
+            players.get(i).pushForce(dragForce*timeBend, calcAngleFromBlastZone(x, y, players.get(i).cx, players.get(i).cy));
             if (count%10==0)players.get(i).hit(damage);
           }
         }

@@ -3,7 +3,9 @@ void keyPressed() {
   key=Character.toLowerCase(key);// convert key to lower Case
   if (key == '#') {                    // enablecheats
     cheatEnabled=(cheatEnabled==true)?false:true;
-    println(cheatEnabled);
+  }
+    if (key == '"') {                    // enablecheats
+    debug=(debug==true)?false:true;
   }
   if (key == '¤') {      
     //ac.setPause(true);
@@ -12,36 +14,66 @@ void keyPressed() {
     particles.add(new Flash(3000, 3, 0));
   }
 
-
   if ((cheatEnabled||playersAlive<=1 ) && key==ResetKey) {
     background(255);
     for (int i =players.size()-1; i>= 0; i--) {
       if (players.get(i).turret || players.get(i).clone) players.remove( players.get(i));
     }
-    for (int i=0; i<players.size (); i++) {    
-      if (!players.get(i).clone &&  !players.get(i).turret) {  // no turret or clone respawn
-        players.get(i).reset();
-        announceAbility( players.get(i));
+    /* for (int i=0; i<players.size (); i++) {    
+     if (!players.get(i).clone &&  !players.get(i).turret) {  // no turret or clone respawn
+     players.get(i).reset();
+     announceAbility( players.get(i));
+     } else {
+     players.get(i).dead=true;
+     players.get(i).state=0;
+     }
+     }*/
+    for (Player p : players) {      
+      if (!p.clone &&  !p.turret) {  // no turret or clone respawn
+        p.reset();
+        announceAbility( p, 0);
       } else {
-        players.get(i).dead=true;
-        players.get(i).state=0;
+        p.dead=true;
+        p.state=0;
       }
     }
   }
 
   if (cheatEnabled ) {
-    if (key==Character.toLowerCase(RandomKey)) {
-      for (int i=0; i<players.size(); i++) {
-        if (!players.get(i).clone &&  !players.get(i).turret) {  // no turret or clone weapon switch
-          abilities[i].reset();
-          abilities[i]=new Random().randomize();
-
-          //abilities[i].owner=players.get(i);
-          abilities[i].setOwner(players.get(i));
-          players.get(i).ability=abilities[i];
-          announceAbility( players.get(i));
+      if (key==Character.toLowerCase('6')) {
+      for (Player p : players) {      
+        if (!p.clone &&  !p.turret) {  // no turret or clone weapon switch
+          p.abilityList.get(1).reset();
+          p.abilityList.set(1, new RandomPassive().randomize());
+          p.abilityList.get(1).setOwner(p);
+          announceAbility( p, 1);
         }
       }
+    
+    }
+    if (key==Character.toLowerCase(RandomKey)) {
+      for (Player p : players) {      
+        if (!p.clone &&  !p.turret) {  // no turret or clone weapon switch
+          p.abilityList.get(0).reset();
+          p.abilityList.set(0, new Random().randomize());
+
+          //abilities[i].owner=players.get(i);
+          p.abilityList.get(0).setOwner(p);
+          //p.ability= p.abilityList.get(0);
+          announceAbility( p, 0);
+        }
+      }
+      /*for (int i=0; i<players.size(); i++) {
+       if (!players.get(i).clone &&  !players.get(i).turret) {  // no turret or clone weapon switch
+       abilities[i].reset();
+       abilities[i]=new Random().randomize();
+       
+       //abilities[i].owner=players.get(i);
+       abilities[i].setOwner(players.get(i));
+       players.get(i).ability=abilities[i];
+       announceAbility( players.get(i));
+       }
+       }*/
     }
     if (key==Character.toLowerCase('9')) {
       for (int i=0; i<players.size()-1; i++) {
@@ -54,17 +86,24 @@ void keyPressed() {
           }
           //abilities[i].owner=players.get(i);
           abilities[i].setOwner(players.get(i));
-          players.get(i).ability=abilities[i];
+          //players.get(i).ability=abilities[i];
         }
       }
     }
     if (key==Character.toLowerCase('8')) {
-      for (int i=0; i<players.size(); i++) {
-        if (!players.get(i).clone &&  !players.get(i).turret) {  //infinate energy
-          //abilities[i].owner=players.get(i);
-          players.get(i).ability.energy=9999999;
+
+      for (Player p : players) {      
+        if (!p.clone &&  !p.turret) {  // no turret or clone weapon switch
+          p.abilityList.get(0).energy=99999;
         }
       }
+      /*
+      for (int i=0; i<players.size(); i++) {
+       if (!players.get(i).clone &&  !players.get(i).turret) {  //infinate energy
+       //abilities[i].owner=players.get(i);
+       players.get(i).ability.energy=9999999;
+       }
+       }*/
     }
     if (key==DELETE) {
       prevMillis=millis(); 
@@ -83,36 +122,53 @@ void keyPressed() {
       }
     }
     if (key==Character.toLowerCase('-')) {
-      players.get(mouseSelectedPlayerIndex).ability.reset();
+      //players.get(mouseSelectedPlayerIndex).ability.reset();
+      players.get(mouseSelectedPlayerIndex).abilityList.get(0).reset();
       for (  int i=0; i<abilityList.length; i++) {
-        //if (players.get(0).ability==abilityList[i]) {
-        if (players.get(mouseSelectedPlayerIndex).ability.getClass()==abilityList[i].getClass()) {
-          //println("ability match "+i+" "+abilityList[i].getClass());
-          //if (i>=abilityList.length)i=0;
+        if (players.get(mouseSelectedPlayerIndex).abilityList.get(0).getClass()==abilityList[i].getClass()) {
           if (i<=0)i=abilityList.length;
           try {
-            //abilities[0]= abilityList[i-1].clone();
-            //abilityList[i-1].clone().setOwner(players.get(0));
-            players.get(mouseSelectedPlayerIndex).ability=abilityList[i-1].clone();
-            players.get(mouseSelectedPlayerIndex).ability.setOwner(players.get(mouseSelectedPlayerIndex));
-            announceAbility( players.get(mouseSelectedPlayerIndex));
+            players.get(mouseSelectedPlayerIndex).abilityList.set(0, abilityList[i-1].clone());
+            players.get(mouseSelectedPlayerIndex).abilityList.get(0).setOwner(players.get(mouseSelectedPlayerIndex));
+            announceAbility( players.get(mouseSelectedPlayerIndex), 0);
           }
           catch(CloneNotSupportedException e) {
             println("not cloned from Random");
           }
-        }else println("not player"+ i);
+        } else println("not player"+ i);
       }
+
+      /*players.get(mouseSelectedPlayerIndex).ability.reset();
+       for (  int i=0; i<abilityList.length; i++) {
+       //if (players.get(0).ability==abilityList[i]) {
+       if (players.get(mouseSelectedPlayerIndex).ability.getClass()==abilityList[i].getClass()) {
+       //println("ability match "+i+" "+abilityList[i].getClass());
+       //if (i>=abilityList.length)i=0;
+       if (i<=0)i=abilityList.length;
+       try {
+       //abilities[0]= abilityList[i-1].clone();
+       //abilityList[i-1].clone().setOwner(players.get(0));
+       players.get(mouseSelectedPlayerIndex).ability=abilityList[i-1].clone();
+       players.get(mouseSelectedPlayerIndex).ability.setOwner(players.get(mouseSelectedPlayerIndex));
+       announceAbility( players.get(mouseSelectedPlayerIndex));
+       }
+       catch(CloneNotSupportedException e) {
+       println("not cloned from Random");
+       }
+       } else println("not player"+ i);
+       }*/
     }
     if (key==Character.toLowerCase('+')) {
-      players.get(mouseSelectedPlayerIndex).ability.reset();
+      //players.get(mouseSelectedPlayerIndex).ability.reset();
+      players.get(mouseSelectedPlayerIndex).abilityList.get(0).reset();
       for (  int i=0; i<abilityList.length; i++) {
-        if (players.get(mouseSelectedPlayerIndex).ability.getClass()==abilityList[i].getClass()) {
+        if (players.get(mouseSelectedPlayerIndex).abilityList.get(0).getClass()==abilityList[i].getClass()) {
           //println("ability match "+i+" "+abilityList[i].getClass());
           if (i>=abilityList.length-1)i=-1;
           try {
-            players.get(mouseSelectedPlayerIndex).ability=abilityList[i+1].clone();
-            players.get(mouseSelectedPlayerIndex).ability.setOwner(players.get(mouseSelectedPlayerIndex));
-            announceAbility( players.get(mouseSelectedPlayerIndex));
+            players.get(mouseSelectedPlayerIndex).abilityList.set(0, abilityList[i+1].clone());
+            players.get(mouseSelectedPlayerIndex).abilityList.get(0).setOwner(players.get(mouseSelectedPlayerIndex));
+            announceAbility( players.get(mouseSelectedPlayerIndex), 0);
           }
           catch(CloneNotSupportedException e) {
             println("not cloned from Random");
@@ -120,6 +176,22 @@ void keyPressed() {
           break;
         }
       }
+      /* players.get(mouseSelectedPlayerIndex).ability.reset();
+       for (  int i=0; i<abilityList.length; i++) {
+       if (players.get(mouseSelectedPlayerIndex).ability.getClass()==abilityList[i].getClass()) {
+       //println("ability match "+i+" "+abilityList[i].getClass());
+       if (i>=abilityList.length-1)i=-1;
+       try {
+       players.get(mouseSelectedPlayerIndex).ability=abilityList[i+1].clone();
+       players.get(mouseSelectedPlayerIndex).ability.setOwner(players.get(mouseSelectedPlayerIndex));
+       announceAbility( players.get(mouseSelectedPlayerIndex));
+       }
+       catch(CloneNotSupportedException e) {
+       println("not cloned from Random");
+       }
+       break;
+       }
+       }*/
     }
     if (key==Character.toLowerCase(keyIceDagger)) {
       projectiles.add( new IceDagger(players.get(1), int( players.get(1).x+players.get(1).w/2), int(players.get(1).y+players.get(1).h/2), 30, players.get(1).playerColor, 800, players.get(1).angle, players.get(1).ax*15, players.get(1).ay*15, 8));
@@ -139,7 +211,8 @@ void keyPressed() {
       for (int i=0; i< players.size (); i++) {
         if (!reverse || players.get(i).reverseImmunity) { 
           if (key==Character.toLowerCase(players.get(i).triggKey)) {// ability trigg key
-            players.get(i).ability.release();
+            //players.get(i).ability.release();
+             for (Ability a : players.get(i).abilityList)  a.release();
             players.get(i).holdTrigg=false;
           }
         }
@@ -213,9 +286,10 @@ void keyPressed() {
   try {
     for (Player p : players) {
       if (!p.turret) {
-        if ((!reverse || p.reverseImmunity)|| p.ability.meta) { 
+        if ((!reverse || p.reverseImmunity)|| p.abilityList.get(0).meta) { 
           if (key==Character.toLowerCase(p.triggKey)) {// ability trigg key
-            p.ability.press();
+            //p.ability.press();
+            for (Ability a : p.abilityList)  a.press();
             p.holdTrigg=true;
           }
         }
@@ -270,7 +344,10 @@ void checkKeyHold() { // hold keys
     { 
       if (!p.turret) {
         if (p.holdTrigg) {// ability trigg key
-          if (!reverse || p.reverseImmunity)p.ability.hold();
+          if (!reverse || p.reverseImmunity) {
+            //p.ability.hold();
+            for (Ability a : p.abilityList)  a.hold();
+          }
         }
         if (p.holdUp) {//up
           if (!reverse || p.reverseImmunity) p.control(1);
@@ -312,7 +389,8 @@ void keyReleased() {
   for ( Player p : players) {
     if (!p.turret) {
       if (key==Character.toLowerCase(p.triggKey)) {// ability trigg key
-        if ( p.ability.meta || !reverse)  p.ability.release();
+        if ( p.abilityList.get(0).meta || !reverse)  //p.ability.release();
+          for (Ability a : p.abilityList)  a.release();
         p.holdTrigg=false;
       }
       if (keyCode==p.up) {//up
