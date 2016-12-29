@@ -1,3 +1,5 @@
+
+
 class Projectile  implements Cloneable {
   PVector coord;
   PVector speed;
@@ -216,8 +218,10 @@ class Ball extends Projectile implements Reflectable { //-----------------------
     for (int i=0; i<3; i++) {
       particles.add(new Particle(int(x), int(y), random(10)-5, random(10)-5, int(random(20)+5), 800, 0));
     }
-    owner.ally=_player.ally;
-    owner=_player;
+    if (owner!=null) { 
+      owner.ally=_player.ally;
+      owner=_player;
+    }
     projectileColor=_player.playerColor;
     //particles.add(new Spark( 1000, int(x), int(y), -cos(radians(angle))*5, -sin(radians(angle))*5, 6, angle, projectileColor));
     vx= cos(radians(angle))*15;
@@ -259,9 +263,9 @@ class IceDagger extends Projectile implements Reflectable {//-------------------
     c.beginShape();
     c.fill(projectileColor);
     c.stroke(projectileColor, 50);
-    c.vertex(int (0), int (-size/3) );
+    c.vertex(int (0), int (-size*.33) );
     c.vertex(int (+size), int (0));
-    c.vertex(int (0), int (+size/3));
+    c.vertex(int (0), int (+size*.33));
     c.vertex(int (-size*0.5), int (0));
     c.endShape(CLOSE);
   }
@@ -281,13 +285,13 @@ class IceDagger extends Projectile implements Reflectable {//-------------------
   }
   void display() {
     if (!dead) { 
-      // rect(x-(size/2), y-(size/2), (size), (size));
+      // rect(x-(size*.5), y-(size*.5), (size), (size));
       pushMatrix();
       translate(x, y);
       rotate(radians(angle));
-      // rect(-(size/2), -(size/2), (size), (size));
-      shape(sh, sh.width*0.5, sh.height*0.5);
-      shape(c, c.width*0.5, c.height*0.5);
+      // rect(-(size*.5), -(size*.5), (size), (size));
+      shape(sh, sh.width*.5, sh.height*.5);
+      shape(c, c.width*.5, c.height*.5);
       popMatrix();
     }
   }
@@ -303,12 +307,16 @@ class IceDagger extends Projectile implements Reflectable {//-------------------
     void hit(Player enemy) {
     // super.hit();
     enemy.hit(damage);
+    enemy.ax*=.3;
+    enemy.ay*=.3;
+    enemy.vx*=.3;
+    enemy.vy*=.3;
     deathTime=stampTime;   // dead on collision
     dead=true;
-    for (int i=0; i<8; i++) {
+    for (int i=0; i<4; i++) {
       particles.add(new Particle(int(x), int(y), random(20)-10, random(20)-10, int(random(20)+5), 800, 255));
     }
-    for (int i=0; i<4; i++) {
+    for (int i=0; i<2; i++) {
       particles.add(new Particle(int(x), int(y), random(40)-20, random(40)-20, int(random(30)+10), 800, projectileColor));
     }
     //particles.add(new Flash(200, 32, 255));  
@@ -325,9 +333,9 @@ class IceDagger extends Projectile implements Reflectable {//-------------------
     c.beginShape();
     c.fill(projectileColor);
     c.stroke(projectileColor, 50);
-    c.vertex(int (0), int (-size/3) );
+    c.vertex(int (0), int (-size*.33) );
     c.vertex(int (+size), int (0));
-    c.vertex(int (0), int (+size/3));
+    c.vertex(int (0), int (+size*.33));
     c.vertex(int (-size*0.5), int (0));
     c.endShape(CLOSE);
 
@@ -379,7 +387,7 @@ class ArchingIceDagger extends IceDagger {//------------------------------------
   }
   void display() {
     if (!dead) { 
-      // rect(x-(size/2), y-(size/2), (size), (size));
+      // rect(x-(size*.5), y-(size*.5), (size), (size));
       // fill(0);
       //  text("s: "+ angleCurve, x, y-100);
       //  text("e: "+ startCurveAngle, x, y-75);
@@ -389,9 +397,9 @@ class ArchingIceDagger extends IceDagger {//------------------------------------
 
       rotate(radians(angle));
 
-      // rect(-(size/2), -(size/2), (size), (size));
-      shape(sh, sh.width*0.5, sh.height*0.5);
-      shape(c, c.width*0.5, c.height*0.5);
+      // rect(-(size*.5), -(size*.5), (size), (size));
+      shape(sh, sh.width*.5, sh.height*0.5);
+      shape(c, c.width*.5, c.height*0.5);
       popMatrix();
     }
   }
@@ -447,11 +455,11 @@ class forceBall extends Projectile implements Reflectable { //------------------
   }
   void display() {
     if (!dead) { 
-      // rect(x-(size/2), y-(size/2), (size), (size));
+      // rect(x-(size*.5), y-(size*.5), (size), (size));
       pushMatrix();
       translate(x, y);
       rotate(radians(angle));
-      // rect(-(size/2), -(size/2), (size), (size));
+      // rect(-(size*.5), -(size*.5), (size), (size));
       fill(255);
       strokeWeight(5);
       stroke(projectileColor);
@@ -470,22 +478,22 @@ class forceBall extends Projectile implements Reflectable { //------------------
   @Override
     void hit(Player enemy) {
     // super.hit();
-    if (damage>100) particles.add(new TempSlow(1000, 0.05, 1.05));
+    if (damage>100) particles.add(new TempSlow(700, 0.1, 1.05));
     if (damage>300) particles.add( new TempFreeze(500));
     enemy.hit(damage);
     deathTime=stampTime;   // projectile is dead on collision
     dead=true;
-    for (int i=0; i<int (v*0.4); i++) { // particles
+    for (int i=0; i<int (v*0.3); i++) { // particles
       particles.add(new Particle(int(x), int(y), random(-int(v*0.2), int(v*0.2)), random(-int(v*0.2), int(v*0.2)), int(random(5, 30)), 800, 255));
     }
-    for (int i=0; i<int (v*0.6); i++) {
+    for (int i=0; i<int (v*0.4); i++) {
       particles.add(new Particle(int(x), int(y), random(-int(v*0.4), int(v*0.4)), random(-int(v*0.4), int(v*0.4)), int(random(10, 50)), 800, projectileColor));
     }
     particles.add(new Flash(int(v*4), 32, 255));  
     particles.add(new ShockWave(int(enemy.cx), int(enemy.cy), 20, 16, 200, projectileColor));
     particles.add(new ShockWave(int(x), int(y), int(v*4), 16, int(v*4), projectileColor));
     particles.add(new ShockWave(int(x), int(y), int( v*2), 16, int(v*5), color(255, 0, 255)));
-    shakeTimer=int(force*0.8);
+    shakeTimer+=int(force*0.5);
   }
 
   public void reflect(float _angle, Player _player) {
@@ -509,7 +517,7 @@ class forceBall extends Projectile implements Reflectable { //------------------
 }
 class RevolverBullet extends Projectile implements Reflectable { //----------------------------------------- forceBall objects ----------------------------------------------------
   //scaled object by velocity
-  float vx, vy, v, ax, ay, angleV, spray=30;
+  float vx, vy, v, ax, ay, angleV, spray=30, halfSize;
   RevolverBullet(Player _owner, int _x, int _y, float _v, int _size, color _projectileColor, int  _time, float _angle, float _damage) {
     super(_owner, _x, _y, _size, _projectileColor, _time);
     angle=_angle;
@@ -517,15 +525,16 @@ class RevolverBullet extends Projectile implements Reflectable { //-------------
     damage=int(_damage);
     v=_v;
     force=5;
+    halfSize=size*.5;
     vx= cos(radians(angle))*_v;
     vy= sin(radians(angle))*_v;
 
-    for (int i=0; i<4; i++) {
-      particles.add(new Particle(int(x), int(y), vx/(2-0.12*i), vy/(2-0.12*i), 10+i*4, _time, _projectileColor));
-    }
-    for (int i=0; i<2; i++) {
-      particles.add(new Particle(int(x), int(y), random(10)-5+vx*0.5, random(10)-5+vy*0.5, int(random(20)+5), 800, 255));
-    }
+    /* for (int i=0; i<4; i++) {
+     particles.add(new Particle(int(x), int(y), vx/(2-0.12*i), vy/(2-0.12*i), 10+i*4, _time, _projectileColor));
+     }
+     for (int i=0; i<2; i++) {
+     particles.add(new Particle(int(x), int(y), random(10)-5+vx*0.5, random(10)-5+vy*0.5, int(random(20)+5), 800, 255));
+     }*/
   }
   void update() {
     if (!dead && !freeze) { 
@@ -544,15 +553,15 @@ class RevolverBullet extends Projectile implements Reflectable { //-------------
   }
   void display() {
     if (!dead) { 
-      // rect(x-(size/2), y-(size/2), (size), (size));
+      // rect(x-(size*.5), y-(size*.5), (size), (size));
       pushMatrix();
       translate(x, y);
       rotate(radians(angle));
-      // rect(-(size/2), -(size/2), (size), (size));
+      // rect(-(size*.5), -(size*.5), (size), (size));
       fill(255);
       strokeWeight(5);
       stroke(projectileColor);
-      ellipse(0, 0, size+size*v*0.1, size*.5);
+      ellipse(0, 0, size*v*0.2, halfSize);
       popMatrix();
     }
   }
@@ -573,7 +582,7 @@ class RevolverBullet extends Projectile implements Reflectable { //-------------
     /*for (int i=0; i<int (v*0.4); i++) { // particles
      particles.add(new Particle(int(x), int(y), random(-int(v*0.2), int(v*0.2)), random(-int(v*0.2), int(v*0.2)), int(random(5, 30)), 800, 255));
      }*/
-    for (int i=0; i<15; i++) {
+    for (int i=0; i<12; i++) {
       float sprayAngle=random(-spray, spray)+angle;
       float sprayVelocity=random(v*0.75);
       particles.add(new Spark( 1000, int(x), int(y), cos(radians(sprayAngle))*sprayVelocity, sin(radians(sprayAngle))*sprayVelocity, 6, sprayAngle, projectileColor));
@@ -582,7 +591,7 @@ class RevolverBullet extends Projectile implements Reflectable { //-------------
     //particles.add(new Spark( 1000, int(enemy.x+random(enemy.w)), int(enemy.y+random(enemy.w)), cos(radians(angle))*random(10), sin(radians(angle))*random(10), 6, angle, projectileColor));
 
     particles.add(new ShockWave(int(x), int(y), int(v*4), 22, 100, projectileColor));
-    shakeTimer=int(force*0.2);
+    shakeTimer+=int(force*0.2);
   }
 
   public void reflect(float _angle, Player _player) {
@@ -602,6 +611,92 @@ class RevolverBullet extends Projectile implements Reflectable { //-------------
     particles.add(new Spark( 1000, int(x), int(y), -cos(radians(angle))*5, -sin(radians(angle))*5, 6, angle, projectileColor));
     vx= cos(radians(angle))*(abs(vx)+abs(vy));
     vy= sin(radians(angle))*(abs(vx)+abs(vy));
+  }
+}
+class Blast extends Projectile { //----------------------------------------- forceBall objects ----------------------------------------------------
+  //scaled object by velocity
+  float vx, vy, v, ax, ay, angleV, spray=30, opacity, speed;
+  Blast(Player _owner, int _x, int _y, float _v, int _size, color _projectileColor, int  _time, float _angle, float _damage) {
+    super(_owner, _x, _y, _size, _projectileColor, _time);
+    angle=_angle;
+    angleV=10;
+    damage=int(_damage);
+    v=_v;
+    force=5;
+    opacity=255;
+    speed=20;
+    vx= cos(radians(angle))*_v;
+    vy= sin(radians(angle))*_v;
+  }
+  Blast(Player _owner, int _x, int _y, float _v, int _size, color _projectileColor, int  _time, float _angle, float _damage, float _speed) {
+    super(_owner, _x, _y, _size, _projectileColor, _time);
+    angle=_angle;
+    angleV=10;
+    damage=int(_damage);
+    v=_v;
+    force=5;
+    opacity=255;
+    speed=_speed;
+    vx= cos(radians(angle))*_v;
+    vy= sin(radians(angle))*_v;
+  }
+  void update() {
+    if (!dead && !freeze) { 
+
+      if (reverse) {
+        opacity+=speed*timeBend;
+        //if (charging) angle+=angleV*timeBend;
+        angleV+=speed*timeBend;
+        size-=speed*timeBend*0.75;
+        x-=vx*timeBend;
+        y-=vy*timeBend;
+      } else {
+        opacity-=speed*timeBend;
+
+        angleV-=speed*timeBend;
+        size+=speed*timeBend*0.75;
+        x+=vx*timeBend;
+        y+=vy*timeBend;
+      }
+    }
+  }
+  void display() {
+    if (!dead) { 
+      // rect(x-(size*.5), y-(size*.5), (size), (size));
+      pushMatrix();
+      translate(x, y);
+      rotate(radians(angleV));
+      // rect(-(size*.5), -(size*.5), (size), (size));
+      fill(255, opacity);
+      strokeWeight(10);
+      stroke(projectileColor, opacity);
+      rect(0-size*0.5, 0-size*0.5, size, size);
+      popMatrix();
+    }
+  }
+  @Override
+    void fizzle() {    // when fizzle
+  }
+  @Override
+    void hit(Player enemy) {
+    // super.hit();
+    enemy.hit(damage);
+    enemy.pushForce(v*0.1, angle);
+    //deathTime=stampTime;   // projectile is dead on collision
+    //dead=true;
+    /*for (int i=0; i<int (v*0.4); i++) { // particles
+     particles.add(new Particle(int(x), int(y), random(-int(v*0.2), int(v*0.2)), random(-int(v*0.2), int(v*0.2)), int(random(5, 30)), 800, 255));
+     }*/
+    for (int i=0; i<2; i++) {
+      float sprayAngle=random(-spray, spray)+angle;
+      float sprayVelocity=random(v*0.75);
+      particles.add(new Spark( 1000, int(x), int(y), cos(radians(sprayAngle))*sprayVelocity, sin(radians(sprayAngle))*sprayVelocity, 6, sprayAngle, projectileColor));
+    }
+    //enemy.pushForce(0.6, angle);
+    //particles.add(new Spark( 1000, int(enemy.x+random(enemy.w)), int(enemy.y+random(enemy.w)), cos(radians(angle))*random(10), sin(radians(angle))*random(10), 6, angle, projectileColor));
+
+    //particles.add(new ShockWave(int(x), int(y), int(v*4), 22, 100, projectileColor));
+    // shakeTimer=int(force*0.2);
   }
 }
 class ChargeLaser extends Projectile { //----------------------------------------- forceBall objects ----------------------------------------------------
@@ -664,8 +759,8 @@ class ChargeLaser extends Projectile { //---------------------------------------
           deathTime=stampTime;
         }
         owner.pushForce(-0.2, angle);
-        shakeTimer=int(laserWidth*0.1);
-        particles.add(new  gradient(1000, int(x+size*0.5 +cos(radians(angle))*owner.w*0.5), int(y+size*0.5+sin(radians(angle))*owner.w*0.5), 0, 0, int(laserWidth), 4, angle, projectileColor));
+        shakeTimer+=int(laserWidth*0.02);
+        particles.add(new  Gradient(1000, int(x+size*0.5 +cos(radians(angle))*owner.radius), int(y+size*0.5+sin(radians(angle))*owner.radius), 0, 0, int(laserWidth), 4, angle, projectileColor));
 
         for (int i= 0; players.size () > i; i++)
           if (playerIndex!=i  && !players.get(i).dead && players.get(i).ally != owner.ally ) lineVsCircleCollision(x, y, cos(radians(angle))*laserLength+int(x), sin(radians(angle))*laserLength+int(y), players.get(i));
@@ -738,13 +833,13 @@ class SniperBullet extends ChargeLaser { //-------------------------------------
   /*
   SniperBullet( int _playerIndex, int _x, int _y, int _maxLaserWidth, color _projectileColor, int  _time, float _angle, float _damage  ) {
    super( _playerIndex, _x, _y, _maxLaserWidth, _projectileColor, _time, _angle, _damage  );
-   particles.add(new Flash(50, 50, color(0)));
-   particles.add(new ShockWave(int(x), int(y), int(size*0.25),40, 80, color(255)));
+   particles.add(new Flash(50, 50, BLACK));
+   particles.add(new ShockWave(int(x), int(y), int(size*0.25),40, 80, WHITE));
    }*/
   SniperBullet( Player _owner, int _x, int _y, int _maxLaserWidth, color _projectileColor, int  _time, float _angle, float _damage  ) {
     super( _owner, _x, _y, _maxLaserWidth, _projectileColor, _time, _angle, _damage  );
-    particles.add(new Flash(50, 50, color(0)));
-    particles.add(new ShockWave(int(x), int(y), int(size*0.25), 40, 80, color(255)));
+    particles.add(new Flash(50, 50, BLACK));
+    particles.add(new ShockWave(int(x), int(y), int(size*0.25), 40, 80, WHITE));
     force=3;
     //particles.add( new TempFreeze(100));
   }
@@ -752,8 +847,8 @@ class SniperBullet extends ChargeLaser { //-------------------------------------
 
   void display() {
     if (!dead ) { 
-      println(damage);
-      strokeWeight(int(laserWidth));
+      //println(damage);
+      strokeWeight(int(laserWidth+1));
       stroke(projectileColor);
       line(int(x), int(y), cos(radians(angle))*laserLength+int(x), sin(radians(angle))*laserLength+int(y));
       //arc(int(x),int(y),1,1,radians(angle+90),radians(angle+275));
@@ -788,7 +883,7 @@ class SniperBullet extends ChargeLaser { //-------------------------------------
         }
         owner.pushForce(-0.2, angle);
         //shakeTimer=int(laserWidth*0.1);
-        particles.add(new  gradient(1000, int(x+size*0.5 +cos(radians(angle))*owner.w*0.5), int(y+size*0.5+sin(radians(angle))*owner.w*0.5), 0, 0, 40, 6, angle, projectileColor));
+        particles.add(new  Gradient(1000, int(x+size*0.5 +cos(radians(angle))*owner.radius), int(y+size*0.5+sin(radians(angle))*owner.radius), 0, 0, 40, 6, angle, projectileColor));
 
         for (int i= 0; players.size () > i; i++)
           if (playerIndex!=i  && !players.get(i).dead && players.get(i).ally != owner.ally ) lineVsCircleCollision(x, y, cos(radians(angle))*laserLength+int(x), sin(radians(angle))*laserLength+int(y), players.get(i));
@@ -798,13 +893,14 @@ class SniperBullet extends ChargeLaser { //-------------------------------------
   @Override
     void hit(Player enemy) {
     enemy.hit(damage);
-    particles.add( new TempFreeze(100));
-    particles.add( new TempSlow(25, 0.1, 1.00));
-
+    if (damage>100) {
+      particles.add( new TempFreeze(100));
+      particles.add( new TempSlow(25, 0.1, 1.00));
+    }
     //  particles.add(new Spark( 1000, int(x), int(y), cos(radians(sprayAngle))*sprayVelocity, sin(radians(sprayAngle))*sprayVelocity, 6, sprayAngle, projectileColor));
 
     enemy.pushForce(3, angle);
-    particles.add(new Flash(100, 24, color(0)));
+    particles.add(new Flash(100, 24, BLACK));
     particles.add(new LineWave(int(enemy.cx), int(enemy.cy), 10, 200, projectileColor, angle+90));
     particles.add(new Spark( 1000, int(enemy.x+random(enemy.w)), int(enemy.y+random(enemy.w)), cos(radians(angle))*random(10), sin(radians(angle))*random(10), 6, angle, projectileColor));
 
@@ -818,7 +914,7 @@ class SniperBullet extends ChargeLaser { //-------------------------------------
 class Bomb extends Projectile implements Reflectable {//----------------------------------------- Bomb objects ----------------------------------------------------
 
   float vx, vy, friction=0.95;
-  int blastForce=40, blastRadius=200;
+  int blastForce=40, blastRadius=200, flick;
   boolean friendlyFire;
   Bomb(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage, boolean _friendlyFire) {
     super(_owner, _x, _y, _size, _projectileColor, _time);
@@ -834,6 +930,7 @@ class Bomb extends Projectile implements Reflectable {//------------------------
 
   void update() {
     if (!dead && !freeze) { 
+      flick=int(random(255));
       if (reverse) {
         x-=vx*timeBend;
         y-=vy*timeBend;
@@ -851,11 +948,11 @@ class Bomb extends Projectile implements Reflectable {//------------------------
   void display() {
     if (!dead) { 
       strokeWeight(5);
-      stroke((friendlyFire)? color(0):color(owner.playerColor));
-      fill((friendlyFire)? color(0):color(owner.playerColor));
+      stroke((friendlyFire)? BLACK:color(owner.playerColor));
+      fill((friendlyFire)? BLACK:color(owner.playerColor));
       ellipse(x, y, (size*(deathTime-stampTime)/time)-size, (size*(deathTime-stampTime)/time)-size );
       noFill();
-      stroke(random(255));
+      stroke(flick);
       ellipse(x, y, size, size);
       /*if ((deathTime-stampTime)<=100)size=400;
        else size=50;*/
@@ -894,15 +991,15 @@ class Bomb extends Projectile implements Reflectable {//------------------------
   @Override
     void fizzle() {    // when fizzle
     if ( !dead) {         
-      for (int i=0; i<8; i++) {
+      for (int i=0; i<6; i++) {
         particles.add(new Particle(int(x), int(y), random(-80, 80), random(-80, 80), int(random(30)+10), 800, 255));
       }
 
-      particles.add(new ShockWave(int(x), int(y), int(blastRadius*0.5), 16, 200, color(255)));
-      particles.add(new ShockWave(int(x), int(y), int(blastRadius*0.4), 32, 150, (friendlyFire)? color(0):color(owner.playerColor)));
-      particles.add(new Flash(200, 12, color(255)));
+      particles.add(new ShockWave(int(x), int(y), int(blastRadius*0.5), 16, 200, WHITE));
+      particles.add(new ShockWave(int(x), int(y), int(blastRadius*0.4), 32, 150, (friendlyFire)? BLACK:color(owner.playerColor)));
+      particles.add(new Flash(200, 12, WHITE));
       hitPlayersInRadius(blastRadius, friendlyFire);
-      shakeTimer=20;
+      shakeTimer+=damage*.2;
     }
   }
 
@@ -1012,7 +1109,7 @@ class DetonateBomb extends Bomb {//----------------------------------------- Bom
     void fizzle() {    // when fizzle
     if ( !dead) {    
       for (int i=0; i<360; i+=30) {
-        Projectile p= new Needle(owner, int(x+cos(radians(i+15))*250), int(y+sin(radians(i+15))*250), 60, color(0), 600, i+195, -cos(radians(i+15))*35, -sin(radians(i+15))*35, 25);
+        Projectile p= new Needle(owner, int(x+cos(radians(i+15))*250), int(y+sin(radians(i+15))*250), 60, BLACK, 600, i+195, -cos(radians(i+15))*35, -sin(radians(i+15))*35, 25);
         p.ally=-1;
         projectiles.add(p);
         projectiles.add( new Needle(owner, int(x+cos(radians(i))*200), int(y+sin(radians(i))*200), 60, owner.playerColor, 600, i+180, -cos(radians(i))*20, -sin(radians(i))*20, 10));
@@ -1021,11 +1118,11 @@ class DetonateBomb extends Bomb {//----------------------------------------- Bom
         particles.add(new Particle(int(x), int(y), random(-80, 80), random(-80, 80), int(random(30)+10), 800, 255));
       }
       particles.add(new ShockWave(int(x), int(y), int(blastRadius*0.5), 16, 175, owner.playerColor));
-      particles.add(new ShockWave(int(x), int(y), int(blastRadius), 16, 1000, color(0)));
+      particles.add(new ShockWave(int(x), int(y), int(blastRadius), 16, 1000, BLACK));
       //particles.add(new ShockWave(int(x), int(y), int(blastRadius*0.4), 125, owner.playerColor));
-      particles.add(new Flash(200, 12, color(255)));
+      particles.add(new Flash(200, 12, WHITE));
       hitPlayersInRadius(blastRadius, friendlyFire);
-      shakeTimer=20;
+      shakeTimer+=20;
     }
   }
 }
@@ -1066,10 +1163,10 @@ class Mine extends Bomb {//----------------------------------------- Mine object
       noFill();
       strokeWeight(5);
       stroke(freezeColor);
-      if (spawnTime+1000<stampTime) rect(-(size/2), -(size/2), (size), (size));
+      if (spawnTime+1000<stampTime) rect(-(size*.5), -(size*.5), (size), (size));
       rotate(radians(angle));
-      stroke((friendlyFire)? color(0):color(owner.playerColor));
-      rect(-(size/2), -(size/2), (size), (size));
+      stroke((friendlyFire)? BLACK:color(owner.playerColor));
+      rect(-(size*.5), -(size*.5), (size), (size));
       popMatrix();
     }
   }
@@ -1121,8 +1218,8 @@ class Rocket extends Bomb implements Reflectable {//----------------------------
   void display() {
     if (!dead) { 
       strokeWeight(5);
-      stroke((friendlyFire)? color(0):color(owner.playerColor));
-      fill((friendlyFire)? color(0):color(owner.playerColor));
+      stroke((friendlyFire)? BLACK:color(owner.playerColor));
+      fill((friendlyFire)? BLACK:color(owner.playerColor));
       //ellipse(x, y, (, (size*(deathTime-stampTime)/time)-size );
       triangle(x+cos(radians(angle-140))*timedScale, y+sin(radians(angle-140))*timedScale, x+cos(radians(angle))*timedScale, y+sin(radians(angle))*timedScale, x+cos(radians(angle+140))*timedScale, y+sin(radians(angle+140))*timedScale  );
       noFill();
@@ -1155,26 +1252,35 @@ class Rocket extends Bomb implements Reflectable {//----------------------------
     for (int i=0; i<360; i+=360/6) {
       projectiles.add( new Bomb(owner, int( x), int(y), 25, owner.playerColor, 400, owner.angle+i, cos(radians(owner.angle+i))*10+vx, sin(radians(owner.angle+i))*10+vy, damage, false));
     }
-    fill((friendlyFire)? color(0):color(owner.playerColor));
+    fill((friendlyFire)? BLACK:color(owner.playerColor));
     ellipse(x, y, size*5, size*5);
-    particles.add(new ShockWave(int(x+vx), int(y+vy), int(blastRadius*0.5), 20, 220, color(255)));
-    particles.add(new ShockWave(int(x), int(y), int(blastRadius*0.4), 18, 150, (friendlyFire)? color(0):color(owner.playerColor)));
-    particles.add(new Flash(200, 12, color(255)));
+    particles.add(new ShockWave(int(x+vx), int(y+vy), int(blastRadius*0.5), 20, 220, WHITE));
+    particles.add(new ShockWave(int(x), int(y), int(blastRadius*0.4), 18, 150, (friendlyFire)? BLACK:color(owner.playerColor)));
+    particles.add(new Flash(200, 12, WHITE));
     hitPlayersInRadius(blastRadius, friendlyFire);
-    shakeTimer=20;
+    shakeTimer+=15;
   }
-  /* public void reflect(float _angle, Player _player) {
-   angle=_angle;
-   playerIndex=_player.index;
-   owner=_player;
-   projectileColor=owner.playerColor;
-   ally=owner.ally;
-   
-   particles.add(new Spark( 1000, int(x), int(y), -cos(radians(angle))*5, -sin(radians(angle))*5, 6, angle, projectileColor));
-   
-   vx=-vx;
-   vy=-vy;
-   }*/
+  public void reflect(float _angle, Player _player) {
+    angle=_angle;
+    playerIndex=_player.index;
+    owner=_player;
+    projectileColor=owner.playerColor;
+    ally=owner.ally;
+
+    particles.add(new Spark( 1000, int(x), int(y), -cos(radians(angle))*5, -sin(radians(angle))*5, 6, angle, projectileColor));
+
+    float diff=_angle;
+
+    angle-=diff;
+    // angle=angle%360;
+
+    angle=-angle;
+    angle+=diff+90;
+
+    particles.add(new Spark( 1000, int(x), int(y), -cos(radians(angle))*5, -sin(radians(angle))*5, 6, angle, projectileColor));
+    vx= cos(radians(angle))*(abs(vx)+abs(vy));
+    vy= sin(radians(angle))*(abs(vx)+abs(vy));
+  }
 }
 
 class Missle extends Rocket implements Reflectable {//----------------------------------------- Bomb objects ----------------------------------------------------
@@ -1193,8 +1299,8 @@ class Missle extends Rocket implements Reflectable {//--------------------------
       if (reverse) {
         x-=vx*timeBend;
         y-=vy*timeBend;
-        vx/=friction;
-        vy/=friction;
+        vx/=friction*timeBend;
+        vy/=friction*timeBend;
       } else {
         particles.add(new Particle(int(x), int(y), 0, 0, int(random(size*.5)+5), 800, owner.playerColor));
 
@@ -1209,13 +1315,13 @@ class Missle extends Rocket implements Reflectable {//--------------------------
         if (target!=owner) { 
           float tx=target.cx, ty=target.cy, keyAngle=(atan2(ty-y, tx-x) * 180 / PI);
           keyAngle+= 360; 
-           angle+= 360; 
-           keyAngle= keyAngle % 360; 
-           angle = angle % 360; 
+          angle+= 360; 
+          keyAngle= keyAngle % 360; 
+          angle = angle % 360; 
 
 
-         float relativeAngleToTarget = keyAngle - angle;
-           println(relativeAngleToTarget+"more "+keyAngle+" : " +angle);
+          float relativeAngleToTarget = keyAngle - angle;
+          //println(relativeAngleToTarget+"more "+keyAngle+" : " +angle);
 
           if (relativeAngleToTarget > 180)
             relativeAngleToTarget -= 360;
@@ -1230,8 +1336,8 @@ class Missle extends Rocket implements Reflectable {//--------------------------
         //vy+=sin(radians(angle))*10;
         //vx=constrain(vx,-10,10);
         //vy=constrain(vy,-10,10);
-        vx*=friction;
-        vy*=friction;
+        vx*=1-friction*timeBend;
+        vy*=1-friction*timeBend;
       }
     }
   }
@@ -1243,13 +1349,13 @@ class Missle extends Rocket implements Reflectable {//--------------------------
     /*for (int i=0; i<360; i+=360/6) {
      projectiles.add( new Bomb(owner, int( x), int(y), 25, owner.playerColor, 400, owner.angle+i, cos(radians(owner.angle+i))*10+vx, sin(radians(owner.angle+i))*10+vy, damage, false));
      }*/
-    fill((friendlyFire)? color(0):color(owner.playerColor));
+    fill((friendlyFire)? BLACK:color(owner.playerColor));
     ellipse(x, y, size*4, size*4);
-    particles.add(new ShockWave(int(x+vx), int(y+vy), int(blastRadius*0.5), 20, 220, color(255)));
-    particles.add(new ShockWave(int(x), int(y), int(blastRadius*0.4), 18, 150, (friendlyFire)? color(0):color(owner.playerColor)));
-    particles.add(new Flash(200, 12, color(255)));
+    particles.add(new ShockWave(int(x+vx), int(y+vy), int(blastRadius*0.5), 20, 220, WHITE));
+    particles.add(new ShockWave(int(x), int(y), int(blastRadius*0.4), 18, 150, (friendlyFire)? BLACK:color(owner.playerColor)));
+    particles.add(new Flash(200, 12, WHITE));
     hitPlayersInRadius(blastRadius, friendlyFire);
-    shakeTimer=15;
+    shakeTimer+=10;
   }
 }
 class SinRocket extends Rocket implements Reflectable {//----------------------------------------- Bomb objects ----------------------------------------------------
@@ -1266,15 +1372,18 @@ class SinRocket extends Rocket implements Reflectable {//-----------------------
     void update() {
     if (!dead && !freeze) { 
       if (reverse) {
-        x-=vx*timeBend;
-        y-=vy*timeBend;
+        angle-=sin(radians(count))*10*timeBend;
+        count-=10*timeBend;
+        timedScale =size-(size*(deathTime-stampTime)/time);
+        x-=(vx+cos(radians(angle))*angleSpeed)*timeBend;
+        y-=(vy+sin(radians(angle))*angleSpeed)*timeBend;
         vx/=friction;
         vy/=friction;
       } else {
-        particles.add(new Particle(int(x), int(y), 0, 0, int(random(25)+8), 800, color(255)));
+        particles.add(new Particle(int(x), int(y), 0, 0, int(random(25)+8), 800, WHITE));
 
-        angle+=sin(radians(count))*10;
-        count+=10;
+        angle+=sin(radians(count))*10*timeBend;
+        count+=10*timeBend;
         timedScale =size-(size*(deathTime-stampTime)/time);
         x+=(vx+cos(radians(angle))*angleSpeed)*timeBend;
         y+=(vy+sin(radians(angle))*angleSpeed)*timeBend;
@@ -1296,21 +1405,23 @@ class SinRocket extends Rocket implements Reflectable {//-----------------------
     /*for (int i=0; i<360; i+=360/6) {
      projectiles.add( new Bomb(owner, int( x), int(y), 25, owner.playerColor, 400, owner.angle+i, cos(radians(owner.angle+i))*10+vx, sin(radians(owner.angle+i))*10+vy, damage, false));
      }*/
-    fill((friendlyFire)? color(0):color(owner.playerColor));
+    fill((friendlyFire)? BLACK:color(owner.playerColor));
     ellipse(x, y, size*4, size*4);
-    particles.add(new ShockWave(int(x+vx), int(y+vy), int(blastRadius*0.5), 20, 220, color(255)));
-    particles.add(new ShockWave(int(x), int(y), int(blastRadius*0.4), 18, 150, (friendlyFire)? color(0):color(owner.playerColor)));
-    particles.add(new Flash(200, 12, color(255)));
+    particles.add(new ShockWave(int(x+vx), int(y+vy), int(blastRadius*0.5), 20, 220, WHITE));
+    particles.add(new ShockWave(int(x), int(y), int(blastRadius*0.4), 18, 150, (friendlyFire)? BLACK:color(owner.playerColor)));
+    particles.add(new Flash(200, 12, WHITE));
     hitPlayersInRadius(blastRadius, friendlyFire);
-    shakeTimer=15;
+    shakeTimer+=10;
   }
 }
 class RCRocket extends Rocket implements Reflectable {//----------------------------------------- Bomb objects ----------------------------------------------------
-  RCRocket(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage, boolean _friendlyFire) {
+  float offsetAngle;
+  RCRocket(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _offsetAngle, float _vx, float _vy, int _damage, boolean _friendlyFire) {
     super(_owner, _x, _y, _size, _projectileColor, _time, _angle, _vx, _vy, _damage, _friendlyFire);
     for (int i=0; i<2; i++) {
       particles.add(new Particle(int(x), int(y), random(10)-5+vx*0.5, random(10)-5+vy*0.5, int(random(20)+5), 800, 255));
     }
+    offsetAngle=_offsetAngle;
     // friction=0.99;
   }
   @Override
@@ -1321,11 +1432,11 @@ class RCRocket extends Rocket implements Reflectable {//------------------------
         y-=vy*timeBend;
         vx/=friction;
         vy/=friction;
-        angle=owner.keyAngle;
+        angle=owner.keyAngle+offsetAngle;
       } else {
         particles.add(new Particle(int(x), int(y), 0, 0, int(random(25)+8), 800, owner.playerColor));
         timedScale =size-(size*(deathTime-stampTime)/time);
-        angle=owner.keyAngle;
+        angle=owner.keyAngle+offsetAngle;
         x+=vx*timeBend;
         y+=vy*timeBend;
         vx+=cos(radians(angle))*2;
@@ -1343,23 +1454,24 @@ class RCRocket extends Rocket implements Reflectable {//------------------------
     /*for (int i=0; i<360; i+=360/6) {
      projectiles.add( new Bomb(owner, int( x), int(y), 25, owner.playerColor, 400, owner.angle+i, cos(radians(owner.angle+i))*10+vx, sin(radians(owner.angle+i))*10+vy, damage, false));
      }*/
-    fill((friendlyFire)? color(0):color(owner.playerColor));
+    fill((friendlyFire)? BLACK:color(owner.playerColor));
     ellipse(x, y, size*5, size*5);
-    particles.add(new ShockWave(int(x+vx), int(y+vy), int(blastRadius*0.5), 20, 220, color(255)));
-    particles.add(new ShockWave(int(x), int(y), int(blastRadius*0.4), 18, 150, (friendlyFire)? color(0):color(owner.playerColor)));
-    particles.add(new Flash(200, 12, color(255)));
+    particles.add(new ShockWave(int(x+vx), int(y+vy), int(blastRadius*0.5), 20, 220, WHITE));
+    particles.add(new ShockWave(int(x), int(y), int(blastRadius*0.4), 18, 150, (friendlyFire)? BLACK:color(owner.playerColor)));
+    particles.add(new Flash(200, 12, WHITE));
     hitPlayersInRadius(blastRadius, friendlyFire);
-    shakeTimer=15;
+    shakeTimer+=damage*.2;
   }
 }
 class Thunder extends Bomb {//----------------------------------------- Thunder objects ----------------------------------------------------
-  int segment=40;
+  int segment=40, arms;
   PShape shockCircle = createShape();       // First create the shape
   float electryfiy = 0, opacity;
   boolean firstFrozen;
-  Thunder(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage) {
+  Thunder(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage, int _arms) {
     super(_owner, _x, _y, _size, _projectileColor, _time, _angle, _vx, _vy, _damage, true);
     blastRadius=_size;
+    arms=_arms;
   }
 
   void update() {
@@ -1416,7 +1528,7 @@ class Thunder extends Bomb {//----------------------------------------- Thunder 
           shockCircle.endShape(CLOSE);
           firstFrozen=false;
         } 
-        shape(shockCircle, shockCircle.X + shockCircle.width/2, shockCircle.Y+shockCircle.height/2);
+        shape(shockCircle, shockCircle.X + shockCircle.width*.5, shockCircle.Y+shockCircle.height*.5);
       }
     }
   }
@@ -1424,14 +1536,16 @@ class Thunder extends Bomb {//----------------------------------------- Thunder 
   @Override
     void fizzle() {    // when fizzle
     if ( !dead ) {         
-      for (int i=0; i<8; i++) {
+      for (int i=0; i<5; i++) {
         particles.add(new Particle(int(x), int(y), random(-80, 80), random(-80, 80), int(random(30)+10), 800, 255));
       }
-      for (int i=0; i<360; i+= (360/5)) {
-        particles.add( new Shock(400, int( x), int(y), 0, 0, 2, i, projectileColor)) ;
+      if (arms>1) {
+        for (int i=0; i<360; i+= (360/arms)) {
+          particles.add( new Shock(400, int( x), int(y), 0, 0, 2, i, projectileColor)) ;
+        }
       }
-      particles.add(new ShockWave(int(x), int(y), int(blastRadius*0.5), 20, blastRadius, color(255)));
-      particles.add(new Flash(500, 12, color(255)));
+      particles.add(new ShockWave(int(x), int(y), int(blastRadius*0.5), 20, blastRadius, WHITE));
+      particles.add(new Flash(500, 12, WHITE));
 
       beginShape();
       strokeWeight(16);
@@ -1442,10 +1556,110 @@ class Thunder extends Bomb {//----------------------------------------- Thunder 
       }
       endShape(CLOSE);
       hitPlayersInRadius(blastRadius, true);
-      shakeTimer=50;
+      //shakeTimer=50;
+      shakeTimer+=int(damage*.4);
     }
   }
   void hit(Player enemy) {
+  }
+}
+
+class CurrentLine extends Projectile {//----------------------------------------- Current objects ----------------------------------------------------
+  float senseRange, tesla, homX, homY;
+  int accuracy;
+  boolean linked, used, follow=true;
+  Player target, link;
+
+  CurrentLine(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage) {
+    super(_owner, _x, _y, _size, _projectileColor, _time);
+    damage=_damage;
+  }
+  CurrentLine(Player _owner, Player _linked, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage) {
+    super(_owner, _x, _y, _size, _projectileColor, _time);
+    damage=_damage;
+    link=_linked;
+  }
+  void update() {
+    if (!dead && !freeze) { 
+
+      senseRange=size+accuracy*12 - random(accuracy*4);
+      target=homingToEnemy(owner.cx, owner.cy); // homing returns 0 if it cant fin any enemy index
+      // else target=homingToEnemy(owner.cx, owner.cy);
+      if (link!=null)      target=homingToEnemy(link.cx, link.cy); // homing returns 0 if it cant fin any enemy index
+
+      tesla=size+accuracy*10; // tesla effect range
+      if (target!=null && !target.dead) target.hit(damage);
+      if (linked && !used) {
+        projectiles.add( new CurrentLine(owner, target, int( target.cx), int(target.cy), size, owner.playerColor, 300, target.angle, 0, 0, damage)); // link
+        used=true;
+      }
+    }
+  }
+
+
+  void display() {
+    if (!dead) {
+      stroke(hue(owner.playerColor), 255, random(100)+150);
+      strokeWeight(int(random(10)));
+      if (link!=null && target!=null) {
+        homX=link.cx;
+        homY=link.cy;
+        noFill();
+        ellipse(homX, homY, senseRange, senseRange);
+        line(link.cx, link.cy, target.cx, target.cy);
+        // if (int(random(10))==0) particles.add(new particle(7, WHITE, target.x+random(tesla)-tesla*.5, target.y+random(tesla)-tesla*.5, random(360), random(20), 50, int(random(100)+50), 8)); // electric Particles
+        bezier(target.cx, target.cy, target.cx-100 +random(tesla)-tesla*.5, target.cy+random(tesla)-tesla*.5, target.cx+100+random(tesla)-tesla*.5, target.cy+random(tesla)-tesla*.5, target.cx, target.cy);// crosshier
+        bezier(target.cx, target.cy, target.cx+random(tesla)-tesla*.5, target.cy-100+random(tesla)-tesla*.5, target.cx+random(tesla)-tesla*.5, target.cy+100+random(tesla)-tesla*.5, target.cx, target.cy);// crosshier
+        // target.force(random(360), this.v/5 );   // force enemy back
+        // target.hit(this.damage);
+      } else {
+        if (target!=null) {
+          homX=target.cx;
+          homY=target.cy;
+          noFill();
+          ellipse(homX, homY, senseRange*.5, senseRange*.5);
+          line(owner.cx, owner.cy, target.cx, target.cy);
+          // if (int(random(10))==0) particles.add(new particle(7, WHITE, target.x+random(tesla)-tesla*.5, target.y+random(tesla)-tesla*.5, random(360), random(20), 50, int(random(100)+50), 8)); // electric Particles
+          bezier(target.cx, target.cy, target.cx-100 +random(tesla)-tesla*.5, target.cy+random(tesla)-tesla*.5, target.cx+100+random(tesla)-tesla*.5, target.cy+random(tesla)-tesla*.5, target.cx, target.cy);// crosshier
+          bezier(target.cx, target.cy, target.cx+random(tesla)-tesla*.5, target.cy-100+random(tesla)-tesla*.5, target.cx+random(tesla)-tesla*.5, target.cy+100+random(tesla)-tesla*.5, target.cx, target.cy);// crosshier
+          // target.force(random(360), this.v/5 );   // force enemy back
+          // target.hit(this.damage);
+          //   fill(255);
+          particles.add(new  Tesla( int(target.cx), int(target.cy), 300, 200, owner.playerColor));
+        } else {            // if enemies is not present
+          noFill();
+          strokeWeight(1);
+          // if (int(random(20))==0) particles.add(new particle(7, WHITE, owner.cx+random(tesla)-tesla*.5, owner.cy+random(tesla)-tesla*.5, random(360), random(10), 50, int(random(50)+50), 8)); // electric Particles
+
+          homX=owner.cx; 
+          homY= owner.cy;
+          ellipse(homX, homY, tesla, tesla);
+          bezier(owner.cx, owner.cy, owner.cx-100 +random(tesla)-tesla*.5, owner.cy+random(tesla)-tesla*.5, owner.cx+100+random(tesla)-tesla*.5, owner.cy+random(tesla)-tesla*.5, owner.cx, owner.cy+random(tesla)-tesla*.5);// crosshier
+          bezier(owner.cx, owner.cy, owner.cx+random(tesla)-tesla*.5, owner.cy-100+random(tesla)-tesla*.5, owner.cx+random(tesla)-tesla*.5, owner.cy+100+random(tesla)-tesla*.5, owner.cx, owner.cy+random(tesla)-tesla*.5);// crosshier
+        }
+
+
+        stroke(hue(owner.playerColor), 255, random(100)+150);
+        noFill();
+        bezier(owner.cx, owner.cy, owner.cx+10-random(100), owner.cy+10-random(100), homX+10-random(100), homY+10-random(100), homX, homY);
+      }
+    }
+  }
+
+
+  Player homingToEnemy(float X, float Y) {  // missile range scan
+    for (int sense = 0; sense < senseRange; sense++) {
+      for (  Player p : players) {
+        if (p!=owner && p.ally!=owner.ally && !p.dead && dist(p.cx, p.cy, X, Y)<sense*.5) {
+          if (target!=link ||(link!=null && link==owner)) {
+            return null;
+          }
+          linked=true;
+          return p;
+        }
+      }
+    }
+    return null;
   }
 }
 
@@ -1511,7 +1725,7 @@ class Needle extends Projectile implements Reflectable {//----------------------
       float sprayVelocity=random(v*0.75);
       particles.add(new Spark( 1000, int(x), int(y), cos(radians(sprayAngle))*sprayVelocity, sin(radians(sprayAngle))*sprayVelocity, 6, sprayAngle, projectileColor));
     }
-    // particles.add(new LineWave(int(x), int(y), 80, 100, color(255), angle+90));
+    // particles.add(new LineWave(int(x), int(y), 80, 100, WHITE, angle+90));
   }
   @Override
     public void reflect(float _angle, Player _player) {
@@ -1570,7 +1784,7 @@ class Slash extends Projectile {//----------------------------------------- Slas
     range= _range;
     pCX=_owner.cx;
     pCY= _owner.cy;
-    for (int i=0; i<7; i++) {
+    for (int i=0; i<5; i++) {
       particles.add(new Particle(int(x), int(y), vx/(2-0.12*i), vy/(2-0.12*i), 10+i*4, _time, _projectileColor));
     }
     for (int i=0; i<2; i++) {
@@ -1656,7 +1870,7 @@ class Slash extends Projectile {//----------------------------------------- Slas
   @Override
     void fizzle() {    // when fizzle
     if ( !dead) {         
-      for (int i=0; i<4; i++) {
+      for (int i=0; i<3; i++) {
         particles.add(new Particle(int(x), int(y), cos(radians(random(-15, 15)+angle-120))*10, sin(radians(random(-15, 15)+angle-120))*10, int(random(20)+5), 800, 255));
       }
     }
@@ -1666,16 +1880,16 @@ class Slash extends Projectile {//----------------------------------------- Slas
     void hit(Player enemy) {
 
     enemy.hit(damage);
-    for (int i=0; i<6; i++) {
+    for (int i=0; i<5; i++) {
       particles.add(new Particle(int(x), int(y), random(20)-10, random(20)-10, int(random(20)+5), 800, 255));
     }
-    for (int i=0; i<4; i++) {
+    for (int i=0; i<3; i++) {
       particles.add(new Particle(int(x), int(y), random(40)-20, random(40)-20, int(random(30)+10), 800, projectileColor));
     }
     // enemy.pushForce(-10, angle);
     // particles.add(new Flash(200, 32, 255));  
     particles.add(new LineWave(int(enemy.cx), int(enemy.cy), 10, 300, projectileColor, angle+90));
-    particles.add(new LineWave(int(enemy.cx), int(enemy.cy), 10, 300, color(255), angle+90));
+    particles.add(new LineWave(int(enemy.cx), int(enemy.cy), 10, 300, WHITE, angle+90));
   }
 }
 
@@ -1754,7 +1968,7 @@ class Boomerang extends Projectile implements Reflectable {//-------------------
 
       owner.pushForce(vx*0.2, vy*0.2, angle);
       owner.abilityList.get(0).energy+=recoverEnergy;
-      particles.add(new RShockWave(int(owner.cx), int(owner.cy), 350, 32, 300, color(255)));
+      particles.add(new RShockWave(int(owner.cx), int(owner.cy), 350, 32, 300, WHITE));
       // particles.add(new ShockWave(int(players.get(playerIndex).x+players.get(playerIndex).w*0.5), int(players.get(playerIndex).y+players.get(playerIndex).h*0.5), 20, 100, projectileColor));
     }
     deathTime=stampTime;   // dead on collision with owner
@@ -1831,9 +2045,9 @@ class HomingMissile extends Projectile implements Reflectable {//---------------
      c.beginShape();
      c.fill(projectileColor);
      c.stroke(projectileColor, 50);
-     c.vertex(int (0), int (-size/3) );
+     c.vertex(int (0), int (-size*.33) );
      c.vertex(int (+size), int (0));
-     c.vertex(int (0), int (+size/3));
+     c.vertex(int (0), int (+size*.33));
      c.vertex(int (+size*0.5), int (0));
      c.endShape(CLOSE);*/
 
@@ -1882,7 +2096,7 @@ class HomingMissile extends Projectile implements Reflectable {//---------------
         } else if (leap) {
           vx+=cos(radians(angle))*leapAccel*timeBend;
           vy+=sin(radians(angle))*leapAccel*timeBend;
-          particles.add(new Particle(int(x), int(y), cos(radians(angle+180))*(abs(vx)+abs(vy))*0.05, sin(radians(angle+180))*(abs(vx)+abs(vy))*0.05, 15, 300, color(255)));
+          particles.add(new Particle(int(x), int(y), cos(radians(angle+180))*(abs(vx)+abs(vy))*0.05, sin(radians(angle+180))*(abs(vx)+abs(vy))*0.05, 15, 300, WHITE));
         } else if (!locked) {
           calcAngle();
           vx+=cos(radians(angle))*homeRate*timeBend;
@@ -1959,7 +2173,7 @@ class HomingMissile extends Projectile implements Reflectable {//---------------
       particles.add(new Particle(int(x), int(y), random(40)-20, random(40)-20, int(random(30)+10), 800, projectileColor));
     }
     particles.add(new Flash(50, 64, 255));  
-    particles.add(new LineWave(int(x), int(y), 10, 300, color(255), angle));
+    particles.add(new LineWave(int(x), int(y), 10, 300, WHITE, angle));
   }
 
   void calcAngle() {
@@ -2018,8 +2232,8 @@ class Shield extends Projectile implements Reflector { //-----------------------
     damage= int(_damage);
     size=60;
     angle=_angle;
-    follow=false;
-    for (int i=0; i<4; i++) {
+    //follow=false;
+    for (int i=0; i<2; i++) {
       particles.add(new Particle(int(x), int(y), random(10)-5, random(10)-5, int(random(20)+5), 800, 255));
     }
   }
@@ -2031,7 +2245,7 @@ class Shield extends Projectile implements Reflector { //-----------------------
     offsetX=_offsetX;
     offsetY=_offsetY;
     follow=true;
-    for (int i=0; i<4; i++) {
+    for (int i=0; i<2; i++) {
       particles.add(new Particle(int(x), int(y), random(10)-5, random(10)-5, int(random(20)+5), 800, 255));
     }
   }
@@ -2041,8 +2255,7 @@ class Shield extends Projectile implements Reflector { //-----------------------
       //text(angle, x-100, y-100);
       strokeWeight(int(10));
       stroke(color(hue(projectileColor), 255-brightness, brightness(projectileColor)));
-           // line(cos(radians(angle-90+90))*size*0.9+int(x), sin(radians(angle-90+90))*size*0.9+int(y), cos(radians(angle+90+90))*size*0.9+int(x), sin(radians(angle+90+90))*size*0.9+int(y));
-
+      // line(cos(radians(angle-90+90))*size*0.9+int(x), sin(radians(angle-90+90))*size*0.9+int(y), cos(radians(angle+90+90))*size*0.9+int(x), sin(radians(angle+90+90))*size*0.9+int(y));
       line(cos(radians(angle))*size*0.9+int(x), sin(radians(angle))*size*0.9+int(y), cos(radians(angle+90+90))*size*0.9+int(x), sin(radians(angle+90+90))*size*0.9+int(y));
     }
   }
@@ -2070,7 +2283,7 @@ class Shield extends Projectile implements Reflector { //-----------------------
         // x=players.get(playerIndex).x+50;
         //  y=players.get(playerIndex).y+50;
         //   shakeTimer=int(laserWidth*0.1);
-        // particles.add(new  gradient(1000, int(x+size*0.5), int(y+size*0.5), 0, 0, 4, angle, projectileColor));
+        // particles.add(new  Gradient(1000, int(x+size*0.5), int(y+size*0.5), 0, 0, 4, angle, projectileColor));
 
         /* for (int i= 0; players.size () > i; i++)
          if (playerIndex!=i  && !players.get(i).dead) lineVsCircleCollision(x, y, cos(radians(angle))*laserLength+int(x), sin(radians(angle))*laserLength+int(y), players.get(i));
@@ -2081,18 +2294,17 @@ class Shield extends Projectile implements Reflector { //-----------------------
 
   @Override
     void fizzle() {    // when fizzle
-    if ( !dead) {         
-      for (int i=0; i<2; i++) {
-        particles.add(new Particle(int(x-cos(radians(angle))*15), int(y-sin(radians(angle))*15), 0, 0, int(random(25)), 500, color(projectileColor)));
-        particles.add(new Particle(int(x+cos(radians(angle))*15), int(y+sin(radians(angle))*15), 0, 0, int(random(25)), 500, color(projectileColor)));
-        particles.add(new Particle(int(x-cos(radians(angle))*30), int(y-sin(radians(angle))*30), 0, 0, int(random(25)), 500, color(projectileColor)));
-        particles.add(new Particle(int(x+cos(radians(angle))*30), int(y+sin(radians(angle))*30), 0, 0, int(random(25)), 500, color(projectileColor)));
-        particles.add(new Particle(int(x-cos(radians(angle))*50), int(y-sin(radians(angle))*50), 0, 0, int(random(25)), 500, color(projectileColor)));
-        particles.add(new Particle(int(x+cos(radians(angle))*50), int(y+sin(radians(angle))*50), 0, 0, int(random(25)), 500, color(projectileColor)));
-        particles.add(new Particle(int(x), int(y), 0, 0, 10, 1000, color(projectileColor)));
-
-        //  particles.add(new Particle(int(x), int(y), random(10)-5, random(10)-5, int(random(20)+5), 1000, projectileColor));
-      }
+    if ( !dead && !follow) {         
+      // for (int i=0; i<2; i++) {
+      // particles.add(new Particle(int(x-cos(radians(angle))*15), int(y-sin(radians(angle))*15), 0, 0, int(random(25)), 500, color(projectileColor)));
+      particles.add(new Particle(int(x+cos(radians(angle))*15), int(y+sin(radians(angle))*15), 0, 0, int(random(25)), 500, color(projectileColor)));
+      particles.add(new Particle(int(x-cos(radians(angle))*30), int(y-sin(radians(angle))*30), 0, 0, int(random(25)), 500, color(projectileColor)));
+      particles.add(new Particle(int(x+cos(radians(angle))*30), int(y+sin(radians(angle))*30), 0, 0, int(random(25)), 500, color(projectileColor)));
+      particles.add(new Particle(int(x-cos(radians(angle))*50), int(y-sin(radians(angle))*50), 0, 0, int(random(25)), 500, color(projectileColor)));
+      // particles.add(new Particle(int(x+cos(radians(angle))*50), int(y+sin(radians(angle))*50), 0, 0, int(random(25)), 500, color(projectileColor)));
+      particles.add(new Particle(int(x), int(y), 0, 0, 10, 1000, color(projectileColor)));
+      //  particles.add(new Particle(int(x), int(y), random(10)-5, random(10)-5, int(random(20)+5), 1000, projectileColor));
+      //}
     }
   }
 
@@ -2192,7 +2404,7 @@ class Shield extends Projectile implements Reflector { //-----------------------
 
   public void reflecting() {
     brightness=500;
-    particles.add(new ShockWave(int(x), int(y), size, 16, 100, color(255)));
+    particles.add(new ShockWave(int(x), int(y), size, 16, 100, WHITE));
   }
 }
 
@@ -2200,6 +2412,7 @@ class Shield extends Projectile implements Reflector { //-----------------------
 class Electron extends Projectile implements Reflectable {//----------------------------------------- Electron objects ----------------------------------------------------
   boolean orbit=true;
   int recoverEnergy=5;
+  final float derailMultiplier=2.5;
   float orbitAngle, vx, vy, distance=25, maxDistance=200, orbitAngleSpeed=6;
   Electron(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage) {
     super(_owner, _x, _y, _size, _projectileColor, _time);
@@ -2263,7 +2476,7 @@ class Electron extends Projectile implements Reflectable {//--------------------
     void fizzle() {    // when fizzle
     if ( !dead) {         
       for (int i=0; i<4; i++) {
-        particles.add(new Particle(int(x), int(y), random(10)-5+vx, random(10)-5+vy, int(random(20)+5), 800, 255));
+        particles.add(new Particle(int(x+size*.5), int(y+size*.5), random(10)-5+vx, random(10)-5+vy, int(random(20)+5), 800, 255));
       }
     }
   }
@@ -2282,14 +2495,15 @@ class Electron extends Projectile implements Reflectable {//--------------------
         particles.add(new Particle(int(x), int(y), random(40)-20, random(40)-20, int(random(30)+10), 800, projectileColor));
       }
     } else { 
-      enemy.hit(damage*2);
+      enemy.hit(int(damage*derailMultiplier));
       enemy.pushForce(12*orbitAngleSpeed, angle);
       deathTime+=3000;
       owner.abilityList.get(0).energy+=recoverEnergy;
       orbit=true;
-      particles.add(new ShockWave(int(x), int(y), 300, 16, 150, color(255)));
+      projectiles.add( new CurrentLine(owner, int( enemy.cx), int( enemy.cx), 200, owner.playerColor, 200, owner.angle, 0, 0, 2));
+      particles.add(new ShockWave(int(x), int(y), 300, 16, 150, WHITE));
 
-      for (int i=0; i<8; i++) {
+      for (int i=0; i<6; i++) {
         particles.add(new Particle(int(x), int(y), random(40)-20, random(40)-20, int(random(30)+10), 800, projectileColor));
       }
       stroke(projectileColor);
@@ -2355,7 +2569,7 @@ class Graviton extends Projectile {//----------------------------------------- G
       particles.add(new Particle(int(x), int(y), random(10)-5+vx*0.5, random(10)-5+vy*0.5, int(random(20)+5), 800, 255));
     }
     particles.add(new ShockWave(int(x), int(y), int(dragRadius*0.5), 16, 200, color(_projectileColor)));
-    particles.add(new ShockWave(int(x), int(y), int(dragRadius*0.4), 16, 150, color(255)));
+    particles.add(new ShockWave(int(x), int(y), int(dragRadius*0.4), 16, 150, WHITE));
   }
   void update() {
     if (!dead && !freeze) { 
@@ -2381,7 +2595,7 @@ class Graviton extends Projectile {//----------------------------------------- G
   void display() {
     if (!dead) { 
 
-      strokeWeight(sin(radians(count*4*timeBend))*10);
+      strokeWeight(sin(radians(count*4*timeBend))*5);
       stroke(255);
       fill(projectileColor);
       ellipse(x, y, (size*(deathTime-stampTime)/time)-size, (size*(deathTime-stampTime)/time)-size );
@@ -2427,11 +2641,11 @@ class Graviton extends Projectile {//----------------------------------------- G
   @Override
     void fizzle() {    // when fizzle
     if ( !dead) {         
-      for (int i=0; i<8; i++) {
+      for (int i=0; i<6; i++) {
         particles.add(new Particle(int(x), int(y), random(-80, 80), random(-80, 80), int(random(30)+10), 800, 255));
       }
-      // particles.add(new Flash(200, 12, color(255)));
-      shakeTimer=5;
+      // particles.add(new Flash(200, 12, WHITE));
+      shakeTimer+=5;
     }
   }
 }

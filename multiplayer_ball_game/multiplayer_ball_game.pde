@@ -2,13 +2,13 @@
 /**------------------------------------------------------------//
  //                                                            //
  //  Coding dojo  - Prototype of a timecontrol game            //
- //  av: Alrik He    v.0.6.5                                   //
+ //  av: Alrik He    v.0.6.7                                   //
  //  Arduino verstad Malmö                                     //
  //                                                            //
- //      2014-09-21    -     2016-01-15                        //
+ //      2014-09-21    -     2016-11-05                        //
  //                                                            //
  //                                                            //
- //         Used for weapon test & prototyping                 //
+ //         Used for weapon test & prototyping timebending     //
  //                                                            //
  //                                                            //
  --------------------------------------------------------------*/
@@ -27,23 +27,27 @@ Gain   g = new Gain(ac, 1, 0.05); //volume
 PFont font;
 PGraphics GUILayer;
 PShader  Blur;
-boolean slow, reverse, fastForward, freeze, controlable=true, cheatEnabled,debug, origo, noisy, mute;
+boolean noFlash=true, noShake=true, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute;
+final float flashAmount=0.2;
 int mouseSelectedPlayerIndex=0;
+int halfWidth, halfHeight;
+int gameMode=1;
+final int WHITE=color(255), GREY=color(172), BLACK=color(0);
 final int speedFactor= 2;
 final float slowFactor= 0.3;
-final String version="0.7.2";
+final String version="0.7.5";
 static long prevMillis, addMillis, forwardTime, reversedTime, freezeTime, stampTime, fallenTime;
 final int baudRate= 19200;
 final static float DEFAULT_FRICTION=0.1;
 final int AmountOfPlayers=4; // start players
-final int startBalls=5;
+final int startBalls=0;
 final int  ballSize=100;
 final int playerSize=100;
 static int playersAlive; // amount of players alive
-
+static Player AI;
 final int offsetX=950, offsetY=100;
-static int shakeTimer;
-static float F=1, S=1, timeBend=1, zoom=.8;
+static int shakeTimer, shakeX=0, shakeY=0;
+static float F=1, S=1, timeBend=1, zoom=1;//0.7;
 //int keyCooldown[]= new int[AmountOfPlayers];
 final int keyResponseDelay=30;  // eventhe refreashrate equal to arduino devices
 final char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='7';
@@ -56,12 +60,15 @@ ArrayList <TimeStamp> stamps= new ArrayList<TimeStamp>();
 ArrayList <Projectile> projectiles = new ArrayList<Projectile>();
 ArrayList <Particle> particles = new ArrayList<Particle>();
 
+final Projectile allProjectiles[] = new Projectile[]{
+  // new IceDagger(),new forceBall(),new RevolverBullet()
+};
+
 final Ability abilityList[] = new Ability[]{
   // new FastForward(), 
   // new Freeze(), 
   // new Reverse(), 
   // new Slow(), 
-
   new ThrowDagger(), 
   new Revolver(), 
   new ForceShoot(), 
@@ -84,11 +91,23 @@ final Ability abilityList[] = new Ability[]{
   new DeployElectron(), 
   new Gravity(), 
   new DeployTurret(), 
-  new Bazooka(),
-  new MissleLauncher(),
+  new Bazooka(), 
+  new MissleLauncher(), 
   new AutoGun(), 
-  new Combo(),
-  new KineticPulse()
+  new Combo(), 
+  new KineticPulse(), 
+  new TeslaShock(), 
+  new RandoGun(), 
+  new Shotgun(), 
+  new FlameThrower(), 
+  new DeployDrone(), 
+  new DeployBodyguard(), 
+  new SemiAuto(), 
+  new Pistol(), 
+  new AssaultBattery(), 
+  new Stars(), 
+  new SeekGun()
+  //new SummonEvil()
 };
 
 final Ability passiveList[] = new Ability[]{
@@ -97,10 +116,30 @@ final Ability passiveList[] = new Ability[]{
   new Speed(), 
   new Armor(), 
   new HpRegen(), 
+  new Static(), 
+  new SuppressFire(), 
+  new Nova(), 
+  new Trail(), 
+  new Gloss(), 
+  new BackShield(), 
+  new PainPulse(), 
+  new Boost(), 
+  new Glide(), 
+  new MpRegen(), 
+  new BulletTime(), 
+  new Emergency(), 
+  new Adrenaline(), 
+  new Redemption(), 
+  new Undo()
 };
 
-Ability[] abilities= { 
-  new KineticPulse(), new MissleLauncher(), new AutoGun(), new DeployThunder(), new Random().randomize(), new Random().randomize()
+Ability[][] abilities= { 
+  {new AssaultBattery(), new Adrenaline()}, 
+  {new SeekGun(), new Emergency()}, 
+  { new AutoGun(), new Adrenaline()}, 
+  {new Shotgun(), new Adrenaline()}, 
+  {new Random().randomize(), new RandomPassive().randomize()}, 
+  {new Random().randomize(), new RandomPassive().randomize()}
 };
 
 int playerControl[][]= {
@@ -137,6 +176,8 @@ void setup() {
   textFont(font, 18);
   randomSeed(12345);
   noSmooth();
+  halfWidth=int(width*.5);
+  halfHeight=int(height*.5);
   //frameRate(60);
   //noCursor();
   //cursor();
@@ -144,9 +185,10 @@ void setup() {
   colorMode(HSB);
   for (int i=0; i< AmountOfPlayers; i++) {
     try {
-      players.add(new Player(i, color((255/AmountOfPlayers)*i, 255, 255), int(random(width-playerSize*1)+playerSize), int(random(height-playerSize*1)+playerSize), playerSize, playerSize, playerControl[i][0], playerControl[i][1], playerControl[i][2], playerControl[i][3], playerControl[i][4], abilities[i], new RandomPassive().randomize().clone()));
+      players.add(new Player(i, color((255/AmountOfPlayers)*i, 255, 255), int(random(width-playerSize*1)+playerSize), int(random(height-playerSize*1)+playerSize), playerSize, playerSize, playerControl[i][0], playerControl[i][1], playerControl[i][2], playerControl[i][3], playerControl[i][4], abilities[i][0], abilities[i][1]));
     }
     catch(Exception e ) {
+          println(e);
     }
     if (players.get(i).mouse)players.get(i).FRICTION_FACTOR=0.11; //mouse
   }
@@ -174,10 +216,10 @@ void setup() {
 
   try {  
     // initialize the SamplePlayer
-   // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/TooManyCooksAdultSwim.mp3"));
-    //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
-   // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
-    musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Branching time.mp3")); 
+    // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/TooManyCooksAdultSwim.mp3"));
+    musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
+    // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
+    // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Branching time.mp3")); 
     //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/orange caramel -aing.mp3"));
     //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/goodbye.mp3"));
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/wierd.mp3"));
@@ -203,9 +245,26 @@ void setup() {
   an.out.addInput(g2);
   an.start();  //start noise
 
-  particles.add(new Flash(1500, 5, color(255)));   // flash
+  particles.add(new Flash(1500, 5, WHITE));   // flash
   particles.get(0).opacity=0;
-  frameRate(60);
+  //frameRate(60);
+
+  AI= new Player( -1, GREY, halfWidth, halfHeight, 0, 0, 0, 0, 0, 0, 0, new DeployTurret());
+  AI.index=-1;
+  AI.angle=0;
+  AI.stealth=true;
+  AI.dead=true;
+  switch(gameMode) {
+  case 0:
+    particles.add(new  Text("Brawl", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
+    break;
+  case 1:
+    for (Player p : players) p.ally=0;
+    players.add(AI);
+    spawningSetup();
+    particles.add(new  Text("Survival", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
+    break;
+  }
 }
 void stop() {
   musicPlayer.pause(true);
@@ -213,6 +272,17 @@ void stop() {
 }
 
 void draw() {
+  switch(gameMode) {
+  case 0:
+
+    break;
+  case 1:
+    survivalSpawning();
+    break;
+  }
+
+
+
   background(255);
   addMillis=millis()-prevMillis;
   prevMillis=millis();
@@ -226,15 +296,13 @@ void draw() {
     fill(100);
 
     if (fastForward) {
-      fill(240, 200, 255, 70);
+      fill(240, 100*F, 100, 50);
     }
     if (slow) {
       fill(240, 10*F, 250, 20);
     }
     if (freeze) {
       fill(150, 200, 255);
-    }
-    if (freeze) {
       freezeTime+=addMillis;
     } else {
       if (reverse) {
@@ -271,7 +339,7 @@ void draw() {
     scale(zoom, zoom);
 
     noStroke();
-    rect(0-10, 0-10, width+20, height+20); // background
+    rect(-10, -10, width+20, height+20); // background
 
 
     //--------------------- projectiles-----------------------
@@ -303,40 +371,16 @@ void draw() {
     }
 
     checkPlayerVSPlayerColloision();
-    checkPlayerVSProjectileColloision();
     checkProjectileVSProjectileColloision();
-    /*for (int i=0; i<players.size (); i++) {       
-     if (!players.get(i).dead) {
-     
-     if (reverse && !players.get(i).reverseImmunity) {
-     
-     if (!freeze ||  players.get(i).freezeImmunity) {
-     // players.get(i).checkBounds();
-     players.get(i).mouseControl() ;
-     players.get(i).update();
-     }
-     players.get(i).display();
-     } else {
-     if (!freeze || players.get(i).freezeImmunity) {
-     players.get(i).mouseControl() ;
-     players.get(i).update();
-     players.get(i).checkBounds();
-     }
-     players.get(i).display();
-     }
-     }
-     }*/
+    checkPlayerVSProjectileColloision();
+
+
     for (Player p : players) {       
       if (!p.dead) {
-        if (reverse && !p.reverseImmunity) {
-          if (!freeze ||  p.freezeImmunity) {
-            p.mouseControl() ;
-            p.update();
-          }
-        } else {
-          if (!freeze || p.freezeImmunity) {
-            p.mouseControl() ;
-            p.update();
+        if (!freeze ||  p.freezeImmunity) {
+          p.mouseControl() ;
+          p.update();
+          if (!reverse || p.reverseImmunity) {
             p.checkBounds();
           }
         }
@@ -349,12 +393,12 @@ void draw() {
       filter(Blur);
       // }
     } /*else {   
-      //colorMode(HSB);
-    }*/
+     //colorMode(HSB);
+     }*/
     if (slow) {
       noStroke();
-      fill(0, 0, 0, 30);
-      rect(0-10, 0-10, width+20, height+20); // background
+      fill(0, 30);
+      rect(10, 10, width+20, height+20); // background
     }
     image(GUILayer, 0, 0);
     //mouseDot();
@@ -367,12 +411,6 @@ void draw() {
 
     popMatrix();
 
-    /*for (int i=0; i<players.size (); i++) {    // resetstate
-     if (!players.get(i).dead) {
-     players.get(i).state=0;
-     players.get(i).hit=false;
-     }
-     }*/
     for (Player p : players) {    // resetstate
       if (!p.dead) {
         p.state=0;
@@ -382,9 +420,6 @@ void draw() {
     popMatrix();
   }// origo
   // prevMillis=millis();
-  if (cheatEnabled) {
-    displayInfo();
-  } else {
-    displayClock();
-  }
+  if (cheatEnabled)displayInfo();
+  else displayClock();
 }

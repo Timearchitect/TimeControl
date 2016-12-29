@@ -15,44 +15,44 @@ class CheckPoint extends TimeStamp {  // save states
     // save all states
 
     /*for (int i=0; i<players.size (); i++) {
-      checkPointStamps.add( new ControlStamp(players.get(i).index, int(players.get(i).x), int(players.get(i).y), players.get(i).vx, players.get(i).vy, players.get(i).ax, players.get(i).ay)); //save coords and controll
-      checkPointStamps.add( new StateStamp(players.get(i).index, int(players.get(i).x), int(players.get(i).y), players.get(i).state, players.get(i).health, players.get(i).dead)); //save players state
-    }
-
-    for (int i=0; i<projectiles.size (); i++) {  // clone projectiles
-      try {
-        clonedProjectiles.add( projectiles.get(i).clone());
-      }
-      catch(CloneNotSupportedException e) {
-      }
-    }
-
-    for (int i=0; i<particles.size (); i++) { // clone particles
-      try {
-        clonedParticles.add( particles.get(i).clone());
-      }
-      catch(CloneNotSupportedException e) {
-      }
-    }*/
-     for (Player p:players) {
+     checkPointStamps.add( new ControlStamp(players.get(i).index, int(players.get(i).x), int(players.get(i).y), players.get(i).vx, players.get(i).vy, players.get(i).ax, players.get(i).ay)); //save coords and controll
+     checkPointStamps.add( new StateStamp(players.get(i).index, int(players.get(i).x), int(players.get(i).y), players.get(i).state, players.get(i).health, players.get(i).dead)); //save players state
+     }
+     
+     for (int i=0; i<projectiles.size (); i++) {  // clone projectiles
+     try {
+     clonedProjectiles.add( projectiles.get(i).clone());
+     }
+     catch(CloneNotSupportedException e) {
+     }
+     }
+     
+     for (int i=0; i<particles.size (); i++) { // clone particles
+     try {
+     clonedParticles.add( particles.get(i).clone());
+     }
+     catch(CloneNotSupportedException e) {
+     }
+     }*/
+    for (Player p : players) {
       checkPointStamps.add( new ControlStamp(p.index, int(p.x), int(p.y), p.vx, p.vy, p.ax, p.ay)); //save coords and controll
       checkPointStamps.add( new StateStamp(p.index, int(p.x), int(p.y), p.state, p.health, p.dead)); //save players state
     }
 
-    for (Projectile p:projectiles) {  // clone projectiles
-      try {
+    for (Projectile p : projectiles) {  // clone projectiles
+     try {
         clonedProjectiles.add( p.clone());
       }
-      catch(CloneNotSupportedException e) {
+     catch(CloneNotSupportedException e) {
       }
     }
 
-    for (Particle p:particles) { // clone particles
-      try {
+    for (Particle p : particles) { // clone particles
+     // try {
         clonedParticles.add( p.clone());
-      }
-      catch(CloneNotSupportedException e) {
-      }
+   //   }
+   //   catch(CloneNotSupportedException e) {
+    //  }
     }
 
     //-----------------------
@@ -96,10 +96,10 @@ class CheckPoint extends TimeStamp {  // save states
     fastForward=savedFastForward; 
     freeze=savedFreeze;
 
-   /* for (int i=0; i<checkPointStamps.size (); i++) {
-      checkPointStamps.get(i).call();
-    }*/
-     for (TimeStamp t:checkPointStamps) {
+    /* for (int i=0; i<checkPointStamps.size (); i++) {
+     checkPointStamps.get(i).call();
+     }*/
+    for (TimeStamp t : checkPointStamps) {
       t.call();
     }
     musicPlayer.pause(musicPause);
@@ -110,8 +110,7 @@ class CheckPoint extends TimeStamp {  // save states
 class StateStamp extends TimeStamp {  // save player 
   int playerState=0;
   int playerHealth=0;
-  boolean playerDead;
-  boolean stealth;
+  boolean playerDead, stealth;
   StateStamp(int _player, int _x, int _y, int _state, int _health, boolean _dead) {
     super(_player);
     x=_x;
@@ -138,10 +137,16 @@ class StateStamp extends TimeStamp {  // save player
   }
 
   void revert() {
-    if (reverse && ! players.get(playerIndex).reverseImmunity && stampTime<time) {
-      call();
+    try {
+      if (reverse && ! players.get(playerIndex).reverseImmunity && stampTime<time) {
+        call();
+        stamps.remove(this);
+        // super.revert();
+      }
+    } 
+    catch(Exception e) {
+      println(e);
       stamps.remove(this);
-      // super.revert();
     }
   }
   void call() {
@@ -172,15 +177,19 @@ class AbilityStamp extends TimeStamp { //save player ability
     super.display();
     stroke(255);
     point(x, y);
-    //point(coord.x, coord.y);
   }
 
   void revert() {
-    if (reverse && ! players.get(playerIndex).reverseImmunity && stampTime<time) {
-      //background(255);
-      call();
-      stamps.remove(this);
-      // super.revert();
+    try {
+      if (reverse && !players.get(playerIndex).reverseImmunity && stampTime<time) {
+        //background(255);
+        call();
+        stamps.remove(this);
+        // super.revert();
+      }
+    }
+    catch(Exception e) {
+      println(e);
     }
   }
   void call() {

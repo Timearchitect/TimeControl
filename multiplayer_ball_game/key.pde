@@ -4,7 +4,7 @@ void keyPressed() {
   if (key == '#') {                    // enablecheats
     cheatEnabled=(cheatEnabled==true)?false:true;
   }
-    if (key == '"') {                    // enablecheats
+  if (key == '"') {                    // enablecheats
     debug=(debug==true)?false:true;
   }
   if (key == '¤') {      
@@ -15,10 +15,11 @@ void keyPressed() {
   }
 
   if ((cheatEnabled||playersAlive<=1 ) && key==ResetKey) {
-    background(255);
+   if(!noFlash) background(255);
     for (int i =players.size()-1; i>= 0; i--) {
       if (players.get(i).turret || players.get(i).clone) players.remove( players.get(i));
     }
+    spawningReset();
     /* for (int i=0; i<players.size (); i++) {    
      if (!players.get(i).clone &&  !players.get(i).turret) {  // no turret or clone respawn
      players.get(i).reset();
@@ -29,6 +30,7 @@ void keyPressed() {
      }
      }*/
     for (Player p : players) {      
+      if(p.index!=-1 )
       if (!p.clone &&  !p.turret) {  // no turret or clone respawn
         p.reset();
         announceAbility( p, 0);
@@ -36,11 +38,12 @@ void keyPressed() {
         p.dead=true;
         p.state=0;
       }
+      
     }
   }
 
   if (cheatEnabled ) {
-      if (key==Character.toLowerCase('6')) {
+    if (key==Character.toLowerCase('6')) {
       for (Player p : players) {      
         if (!p.clone &&  !p.turret) {  // no turret or clone weapon switch
           p.abilityList.get(1).reset();
@@ -49,7 +52,6 @@ void keyPressed() {
           announceAbility( p, 1);
         }
       }
-    
     }
     if (key==Character.toLowerCase(RandomKey)) {
       for (Player p : players) {      
@@ -79,13 +81,13 @@ void keyPressed() {
       for (int i=0; i<players.size()-1; i++) {
         if (!players.get(i).clone &&  !players.get(i).turret) {  // no turret or clone weapon switch
           try {
-            abilities[i]=new Detonator().clone();
+            abilities[i][0]=new Detonator().clone();
           }
           catch(CloneNotSupportedException e) {
             println("not cloned from Random");
           }
           //abilities[i].owner=players.get(i);
-          abilities[i].setOwner(players.get(i));
+          abilities[i][0].setOwner(players.get(i));
           //players.get(i).ability=abilities[i];
         }
       }
@@ -116,13 +118,17 @@ void keyPressed() {
       stamps.clear();
       projectiles.clear();
       particles.clear();
-      background(255);
+      if(!noFlash)background(255);
       for (int i =players.size()-1; i>= 0; i--) {
+        //players.get(i).holdTrigg=true;
         if (players.get(i).turret || players.get(i).clone) players.remove( players.get(i));
       }
     }
     if (key==Character.toLowerCase('-')) {
       //players.get(mouseSelectedPlayerIndex).ability.reset();
+      for (int i =players.size()-1; i>= 0; i--) {
+        if (players.get(i).turret || players.get(i).clone) players.remove( players.get(i));
+      }
       players.get(mouseSelectedPlayerIndex).abilityList.get(0).reset();
       for (  int i=0; i<abilityList.length; i++) {
         if (players.get(mouseSelectedPlayerIndex).abilityList.get(0).getClass()==abilityList[i].getClass()) {
@@ -135,7 +141,7 @@ void keyPressed() {
           catch(CloneNotSupportedException e) {
             println("not cloned from Random");
           }
-        } else println("not player"+ i);
+        } //else println("not player"+ i);
       }
 
       /*players.get(mouseSelectedPlayerIndex).ability.reset();
@@ -160,6 +166,9 @@ void keyPressed() {
     }
     if (key==Character.toLowerCase('+')) {
       //players.get(mouseSelectedPlayerIndex).ability.reset();
+      for (int i =players.size()-1; i>= 0; i--) {
+        if (players.get(i).turret || players.get(i).clone) players.remove( players.get(i));
+      }
       players.get(mouseSelectedPlayerIndex).abilityList.get(0).reset();
       for (  int i=0; i<abilityList.length; i++) {
         if (players.get(mouseSelectedPlayerIndex).abilityList.get(0).getClass()==abilityList[i].getClass()) {
@@ -193,9 +202,9 @@ void keyPressed() {
        }
        }*/
     }
-    if (key==Character.toLowerCase(keyIceDagger)) {
-      projectiles.add( new IceDagger(players.get(1), int( players.get(1).x+players.get(1).w/2), int(players.get(1).y+players.get(1).h/2), 30, players.get(1).playerColor, 800, players.get(1).angle, players.get(1).ax*15, players.get(1).ay*15, 8));
-    }
+    /*if (key==Character.toLowerCase(keyIceDagger)) {
+      projectiles.add( new IceDagger(players.get(1), int( players.get(1).x+players.get(1).w*.5), int(players.get(1).y+players.get(1).h*.5), 30, players.get(1).playerColor, 800, players.get(1).angle, players.get(1).ax*15, players.get(1).ay*15, 8));
+    }*/
     if (key==Character.toLowerCase( keySlow)) {
       quitOrigo();
       musicPlayer.pause(false);
@@ -206,13 +215,13 @@ void keyPressed() {
       speedControl.addSegment((reverse)?-1*timeBend:1*timeBend, 800); //now slow
       drawTimeSymbol();
     }
-    if (key==Character.toLowerCase(keyRewind)) {
+   if (key==Character.toLowerCase(keyRewind)) {
 
       for (int i=0; i< players.size (); i++) {
         if (!reverse || players.get(i).reverseImmunity) { 
           if (key==Character.toLowerCase(players.get(i).triggKey)) {// ability trigg key
             //players.get(i).ability.release();
-             for (Ability a : players.get(i).abilityList)  a.release();
+            for (Ability a : players.get(i).abilityList)  a.release();
             players.get(i).holdTrigg=false;
           }
         }
@@ -244,7 +253,7 @@ void keyPressed() {
     }
     if (key==Character.toLowerCase(keyFastForward)) {
       quitOrigo();
-      background(0, 255, 255);
+      if(!noFlash)background(0, 255, 255);
       fastForward=(fastForward)?false:true;
       F =(fastForward)?speedFactor:1;
       timeBend=S*F;
@@ -314,6 +323,7 @@ void keyPressed() {
     }
   } 
   catch(Exception e) {
+    println(e);
   }
   //   keyCooldown[i]=keyResponseDelay;
 
@@ -367,6 +377,9 @@ void checkKeyHold() { // hold keys
 }
 
 void keyReleased() {
+
+  key=Character.toLowerCase(key);// convert key to lower Case
+  
   /* for (int i=0; i< players.size (); i++) {
    if (key==Character.toLowerCase(players.get(i).triggKey)) {// ability trigg key
    if ( players.get(i).ability.meta || !reverse)  players.get(i).ability.release();

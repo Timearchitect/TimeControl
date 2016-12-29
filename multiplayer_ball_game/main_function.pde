@@ -10,17 +10,17 @@ void dispose() {
 
 void displayInfo() {
   fill(0);
-  text("add Time: "+addMillis+" freezeTime: " + freezeTime+" reversed: " + reversedTime+" forward: " + forwardTime+ " current: "+  stampTime +" fallenTime: "+fallenTime, width*0.5, 50);
-  text("version: "+version, width*0.5, 20);
-  text("players: "+players.size()+" projectiles: "+projectiles.size()+" particles: "+particles.size()+" stamps: "+stamps.size(), width*0.5, 75);
+  text("add Time: "+addMillis+" freezeTime: " + freezeTime+" reversed: " + reversedTime+" forward: " + forwardTime+ " current: "+  stampTime +" fallenTime: "+fallenTime, halfWidth, 50);
+  text("version: "+version, halfWidth, 20);
+  text("players: "+players.size()+" projectiles: "+projectiles.size()+" particles: "+particles.size()+" stamps: "+stamps.size(), halfWidth, 75);
   text(frameRate, width-80, 50);
 }
 void displayClock() {
   fill(0);
   textSize(40);
-  text(" Time: "+  int(stampTime*0.001), width*0.5, 60);
+  text(" Time: "+  int(stampTime*0.001), halfWidth, 60);
   textSize(18);
-  text("version: "+version, width*0.5, 20);
+  text("version: "+version, halfWidth, 20);
 }
 void screenShake() {
   if (shakeTimer>0) {
@@ -30,37 +30,25 @@ void screenShake() {
   } // shake screen
 }
 void shake(int amount) {
-  int shakeX=0, shakeY=0;
-  if (!freeze) {
-    shakeX=int(random(amount)-amount*0.5);
-    shakeY=int(random(amount)-amount*0.5);
-    shakeTimer--;
+  if (noShake) {
+    // int shakeX=0, shakeY=0;
+    if (!freeze) {
+      shakeX=int(random(amount)-amount*0.5);
+      shakeY=int(random(amount)-amount*0.5);
+      shakeTimer--;
+    }
+    translate( shakeX, shakeY);
   }
-  translate( shakeX, shakeY);
 }
 
 void checkPlayerVSPlayerColloision() {
   if (!freeze &&!reverse) {
-    /* for (int i=0; i<players.size (); i++) {       
-     for (int j=0; j<players.size (); j++) {       
-     if (players.get(i).ally!=players.get(j).ally && j!=i && !players.get(i).dead && !players.get(j).dead ) {
-     if (dist(players.get(i).x, players.get(i).y, players.get(j).x, players.get(j).y)<playerSize) {
-     players.get(i).hit(players.get(j).damage);
-     float deltaY =  players.get(i).y -  players.get(j).y;
-     float  deltaX =  players.get(i).x -  players.get(j).x;
-     players.get(i).pushForce( playerSize-dist(players.get(j).x, players.get(j).y, players.get(i).x, players.get(i).y), atan2(deltaY, deltaX) * 180 / PI);
-     }
-     }
-     }
-     }
-     }*/
     for (Player p1 : players) {       
       for (Player p2 : players) {       
         if (p1.ally!=p2.ally && !p1.dead && !p2.dead ) { //  && p1!=p2
           if (dist(p1.x, p1.y, p2.x, p2.y)<playerSize) {
             p1.hit(p2.damage);
-            float deltaY =  p1.y -  p2.y;
-            float  deltaX =  p1.x -  p2.x;
+            float  deltaX =  p1.x -  p2.x, deltaY =  p1.y -  p2.y;
             p1.pushForce( playerSize-dist(p2.x, p2.y, p1.x, p1.y), atan2(deltaY, deltaX) * 180 / PI);
           }
         }
@@ -96,6 +84,7 @@ void checkPlayerVSProjectileColloision() {
       }
     }
     catch(Exception e) {
+          println(e);
     }
   }
 }
@@ -118,8 +107,8 @@ void checkProjectileVSProjectileColloision() {
     for (Projectile p1 : projectiles) {    
       for (Projectile p2 : projectiles) {      
         if (p2.ally!=p1.ally && !p2.dead && !p1.dead ) { //  && p1!=p2
-          if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*0.5+p2.size*0.5) {
-            if (p1 instanceof  Reflectable  && p2 instanceof Reflector) {
+          if (p1 instanceof  Reflectable  && p2 instanceof Reflector) {
+            if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*0.5+p2.size*0.5) {
               Reflectable reflectObject = (Reflectable)p1;
               Reflector reflectorObject = (Reflector)p2;
               reflectObject.reflect(p2.angle, p2.owner);
@@ -139,12 +128,6 @@ void checkPlayerVSProjectileColloisionLine() {
 void checkWinner() {
   int playerAliveIndex=0;
   playersAlive=0;
-  /*for (int i=0; i<players.size (); i++) {      
-   if (!players.get(i).dead && !players.get(i).turret && !players.get(i).clone) {
-   playersAlive++;
-   playerAliveIndex=players.get(i).index;
-   }
-   }*/
   for (Player p : players) {      
     if (!p.dead && !p.turret && !p.clone) {
       playersAlive++;
@@ -152,10 +135,18 @@ void checkWinner() {
     }
   }
 
-  if (playersAlive==1) {
+  if (playersAlive<=1) {
     textSize(80);
-    text(" Winner is player "+(playerAliveIndex+1), width*0.5, height*0.5);
-    text(" Press ["+ResetKey+"] to restart", width*0.5, height*0.6);
+    switch(gameMode) {
+    case 0:
+      text(" Winner is player "+(playerAliveIndex+1), halfWidth, halfHeight);
+      text(" Press ["+ResetKey+"] to restart", halfWidth, height*0.6);
+      break;
+    case 1:
+      text(" The survivor is player "+(playerAliveIndex+1), halfWidth, halfHeight);
+      text(" Press ["+ResetKey+"] to restart", halfWidth, height*0.6);
+      break;
+    }
     textSize(18);
   }
 }
@@ -197,7 +188,7 @@ void quitOrigo() {
     stampTime=0;
     reverse=false;
     musicPlayer.setPosition(1); //resetmusic s
-    particles.add(new Flash(1500, 5, color(255)));   // flash
+    particles.add(new Flash(1500, 5, WHITE));   // flash
   }
 }
 void mouseDot() {
@@ -209,9 +200,9 @@ void mouseDot() {
 void announceAbility(Player p, int index ) {
   particles.remove( p.textParticle );
 
-  //particles.add( new Text(p.ability.name, int( p.x+p.w*0.5), int(p.y+p.h*0.5)-75, 0, 0, 30, 0, 2000, color(0)));
-  //p.textParticle = new Text(p,p.ability.name, 0, -75, 30, 0, 1500, color(0),0);
-  p.textParticle = new Text(p, p.abilityList.get(index).name, 0, -75, 30, 0, 1500, color(0), 0);
+  //particles.add( new Text(p.ability.name, int( p.x+p.w*0.5), int(p.y+p.h*0.5)-75, 0, 0, 30, 0, 2000, BLACK));
+  //p.textParticle = new Text(p,p.ability.name, 0, -75, 30, 0, 1500, BLACK,0);
+  p.textParticle = new Text(p, p.abilityList.get(index).name, 0, -75, 30, 0, 1500, BLACK, 0);
 
   particles.add( p.textParticle );
 }

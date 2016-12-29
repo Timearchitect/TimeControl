@@ -1,7 +1,6 @@
 abstract class TimeStamp {
   long time;
-  int playerIndex;
-  int x, y;
+  int playerIndex,x, y;
   PVector coord;
   
   TimeStamp(int _playerIndex){
@@ -18,5 +17,5 @@ abstract class TimeStamp {
   void revert() {
     stamps.remove(this);
   }
-  void call(){} // execute timestamp without respect for currenttime
+  void call(){} // execute timestamp without the respect for currenttime
 }

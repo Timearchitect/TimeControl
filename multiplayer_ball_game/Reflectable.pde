@@ -17,3 +17,10 @@ interface Destroyer{
   Boolean destroyable=true;
   void destroying();
 }
+
+interface Container{ 
+  Boolean container=true;
+  Projectile Contain=null;
+  void contain(Projectile p);
+  void contain(Player p);
+}

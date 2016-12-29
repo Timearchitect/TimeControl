@@ -1,15 +1,17 @@
-class Player {
+class Player implements Cloneable {
   PShape arrowSVG = loadShape("arrow.svg");
-  int  index, ally, w, h, up, down, left, right, triggKey, deColor;
+  int  index, ally, radius, outlineDiameter, w, h, up, down, left, right, triggKey, deColor;
   int state=1, maxHealth=200, health=maxHealth, damage=1, armor;
-  final int barSize=12, barDiameter=75;
-  float  x, y, vx, vy, ax, ay, cx, cy, angle, keyAngle, f, s, barFraction;
+  final int barSize=12, barDiameter=75, invinsTime=400, buttonHoldTime=300;
+  final int mouseMargin=200;
+  //float MAX_MOUSE_ACCEL=0.0035;
+  final float mouseMaxAccel=1.4;
+  float  x, y, vx, vy, ax, ay, cx, cy, angle, keyAngle, f, s, bend, barFraction, fraction;
   boolean holdTrigg, holdUp, holdDown, holdLeft, holdRight, dead, stealth, hit, arduino, arduinoHold, mouse, clone, turret;
   PVector coord, speed, accel, arrow;
-  float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR,DEFAULT_ARMOR=0;
-  final int invinsTime=400, buttonHoldTime=300;
+  float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR, DEFAULT_ARMOR=0; 
   long invisStampTime;
-  boolean invis, freezeImmunity, reverseImmunity, fastforwardImmunity, slowImmunity;
+  boolean invis, freezeImmunity=true, reverseImmunity, fastforwardImmunity, slowImmunity;
   //Ability ability;  
   ArrayList<Ability> abilityList= new ArrayList<Ability>();
   color playerColor;
@@ -32,7 +34,7 @@ class Player {
       this.abilityList.add(a);
       this.abilityList.get(0).setOwner(this);
       a.setOwner(this);
-        //if (a==null) this.abilityList.add(new Ability());
+      //if (a==null) this.abilityList.add(new Ability());
     }
     playerColor=_playerColor;
     triggKey=_triggKey;
@@ -44,8 +46,10 @@ class Player {
     y=_y;
     w=_w;
     h=_h;
-    cx=x+w*.5;
-    cy=y+h*.5;
+    radius=int(_w*0.5);
+    outlineDiameter=int(w*1.1);
+    cx=x+radius;
+    cy=y+radius;
     up=_up;
     down= _down;
     left=_left;
@@ -53,7 +57,7 @@ class Player {
     // arrowSVG = loadShape("arrow.svg");
     shapeMode(CENTER);
     arrowSVG.disableStyle();
-    shape(arrowSVG, -arrowSVG.width*0.5+30, -arrowSVG.height+0, arrowSVG.width, arrowSVG.height);
+    shape(arrowSVG, -arrowSVG.width*0.5+30, -arrowSVG.height, arrowSVG.width, arrowSVG.height);
   }
   void checkBounds() {
     //if (!reverse && reverseImmunity) {
@@ -62,46 +66,46 @@ class Player {
       x=0;
       vx=0;
       ax=0;
-      cx=x+w*.5;
-      cy=y+h*.5;
+      cx=x+radius;
+      cy=y+radius;
       //accel.set(0.0, accel.y);
       //speed.set(0.0, speed.y);
       //coord.set(int(0.0), int(coord.y));
-      hit(0);
+      wallHit(0);
     } else if (x>width-w) {
       stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
       x=width-w;
       vx=0;
       ax=0;
-      cx=x+w*.5;
-      cy=y+h*.5;
+      cx=x+radius;
+      cy=y+radius;
       //coord.set(width-w, coord.y);
       //accel.set(0.0, accel.y);
       //speed.set(0.0, speed.y);
-      hit(0);
+      wallHit(0);
     }
     if (y<0) {
       stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
       y=0;
       vy=0;
       ay=0;
-      cx=x+w*.5;
-      cy=y+h*.5;
+      cx=x+radius;
+      cy=y+radius;
       //accel.set(accel.x, 0.0);
       //speed.set(speed.x, 0.0);
       //coord.set(coord.x, 0.0);
-      hit(0);
+      wallHit(0);
     } else if (y>height-h) {
       stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
       y=height-h;
       vy=0;
       ay=0;
-      cx=x+w*.5;
-      cy=y+h*.5;
+      cx=x+radius;
+      cy=y+radius;
       //coord.set(coord.x, height-h);
       //speed.set(speed.x, 0.0);
       //accel.set(accel.x, 0.0);
-      hit(0);
+      wallHit(0);
     }
   }
 
@@ -118,12 +122,12 @@ class Player {
       pushMatrix();
       translate(cx, cy);
       rotate(radians(angle+90));
-      // shape(arrowSVG,x+w/2- arrowSVG.width/2, y-arrowSVG.height/2, arrowSVG.width, arrowSVG.height); // default render
+      // shape(arrowSVG,x+radius- arrowSVG.width*.5, y-arrowSVG.height*.5, arrowSVG.width, arrowSVG.height); // default render
       fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s, 50+deColor);
-      shape(arrowSVG, -arrowSVG.width*0.5+30, -arrowSVG.height+0, arrowSVG.width, arrowSVG.height);
+      shape(arrowSVG, -arrowSVG.width*0.5+30, -arrowSVG.height, arrowSVG.width, arrowSVG.height);
       popMatrix();
 
-      fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s);
+      //s fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s);
       displayAbilityEnergy(0);
       displayHealth();
       displayName();
@@ -142,7 +146,7 @@ class Player {
     }
     if (freezeImmunity || reverseImmunity || fastforwardImmunity || slowImmunity) {
       noFill();
-      ellipse(cx, cy, w*1.1, h*1.1);
+      ellipse(cx, cy, outlineDiameter, outlineDiameter);
     }
   }
 
@@ -151,42 +155,43 @@ class Player {
     if (!dead) {
       f =(fastforwardImmunity)?1:F;
       s =(slowImmunity)?1:S;
+      bend = f*s;
       if (!freeze || freezeImmunity) {
         calcAngle() ;
         if (reverse && !reverseImmunity) {
 
-          vy/=1-FRICTION_FACTOR*f*s;
-          vx/=1-FRICTION_FACTOR*f*s;
-          //speed.set(speed.x/(1-FRICTION_FACTOR*f*s), speed.y/(1-FRICTION_FACTOR*f*s));
-          ay/=1-FRICTION_FACTOR*f*s;
-          ax/=1-FRICTION_FACTOR*f*s;
-          //accel.set(accel.x/(1-FRICTION_FACTOR*f*s), accel.y/(1-FRICTION_FACTOR*f*s));
-          y-=vy*f*s;
-          x-=vx*f*s;
-          //coord.set(coord.x-(speed.x*f*s), coord.y-(speed.y*f*s));
-          vy-=ay*f*s;
-          vx-=ax*f*s;
-          cx=x+w*.5;
-          cy=y+h*.5;
-          //speed.set(speed.x-(accel.x*f*s), speed.y-(accel.y*f*s));
+          vy/=1-FRICTION_FACTOR*bend;
+          vx/=1-FRICTION_FACTOR*bend;
+          //speed.set(speed.x/(1-FRICTION_FACTOR*bend), speed.y/(1-FRICTION_FACTOR*bend));
+          ay/=1-FRICTION_FACTOR*bend;
+          ax/=1-FRICTION_FACTOR*bend;
+          //accel.set(accel.x/(1-FRICTION_FACTOR*bend), accel.y/(1-FRICTION_FACTOR*bend));
+          y-=vy*bend;
+          x-=vx*bend;
+          //coord.set(coord.x-(speed.x*bend), coord.y-(speed.y*bend));
+          vy-=ay*bend;
+          vx-=ax*bend;
+          cx=x+radius;
+          cy=y+radius;
+          //speed.set(speed.x-(accel.x*bend), speed.y-(accel.y*bend));
 
           for (Ability a : this.abilityList) a.regen();
         } else {
           for (Ability a : this.abilityList) a.regen();
-          //speed.set(speed.x+(accel.x*f*s), speed.y+(accel.y*f*s));
-          cx=x+w*.5;
-          cy=y+h*.5;
-          vx+=ax*f*s;
-          vy+=ay*f*s;
-          //coord.set(coord.x+(speed.x*f*s), coord.y+(speed.y*f*s));
-          x+=vx*f*s;
-          y+=vy*f*s;
-          //speed.set(speed.x*(1-FRICTION_FACTOR*f*s), speed.y*(1-FRICTION_FACTOR*f*s));
-          vx*=1-FRICTION_FACTOR*f*s;
-          vy*=1-FRICTION_FACTOR*f*s;
-          // accel.set(accel.x*(1-FRICTION_FACTOR*f*s), accel.y*(1-FRICTION_FACTOR*f*s));
-          ax*=1-FRICTION_FACTOR*f*s;
-          ay*=1-FRICTION_FACTOR*f*s;
+          //speed.set(speed.x+(accel.x*bend), speed.y+(accel.y*bend));
+          cx=x+radius;
+          cy=y+radius;
+          vx+=ax*bend;
+          vy+=ay*bend;
+          //coord.set(coord.x+(speed.x*bend), coord.y+(speed.y*bend));
+          x+=vx*bend;
+          y+=vy*bend;
+          //speed.set(speed.x*(1-FRICTION_FACTOR*bend), speed.y*(1-FRICTION_FACTOR*bend));
+          vx*=1-FRICTION_FACTOR*bend;
+          vy*=1-FRICTION_FACTOR*bend;
+          // accel.set(accel.x*(1-FRICTION_FACTOR*bend), accel.y*(1-FRICTION_FACTOR*bend));
+          ax*=1-FRICTION_FACTOR*bend;
+          ay*=1-FRICTION_FACTOR*bend;
           // calcAngle() ;
         }
       }
@@ -217,13 +222,13 @@ class Player {
       switch(dir) {
       case 0: // down
         // vy+=0.0;
-        ay+=MAX_ACCEL*f*s;
-        //accel.set(accel.x, accel.y+MAX_ACCEL*f*s);
+        ay+=MAX_ACCEL*bend;
+        //accel.set(accel.x, accel.y+MAX_ACCEL*bend);
         break;
       case 1: // up
         // vy+=-0.0;
-        ay+=-MAX_ACCEL*f*s;
-        //accel.set(accel.x, accel.y-MAX_ACCEL*f*s);
+        ay+=-MAX_ACCEL*bend;
+        //accel.set(accel.x, accel.y-MAX_ACCEL*bend);
         break;
       case 2: // hold
         //ay=0;
@@ -232,13 +237,13 @@ class Player {
         break;
       case 4: // left
         // vx+=-0.0;
-        ax+=-MAX_ACCEL*f*s;
-        // accel.set(accel.x-MAX_ACCEL*f*s, accel.y);
+        ax+=-MAX_ACCEL*bend;
+        // accel.set(accel.x-MAX_ACCEL*bend, accel.y);
         break;
       case 5: // right
         //vx+=0.0;
-        ax+=MAX_ACCEL*f*s;
-        //accel.set(accel.x+MAX_ACCEL*f*s, accel.y);
+        ax+=MAX_ACCEL*bend;
+        //accel.set(accel.x+MAX_ACCEL*bend, accel.y);
         break;
       }
     }
@@ -246,15 +251,13 @@ class Player {
 
   void mouseControl() {
     if ((!freeze || freezeImmunity) && !dead && (controlable || reverseImmunity) && mouse) {
-      int mouseMargin=200;
-      //float MAX_MOUSE_ACCEL=0.0035;
-      float mouseMaxAccel=1.4;
+
 
       stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
       //*MAX_ACCEL*0.017*s*f;
       //*MAX_MOUSE_ACCEL*s*f;
       if (pmouseX-1<mouseX) {
-        ax-=(pmouseX-mouseX)*MAX_ACCEL*0.028*s*f;
+        ax-=(pmouseX-mouseX)*MAX_ACCEL*0.028*bend;
         if (ax<-mouseMaxAccel) {
           ax=-mouseMaxAccel;
         }
@@ -265,7 +268,7 @@ class Player {
         }
       }
       if (pmouseX+1>mouseX) {
-        ax-=(pmouseX-mouseX)*MAX_ACCEL*0.028*s*f;
+        ax-=(pmouseX-mouseX)*MAX_ACCEL*0.028*bend;
         if (players.get(0).ax>mouseMaxAccel) {
           players.get(0).ax=mouseMaxAccel;
         }
@@ -276,7 +279,7 @@ class Player {
         }
       }
       if (pmouseY-1<mouseY) {
-        ay-=(pmouseY-mouseY)*MAX_ACCEL*0.028*s*f;
+        ay-=(pmouseY-mouseY)*MAX_ACCEL*0.028*bend;
         if (ay<-mouseMaxAccel) {
           ay=-mouseMaxAccel;
         }
@@ -287,7 +290,7 @@ class Player {
         }
       }
       if (pmouseY+1>mouseY) {
-        ay-=(pmouseY-mouseY)*MAX_ACCEL*0.028*s*f;
+        ay-=(pmouseY-mouseY)*MAX_ACCEL*0.028*bend;
         if (ay>mouseMaxAccel) {
           ay=mouseMaxAccel;
         }
@@ -318,7 +321,7 @@ class Player {
 
 
     if (debug) {
-      line(cx, y+w*0.5, cx+cos(radians(keyAngle))*200, y+w*0.5+sin(radians(keyAngle))*200);
+      line(cx, cy, cx+cos(radians(keyAngle))*200, cy+sin(radians(keyAngle))*200);
       fill(0);
       textSize(20);
       text(angle, x, y);
@@ -340,11 +343,11 @@ class Player {
     if (angle<0 && (180+angle)+(180-keyAngle)<keyAngle-angle) {
       //text("L", x-50, y-50);
       angle-= (abs(angle+180)-abs(keyAngle-180))*ANGLE_FACTOR;
-      angle +=  360;
+      angle+= 360;
     } else if (keyAngle<0 && (180+keyAngle)+(180-angle)<angle-keyAngle) {
       // text("H", x-50, y-50);
       angle+= (abs(keyAngle+180)-abs(angle-180))*ANGLE_FACTOR;
-      angle -=  360;
+      angle-= 360;
     } else    angle+= (keyAngle-angle)*ANGLE_FACTOR;
 
 
@@ -359,6 +362,9 @@ class Player {
     deColor=255;
     state=2;
     hit=true;
+    for (Ability a : this.abilityList) {
+      a.onHit();
+    }
     // for (int i=0; i<2; i++) {
     particles.add(new Particle(int(cx), int(cy), random(-10, 10)+vx*0.5, random(-10, 10)+vy*0.5, int(random(5, 20)), 500, playerColor));
     // }
@@ -368,7 +374,16 @@ class Player {
       death();
     }
   }
-
+  void wallHit(int damage) {
+    stamps.add( new StateStamp(index, int(x), int(y), state, health, dead));
+    deColor=255;
+    state=2;
+    hit=true;
+    for (Ability a : this.abilityList) {
+      a.onHit();
+    }
+    particles.add(new Particle(int(cx), int(cy), random(-10, 10)+vx*0.5, random(-10, 10)+vy*0.5, int(random(5, 20)), 500, playerColor));
+  }
   void death() {
     //ability.onDeath();
     for (Ability a : this.abilityList) {
@@ -377,8 +392,8 @@ class Player {
     }
     dead=true;
     // ability.reset();
-      shakeTimer+=10;
-    for (int i=0; i<64; i++) {
+    shakeTimer+=10;
+    for (int i=0; i<16; i++) {
       particles.add(new Particle(int(cx), int(cy), random(50)-25, random(50)-25, int(random(40)+10), 1500, playerColor));
     }
     particles.add(new ShockWave(int(cx), int(cy), int(random(40)+10), 16, 400, playerColor));
@@ -393,6 +408,7 @@ class Player {
 
     if (clone) {
       text("P"+ (ally+1), cx, cy);
+      if (debug) text("index:"+ (index), cx+50, cy);
     } else {
       text("P"+ (index+1), cx, cy);
       // if (cheatEnabled) text("                              vx:"+int(vx)+" vy:"+int(vy)+" ax:"+int(ax)+" ay:"+int(ay) + " A:"+ angle, cx, cy);
@@ -401,13 +417,13 @@ class Player {
   }
   void displayHealth() {
 
-    float fraction=((PI*2)/maxHealth)*health;
+    fraction=((PI*2)/maxHealth)*health;
     strokeWeight(barSize);
     //strokeCap(SQUARE);
     noFill();
     stroke(hue(playerColor), 80*S, (80-deColor)*S);
     ellipse(cx, cy, barDiameter, barDiameter);
-    stroke(hue(playerColor), (255-deColor*0.5)*S, 255*S);
+    stroke(hue(playerColor), (255-deColor*0.5)*S, ally==-1?0:255*S);
     arc(cx, cy, barDiameter, barDiameter, -HALF_PI +(PI*2)-fraction, PI+HALF_PI);
     //strokeWeight(1);
   }
@@ -420,7 +436,9 @@ class Player {
       strokeWeight(6);
       stroke(hue(playerColor), 255*S, 255*S);
     }
-    arc(cx, cy, barDiameter, barDiameter, -HALF_PI +(PI*2)-barFraction, PI+HALF_PI);
+    arc(cx, cy, barDiameter, barDiameter, (PI*1.5)-barFraction, PI+HALF_PI);
+
+    //arc(cx, cy, barDiameter, barDiameter, -HALF_PI +(PI*2)-barFraction, PI+HALF_PI);
     // strokeWeight(1);
   }
   void pushForce(float amount, float angle) {
@@ -435,6 +453,16 @@ class Player {
     vy+=_vy;
     stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
   }
+  void stop() {
+    vx=0;
+    vy=0;
+    ax=0;
+    ay=0;
+  }
+  void halt() {
+    vx=0;
+    vy=0;
+  }
   void reset() {
     vx=0;
     vy=0;
@@ -444,5 +472,21 @@ class Player {
     dead=false;
     //ability.reset();
     for (Ability a : this.abilityList) a.reset();
+  }
+  public Player clone() {  
+    try {
+      Player temp=(Player)super.clone();
+      temp.index=players.size();
+      for (int i=0; i<abilityList.size(); i++) { // clone all abilities
+        Ability tempAbility =abilityList.get(i).clone();
+        tempAbility.setOwner(temp);
+        temp.abilityList.set(i, tempAbility);
+      }
+
+      return temp;
+    }
+    catch(CloneNotSupportedException c) {
+      return null;
+    }
   }
 }

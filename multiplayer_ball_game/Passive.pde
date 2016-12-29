@@ -27,10 +27,39 @@ class HpRegen extends Ability {//-----------------------------------------------
     // super.reset();
   }
 }
+class MpRegen extends Ability {//---------------------------------------------------    HpRegen   ---------------------------------
+  float regenRate = 1;
+  int count;
+  MpRegen() {
+    super();
+    name=getClassName(this);
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void press() {
+  }
+  @Override
+    void passive() {
+    if (!owner.stealth) {
+      noFill();
+      stroke(owner.playerColor);
+      strokeWeight(1);
+      ellipse(owner.cx, owner.cy, 200, 200);
+      count++;
+      if (count%10==0 && owner.abilityList.get(0).maxEnergy>owner.abilityList.get(0).energy)owner.abilityList.get(0).energy += regenRate;
+    }
+  }
+  @Override
+    void reset() {
+    // super.reset();
+  }
+}
 
 class Armor extends Ability {//---------------------------------------------------    HpRegen   ---------------------------------
   // float regenRate = 1;
-  int armorAmount=6;
+  int armorAmount=4;
   Armor() {
     super();
     name=getClassName(this);
@@ -45,7 +74,7 @@ class Armor extends Ability {//-------------------------------------------------
     void hold() {
     hold=true;
   }
-    @Override
+  @Override
     void release() {
     hold=false;
   }
@@ -56,13 +85,12 @@ class Armor extends Ability {//-------------------------------------------------
       stroke(owner.playerColor);
       strokeWeight(2);
       rect(owner.x, owner.y, owner.w, owner.h);
-     
+
       if (hold) {
         owner.armor=int(armorAmount*.5);
       } else {
-         owner.armor=armorAmount;
-         rect(owner.x-10, owner.y-10, owner.w+20, owner.h+20);
-
+        owner.armor=armorAmount;
+        rect(owner.x-10, owner.y-10, owner.w+20, owner.h+20);
       }
     }
   }
@@ -103,7 +131,7 @@ class Speed extends Ability {//-------------------------------------------------
   }
 }
 class Gravitation extends Ability {//---------------------------------------------------    Gravitation   ---------------------------------
-  float dragForce =-0.3;
+  float dragForce =-0.4;
   Gravitation() {
     super();
     name=getClassName(this);
@@ -132,10 +160,18 @@ class Gravitation extends Ability {//-------------------------------------------
 
   void dragPlayersInRadius(int range, boolean friendlyFire) {
     if (!freeze &&!reverse) { 
-      for (int i=0; i<players.size (); i++) { 
-        if (!players.get(i).dead &&(players.get(i)!= owner || friendlyFire)) {
-          if (dist(owner.cx, owner.cy, players.get(i).cx, players.get(i).cy)<range) {
-            players.get(i).pushForce(dragForce*timeBend, calcAngleFromBlastZone(owner.cx, owner.cy, players.get(i).cx, players.get(i).cy));
+      /*for (int i=0; i<players.size (); i++) { 
+       if (!players.get(i).dead &&(players.get(i)!= owner || friendlyFire)) {
+       if (dist(owner.cx, owner.cy, players.get(i).cx, players.get(i).cy)<range) {
+       players.get(i).pushForce(dragForce*timeBend, calcAngleFromBlastZone(owner.cx, owner.cy, players.get(i).cx, players.get(i).cy));
+       // if (count%10==0)players.get(i).hit(damage);
+       }
+       }
+       }*/
+      for (Player p : players) { 
+        if (!p.dead &&(p!= owner && p.ally!=owner.ally || friendlyFire)) {
+          if (dist(owner.cx, owner.cy, p.cx, p.cy)<range) {
+            p.pushForce(dragForce*timeBend, calcAngleFromBlastZone(owner.cx, owner.cy, p.cx, p.cy));
             // if (count%10==0)players.get(i).hit(damage);
           }
         }
@@ -183,7 +219,7 @@ class Repel extends Ability {//-------------------------------------------------
        }
        }*/
       for (Player p : players) { 
-        if (!p.dead &&(p!= owner || friendlyFire)) {
+        if (!p.dead &&(p!= owner && p.ally!=owner.ally || friendlyFire)) {
           if (dist(owner.cx, owner.cy, p.cx, p.cy)<range) {
             p.pushForce(dragForce*timeBend, calcAngleFromBlastZone(owner.cx, owner.cy, p.cx, p.cy));
             // if (count%10==0)players.get(i).hit(damage);
@@ -193,7 +229,668 @@ class Repel extends Ability {//-------------------------------------------------
     }
   }
 }
+class Static extends Ability {//---------------------------------------------------    Static   ---------------------------------
+  int count;
+  Static() {
+    super();
+    name=getClassName(this);
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void press() {
+  }
+  @Override
+    void hold() {
+  }
+  @Override
+    void passive() {
+    if (!owner.stealth) {
+      noFill();
+      stroke(owner.playerColor);
+      strokeWeight(2);
+      beginShape();
+      for (int i=0; i<360; i+=60) {
+        vertex(owner.cx+sin(radians(i))*175, owner.cy+cos(radians(i))*175);
+      }
+      endShape(CLOSE);
+      count++;
+      if (count%100==0)projectiles.add( new CurrentLine(owner, int( owner.cx), int(owner.cy), int( random(300, 700)), owner.playerColor, 50, owner.angle, cos(radians(owner.angle)), sin(radians(owner.angle)), 15));
+    }
+  }
+  @Override
+    void reset() {
+    owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+  }
+}
 
+class SuppressFire extends Ability {//---------------------------------------------------    SuppressFire   ---------------------------------
+  int count, cooldown;
+  SuppressFire() {
+    super();
+    name=getClassName(this);
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void press() {
+    if (cooldown>50) {
+      noStroke();
+      fill(255);
+      ellipse(owner.cx+cos(radians(owner.angle))*100, owner.cy+sin(radians(owner.angle))*100, 100, 100);
+      projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*46, sin(radians(owner.angle))*46, 7));
+      cooldown=0;
+    }
+  }
+  @Override
+    void hold() {
+  }
+  @Override
+    void passive() {
+    if (!owner.stealth) {
+      noFill();
+      stroke(owner.playerColor);
+      strokeWeight(2);
+      beginShape();
+      for (int i=0; i<360; i+=72.5) {
+        vertex(owner.cx+sin(radians(i))*150, owner.cy+cos(radians(i))*150);
+      }
+
+      endShape(CLOSE);
+      cooldown++;
+      //count++;
+      //  if (count%30==0)   projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*46, sin(radians(owner.angle))*46, 3));
+    }
+  }
+  @Override
+    void reset() {
+    owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+  }
+}
+
+class Gloss extends Ability {//---------------------------------------------------    Gloss   ---------------------------------
+  int count;
+  Gloss() {
+    super();
+    name=getClassName(this);
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void press() {
+  }
+  @Override
+    void hold() {
+  }
+  @Override
+    void passive() {
+    if (!owner.stealth) {
+
+      cooldown+=1;
+      for (int i=0; i<360; i+=30) {
+        if (cooldown%360==i) {
+          projectiles.add( new Shield( owner, int( owner.cx+cos(radians(i))*180), int(owner.cy+sin(radians(i))*180), owner.playerColor, 1000, i+90, 1, int( cos(radians(i))*180), int(sin(radians(i))*180)));
+          projectiles.add( new Shield( owner, int( owner.cx+cos(radians(i+180))*180), int(owner.cy+sin(radians(i+180))*180), owner.playerColor, 1000, i+270, 1, int( cos(radians(i+180))*180), int(sin(radians(i+180))*180)));
+        }
+      }
+      //count++;
+      //  if (count%30==0)   projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*46, sin(radians(owner.angle))*46, 3));
+    }
+  }
+  @Override
+    void reset() {
+    owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+  }
+}
+
+class BackShield extends Ability {//---------------------------------------------------    BackShield   ---------------------------------
+  int count;
+  Shield shield;
+
+  BackShield() {
+    super();
+    name=getClassName(this);
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void press() {
+  }
+  @Override
+    void hold() {
+  }
+  @Override
+    void onDeath() {
+    if (shield!=null && !shield.dead) { 
+      shield.size=100;
+      shield.fizzle();
+      shield.deathTime=stampTime;
+      shield.dead=true;
+    }
+  }
+  @Override
+    void passive() {
+    if (!owner.stealth) {
+      if (shield==null||shield.dead) { 
+        shield=new Shield( owner, int( owner.cx+cos(radians(owner.angle))*100), int(owner.cy+sin(radians(owner.angle))*100), owner.playerColor, 100000, owner.angle+90, 1, int( cos(radians(owner.angle))*100), int(sin(radians(owner.angle))*100));
+        shield.size=100;
+        projectiles.add(shield );
+      }
+      shield.angle=owner.angle+90;
+      shield.offsetX=int(cos(radians(owner.angle+180))*100);
+      shield.offsetY=int(sin(radians(owner.angle+180))*100);
+    }
+  }
+  @Override
+    void reset() {
+    try {
+      if (shield!=null||!shield.dead) { 
+        shield.size=100;
+        shield.fizzle();
+        shield.deathTime=stampTime;
+        shield.dead=true;
+      }
+    }
+    catch(Exception e) {
+    }
+    owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+  }
+}
+
+
+class Trail extends Ability {//---------------------------------------------------    bullet   ---------------------------------
+  int count, cooldown;
+  Trail() {
+    super();
+    name=getClassName(this);
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void press() {
+  }
+  @Override
+    void hold() {
+    if (cooldown>6) {
+      cooldown=0;
+      projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 0, 30, owner.playerColor, 1000, owner.angle, 1, 6));
+    }
+  }
+  @Override
+    void release() {
+  }
+  @Override
+    void passive() {
+    if (!owner.stealth) {
+      noFill();
+      stroke(owner.playerColor);
+      strokeWeight(2);
+      beginShape();
+      for (int i=0; i<360; i+=20) {
+        vertex(owner.cx+sin(radians(i))*150, owner.cy+cos(radians(i))*150);
+      }
+      endShape(CLOSE);
+      cooldown++;
+    }
+  }
+  @Override
+    void reset() {
+    owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+  }
+}
+class PainPulse extends Ability {//---------------------------------------------------    bullet   ---------------------------------
+  int count, cooldown;
+  PainPulse() {
+    super();
+    name=getClassName(this);
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void onHit() {
+    if (cooldown>200) {
+      cooldown=0;
+      for (int i=0; i<360; i+=45) {
+        projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 15, 40, owner.playerColor, 350, i, 1, 10));
+      }
+    }
+  }
+  @Override
+    void hold() {
+  }
+  @Override
+    void release() {
+  }
+  @Override
+    void passive() {
+    if (!owner.stealth) {
+      noFill();
+      stroke(owner.playerColor);
+      strokeWeight(2);
+      beginShape();
+      for (int i=0; i<360; i+=10) {
+        vertex(owner.cx+sin(radians(i))*100, owner.cy+cos(radians(i))*100);
+      }
+      endShape(CLOSE);
+      cooldown++;
+    }
+  }
+  @Override
+    void reset() {
+    owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+  }
+}
+class Nova extends Ability {//---------------------------------------------------    bullet   ---------------------------------
+  int count, cooldown;
+  Nova() {
+    super();
+    name=getClassName(this);
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void press() {
+    // if (cooldown>100) {
+    //   projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*46, sin(radians(owner.angle))*46, 5));
+    // }
+  }
+  @Override
+    void hold() {
+  }
+  @Override
+    void release() {
+    if (cooldown>50) {
+      cooldown=0;
+
+      projectiles.add( new Slash(owner, int( owner.cx+sin(owner.keyAngle)*50), int(owner.cy+cos(owner.keyAngle)*50), 40, owner.playerColor, 180, owner.angle-100, -24, 110, sin(owner.keyAngle)*10, cos(owner.keyAngle)*10, 2, true));
+      projectiles.add( new Slash(owner, int( owner.cx+sin(owner.keyAngle)*50), int(owner.cy+cos(owner.keyAngle)*50), 40, owner.playerColor, 180, owner.angle-280, -24, 110, sin(owner.keyAngle)*10, cos(owner.keyAngle)*10, 2, true));
+    }
+  }
+  @Override
+    void passive() {
+    if (!owner.stealth) {
+      noFill();
+      stroke(owner.playerColor);
+      strokeWeight(2);
+      beginShape();
+      for (int i=0; i<360; i+=40) {
+        vertex(owner.cx+sin(radians(i))*150, owner.cy+cos(radians(i))*150);
+      }
+
+      endShape(CLOSE);
+      cooldown++;
+      // count++;
+      //  if (count%30==0)   projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*46, sin(radians(owner.angle))*46, 3));
+    }
+  }
+  @Override
+    void reset() {
+    owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+  }
+}
+class Boost extends Ability {//---------------------------------------------------    bullet   ---------------------------------
+  int count, charge, cooldown;
+  final int radius= 145, maxCharge=70; 
+  Boost() {
+    super();
+    name=getClassName(this);
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void press() {
+    // if (cooldown>100) {
+    //   projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*46, sin(radians(owner.angle))*46, 5));
+    // }
+  }
+  @Override
+    void hold() {
+    if (charge<=maxCharge)charge++;
+  }
+  @Override
+    void release() {
+    if (charge>maxCharge && cooldown>60) {
+      cooldown=0;
+      charge=0;
+      projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 0, 50, owner.playerColor, 350, 0, 1, 10));
+      owner.pushForce(35, owner.keyAngle);
+    }
+    charge=int(charge*.5);
+  }
+  @Override
+    void passive() {
+    if (!owner.stealth) {
+      noFill();
+      stroke(owner.playerColor);
+      if (charge>=maxCharge) {
+        strokeWeight(3);
+        ellipse(owner.cx, owner.cy, radius, radius);
+      } else {
+        strokeWeight(10);
+        arc(owner.cx, owner.cy, radius, radius, -HALF_PI, (PI*2/(maxCharge+1-charge))-HALF_PI);
+      }
+      cooldown++;
+      // count++;
+      //  if (count%30==0)   projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*46, sin(radians(owner.angle))*46, 3));
+    }
+  }
+  @Override
+    void reset() {
+    owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+  }
+}
+
+class Glide extends Ability {//---------------------------------------------------    bullet   ---------------------------------
+
+  Glide() {
+    super();
+    name=getClassName(this);
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void press() {
+    // if (cooldown>100) {
+    //   projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*46, sin(radians(owner.angle))*46, 5));
+    // }
+  }
+  @Override
+    void hold() {
+    owner.pushForce(1, owner.keyAngle);
+  }
+  @Override
+    void release() {
+  }
+  @Override
+    void passive() {
+    // owner.pushForce(1,owner.keyAngle);
+  }
+  @Override
+    void reset() {
+    // owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+  }
+}
+
+
+class BulletTime extends Ability {//---------------------------------------------------    bullet   ---------------------------------
+  int cooldown;
+  final int interval=150;
+  boolean trigger;
+  BulletTime() {
+    super();
+    name=getClassName(this);
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void onHit() {
+  }
+  @Override
+    void hold() {
+  }
+  @Override
+    void release() {
+  }
+  @Override
+    void passive() {
+
+    if (cooldown>interval) {
+      for (Projectile p : projectiles) {
+        if (!p.dead && p.ally!=owner.ally && dist(owner.cx, owner.cy, p.x, p.y)<300) {
+          trigger=true;
+          break;
+        }
+      }
+      if (trigger) {
+        owner.slowImmunity=true;
+        particles.add(new TempSlow(1500, 0.03, 1.05));
+        trigger=false;
+        cooldown=0;
+      }
+    }
+    cooldown++;
+  }
+  @Override
+    void reset() {
+    owner.slowImmunity=false;
+  }
+}
+class Adrenaline extends Ability {//---------------------------------------------------    bullet   ---------------------------------
+  int cooldown;
+  final int interval=100;
+  boolean trigger;
+  Adrenaline() {
+    super();
+    name=getClassName(this);
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void onHit() {
+  }
+  @Override
+    void hold() {
+  }
+  @Override
+    void release() {
+  }
+  @Override
+    void passive() {
+
+    if (cooldown>interval) {
+      /* for (Projectile p : projectiles) {
+       if (!p.dead && p.ally!=owner.ally && dist(owner.cx, owner.cy, p.x, p.y)<200) {
+       trigger=true;
+       break;
+       }
+       }*/
+      for (Player p : players) {
+        if (!p.dead && p.ally!=owner.ally && dist(owner.cx, owner.cy, p.cx, p.cy)<200) {
+          trigger=true;
+          break;
+        }
+      }
+      if (trigger) {
+        // owner.fastforwardImmunity=true;
+        particles.add(new TempFast(2000, 2, 0.995));
+        trigger=false;
+        cooldown=0;
+      }
+    }
+    cooldown++;
+  }
+  @Override
+    void reset() {
+    // owner.fastforwardImmunity=false;
+  }
+}
+
+class Emergency extends Ability {//---------------------------------------------------    Emergency   ---------------------------------
+
+  final int interval=1000;
+  int cooldown=interval;
+  float percent=0.5;
+  boolean trigger;
+  Emergency() {
+    super();
+    name=getClassName(this);
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void onHit() {
+  }
+  @Override
+    void hold() {
+  }
+  @Override
+    void release() {
+  }
+  @Override
+    void passive() {
+
+    if (cooldown>interval && owner.health<owner.maxHealth*percent) {
+      if (!owner.stealth) { 
+        fill(owner.playerColor);
+        noStroke();
+        ellipse(owner.cx, owner.cy, 250, 250);
+      }
+      for (Projectile p : projectiles) {
+        if (!p.dead && p.ally!=owner.ally && dist(owner.cx, owner.cy, p.x, p.y)<250 && owner.health<=p.damage) {
+          trigger=true;
+          break;
+        }
+      }
+      if (trigger) {
+        owner.freezeImmunity=true;
+        particles.add(new Flash(100, 8, WHITE));  
+
+        //particles.add(new TempSlow(1500, 0.03, 1.05));
+        for (int i =0; i<3; i++) {
+          particles.add( new Feather(300, int(owner.cx), int(owner.cy), random(-2, 2), random(-2, 2), 25, owner.playerColor));
+        }
+        particles.add( new TempFreeze(4500));
+        trigger=false;
+        cooldown=0;
+      }
+    }
+    if (!freeze)cooldown++;
+  }
+  @Override
+    void reset() {
+    cooldown=interval;
+    owner.freezeImmunity=false;
+  }
+}
+class Redemption extends Ability {//---------------------------------------------------    Redemption   ---------------------------------
+
+  final int interval=1000;
+  int cooldown=interval;
+  float percent=1.0;
+  boolean trigger;
+  Redemption() {
+    super();
+    name=getClassName(this);
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void onHit() {
+  }
+  @Override
+    void hold() {
+  }
+  @Override
+    void release() {
+  }
+  @Override
+    void passive() {
+
+    if (cooldown>interval ) {//&& owner.health<owner.maxHealth*percent
+
+      if (!owner.stealth) { 
+        fill(owner.playerColor);
+        noStroke();
+        ellipse(owner.cx, owner.cy, 250, 250);
+      }
+      for (Projectile p : projectiles) {
+        if (!p.dead && p.ally!=owner.ally && dist(owner.cx, owner.cy, p.x, p.y)<250 && owner.health<=p.damage) {
+          trigger=true;
+          break;
+        }
+      }
+      if (trigger) {
+        particles.add(new Flash(100, 8, WHITE));  
+        shakeTimer+=20;
+        particles.add( new TempReverse(2000));
+        trigger=false;
+        cooldown=0;
+      }
+    }
+    if (!freeze)cooldown++;
+  }
+  @Override
+    void reset() {
+    cooldown=interval;
+    //owner.freezeImmunity=false;
+  }
+}
+class Undo extends Ability {//---------------------------------------------------    Undo   ---------------------------------
+
+  final int interval=300, delay=400;
+  int cooldown=interval, triggerDiff=10;
+  long timer;
+  float percent=1.0, tempHealth;
+  boolean trigger;
+  Undo() {
+    super();
+    name=getClassName(this);
+  } 
+  @Override
+    void action() {
+  }
+
+  @Override
+    void hold() {
+  }
+  @Override
+    void release() {
+  }
+  @Override
+    void onHit() {
+    if (!trigger && cooldown>interval) {//&& owner.health<owner.maxHealth*percent
+      if (owner.health+triggerDiff<tempHealth) { 
+        trigger=true; 
+        timer=stampTime;
+        particles.add(new Flash(100, 4, owner.playerColor));  
+        // for (int i =0; i<10; i++) {
+        particles.add( new Feather(300, int(owner.cx), int(owner.cy), random(-2, 2), random(-2, 2), 200, owner.playerColor));
+        //  }
+        particles.add( new  Particle(int(owner.cx), int(owner.cy), 0, 0, int(owner.w), 350, color(255, 0, 255)));
+      }
+    }
+  }
+  @Override
+    void passive() {
+
+    if (trigger) {
+      if (timer+delay<stampTime) {
+        shakeTimer+=10;
+        particles.add( new TempReverse(1200));
+        trigger=false;
+        cooldown=0;
+        timer=millis();
+      }
+    }
+
+    if (!trigger && cooldown>interval ) { 
+      if (!owner.stealth) { 
+        fill(owner.playerColor);
+        noStroke();
+        ellipse(owner.cx, owner.cy, 250, 250);
+      }
+      tempHealth=owner.health;
+    } else if (!freeze) cooldown++;
+  }
+  @Override
+    void reset() {
+    cooldown=interval;
+    //owner.freezeImmunity=false;
+  }
+}
 
 
 class RandomPassive extends Ability {//---------------------------------------------------    RandomPassive   ---------------------------------
