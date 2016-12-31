@@ -2,7 +2,7 @@
 /**------------------------------------------------------------//
  //                                                            //
  //  Coding dojo  - Prototype of a timecontrol game            //
- //  av: Alrik He    v.0.6.7                                   //
+ //  av: Alrik He    v.0.7.7                                   //
  //  Arduino verstad Malmö                                     //
  //                                                            //
  //      2014-09-21    -     2016-11-05                        //
@@ -27,7 +27,7 @@ Gain   g = new Gain(ac, 1, 0.05); //volume
 PFont font;
 PGraphics GUILayer;
 PShader  Blur;
-boolean noFlash=true, noShake=true, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute;
+boolean noFlash=true, noShake=true, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true;
 final float flashAmount=0.2;
 int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight;
@@ -35,7 +35,7 @@ int gameMode=1;
 final int WHITE=color(255), GREY=color(172), BLACK=color(0);
 final int speedFactor= 2;
 final float slowFactor= 0.3;
-final String version="0.7.5";
+final String version="0.7.7";
 static long prevMillis, addMillis, forwardTime, reversedTime, freezeTime, stampTime, fallenTime;
 final int baudRate= 19200;
 final static float DEFAULT_FRICTION=0.1;
@@ -47,7 +47,7 @@ static int playersAlive; // amount of players alive
 static Player AI;
 final int offsetX=950, offsetY=100;
 static int shakeTimer, shakeX=0, shakeY=0;
-static float F=1, S=1, timeBend=1, zoom=1;//0.7;
+static float F=1, S=1, timeBend=1, zoom=0.8;//0.7;
 //int keyCooldown[]= new int[AmountOfPlayers];
 final int keyResponseDelay=30;  // eventhe refreashrate equal to arduino devices
 final char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='7';
@@ -106,7 +106,8 @@ final Ability abilityList[] = new Ability[]{
   new Pistol(), 
   new AssaultBattery(), 
   new Stars(), 
-  new SeekGun()
+  new SeekGun(),
+  new ElemetalLauncher()
   //new SummonEvil()
 };
 
@@ -129,12 +130,13 @@ final Ability passiveList[] = new Ability[]{
   new BulletTime(), 
   new Emergency(), 
   new Adrenaline(), 
-  new Redemption(), 
-  new Undo()
+  new BulletCutter()
+  //new Redemption(), // buggy on survival
+  //new Undo() // buggy on survival
 };
 
 Ability[][] abilities= { 
-  {new AssaultBattery(), new Adrenaline()}, 
+  {new ElemetalLauncher(), new BulletCutter()}, 
   {new SeekGun(), new Emergency()}, 
   { new AutoGun(), new Adrenaline()}, 
   {new Shotgun(), new Adrenaline()}, 
@@ -188,7 +190,7 @@ void setup() {
       players.add(new Player(i, color((255/AmountOfPlayers)*i, 255, 255), int(random(width-playerSize*1)+playerSize), int(random(height-playerSize*1)+playerSize), playerSize, playerSize, playerControl[i][0], playerControl[i][1], playerControl[i][2], playerControl[i][3], playerControl[i][4], abilities[i][0], abilities[i][1]));
     }
     catch(Exception e ) {
-          println(e);
+      println(e);
     }
     if (players.get(i).mouse)players.get(i).FRICTION_FACTOR=0.11; //mouse
   }
@@ -237,7 +239,7 @@ void setup() {
   musicPlayer.setRate(speedControl); // yo
   musicPlayer.setLoopType(SamplePlayer.LoopType.LOOP_FORWARDS);
   //  speedControl.addSegment(1, 3000); //now rewind
-  ac.start(); //start music
+  if (!mute)ac.start(); //start music
 
 
   Gain g2 = new Gain(an, 1, 0);
@@ -254,6 +256,10 @@ void setup() {
   AI.angle=0;
   AI.stealth=true;
   AI.dead=true;
+  AI.freezeImmunity=false;
+  AI.reverseImmunity=false;
+  AI.slowImmunity=false;
+  AI.fastforwardImmunity=false;
   switch(gameMode) {
   case 0:
     particles.add(new  Text("Brawl", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );

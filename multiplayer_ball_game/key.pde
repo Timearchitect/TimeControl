@@ -45,7 +45,7 @@ void keyPressed() {
   if (cheatEnabled ) {
     if (key==Character.toLowerCase('6')) {
       for (Player p : players) {      
-        if (!p.clone &&  !p.turret) {  // no turret or clone weapon switch
+        if (!p.clone &&  !p.turret && p!=AI) {  // no turret or clone weapon switch
           p.abilityList.get(1).reset();
           p.abilityList.set(1, new RandomPassive().randomize());
           p.abilityList.get(1).setOwner(p);

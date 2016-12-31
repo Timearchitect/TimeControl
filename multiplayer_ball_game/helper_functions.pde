@@ -47,17 +47,18 @@ static float angleAgainst(int x,int y,int x2,int y2){
       }
     }
     return null;
+  }  
+  static float  calcAngleBetween(Player target, Player from) {
+    return degrees(atan2((target.cy-from.cy), (target.cx-from.cx)))%360;
   }
-  /*
- Player seek(Player m,int senseRange) {
-    for (int sense = 0; sense < senseRange; sense++) {
-      for ( int i=0; players.size () > i; i++) {
-        if (players.get(i)!= m && !players.get(i).dead && players.get(i).ally!=m.ally) {
-          if (dist(players.get(i).x, players.get(i).y, m.x, m.y)<sense*0.5) {  
-            return players.get(i);
-          }
-        }
-      }
-    }
-    return null;
-  }*/
+   static float  calcAngleBetween(Projectile target, Projectile from) {
+    return degrees(atan2((target.y-from.y), (target.x-from.x)))%360;
+  }
+  
+     static float  calcAngleBetween(Projectile target, Player from) {
+    return degrees(atan2((target.y-from.cy), (target.x-from.cx)))%360;
+  }
+  
+       static float  calcAngleBetween(Player target, Projectile from) {
+    return degrees(atan2((target.cy-from.y), (target.cx-from.x)))%360;
+  }

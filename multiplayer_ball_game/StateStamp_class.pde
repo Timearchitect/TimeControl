@@ -40,19 +40,11 @@ class CheckPoint extends TimeStamp {  // save states
     }
 
     for (Projectile p : projectiles) {  // clone projectiles
-     try {
-        clonedProjectiles.add( p.clone());
-      }
-     catch(CloneNotSupportedException e) {
-      }
+      clonedProjectiles.add( p.clone());
     }
 
     for (Particle p : particles) { // clone particles
-     // try {
-        clonedParticles.add( p.clone());
-   //   }
-   //   catch(CloneNotSupportedException e) {
-    //  }
+      clonedParticles.add( p.clone());
     }
 
     //-----------------------
@@ -145,7 +137,7 @@ class StateStamp extends TimeStamp {  // save player
       }
     } 
     catch(Exception e) {
-      println(e);
+      println(e+" 2");
       stamps.remove(this);
     }
   }

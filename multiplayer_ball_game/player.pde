@@ -11,7 +11,7 @@ class Player implements Cloneable {
   PVector coord, speed, accel, arrow;
   float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR, DEFAULT_ARMOR=0; 
   long invisStampTime;
-  boolean invis, freezeImmunity=true, reverseImmunity, fastforwardImmunity, slowImmunity;
+  boolean invis, freezeImmunity, reverseImmunity, fastforwardImmunity, slowImmunity;
   //Ability ability;  
   ArrayList<Ability> abilityList= new ArrayList<Ability>();
   color playerColor;
@@ -357,11 +357,13 @@ class Player implements Cloneable {
 
   void hit(int damage) {
     stamps.add( new StateStamp(index, int(x), int(y), state, health, dead));
-    if (damage-armor>=0)damage-=armor;
-    health-=damage;
-    deColor=255;
-    state=2;
-    hit=true;
+    damage=damage-=armor;
+    if (damage>0) {
+      health-=damage;
+      deColor=255;
+      state=2;
+      hit=true;
+    }
     for (Ability a : this.abilityList) {
       a.onHit();
     }
@@ -372,6 +374,22 @@ class Player implements Cloneable {
     invis=true;
     if (health<=0) {
       death();
+    }
+  }
+  void heal(int _health) {
+    stamps.add( new StateStamp(index, int(x), int(y), state, health, dead));
+    if (health<maxHealth) {
+      health+=_health;
+      deColor=255;
+      state=2;
+      //  hit=true;
+      //}
+      /*for (Ability a : this.abilityList) {
+       a.onHit();
+       }*/
+      particles.add(new Particle(int(cx), int(cy), random(-10, 10)+vx*0.5, random(-10, 10)+vy*0.5, int(random(5, 20)), 500, playerColor));
+      invisStampTime=stampTime+invinsTime;
+      invis=true;
     }
   }
   void wallHit(int damage) {
@@ -486,6 +504,7 @@ class Player implements Cloneable {
       return temp;
     }
     catch(CloneNotSupportedException c) {
+      println(c);
       return null;
     }
   }

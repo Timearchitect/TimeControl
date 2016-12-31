@@ -46,7 +46,8 @@ void checkPlayerVSPlayerColloision() {
     for (Player p1 : players) {       
       for (Player p2 : players) {       
         if (p1.ally!=p2.ally && !p1.dead && !p2.dead ) { //  && p1!=p2
-          if (dist(p1.x, p1.y, p2.x, p2.y)<playerSize) {
+         //    if (dist(p1.x, p1.y, p2.x, p2.y)<playerSize) { // old collision
+          if (dist(p1.x, p1.y, p2.x, p2.y)<p1.radius+p2.radius) {
             p1.hit(p2.damage);
             float  deltaX =  p1.x -  p2.x, deltaY =  p1.y -  p2.y;
             p1.pushForce( playerSize-dist(p2.x, p2.y, p1.x, p1.y), atan2(deltaY, deltaX) * 180 / PI);
@@ -59,22 +60,15 @@ void checkPlayerVSPlayerColloision() {
 
 void checkPlayerVSProjectileColloision() {
   if (!freeze &&!reverse) {
-    /*for (int i=0; i< projectiles.size (); i++) {    
-     for (int j=0; j<players.size (); j++) {      
-     if (players.get(j).ally!=projectiles.get(i).ally && !players.get(j).dead && !projectiles.get(i).dead && projectiles.get(i).playerIndex!=j  ) {
-     if (dist(projectiles.get(i).x, projectiles.get(i).y, players.get(j).cx, players.get(j).cy)<playerSize) {
-     //  players.get(j).hit(projectiles.get(i).damage);
-     players.get(j).pushForce(projectiles.get(i).force, projectiles.get(i).angle);
-     projectiles.get(i).hit(players.get(j));
-     }
-     }
-     }
-     }*/
+
     try {
       for (Projectile o : projectiles) {    
+
         for (Player p : players) {      
           if (p.ally!=o.ally && !p.dead && !o.dead ) { // && o.playerIndex!=p.ally
-            if (dist(o.x, o.y, p.cx, p.cy)<playerSize) {
+            //if (dist(o.x, o.y, p.cx, p.cy)<playerSize) { //old collision
+               if (dist(o.x, o.y, p.cx, p.cy)<p.radius+o.size*.5) {
+
               //  players.get(j).hit(projectiles.get(i).damage);
               p.pushForce(o.force, o.angle);
               o.hit(p);
@@ -84,7 +78,7 @@ void checkPlayerVSProjectileColloision() {
       }
     }
     catch(Exception e) {
-          println(e);
+      println(e +" onmain projectile ");
     }
   }
 }
@@ -109,10 +103,20 @@ void checkProjectileVSProjectileColloision() {
         if (p2.ally!=p1.ally && !p2.dead && !p1.dead ) { //  && p1!=p2
           if (p1 instanceof  Reflectable  && p2 instanceof Reflector) {
             if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*0.5+p2.size*0.5) {
-              Reflectable reflectObject = (Reflectable)p1;
-              Reflector reflectorObject = (Reflector)p2;
-              reflectObject.reflect(p2.angle, p2.owner);
-              reflectorObject.reflecting();
+              /*Reflectable reflectObject = (Reflectable)p1;
+               Reflector reflectorObject = (Reflector)p2;
+               reflectObject.reflect(p2.angle, p2.owner);
+               reflectorObject.reflecting();*/
+              ((Reflectable)p1).reflect(p2.angle, p2.owner);
+              ((Reflector)p2).reflecting();
+              //reflectObject.reflect(p2.angle, p2.owner);
+              //reflectorObject.reflecting();
+            }
+          }
+          if (p1 instanceof  Destroyable  && p2 instanceof Destroyer) {
+            if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*0.5+p2.size*0.5) {
+              ((Destroyable)p1).destroy(p2);
+              ((Destroyer)p2).destroying(p1);
             }
           }
         }
@@ -139,12 +143,15 @@ void checkWinner() {
     textSize(80);
     switch(gameMode) {
     case 0:
+
       text(" Winner is player "+(playerAliveIndex+1), halfWidth, halfHeight);
       text(" Press ["+ResetKey+"] to restart", halfWidth, height*0.6);
       break;
     case 1:
-      text(" The survivor is player "+(playerAliveIndex+1), halfWidth, halfHeight);
-      text(" Press ["+ResetKey+"] to restart", halfWidth, height*0.6);
+      if (playersAlive<1) {
+        text(" The survivor is player "+(playerAliveIndex+1), halfWidth, halfHeight);
+        text(" Press ["+ResetKey+"] to restart", halfWidth, height*0.6);
+      }
       break;
     }
     textSize(18);

@@ -54,6 +54,7 @@ class Particle  implements Cloneable {
       return (Particle)super.clone();
     }
     catch(CloneNotSupportedException e) {
+      println(e);
       return null;
     }
   }
