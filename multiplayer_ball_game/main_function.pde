@@ -30,7 +30,7 @@ void screenShake() {
   } // shake screen
 }
 void shake(int amount) {
-  if (noShake) {
+  if (!noShake) {
     // int shakeX=0, shakeY=0;
     if (!freeze) {
       shakeX=int(random(amount)-amount*0.5);
@@ -47,10 +47,10 @@ void checkPlayerVSPlayerColloision() {
       for (Player p2 : players) {       
         if (p1.ally!=p2.ally && !p1.dead && !p2.dead ) { //  && p1!=p2
          //    if (dist(p1.x, p1.y, p2.x, p2.y)<playerSize) { // old collision
-          if (dist(p1.x, p1.y, p2.x, p2.y)<p1.radius+p2.radius) {
+          if (dist(p1.cx, p1.cy, p2.cx, p2.cy)<p1.radius+p2.radius) {
             p1.hit(p2.damage);
-            float  deltaX =  p1.x -  p2.x, deltaY =  p1.y -  p2.y;
-            p1.pushForce( playerSize-dist(p2.x, p2.y, p1.x, p1.y), atan2(deltaY, deltaX) * 180 / PI);
+            float  deltaX =  p1.cx -  p2.cx, deltaY =  p1.cy -  p2.cy;
+            p1.pushForce( ((p1.radius+p2.radius)-dist(p2.cx, p2.cy, p1.cx, p1.cy)), atan2(deltaY, deltaX) * 180 / PI);
           }
         }
       }

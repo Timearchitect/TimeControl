@@ -1188,7 +1188,7 @@ class Laser extends Ability {//-------------------------------------------------
       particles.add(new ShockWave(int(owner.cx), int(owner.cy), 200*chargelevel, 16, 500, owner.playerColor));
       particles.add(new Flash(50, 6, WHITE)); 
 
-      Projectile l =new ChargeLaser(owner, int( owner.cx+random(50, -50)), int(owner.cy+random(50, -50)), laserWidth*chargelevel, owner.playerColor, duration, owner.angle, damage*chargelevel);
+      Projectile l =new ChargeLaser(owner, int( owner.cx+random(50, -50)), int(owner.cy+random(50, -50)), laserWidth*chargelevel, owner.playerColor, duration, owner.angle,0, damage*chargelevel,true);
       laserList.add(l);
       projectiles.add(l);
       // projectiles.add( new ChargeLaser(owner, int( owner.cx+random(50, -50)), int(owner.cy+random(50, -50)), laserWidth*chargelevel, owner.playerColor, duration, owner.angle, damage*chargelevel));
@@ -1357,41 +1357,47 @@ class ElemetalLauncher extends Ability {//--------------------------------------
     particles.add(new ShockWave(int(owner.cx), int(owner.cy), 20, 16, 200, owner.playerColor));
     particles.add( new  Particle(int(owner.cx), int(owner.cy), 0, 0, int(owner.w), 800, color(255, 0, 255)));
     switch(ammoType%maxAmmotype) {
+    case 1:
+      Container waterRocket= new Rocket(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 900, owner.angle, cos(radians(owner.angle))*shootSpeed+owner.vx, sin(radians(owner.angle))*shootSpeed+owner.vy, damage, false);
+      payload=new Containable[2];
+      payload[0]= new ChargeLaser(owner, 0, 0, 1000, owner.playerColor, 150, owner.angle+180,20, damage*.4 ).parent(waterRocket); 
+      payload[1]= new ChargeLaser(owner, 0, 0, 1000, owner.playerColor, 150, owner.angle+180,-20, damage*.4 ).parent(waterRocket); 
 
-    case 5:
-      Container iceRocket= new Rocket(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 500, owner.angle, cos(radians(owner.angle))*shootSpeed+owner.vx, sin(radians(owner.angle))*shootSpeed+owner.vy, damage, false);
-      payload=new Containable[10];
-      for (int i=0; i<10; i++) {
-        payload[i] =new IceDagger(owner, 0, 0, 20, owner.playerColor, 2000, owner.angle, random(40)-20+cos(radians(owner.angle))*shootSpeed*1.2, random(40)-20+sin(radians(owner.angle))*shootSpeed*1.2, int(damage*.4)).parent(iceRocket);
-      }
-      iceRocket.contains(payload);
-      projectiles.add((Projectile)iceRocket);
+      waterRocket.contains(payload);
+      projectiles.add((Projectile)waterRocket);
       break;
     case 2:
       Container thunderRocket= new Rocket(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 700, owner.angle, cos(radians(owner.angle))*shootSpeed+owner.vx, sin(radians(owner.angle))*shootSpeed+owner.vy, damage, false);
       payload=new Containable[6];
-          for (int i=0; i<6; i++) {
-          payload[i] =new Thunder(owner, int(random(800)-400), int(random(800)-400), 200, color(owner.playerColor), 500+(150*i), 0, 0, 0, int(damage*2), 0).parent(thunderRocket);
+      for (int i=0; i<6; i++) {
+        payload[i] =new Thunder(owner, int(random(600)-300), int(random(600)-300), 200, color(owner.playerColor), 500+(150*i), 0, 0, 0, int(damage*2.5), 0, false).parent(thunderRocket);
       }
-
       thunderRocket.contains(payload);
       projectiles.add((Projectile)thunderRocket);
       break;
     case 3:
       Container rockRocket= new Rocket(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*shootSpeed*.5+owner.vx, sin(radians(owner.angle))*shootSpeed*.5+owner.vy, damage, false);
       payload=new Containable[1];
-      payload[0]= new Block(players.size(), owner, 0,0, 200, 200, 200,new Armor()).parent(rockRocket);
+      payload[0]= new Block(players.size(), owner, 0, 0, 200, 200, 200, new Armor()).parent(rockRocket);
       rockRocket.contains(payload);
       projectiles.add((Projectile)rockRocket);
       break;
-      
-          case 4:
+
+    case 4:
       Container natureRocket= new Rocket(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 700, owner.angle, cos(radians(owner.angle))*shootSpeed+owner.vx, sin(radians(owner.angle))*shootSpeed+owner.vy, damage, false);
       payload=new Containable[1];
-      payload[0]= new  Heal(owner, 0,0, 400, owner.playerColor, 10000, 0,1, 1, 4, true).parent(natureRocket) ;
-  
+      payload[0]= new  Heal(owner, 0, 0, 400, owner.playerColor, 10000, 0, 1, 1, 4, true).parent(natureRocket) ;
       natureRocket.contains(payload);
       projectiles.add((Projectile)natureRocket);
+      break;
+    case 5:
+      Container iceRocket= new Rocket(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 500, owner.angle, cos(radians(owner.angle))*shootSpeed+owner.vx, sin(radians(owner.angle))*shootSpeed+owner.vy, damage, false);
+      payload=new Containable[12];
+      for (int i=0; i<12; i++) {
+        payload[i] =new IceDagger(owner, 0, 0, 25, owner.playerColor, 2000, owner.angle, random(40)-20+cos(radians(owner.angle))*shootSpeed*1.2, random(40)-20+sin(radians(owner.angle))*shootSpeed*1.2, int(damage*.4)).parent(iceRocket);
+      }
+      iceRocket.contains(payload);
+      projectiles.add((Projectile)iceRocket);
       break;
     default:
 
@@ -1412,14 +1418,14 @@ class ElemetalLauncher extends Ability {//--------------------------------------
   }
   void passive() {
     noStroke();
-
+    textSize(24);
     fill(255);
     switch(ammoType%maxAmmotype) {
     case 0:
-      text("WATER", int(owner.cx), int(owner.cy-90));
+      text("FIRE", int(owner.cx), int(owner.cy-90));
       break;
     case 1:
-      text("FIRE", int(owner.cx), int(owner.cy-90));
+      text("WATER", int(owner.cx), int(owner.cy-90));
       break;
     case 2:
       text("LIGHTNING", int(owner.cx), int(owner.cy-90));
@@ -1563,13 +1569,14 @@ class Bazooka extends Ability {//-----------------------------------------------
     void reset() {
     super.reset();
     energy=90;
+    release();
     deActivate();
     deChannel();
     regen=true;
   }
 }
 
-class Stars extends Ability {//---------------------------------------------------    Bazooka   ---------------------------------
+class Stars extends Ability {//---------------------------------------------------    Stars   ---------------------------------
   int  damage=15, shootSpeed=8;
   float MODIFIED_MAX_ACCEL=0.04; 
   Stars() {
@@ -1615,6 +1622,8 @@ class Stars extends Ability {//-------------------------------------------------
     void reset() {
     super.reset();
     energy=90;
+        release();
+
     deActivate();
     deChannel();
     regen=true;
@@ -2294,6 +2303,16 @@ class MissleLauncher extends Ability {//----------------------------------------
       interval++;
     }
   }
+  
+    @Override
+    void  reset() {
+    super.reset();
+    active=false;
+    regen=true;
+    action();
+    owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
+    owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+  }
 }
 
 class AutoGun extends Ability {//---------------------------------------------------    AutoGun   ---------------------------------
@@ -2503,6 +2522,8 @@ class SeekGun extends Ability {//-----------------------------------------------
     active=false;
     targets.clear();
     spanAngle=5;
+    deChannel();
+    release();
     regen=true;
     action();
     owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
@@ -2790,11 +2811,11 @@ class DeployThunder extends TimeBomb {//----------------------------------------
     if (energy>=maxEnergy-activeCost) {   
       particles.add( new Text("!", int( owner.cx), int(owner.cy), 0, 0, 180, 0, 4000, BLACK, 1));
       particles.add( new Text("!", int( owner.cx), int(owner.cy), 0, 0, 240, 0, 4000, owner.playerColor, 0));
-      projectiles.add( new Thunder(owner, int( owner.cx), int(owner.cy), 500, owner.playerColor, 4000, owner.angle, cos(radians(owner.angle))*shootSpeed, sin(radians(owner.angle))*shootSpeed, int(damage*1.3), 6));
+      projectiles.add( new Thunder(owner, int( owner.cx), int(owner.cy), 500, owner.playerColor, 4000, owner.angle, cos(radians(owner.angle))*shootSpeed, sin(radians(owner.angle))*shootSpeed, int(damage*1.3), 6, true));
     } else {
       particles.add( new Text("!", int( owner.cx), int(owner.cy), 0, 0, 140, 0, 2000, BLACK, 1));
       particles.add( new Text("!", int( owner.cx), int(owner.cy), 0, 0, 180, 0, 2000, owner.playerColor, 0));
-      projectiles.add( new Thunder(owner, int( owner.cx), int(owner.cy), 400, owner.playerColor, 2000, owner.angle, cos(radians(owner.angle))*shootSpeed, sin(radians(owner.angle))*shootSpeed, damage, 5));
+      projectiles.add( new Thunder(owner, int( owner.cx), int(owner.cy), 400, owner.playerColor, 2000, owner.angle, cos(radians(owner.angle))*shootSpeed, sin(radians(owner.angle))*shootSpeed, damage, 5, true));
     }
   }
 
@@ -3036,7 +3057,7 @@ class Ram extends Ability {//---------------------------------------------------
     if (abs(owner.vx)+abs(owner.vy)> 20 && cooldown<stampTime) {
       enableCooldown();
       owner.pushForce(boostSpeed, owner.keyAngle);
-      projectiles.add(new Thunder(owner, int( owner.cx), int(owner.cy), 300, color(owner.playerColor), 0, 0, 0, 0, int(damage*10), 0) );
+      projectiles.add(new Thunder(owner, int( owner.cx), int(owner.cy), 300, color(owner.playerColor), 0, 0, 0, 0, int(damage*10), 0, true) );
 
       particles.add(new ShockWave(int(owner.cx), int(owner.cy), 400, 22, 150, owner.playerColor));
     }
@@ -3224,6 +3245,8 @@ class DeployDrone extends Ability {//-------------------------------------------
   @Override
     void reset() {
     super.reset();
+    deChannel();
+    release();
     players.remove(droneList);
   }
 }
@@ -3300,7 +3323,7 @@ class KineticPulse extends Ability {//------------------------------------------
     }
     particles.add(new ShockWave(distanceX, distanceY, 140, 90, 300, owner.playerColor));
 
-    projectiles.add(new Thunder(owner, distanceX, distanceY, radius, color(owner.playerColor), 700, 0, 0, 0, int(damage), 4) );
+    projectiles.add(new Thunder(owner, distanceX, distanceY, radius, color(owner.playerColor), 700, 0, 0, 0, int(damage), 4, true) );
     enableCooldown();
   }
   @Override
@@ -3332,7 +3355,7 @@ class KineticPulse extends Ability {//------------------------------------------
 
         if (energy>=maxEnergy-activeCost-20 && int((forceAmount*2+2)%8)==0) {
           if (forceAmount<5)forceAmount=5;
-          projectiles.add(new Thunder(owner, distanceX, distanceY, int(radius*.5), color(owner.playerColor), 900, 0, 0, 0, int(damage*.5), 1) );
+          projectiles.add(new Thunder(owner, distanceX, distanceY, int(radius*.5), color(owner.playerColor), 900, 0, 0, 0, int(damage*.5), 1, true) );
         }
 
         crossVarning(distanceX, distanceY );
@@ -3511,7 +3534,7 @@ class RandoGun extends Ability {//----------------------------------------------
 
       break;
     case 7:
-      projectiles.add( new ChargeLaser(owner, int( owner.cx+random(50, -50)), int(owner.cy+random(50, -50)), 100, owner.playerColor, 500, owner.angle, damage*0.08));
+      projectiles.add( new ChargeLaser(owner, int( owner.cx+random(50, -50)), int(owner.cy+random(50, -50)), 100, owner.playerColor, 500, owner.angle,0, damage*0.08,true));
       owner.halt();
       break;
     case 8:
@@ -3531,7 +3554,7 @@ class RandoGun extends Ability {//----------------------------------------------
 
       break;
     case 12:
-      projectiles.add( new Thunder(owner, int( owner.cx+cos(radians(owner.angle))*400), int(owner.cy+sin(radians(owner.angle))*400), 400, owner.playerColor, 1500, owner.angle, cos(radians(owner.angle))*shootSpeed, sin(radians(owner.angle))*shootSpeed, damage, 5));
+      projectiles.add( new Thunder(owner, int( owner.cx+cos(radians(owner.angle))*400), int(owner.cy+sin(radians(owner.angle))*400), 400, owner.playerColor, 1500, owner.angle, cos(radians(owner.angle))*shootSpeed, sin(radians(owner.angle))*shootSpeed, damage, 5, true));
       break;
     case 13:
       projectiles.add( new Rocket(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 1000, owner.angle, cos(radians(owner.angle))*shootSpeed+owner.vx, sin(radians(owner.angle))*shootSpeed+owner.vy, damage, false));
@@ -3568,6 +3591,14 @@ class RandoGun extends Ability {//----------------------------------------------
       action();
       deActivate();
     }
+  }
+    @Override
+    void reset() {
+    super.reset();
+    energy=90;
+    deActivate();
+    deChannel();
+    regen=true;
   }
 }
 class FlameThrower extends Ability {//---------------------------------------------------    FlameThrower   ---------------------------------

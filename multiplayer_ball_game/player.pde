@@ -179,13 +179,14 @@ class Player implements Cloneable {
         } else {
           for (Ability a : this.abilityList) a.regen();
           //speed.set(speed.x+(accel.x*bend), speed.y+(accel.y*bend));
-          cx=x+radius;
-          cy=y+radius;
+
           vx+=ax*bend;
           vy+=ay*bend;
           //coord.set(coord.x+(speed.x*bend), coord.y+(speed.y*bend));
           x+=vx*bend;
           y+=vy*bend;
+          cx=x+radius;
+          cy=y+radius;
           //speed.set(speed.x*(1-FRICTION_FACTOR*bend), speed.y*(1-FRICTION_FACTOR*bend));
           vx*=1-FRICTION_FACTOR*bend;
           vy*=1-FRICTION_FACTOR*bend;

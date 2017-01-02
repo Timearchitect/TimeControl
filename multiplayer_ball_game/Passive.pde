@@ -59,7 +59,7 @@ class MpRegen extends Ability {//-----------------------------------------------
 
 class Armor extends Ability {//---------------------------------------------------    HpRegen   ---------------------------------
   // float regenRate = 1;
-  int armorAmount=6, stillBonusArmor=3;
+  int armorAmount=4, stillBonusArmor=2;
   Armor() {
     super();
     name=getClassName(this);
@@ -780,7 +780,7 @@ class Adrenaline extends Ability {//--------------------------------------------
   }
   @Override
     void passive() {
-    if (fastForward||timeBend>1)owner.armor=100;
+    if (fastForward)owner.armor=100;
     else owner.armor=int(owner.DEFAULT_ARMOR);
 
     if (cooldown>interval) {

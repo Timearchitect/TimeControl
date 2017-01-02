@@ -31,7 +31,7 @@ boolean noFlash=true, noShake=true, slow, reverse, fastForward, freeze, controla
 final float flashAmount=0.2;
 int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight;
-int gameMode=1;
+int gameMode=0;
 final int WHITE=color(255), GREY=color(172), BLACK=color(0);
 final int speedFactor= 2;
 final float slowFactor= 0.3;
@@ -251,7 +251,7 @@ void setup() {
   particles.get(0).opacity=0;
   //frameRate(60);
 
-  AI= new Player( -1, GREY, halfWidth, halfHeight, 0, 0, 0, 0, 0, 0, 0, new DeployTurret());
+  AI= new Player( -1, BLACK, halfWidth, halfHeight, 0, 0, 0, 0, 0, 0, 0, new DeployTurret());
   AI.index=-1;
   AI.angle=0;
   AI.stealth=true;
@@ -290,6 +290,7 @@ void draw() {
 
 
   background(255);
+  
   addMillis=millis()-prevMillis;
   prevMillis=millis();
   if (origo) {
@@ -301,14 +302,14 @@ void draw() {
 
     fill(100);
 
-    if (fastForward) {
+    if (fastForward&& !noFlash) {
       fill(240, 100*F, 100, 50);
     }
-    if (slow) {
+    if (slow&& !noFlash) {
       fill(240, 10*F, 250, 20);
     }
-    if (freeze) {
-      fill(150, 200, 255);
+    if (freeze ) {
+      if(!noFlash)fill(150, 200, 255);
       freezeTime+=addMillis;
     } else {
       if (reverse) {
@@ -325,7 +326,7 @@ void draw() {
 
           shake(4);
         }
-        fill(40, 200*timeBend, 255*F);
+        if(!noFlash)fill(40, 200*timeBend, 255*F);
         reversedTime+=addMillis*timeBend;
       } else {
         forwardTime+=addMillis*timeBend;
