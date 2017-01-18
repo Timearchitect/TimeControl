@@ -27,13 +27,15 @@ final color BGcolor=color(100);
 PFont font;
 PGraphics GUILayer;
 PShader  Blur;
-boolean RandomSkillsOnDeath=true, noFlash=true, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true,inGame;
-final float flashAmount=0.1, shakeAmount=0.1;
+boolean RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true,inGame;
+final float flashAmount=0.5, shakeAmount=0.5;
 int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight;
 //int gameMode=0;
-GameType gameMode=GameType.BRAWL;
-final int AmountOfPlayers=3; // start players
+GameType gameMode=GameType.SURVIVAL;
+final int AmountOfPlayers=1; // start players
+final float DIFFICULTY_LEVEL=1.0;
+
 final int WHITE=color(255), GREY=color(172), BLACK=color(0);
 final int speedFactor= 2;
 final float slowFactor= 0.3;
@@ -60,6 +62,8 @@ ArrayList <Player> players = new ArrayList<Player>();
 ArrayList <TimeStamp> stamps= new ArrayList<TimeStamp>();
 ArrayList <Projectile> projectiles = new ArrayList<Projectile>();
 ArrayList <Particle> particles = new ArrayList<Particle>();
+
+
 
 final Projectile allProjectiles[] = new Projectile[]{
   // new IceDagger(),new forceBall(),new RevolverBullet()
@@ -100,6 +104,7 @@ final Ability abilityList[] = new Ability[]{
   new TeslaShock(), 
   new RandoGun(), 
   new Shotgun(), 
+  new Sluggun(),
   new FlameThrower(), 
   new DeployDrone(), 
   new DeployBodyguard(), 
@@ -109,7 +114,13 @@ final Ability abilityList[] = new Ability[]{
   new Stars(), 
   new SeekGun(), 
   new ElemetalLauncher(), 
-  new SummonEvil()
+  new SummonEvil(),
+  new SummonIlluminati(),
+  new DemonFire(),
+  new SneakBall(),
+  new TripleShot()
+  
+
 };
 
 final Ability passiveList[] = new Ability[]{
@@ -131,41 +142,29 @@ final Ability passiveList[] = new Ability[]{
   new BulletTime(), 
   new Emergency(), 
   new Adrenaline(), 
-  new BulletCutter()
+  new BulletCutter(),
+  new Dodge(),
+  new Guardian()
   //new Redemption(), // buggy on survival
   //new Undo() // buggy on survival
 };
 
 Ability[][] abilities= { 
-  {new Random().randomize(), new CloneMultiply()}, 
-  {new  Random().randomize(), new CloneMultiply()}, 
-  { new  Random().randomize(), new CloneMultiply()}, 
-  {new Shotgun(), new RandomPassive().randomize()}, 
+ /* player 1 */ {new Random().randomize(),new RandomPassive().randomize(), new Dodge()}, 
+ /* player 2 */ {new Random().randomize(),new RandomPassive().randomize(), new Dodge()}, 
+ /* player 3 mouse */ {new  Random().randomize(),new  Random().randomize(), new Suicide()}, 
+ /* player 4 */ {new Random().randomize(),new Random().randomize(), new RandomPassive().randomize()}, 
   {new Random().randomize(), new RandomPassive().randomize()}, 
   {new Random().randomize(), new RandomPassive().randomize()}
 };
 
 int playerControl[][]= {
-  {
-    UP, DOWN, LEFT, RIGHT, int(',')
-  }
-  , {
-    int('w')-32, int('s')-32, int('a')-32, int('d')-32, int('t')-32
-  }
-  , 
-  {
-    888, 888, 888, 888, 888 // mouse
-  }
-  , {
-    int('i')-32, int('k')-32, int('j')-32, int('l')-32, int('ö')-32
-  }
-  , {
-    int('g')-32, int('b')-32, int('v')-32, int('n')-32, int('m')-32
-  }
-  , 
-  {
-    '8', '5', '4', '6', '3'
-  }
+  { UP, DOWN, LEFT, RIGHT, int(',') }
+  , { int('w')-32, int('s')-32, int('a')-32, int('d')-32, int('t')-32 }
+  , { 888, 888, 888, 888, 888 }// mouse 
+  , { int('i')-32, int('k')-32, int('j')-32, int('l')-32, int('ö')-32 }
+  , { int('g')-32, int('b')-32, int('v')-32, int('n')-32, int('m')-32}
+  , { '8', '5', '4', '6', '3'}
 };
 /*boolean sketchFullScreen() { // p2 legacy
  return false;
@@ -188,7 +187,7 @@ void setup() {
   colorMode(HSB);
   for (int i=0; i< AmountOfPlayers; i++) {
     try {
-      players.add(new Player(i, color((255/AmountOfPlayers)*i, 255, 255), int(random(width-playerSize*1)+playerSize), int(random(height-playerSize*1)+playerSize), playerSize, playerSize, playerControl[i][0], playerControl[i][1], playerControl[i][2], playerControl[i][3], playerControl[i][4], abilities[i][0], abilities[i][1]));
+      players.add(new Player(i, color((255/AmountOfPlayers)*i, 255, 255), int(random(width-playerSize*1)+playerSize), int(random(height-playerSize*1)+playerSize), playerSize, playerSize, playerControl[i][0], playerControl[i][1], playerControl[i][2], playerControl[i][3], playerControl[i][4], abilities[i]));
     }
     catch(Exception e ) {
       println(e);
@@ -262,7 +261,7 @@ void setup() {
   AI.fastforwardImmunity=false;
   switch(gameMode) {
   case BRAWL:
-    particles.add(new  Text("Brawl", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
+    particles.add(new Text("Brawl", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
     particles.add(new Gradient(8000, 0, 500, 0, 0, 500, 0.5, 0, GREY));
     break;
   case SURVIVAL:

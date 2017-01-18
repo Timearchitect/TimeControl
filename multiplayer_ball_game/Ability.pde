@@ -596,10 +596,10 @@ class Pistol extends Ability {//------------------------------------------------
   @Override
     void action() {
     if (energy>=maxEnergy)
-      projectiles.add( new RevolverBullet(owner, int( owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 85, 12, owner.playerColor, 1000, owner.angle, damage));
+      projectiles.add( new RevolverBullet(owner, int( owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 85, 14, owner.playerColor, 1000, owner.angle, damage));
 
     else
-      projectiles.add( new RevolverBullet(owner, int( owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 75, 10, owner.playerColor, 1000, owner.angle, damage));
+      projectiles.add( new RevolverBullet(owner, int( owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 75, 12, owner.playerColor, 1000, owner.angle, damage));
 
     particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 20, 32, 55, WHITE));
     owner.pushForce(-5, owner.angle);
@@ -645,7 +645,7 @@ class Pistol extends Ability {//------------------------------------------------
   }
 }
 class Revolver extends Ability {//---------------------------------------------------    Revolver   ---------------------------------
-  final int damage=38;
+  final int damage=40;
   int r;
   float accuracy=1, MODIFIED_ANGLE_FACTOR=0.18;
   Revolver() {
@@ -866,7 +866,7 @@ class Multiply extends Ability {//----------------------------------------------
   Multiply() {
     super();
     name=getClassName(this);
-    activeCost=80;
+    activeCost=70;
   } 
   @Override
     void action() {
@@ -877,16 +877,16 @@ class Multiply extends Ability {//----------------------------------------------
     try {
       switch(dir%4) {
       case 0:
-        currentClone=new Player(players.size()-1, owner.playerColor, int(owner.x-cos(radians(owner.angle))*range), int(owner.y-sin(radians(owner.angle))*range), playerSize, playerSize, owner.down, owner.up, owner.right, owner.left, owner.triggKey, new CloneMultiply(), owner.abilityList.get(1).clone());
+        currentClone=new Player(players.size()-1, owner.playerColor, int(owner.x-cos(radians(owner.angle))*range), int(owner.y-sin(radians(owner.angle))*range), playerSize, playerSize, owner.down, owner.up, owner.right, owner.left, owner.triggKey, new Suicide(), owner.abilityList.get(1).clone());
         break;
       case 1:
-        currentClone=new Player(players.size()-1, owner.playerColor, int(owner.x-cos(radians(owner.angle))*range), int(owner.y-sin(radians(owner.angle))*range), playerSize, playerSize, owner.right, owner.left, owner.up, owner.down, owner.triggKey, new CloneMultiply(), owner.abilityList.get(1).clone());
+        currentClone=new Player(players.size()-1, owner.playerColor, int(owner.x-cos(radians(owner.angle))*range), int(owner.y-sin(radians(owner.angle))*range), playerSize, playerSize, owner.right, owner.left, owner.up, owner.down, owner.triggKey, new Suicide(), owner.abilityList.get(1).clone());
         break;
       case 2:
-        currentClone=new Player(players.size()-1, owner.playerColor, int(owner.x-cos(radians(owner.angle))*range), int(owner.y-sin(radians(owner.angle))*range), playerSize, playerSize, owner.up, owner.down, owner.left, owner.right, owner.triggKey, new CloneMultiply(), owner.abilityList.get(1).clone());
+        currentClone=new Player(players.size()-1, owner.playerColor, int(owner.x-cos(radians(owner.angle))*range), int(owner.y-sin(radians(owner.angle))*range), playerSize, playerSize, owner.up, owner.down, owner.left, owner.right, owner.triggKey, new Suicide(), owner.abilityList.get(1).clone());
         break;
       case 3:
-        currentClone=new Player(players.size()-1, owner.playerColor, int(owner.x-cos(radians(owner.angle))*range), int(owner.y-sin(radians(owner.angle))*range), playerSize, playerSize, owner.left, owner.right, owner.down, owner.up, owner.triggKey, new CloneMultiply(), owner.abilityList.get(1).clone());
+        currentClone=new Player(players.size()-1, owner.playerColor, int(owner.x-cos(radians(owner.angle))*range), int(owner.y-sin(radians(owner.angle))*range), playerSize, playerSize, owner.left, owner.right, owner.down, owner.up, owner.triggKey, new Suicide(), owner.abilityList.get(1).clone());
         break;
       }
     }
@@ -936,7 +936,7 @@ class Multiply extends Ability {//----------------------------------------------
     }
   }
 }
-class CloneMultiply extends Multiply { // ability that have no effect as clones.
+/*class CloneMultiply extends Multiply { // ability that have no effect as clones.
   int damage=50;
   CloneMultiply() {
     super();
@@ -945,9 +945,9 @@ class CloneMultiply extends Multiply { // ability that have no effect as clones.
   @Override
     void action() {
     //projectiles.add( new Bomb(owner, int( owner.cx), int(owner.cy), 75, owner.playerColor, 1000, owner.angle, 0, 0, damage, false));
-    for (int i=0; i<10; i++) {
-      particles.add(new Particle(int(owner.cx), int(owner.cy), random(-10, 10), random(-10, 10), int(random(20)+5), 800, 255));
-    }
+    // for (int i=0; i<10; i++) {
+    // particles.add(new Particle(int(owner.cx), int(owner.cy), random(-10, 10), random(-10, 10), int(random(20)+5), 800, 255));
+    // }
   }
   @Override
     void press() {
@@ -966,17 +966,17 @@ class CloneMultiply extends Multiply { // ability that have no effect as clones.
     //for (TimeStamp s:stamps )if(s.playerIndex==players.indexOf(owner))stamps.remove(players.indexOf(owner));
 
 
-    /* for (int i =players.size()-1; i>= 0; i--) {
-     if (players.get(i).turret || players.get(i).clone) players.remove( players.get(i));
-     }*/
+    // for (int i =players.size()-1; i>= 0; i--) {
+    // if (players.get(i).turret || players.get(i).clone) players.remove( players.get(i));
+    // }
   }
   @Override
     void onDeath() {
     if ((!reverse || owner.reverseImmunity)&&  owner.health<=0 && (!freeze || owner.freezeImmunity)) {
-      projectiles.add( new Bomb(owner, int( owner.cx), int(owner.cy), 120, owner.playerColor, 1000, owner.angle, owner.vx, owner.vy, damage, false));
+      projectiles.add( new Bomb(owner, int( owner.cx), int(owner.cy), 160, owner.playerColor, 1000, owner.angle, owner.vx, owner.vy, damage, false));
     }
   }
-}
+}*/
 
 class Stealth extends Ability {//---------------------------------------------------    Stealth   ---------------------------------
   int projectileDamage=12, wait;
@@ -1056,6 +1056,7 @@ class Combo extends Ability {//-------------------------------------------------
     name=getClassName(this);
     activeCost=stepActivateCost[1];
     energy=110;
+    regenRate=0.12;
   } 
 
   @Override
@@ -1280,6 +1281,68 @@ class Shotgun extends Ability {//-----------------------------------------------
         projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*shotSpeed, sin(radians(owner.angle+InAccurateAngle))*shotSpeed, damage));
       }
       owner.pushForce(-40, owner.angle);
+      charging=false;
+      // chargelevel=0;
+    } else {
+      owner.ANGLE_FACTOR=(owner.DEFAULT_ANGLE_FACTOR/duration)*(stampTime-startTime)*0.03*timeBend;
+      owner.MAX_ACCEL=(owner.DEFAULT_MAX_ACCEL/duration)*(stampTime-startTime)*0.4*timeBend;
+      if (stampTime>=duration+startTime) {
+        owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
+        owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+      }
+    }
+  }
+  void reset() {
+    super.reset();
+    charging=false;
+    owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
+    owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+  }
+}
+   class Sluggun extends Ability {//---------------------------------------------------    Shotgun   ---------------------------------
+  int damage=5, duration=900, delay=300, laserWidth=75, chargelevel;
+  long timer;
+  float MODIFIED_ANGLE_FACTOR=0.5, MODIFIED_MAX_ACCEL=0.006; 
+  long startTime;
+  boolean charging;
+  Sluggun() {
+    super();
+    name=getClassName(this);
+    activeCost=30;
+    regenRate=0.25;
+  } 
+  @Override
+    void action() {
+    timer=millis();
+    // chargelevel++;
+    // particles.add(new Gradient(150*chargelevel, int(owner.cx +cos(radians(owner.angle))*owner.radius), int(owner.cy+sin(radians(owner.angle))*owner.radius), 0, 0, 75*chargelevel, 6*chargelevel, owner.angle, owner.playerColor));
+    particles.add(new RShockWave(int(owner.cx+cos(radians(owner.angle))*120), int(owner.cy+sin(radians(owner.angle))*120), 300, 16+10, 150, WHITE));
+    charging=true;
+    //projectiles.add( new ChargeLaser(owner.index, int( owner.cx), int(owner.cy), owner.playerColor, duration, owner.angle, damage));
+  }
+  @Override
+    void press() {
+    if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !charging&& !owner.dead && (!freeze || owner.freezeImmunity)) {
+      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+      regen=true;
+      activate();
+      owner.ANGLE_FACTOR= MODIFIED_ANGLE_FACTOR;
+      owner.MAX_ACCEL=MODIFIED_MAX_ACCEL;
+      if (!charging)action();
+      startTime=stampTime;
+      deActivate();
+      // particles.add(new  Gradient(1000,int(owner.cx +cos(radians(owner.angle))*owner.radius), int(owner.cy+sin(radians(owner.angle))*owner.radius), 0, 0, 3, owner.angle, owner.playerColor));
+    }
+  }
+  void passive() {
+    if (charging && (timer+delay/S/F)<millis()) {
+      //particles.add(new ShockWave(int(owner.cx), int(owner.cy), 200*chargelevel, 16, 500, owner.playerColor));
+      //particles.add(new Flash(50, 6, WHITE)); 
+      projectiles.add( new Bomb(owner, int( owner.cx), int(owner.cy), 40, owner.playerColor, 1, owner.angle, cos(radians(owner.angle))*20, sin(radians(owner.angle))*20, damage, false));
+      projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 30, 100, owner.playerColor, 200, owner.angle, damage));
+      projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 10, 200, owner.playerColor, 200, owner.angle, damage));
+      projectiles.add( new Slug(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 70, owner.playerColor, 1500, owner.angle, cos(radians(owner.angle))*36, sin(radians(owner.angle))*36, damage*8));
+       owner.pushForce(-40, owner.angle);
       charging=false;
       // chargelevel=0;
     } else {
@@ -1588,7 +1651,7 @@ class Bazooka extends Ability {//-----------------------------------------------
 }
 
 class Stars extends Ability {//---------------------------------------------------    Stars   ---------------------------------
-  int  damage=15, shootSpeed=8;
+  int  damage=40, shootSpeed=6;
   float MODIFIED_MAX_ACCEL=0.04; 
   Stars() {
     super();
@@ -1708,6 +1771,106 @@ class RapidFire extends Ability {//---------------------------------------------
     strokeWeight(12);
     if (r<100)r*=1.1;
     line(owner.cx, owner.cy, owner.cx+cos(radians(owner.angle))*r, owner.cy+sin(radians(owner.angle))*r);
+  }
+}
+
+class DemonFire extends Ability {//---------------------------------------------------    RapidFire   ---------------------------------
+  float interval, accuracy = 5, MODIFIED_ANGLE_FACTOR=-0.0008, r=50, shootSpeed=60 ;
+  int  minInterval=50  ;
+  boolean alt;
+  long  PastTime;
+  int projectileDamage=8;
+  DemonFire() {
+    super();
+    name=getClassName(this);
+    deactiveCost=0;
+    channelCost=0.2;
+  } 
+
+  @Override
+    void press() {
+    if ((!reverse || owner.reverseImmunity) && energy>(0+activeCost) && !active && !channeling && !owner.dead) {
+      activate();
+      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+      regen=false;
+    }
+  }
+  @Override
+    void hold() {
+    if ((!reverse || owner.reverseImmunity) &&  active && !owner.dead &&(stampTime-PastTime) >= interval) {
+      float InAccurateAngle=random(-accuracy, accuracy);
+
+      SinRocket sr= new SinRocket(owner, int( owner.cx), int(owner.cy), 20, owner.playerColor, 2000, owner.angle, cos(radians(owner.angle))*shootSpeed*.01+owner.vx, sin(radians(owner.angle))*shootSpeed*.01+owner.vy, projectileDamage*2, false);
+      Containable[] payload=new Containable[1];
+      payload[0]= new  Blast(owner, 0, 0, 15, 50, owner.playerColor, 100, owner.angle, 1, 15).parent(sr);
+
+      sr.contains(payload);
+
+      if (alt) { 
+        sr.count=100;
+        sr.angleSpeed=int(35+InAccurateAngle);
+      } else {
+        sr.count=280;
+        sr.angleSpeed=int(35+InAccurateAngle);
+      }
+      alt=!alt;
+      projectiles.add( sr);
+      /* SinRocket sr= new SinRocket(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 2500, owner.angle, cos(radians(owner.angle))*shootSpeed*.01+owner.vx, sin(radians(owner.angle))*shootSpeed*.01+owner.vy, damage*2, false);
+       sr.count=275;
+       projectiles.add( sr);*/
+      // projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*36, sin(radians(owner.angle+InAccurateAngle))*36, projectileDamage));
+      particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle))*85), int(owner.cy+sin(radians(owner.angle))*85), 5, 22, 20, WHITE));
+      owner.ANGLE_FACTOR=MODIFIED_ANGLE_FACTOR;
+      r=50;
+      channel();
+      interval+=30;
+      if (!active || energy<0 ) {
+        release();
+      }
+      PastTime=stampTime;
+    } else if ((!freeze || owner.freezeImmunity) &&  active && !owner.dead &&(stampTime+freezeTime-PastTime) >= interval) {
+      // float InAccurateAngle=random(-accuracy, accuracy);
+      // projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*36, sin(radians(owner.angle+InAccurateAngle))*36, projectileDamage));
+      particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle))*85), int(owner.cy+sin(radians(owner.angle))*85), 5, 22, 20, WHITE));
+      owner.ANGLE_FACTOR=MODIFIED_ANGLE_FACTOR;
+      r=50;
+      channel();
+      if (!active || energy<0 ) {
+        release();
+      }
+      PastTime=freezeTime+stampTime;
+    }
+    // if (!active)press(); // cancel
+    if (owner.hit)release(); // cancel
+  }
+  @Override
+    void release() {
+    if ((!reverse || owner.reverseImmunity ) ) {
+      if (!owner.dead && (!freeze || owner.freezeImmunity)&& active && channeling) {
+        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        regen=true;
+        deChannel();
+        deActivate();
+        owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+        owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
+      }
+    }
+  }
+  @Override
+    void passive() {
+    if (interval>minInterval)interval-=2*timeBend;
+    stroke(owner.playerColor);
+    strokeWeight(12);
+    if (r<100)r*=1.1;
+    line(owner.cx, owner.cy, owner.cx+cos(radians(owner.angle))*r, owner.cy+sin(radians(owner.angle))*r);
+  }
+  @Override
+    void reset() {
+    super.reset();
+    energy=90;
+    deActivate();
+    deChannel();
+    regen=true;
   }
 }
 
@@ -2059,9 +2222,7 @@ class AssaultBattery extends Ability {//----------------------------------------
     }
     strokeWeight(1);
     flip*=-1;
-    //projectiles.add(charge.get(count));
-    //float inAccuracy;
-    //inAccuracy =random(-accuracy, accuracy);
+
     owner.ANGLE_FACTOR= MODIFIED_ANGLE_FACTOR;
     owner.MAX_ACCEL= MODIFIED_MAX_ACCEL;
 
@@ -2143,7 +2304,7 @@ class SemiAuto extends Battery {//----------------------------------------------
     super();
     name=getClassName(this);
     maxInterval=4; 
-    damage=10;  
+    damage=11;  
     maxCount=3;
     MODIFIED_ANGLE_FACTOR=0.02;
     activeCost=10;
@@ -2158,17 +2319,17 @@ class SemiAuto extends Battery {//----------------------------------------------
     switch(count) {
     case 0:
       owner.ANGLE_FACTOR= MODIFIED_ANGLE_FACTOR;
-      projectiles.add(new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800*maxInterval, owner.angle+inAccuracy, cos(radians(owner.angle+inAccuracy))*75, sin(radians(owner.angle+inAccuracy))*75, damage));        
+      projectiles.add(new Spike(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 55, owner.playerColor, 800*maxInterval, owner.angle+inAccuracy, cos(radians(owner.angle+inAccuracy))*75, sin(radians(owner.angle+inAccuracy))*70, damage));        
       particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle))*105), int(owner.cy+sin(radians(owner.angle))*105), 5, 22, 20, WHITE));
       accuracy+=swayRate;
       break;
     case 1:
-      projectiles.add(new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800*maxInterval, owner.angle+inAccuracy, cos(radians(owner.angle+inAccuracy))*70, sin(radians(owner.angle+inAccuracy))*70, damage));        
+      projectiles.add(new Spike(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 55, owner.playerColor, 800*maxInterval, owner.angle+inAccuracy, cos(radians(owner.angle+inAccuracy))*70, sin(radians(owner.angle+inAccuracy))*65, damage));        
       particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle))*105), int(owner.cy+sin(radians(owner.angle))*105), 5, 22, 20, WHITE));
       accuracy+=swayRate;
       break;
     case 2:
-      projectiles.add(new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800*maxInterval, owner.angle+inAccuracy, cos(radians(owner.angle+inAccuracy))*65, sin(radians(owner.angle+inAccuracy))*65, damage));        
+      projectiles.add(new Spike(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 55, owner.playerColor, 800*maxInterval, owner.angle+inAccuracy, cos(radians(owner.angle+inAccuracy))*65, sin(radians(owner.angle+inAccuracy))*60, damage));        
       particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle))*105), int(owner.cy+sin(radians(owner.angle))*105), 5, 22, 20, WHITE));
       accuracy+=swayRate;
       break;     
@@ -2516,7 +2677,7 @@ class SeekGun extends Ability {//-----------------------------------------------
           HomingMissile p=new HomingMissile(owner, int( owner.cx+cos(radians(tempAngle))*50), int(owner.cy+sin(radians(tempAngle))*50), 60+30*targets.size(), owner.playerColor, 1400, owner.angle, cos(radians(owner.angle))*30, sin(radians(owner.angle))*30, damage+15*targets.size());
           p.angle=tempAngle;
           p.locking();  
-          p.ReactionTime=5*targets.size();
+          p.reactionTime=5*targets.size();
           projectiles.add(p);
         }
         owner.stop();
@@ -2717,12 +2878,12 @@ class PhotonicWall extends Ability {//------------------------------------------
     lockProjectiles.add(new HomingMissile(owner, int( owner.cx+cos(radians(owner.angle+90))*120), int(owner.cy+sin(radians(owner.angle+90))*120), 70, owner.playerColor, 1400, owner.angle, cos(radians(owner.angle+customAngle))*30, sin(radians(owner.angle+customAngle))*initialSpeed, damage));
     lockProjectiles.get(lockProjectiles.size()-1).angle=owner.angle;
     lockProjectiles.get(lockProjectiles.size()-1).locking();
-    lockProjectiles.get(lockProjectiles.size()-1).ReactionTime=45;
+    lockProjectiles.get(lockProjectiles.size()-1).reactionTime=45;
     projectiles.add(lockProjectiles.get(lockProjectiles.size()-1));
     lockProjectiles.add(new HomingMissile(owner, int( owner.cx+cos(radians(owner.angle-90))*120), int(owner.cy+sin(radians(owner.angle-90))*120), 70, owner.playerColor, 1400, owner.angle, cos(radians(owner.angle+customAngle))*30, sin(radians(owner.angle+customAngle))*initialSpeed, damage));
     lockProjectiles.get(lockProjectiles.size()-1).angle=owner.angle;
     lockProjectiles.get(lockProjectiles.size()-1).locking();
-    lockProjectiles.get(lockProjectiles.size()-1).ReactionTime=45;
+    lockProjectiles.get(lockProjectiles.size()-1).reactionTime=45;
     projectiles.add(lockProjectiles.get(lockProjectiles.size()-1));
     lockProjectiles.add(new HomingMissile(owner, int( owner.cx+cos(radians(owner.angle-100))*150), int(owner.cy+sin(radians(owner.angle-100))*150), 60, owner.playerColor, 1400, owner.angle, cos(radians(owner.angle+customAngle))*30, sin(radians(owner.angle+customAngle))*initialSpeed, damage));
     lockProjectiles.get(lockProjectiles.size()-1).angle=owner.angle;
@@ -3157,7 +3318,7 @@ class DeployTurret extends Ability {//------------------------------------------
 
     switch(turretLevel) { 
       /*  case 0:
-       currentTurret=new Turret(players.size(), owner, int(owner.x+cos(radians(owner.angle))*range), int(owner.y+sin(radians(owner.angle))*range), playerSize, playerSize, 100, new CloneMultiply());
+       currentTurret=new Turret(players.size(), owner, int(owner.x+cos(radians(owner.angle))*range), int(owner.y+sin(radians(owner.angle))*range), playerSize, playerSize, 100, new Suicide());
        break;*/
     case 1:
       currentTurret=new Turret(players.size(), owner, int(owner.x+cos(radians(owner.angle))*range), int(owner.y+sin(radians(owner.angle))*range), playerSize, playerSize, 50, new Battery());
@@ -3726,25 +3887,27 @@ class SummonEvil extends Ability {//--------------------------------------------
     activeCost=60;
     energy=80;
   } 
-  
+
   @Override
     void press() {
-   if ((!reverse || owner.reverseImmunity)&& energy>activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
+    if ((!reverse || owner.reverseImmunity)&& energy>activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
       stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
       activate();
       action();
-        active=true;
+      active=true;
     }
   }
-  
+
   @Override
     void action() {
     if ((!reverse || owner.reverseImmunity) &&  active && !owner.dead ) {
       //  particles.add(new  Tesla( int(owner.cx), int(owner.cy), 200, 500, owner.playerColor));
       //players.add(new Turret(players.size(), int(owner.x+cos(radians(owner.angle))*range), int(owner.y+sin(radians(owner.angle))*range), playerSize, playerSize, 200, new AutoGun(), new RandomPassive().randomize() ));
-      players.add(new FollowDrone(players.size(), int(owner.cx+cos(radians(owner.angle))*range), int(owner.cy+sin(radians(owner.angle))*range), int(playerSize*0.5), int(playerSize*0.5), 20, 200, 2, new Random().randomize(), new RandomPassive().randomize() ));
+      players.add(new FollowDrone(players.size(), int(owner.cx+cos(radians(owner.angle))*range), int(owner.cy+sin(radians(owner.angle))*range), int(playerSize*0.5), int(playerSize*0.5), 20, 300, 2, new Random().randomize(), new RandomPassive().randomize() ));
+      particles.add(new RShockWave( int(owner.cx+cos(radians(owner.angle))*range), int(owner.cy+sin(radians(owner.angle))*range), 300, 500, 500, BLACK));
+
       //println("hello");
-    regen=true;
+      regen=true;
     }
   }
 
@@ -3769,6 +3932,207 @@ class SummonEvil extends Ability {//--------------------------------------------
     regen=true;
   }
 }
+
+class SummonIlluminati extends Ability {//---------------------------------------------------    SummonIlluminati   ---------------------------------
+  int range=400, healthCost, maxRange=1600, duration=350;
+  float MODIFIED_MAX_ACCEL=0.01, damage=1; 
+  long startTime;
+  ArrayList<Player> enemies = new  ArrayList<Player>();
+
+  SummonIlluminati() {
+    super();
+    regenRate=0.22;
+    name=getClassName(this);
+    activeCost=60;
+    energy=100;
+  } 
+
+  @Override
+    void press() {
+    if ((!reverse || owner.reverseImmunity)&& energy>activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
+      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+      activate();
+      action();
+      active=true;
+    }
+  }
+
+  @Override
+    void action() {
+    if ((!reverse || owner.reverseImmunity) &&  active && !owner.dead ) {
+      owner.hit(int(owner.health*.1));
+
+      //  particles.add(new  Tesla( int(owner.cx), int(owner.cy), 200, 500, owner.playerColor));
+      players.add(new Illuminati(players.size(), AI, int(owner.cx+cos(radians(owner.angle))*range), int(owner.cy+sin(radians(owner.angle))*range), 175, 175, 999, new Stealth())) ;
+      //players.add(new Turret(players.size(), int(owner.x+cos(radians(owner.angle))*range), int(owner.y+sin(radians(owner.angle))*range), playerSize, playerSize, 200, new AutoGun(), new RandomPassive().randomize() ));
+      //players.add(new Illuminati(players.size(),AI, int(owner.cx+cos(radians(owner.angle))*range), int(owner.cy+sin(radians(owner.angle))*range), int(playerSize*0.5), int(playerSize*0.5), 20, 300, 2, new Random().randomize(), new RandomPassive().randomize() ));
+      particles.add(new RShockWave( int(owner.cx+cos(radians(owner.angle))*range), int(owner.cy+sin(radians(owner.angle))*range), 300, 500, 500, BLACK));
+      //println("hello");
+      regen=true;
+    }
+  }
+
+  void  passive() {
+    //stroke(owner.playerColor);
+    stroke(BLACK);
+    strokeWeight(6);
+    noFill();
+    arc(owner.cx, owner.cy, range*2, range*2, radians(owner.angle)-QUARTER_PI, radians(owner.angle)+QUARTER_PI);
+    ellipse(int(owner.cx+cos(radians(owner.angle))*range), int(owner.cy+sin(radians(owner.angle))*range), 150, 150);
+    if (stampTime>=duration+startTime) {
+      owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+    }
+  }
+  @Override
+    void  reset() {
+    super.reset();
+    owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+    energy=90;
+    deActivate();
+    deChannel();
+    regen=true;
+  }
+}
+
+class SneakBall extends Ability {//---------------------------------------------------    SneakBall  ---------------------------------
+
+  int shootSpeed=65;
+  int damage=15;
+  ArrayList<HomingMissile> missileList= new   ArrayList<HomingMissile> ();
+  float MODIFIED_ANGLE_FACTOR = 0.04;   
+  long timer;
+  SneakBall() {
+    super();
+    cooldownTimer=100;
+    name=getClassName(this);
+    activeCost=40;
+    energy=25;
+    regenRate=0.18;
+  } 
+  @Override
+    void action() {
+    owner.pushForce(-8, owner.angle);
+    timer=millis();
+    /*
+      Container ball= new Rocket(owner, int( owner.cx), int(owner.cy), 30, owner.playerColor, 400, owner.angle, cos(radians(owner.angle))*shootSpeed+owner.vx, sin(radians(owner.angle))*shootSpeed+owner.vy, damage, false);
+     Containable [] payload=new Containable[1];
+     payload[0]= new HomingMissile(owner, 0, 0, 50, owner.playerColor, 4000, owner.angle, cos(radians(owner.angle))*shootSpeed*.1, sin(radians(owner.angle))*shootSpeed*.1, damage).parent(ball); 
+     ((HomingMissile)payload[0]).reactionTime=20;
+     ball.contains(payload);
+     projectiles.add((Projectile)ball);*/
+
+
+    Container ball= new Bomb(owner, int( owner.cx), int(owner.cy), 200, owner.playerColor, 400, owner.angle, cos(radians(owner.angle))*shootSpeed+owner.vx, sin(radians(owner.angle))*shootSpeed+owner.vy, damage, false);
+    Containable[] payload=new Containable[8];
+    for (int i=0; i<8; i++) {
+      payload[i]= new HomingMissile(owner, int( cos(radians(i*45))*100), int(sin(radians(i*45))*100), 50, owner.playerColor, 4000, owner.angle, cos(radians(owner.angle))*shootSpeed*.1, sin(radians(owner.angle))*shootSpeed*.1, damage).parent(ball); 
+      ((HomingMissile)payload[i]).locking();
+      missileList.add((HomingMissile)payload[i]);
+    }
+    ball.contains(payload);
+    projectiles.add((Projectile)ball);
+  }
+  @Override
+    void activate() { 
+
+    super.activate();
+  }
+  @Override
+    void press() {
+    if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
+      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+      regen=true;
+      activate();
+
+
+      action();
+      deActivate();
+    }
+  }
+  void passive() {
+
+    for (HomingMissile m : missileList) 
+      if (!m.leap) m.angle=owner.angle;
+    if (timer+1200<millis())  owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
+    else owner.ANGLE_FACTOR=MODIFIED_ANGLE_FACTOR;
+    strokeWeight(10);
+    noFill();
+    stroke(255);
+  }
+  @Override
+    void reset() {
+    super.reset();
+    deChannel();
+    owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
+    missileList.clear();
+    release();
+  }
+}
+
+class TripleShot extends Ability {//---------------------------------------------------    DeployDrone  ---------------------------------
+
+  int shootSpeed=65;
+  int damage=15;
+  ArrayList<HomingMissile> missileList= new   ArrayList<HomingMissile> ();
+  float MODIFIED_ANGLE_FACTOR = 0.04,spreadAngle=15;   
+  long timer;
+  TripleShot() {
+    super();
+    cooldownTimer=30;
+    name=getClassName(this);
+    activeCost=10;
+    energy=45;
+    regenRate=0.18;
+  } 
+  @Override
+    void action() {
+    owner.pushForce(-12, owner.angle);
+    timer=millis();
+      projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle+spreadAngle))*owner.w), int(owner.cy+sin(radians(owner.angle+spreadAngle))*owner.w), 60, owner.playerColor, 800, owner.angle+10, cos(radians(owner.angle+spreadAngle))*36, sin(radians(owner.angle+spreadAngle))*36, int(damage*0.8)));
+      projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle-spreadAngle))*owner.w), int(owner.cy+sin(radians(owner.angle-spreadAngle))*owner.w), 60, owner.playerColor, 800, owner.angle-10, cos(radians(owner.angle-spreadAngle))*36, sin(radians(owner.angle-spreadAngle))*36, int(damage*0.8)));
+      projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*36, sin(radians(owner.angle))*36, int(damage*0.8)));
+
+      projectiles.add( new Slug(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*36, sin(radians(owner.angle))*36, int(damage*0.8)));
+
+  }
+  @Override
+    void activate() { 
+
+    super.activate();
+  }
+  @Override
+    void press() {
+    if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
+      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+      regen=true;
+      activate();
+
+
+      action();
+      deActivate();
+    }
+  }
+  void passive() {
+
+    for (HomingMissile m : missileList) 
+      if (!m.leap) m.angle=owner.angle;
+    if (timer+1200<millis())  owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
+    else owner.ANGLE_FACTOR=MODIFIED_ANGLE_FACTOR;
+    strokeWeight(10);
+    noFill();
+    stroke(255);
+  }
+  @Override
+    void reset() {
+    super.reset();
+    deChannel();
+    owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
+    missileList.clear();
+    release();
+  }
+}
+
+
 
 class Random extends Ability {//---------------------------------------------------    Random   ---------------------------------
 

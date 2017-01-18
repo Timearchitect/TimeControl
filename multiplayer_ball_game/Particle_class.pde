@@ -777,7 +777,7 @@ class Fragment extends Particle {
     //p3=new PVector(random(_minSize-_maxSize)+_minSize, random(_minSize-_maxSize)+_minSize);
      p3=new PVector(random(_minSize-_maxSize)+_minSize, 0);
     p3.rotate(random(radians(40),radians(80)));
-    println(p1.x, p1, y);
+   // println(p1.x, p1, y);
 
     opacity=255;
     x=_vx*_time*.06+_x;
