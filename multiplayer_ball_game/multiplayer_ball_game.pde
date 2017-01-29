@@ -54,7 +54,7 @@ static float F=1, S=1, timeBend=1, zoom=0.8;//0.7;
 //int keyCooldown[]= new int[AmountOfPlayers];
 final int keyResponseDelay=30;  // eventhe refreashrate equal to arduino devices
 final char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='7';
-final int ICON_AMOUNT=12;
+final int ICON_AMOUNT=22;
 final PImage[] icons=new PImage[ICON_AMOUNT];
 Serial port[]=new Serial[AmountOfPlayers];  // Create object from Serial class
 String portName[]=new String[AmountOfPlayers];

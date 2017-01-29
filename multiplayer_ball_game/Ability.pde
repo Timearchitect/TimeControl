@@ -673,7 +673,7 @@ class Revolver extends Ability {//----------------------------------------------
     owner.angle+=random(-180, 180);
     owner.pushForce(4, owner.keyAngle);
     ammo--;
-    
+
     r=30;
   }
 
@@ -1061,6 +1061,7 @@ class Combo extends Ability {//-------------------------------------------------
   int stepActivateCost[]={0, 10, 5, 8, 5};
   Combo() {
     super();
+    icon=icons[15];
     active=false;
     name=getClassName(this);
     activeCost=stepActivateCost[1];
@@ -1318,6 +1319,7 @@ class Sluggun extends Ability {//-----------------------------------------------
   boolean charging;
   Sluggun() {
     super();
+        icon=icons[17];
     name=getClassName(this);
     activeCost=30;
     regenRate=0.25;
@@ -1666,7 +1668,7 @@ class Bazooka extends Ability {//-----------------------------------------------
 }
 
 class Stars extends Ability {//---------------------------------------------------    Stars   ---------------------------------
-  int  damage=42, shootSpeed=6;
+  int  damage=45, shootSpeed=6, size=20;
   float MODIFIED_MAX_ACCEL=0.04; 
   Stars() {
     super();
@@ -1682,7 +1684,7 @@ class Stars extends Ability {//-------------------------------------------------
     particles.add(new ShockWave(int(owner.cx), int(owner.cy), 50, 16, 500, owner.playerColor));
     // particles.add( new  Particle(int(owner.cx), int(owner.cy), 0, 0, int(owner.w), 800, color(255, 0, 255)));
     for (int i=0; i<359; i+=40) {
-      projectiles.add( new RCRocket(owner, int( owner.cx+cos(radians(owner.angle+i))*50), int(owner.cy+sin(radians(owner.angle+i))*50), 15, owner.playerColor, 1700, owner.angle+i, i, cos(radians(owner.angle+i))*shootSpeed*.02+owner.vx, sin(radians(owner.angle+i))*shootSpeed*.02+owner.vy, damage, false));
+      projectiles.add( new RCRocket(owner, int( owner.cx+cos(radians(owner.angle+i))*50), int(owner.cy+sin(radians(owner.angle+i))*50), size, owner.playerColor, 1700, owner.angle+i, i, cos(radians(owner.angle+i))*shootSpeed*.02+owner.vx, sin(radians(owner.angle+i))*shootSpeed*.02+owner.vy, damage, false));
     }
     owner.pushForce(5, owner.angle);
     // particles.add(new ShockWave(int(owner.cx), int(owner.cy), 20, 16, 200, owner.playerColor));
@@ -1980,7 +1982,7 @@ class MachineGun extends RapidFire {//------------------------------------------
 
         owner.pushForce(8, owner.angle+180);
 
-        for (int i=0; sutainCount/8>i; i++) {
+        for (int i=0; sutainCount/10>i; i++) {
           float InAccurateAngle=random(-accuracy*2, accuracy*2);
           projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 700, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*projectileSpeed, sin(radians(owner.angle+InAccurateAngle))*projectileSpeed, projectileDamage*2));
         }
@@ -2020,6 +2022,7 @@ class Sniper extends RapidFire {//----------------------------------------------
   float sutainCount, MAX_sutainCount=40, inAccurateAngle=startAccuracy, MODIFIED_ANGLE_FACTOR=0, MODIFIED_MAX_ACCEL=0.05; 
   Sniper() {
     super();
+    icon=icons[13];
     name=getClassName(this);
     deactiveCost=6;
     activeCost=4;
@@ -2223,6 +2226,7 @@ class AssaultBattery extends Ability {//----------------------------------------
 
   AssaultBattery() {
     super();
+    icon=icons[20];
     name=getClassName(this);
     activeCost=45;
     regenRate=0.19;
@@ -2320,6 +2324,7 @@ class SemiAuto extends Battery {//----------------------------------------------
 
   SemiAuto() {
     super();
+        icon=icons[14];
     name=getClassName(this);
     maxInterval=4; 
     damage=11;  
@@ -2399,7 +2404,7 @@ class SemiAuto extends Battery {//----------------------------------------------
 }
 
 class MissleLauncher extends Ability {//---------------------------------------------------    MissleLauncher   ---------------------------------
-  int interval, maxInterval=6, damage=17, offset=50, accuracy=10, count=0, maxCount=6, shootSpeed=34, duration=4000;
+  int interval, maxInterval=6, damage=17, offset=50, accuracy=10, count=0, maxCount=6, shootSpeed=44, duration=4000;
   float  MODIFIED_ANGLE_FACTOR=0.02;
 
   MissleLauncher() {
@@ -2514,6 +2519,7 @@ class AutoGun extends Ability {//-----------------------------------------------
   int amountOfTargets;
   AutoGun() {
     super();
+    icon=icons[13];
     name=getClassName(this);
     activeCost=12;
     channelCost=0.1;
@@ -2753,6 +2759,7 @@ class ThrowBoomerang extends Ability {//----------------------------------------
   PShape boomerang;
   ThrowBoomerang() {
     super();
+        icon=icons[18];
     name=getClassName(this);
     activeCost=15;
     channelCost=0.1;
@@ -2879,6 +2886,7 @@ class PhotonicWall extends Ability {//------------------------------------------
   float MODIFIED_MAX_ACCEL=0.04; 
   PhotonicWall() {
     super();
+        icon=icons[19];
     name=getClassName(this);
     activeCost=8;
     energy=40;
@@ -2999,6 +3007,7 @@ class DeployThunder extends TimeBomb {//----------------------------------------
   long startTime;
   DeployThunder() {
     super();
+    icon=icons[12];
     damage=120;
     shootSpeed=0;
     regenRate=0.45;
@@ -3520,6 +3529,7 @@ class KineticPulse extends Ability {//------------------------------------------
 
   KineticPulse() {
     super();
+    icon=icons[16];
     name=getClassName(this);
     activeCost=22;
     cooldownTimer=1400;
@@ -4099,6 +4109,7 @@ class TripleShot extends Ability {//--------------------------------------------
   long timer;
   TripleShot() {
     super();
+    icon=icons[21];
     cooldownTimer=30;
     name=getClassName(this);
     activeCost=10;
