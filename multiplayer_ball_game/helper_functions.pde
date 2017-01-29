@@ -4,7 +4,9 @@
  enum GameType {
   BRAWL, SURVIVAL,PUZZLE
 }
-
+static String getClassName(Object o) {
+  return o.getClass().getSimpleName();
+}
 void targetHommingVarning(Player target) {
   final int r=130;
   float tcx=target.cx, tcy=target.cy;

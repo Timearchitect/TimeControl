@@ -215,7 +215,12 @@ void mouseDot() {
 
 void announceAbility(Player p, int index ) {
   if(p.textParticle!=null)particles.remove( p.textParticle );
+    if(p.iconParticle!=null)particles.remove( p.iconParticle );
+ //p.abilityList.get(index).icon
+  p.iconParticle= new Pic(p,p.abilityList.get(index).icon,int(0),int(-150),0, 0, 100, 0, 2000, p.playerColor,1);
+  particles.add(new Pic(p,p.abilityList.get(index).icon,int(0),int(-150),0, 0, 100, -10, 300, p.playerColor,1));
+  particles.add( p.iconParticle);
 
-  p.textParticle = new Text(p, p.abilityList.get(index).name, 0, -75, 30, 0, 1500, BLACK, 0);
+  p.textParticle = new Text(p, p.abilityList.get(index).name, 0, -75, 30, 0, 2000, BLACK, 0);
   particles.add( p.textParticle );
 }

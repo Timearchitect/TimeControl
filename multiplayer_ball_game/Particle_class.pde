@@ -737,7 +737,6 @@ class Text extends Particle {
           x+=vx*timeBend;
           y+=vy*timeBend;
         }
-        //if (size<0) dead=true;
       }
     }
   }
@@ -753,9 +752,63 @@ class Text extends Particle {
       default:
         fill(particleColor);
       }
-      //stroke(hue(particleColor), saturation(particleColor)-brightness, brightness(particleColor));
       textSize(size);
       text(text, x, y);
+    }
+  }
+}
+class Pic extends Particle {
+  float shrinkRate, brightness=255;
+  String text="";
+  int  offsetX, offsetY, type, opacity;
+  boolean follow;
+  PImage pic;
+  Player owner;
+  //star.endShape(CLOSE);       // now call endShape(CLOSE);
+  Pic(Player _owner,PImage _pic, int _x, int _y, float _vx, float _vy, float _size, float _shrinkRate, int _time, color _particleColor, int _type) {
+    super( _x, _y, _vx, _vy, int(_size), _time, _particleColor);
+    pic=_pic;
+    type= _type;
+    offsetX=_x;
+    offsetY=_y;
+    shrinkRate=_shrinkRate;
+    owner=_owner;
+    if(_type==1)follow=true;
+    opacity=255;
+  }
+
+  void update() {
+    if (!dead && !freeze) { 
+      if (reverse) {       
+        size+=shrinkRate*timeBend;
+        opacity=int((255*(deathTime-stampTime)/time));
+
+        if (follow) {
+          x=owner.cx+offsetX;
+          y=owner.cy+offsetY;
+        } else {
+          x-=vx*timeBend;
+          y-=vy*timeBend;
+        }
+      } else { 
+        opacity=int((255*(deathTime-stampTime)/time));
+        size-=shrinkRate*timeBend;
+        if (follow) {
+          x=owner.cx+offsetX;
+          y=owner.cy+offsetY;
+        } else {
+          x+=vx*timeBend;
+          y+=vy*timeBend;
+        }
+      }
+    }
+  }
+
+  void display() {
+    if (!dead) {
+      tint(owner.playerColor,opacity);
+    image(pic,x,y,size,size);
+      noTint();
     }
   }
 }

@@ -278,9 +278,10 @@ class Static extends Ability {//------------------------------------------------
         vertex(owner.cx+sin(radians(i))*175, owner.cy+cos(radians(i))*175);
       }
       endShape(CLOSE);
+    }
       count++;
       if (count%100==0)projectiles.add( new CurrentLine(owner, int( owner.cx), int(owner.cy), int( random(300, 700)), owner.playerColor, 50, owner.angle, cos(radians(owner.angle)), sin(radians(owner.angle)), 15));
-    }
+    
   }
   @Override
     void reset() {

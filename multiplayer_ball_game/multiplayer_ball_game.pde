@@ -27,19 +27,19 @@ final color BGcolor=color(100);
 PFont font;
 PGraphics GUILayer;
 PShader  Blur;
-boolean RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true,inGame;
+boolean RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true, inGame;
 final float flashAmount=0.5, shakeAmount=0.5;
 int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight;
 //int gameMode=0;
-GameType gameMode=GameType.SURVIVAL;
-final int AmountOfPlayers=1; // start players
+GameType gameMode=GameType.BRAWL;
+final int AmountOfPlayers=4; // start players
 final float DIFFICULTY_LEVEL=1.0;
 
 final int WHITE=color(255), GREY=color(172), BLACK=color(0);
 final int speedFactor= 2;
 final float slowFactor= 0.3;
-final String version="0.7.7";
+final String version="0.7.8";
 static long prevMillis, addMillis, forwardTime, reversedTime, freezeTime, stampTime, fallenTime;
 final int baudRate= 19200;
 final static float DEFAULT_FRICTION=0.1;
@@ -54,7 +54,8 @@ static float F=1, S=1, timeBend=1, zoom=0.8;//0.7;
 //int keyCooldown[]= new int[AmountOfPlayers];
 final int keyResponseDelay=30;  // eventhe refreashrate equal to arduino devices
 final char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='7';
-
+final int ICON_AMOUNT=12;
+final PImage[] icons=new PImage[ICON_AMOUNT];
 Serial port[]=new Serial[AmountOfPlayers];  // Create object from Serial class
 String portName[]=new String[AmountOfPlayers];
 
@@ -68,96 +69,19 @@ ArrayList <Particle> particles = new ArrayList<Particle>();
 final Projectile allProjectiles[] = new Projectile[]{
   // new IceDagger(),new forceBall(),new RevolverBullet()
 };
+final int ABILITY_AMOUNT=44, PASSIVE_AMOUNT=22;
+Ability abilityList[] ;
+Ability passiveList[];
 
-final Ability abilityList[] = new Ability[]{
-  // new FastForward(), 
-  // new Freeze(), 
-  // new Reverse(), 
-  // new Slow(), 
-  new ThrowDagger(), 
-  new Revolver(), 
-  new ForceShoot(), 
-  new Blink(), 
-  new Multiply(), 
-  new Stealth(), 
-  new Laser(), 
-  new TimeBomb(), 
-  new RapidFire(), 
-  new MachineGun(), 
-  new Battery(), 
-  new Ram(), 
-  new Detonator(), 
-  new PhotonicWall(), 
-  new Sniper(), 
-  new ThrowBoomerang(), 
-  new PhotonicPursuit(), 
-  new DeployThunder(), 
-  new DeployShield(), 
-  new DeployElectron(), 
-  new Gravity(), 
-  new DeployTurret(), 
-  new Bazooka(), 
-  new MissleLauncher(), 
-  new AutoGun(), 
-  new Combo(), 
-  new KineticPulse(), 
-  new TeslaShock(), 
-  new RandoGun(), 
-  new Shotgun(), 
-  new Sluggun(),
-  new FlameThrower(), 
-  new DeployDrone(), 
-  new DeployBodyguard(), 
-  new SemiAuto(), 
-  new Pistol(), 
-  new AssaultBattery(), 
-  new Stars(), 
-  new SeekGun(), 
-  new ElemetalLauncher(), 
-  new SummonEvil(),
-  new SummonIlluminati(),
-  new DemonFire(),
-  new SneakBall(),
-  new TripleShot()
-  
-
-};
-
-final Ability passiveList[] = new Ability[]{
-  new Repel(), 
-  new Gravitation(), 
-  new Speed(), 
-  new Armor(), 
-  new HpRegen(), 
-  new Static(), 
-  new SuppressFire(), 
-  new Nova(), 
-  new Trail(), 
-  new Gloss(), 
-  new BackShield(), 
-  new PainPulse(), 
-  new Boost(), 
-  new Glide(), 
-  new MpRegen(), 
-  new BulletTime(), 
-  new Emergency(), 
-  new Adrenaline(), 
-  new BulletCutter(),
-  new Dodge(),
-  new Guardian()
-  //new Redemption(), // buggy on survival
-  //new Undo() // buggy on survival
-};
-
-Ability[][] abilities= { 
- /* player 1 */ {new Random().randomize(),new RandomPassive().randomize(), new Dodge()}, 
- /* player 2 */ {new Random().randomize(),new RandomPassive().randomize(), new Dodge()}, 
- /* player 3 mouse */ {new  Random().randomize(),new  Random().randomize(), new Suicide()}, 
- /* player 4 */ {new Random().randomize(),new Random().randomize(), new RandomPassive().randomize()}, 
-  {new Random().randomize(), new RandomPassive().randomize()}, 
-  {new Random().randomize(), new RandomPassive().randomize()}
-};
-
+/*Ability[][] abilities= { 
+ player 1  {new Random().randomize(),new RandomPassive().randomize()}, 
+ player 2  {new Random().randomize(),new RandomPassive().randomize()}, 
+ player 3 mouse  {new  Random().randomize(),new  Random().randomize()}, 
+ player 4  {new Random().randomize(),new Random().randomize()}, 
+ {new Random().randomize(), new RandomPassive().randomize()}, 
+ {new Random().randomize(), new RandomPassive().randomize()}
+ };*/
+Ability[][] abilities= new Ability[AmountOfPlayers][];
 int playerControl[][]= {
   { UP, DOWN, LEFT, RIGHT, int(',') }
   , { int('w')-32, int('s')-32, int('a')-32, int('d')-32, int('t')-32 }
@@ -172,6 +96,7 @@ int playerControl[][]= {
  */
 void setup() {
   fullScreen(P3D);
+  imageMode(CENTER);
   //size(displayWidth, displayHeight, P3D);
   font= loadFont("PressStart2P-Regular-28.vlw");
   Blur= loadShader("blur.glsl");
@@ -183,7 +108,107 @@ void setup() {
   //frameRate(60);
   //noCursor();
   //cursor();
+  for (int i=0; i<ICON_AMOUNT; i++ )icons[i]=loadImage("data/Ability Icons-"+(i+1)+".png");
+  abilityList= new Ability[]{
+    // new FastForward(), 
+    // new Freeze(), 
+    // new Reverse(), 
+    // new Slow(), 
 
+    new ThrowDagger(), 
+    new Revolver(), 
+    new ForceShoot(), 
+    new Blink(), 
+    new Multiply(), 
+
+    new Stealth(), 
+    new Laser(), 
+    new TimeBomb(), 
+    new RapidFire(), 
+    new MachineGun(), 
+
+    new Battery(), 
+    new Ram(), 
+    new Detonator(), 
+    new PhotonicWall(), 
+    new Sniper(), 
+
+    new ThrowBoomerang(), 
+    new PhotonicPursuit(), 
+    new DeployThunder(), 
+    new DeployShield(), 
+    new DeployElectron(), 
+
+    new Gravity(), 
+    new DeployTurret(), 
+    new Bazooka(), 
+    new MissleLauncher(), 
+    new AutoGun(), 
+
+    new Combo(), 
+    new KineticPulse(), 
+    new TeslaShock(), 
+    new RandoGun(), 
+    new Shotgun(), 
+
+    new Sluggun(), 
+    new FlameThrower(), 
+    new DeployDrone(), 
+    new DeployBodyguard(), 
+    new SemiAuto(), 
+
+    new Pistol(), 
+    new AssaultBattery(), 
+    new Stars(), 
+    new SeekGun(), 
+    new ElemetalLauncher(), 
+
+    new SummonEvil(), 
+    new SummonIlluminati(), 
+    new SerpentFire(), 
+    new SneakBall(), 
+    new TripleShot()
+  };
+
+  passiveList = new Ability[]{
+    new Repel(), 
+    new Gravitation(), 
+    new Speed(), 
+    new Armor(), 
+    new HpRegen(), 
+
+    new Static(), 
+    new SuppressFire(), 
+    new Nova(), 
+    new Trail(), 
+    new Gloss(), 
+
+    new BackShield(), 
+    new PainPulse(), 
+    new Boost(), 
+    new Glide(), 
+    new MpRegen(), 
+
+    new BulletTime(), 
+    new Emergency(), 
+    new Adrenaline(), 
+    new BulletCutter(), 
+    new Dodge(), 
+
+    new Guardian()
+    //new Redemption(), // buggy on survival
+    //new Undo() // buggy on survival
+  };
+
+
+    abilities= new Ability[][]{ 
+  /* player 1 */    new Ability[]{new Random().randomize(), new RandomPassive().randomize()}, 
+  /* player 2 */    new Ability[]{new Random().randomize(), new RandomPassive().randomize()}, 
+  /* player 3 mouse */    new Ability[]{new  Random().randomize(), new  Random().randomize()}, 
+  /* player 4 */    new Ability[]{new Random().randomize(), new Random().randomize()}, 
+    new Ability[]{new Random().randomize(), new RandomPassive().randomize()}, 
+    new Ability[]{new Random().randomize(), new RandomPassive().randomize()}
+  };
   colorMode(HSB);
   for (int i=0; i< AmountOfPlayers; i++) {
     try {
@@ -201,8 +226,8 @@ void setup() {
   for (int i=0; i<Serial.list ().length; i++) {
     portName[i] = Serial.list()[i];   // du kan också skriva COM + nummer på porten   
     port[i] = new Serial(this, portName[i], baudRate);   // du måste ha samma baudrate t.ex 9600
-    // println(port[i].available());
-    //println(portName[i]);
+    println(" port " +port[i].available(), " avalible");
+    println(portName[i]);
     players.get(i).MAX_ACCEL=0.16;
     players.get(i).DEFAULT_MAX_ACCEL=0.16;
     players.get(i).arduino=true;
@@ -376,7 +401,7 @@ void draw() {
     for (int i=0; i<Serial.list().length; i++) {   // USB devices
       if (portName[i]!= null && port[i].available() > 0) {  //ta in data och ignorerar skräpdata    
         players.get(i).control(port[i].read());
-        // println("INPUT!!!!!!!!!!!!!!!!!!!!!!!");
+        // println("INPUT!:  "+char(port[i].read()));
       }
     }
 

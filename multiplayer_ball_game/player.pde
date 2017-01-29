@@ -15,7 +15,8 @@ class Player implements Cloneable {
   //Ability ability;  
   ArrayList<Ability> abilityList= new ArrayList<Ability>();
   color playerColor;
-  Particle textParticle;
+  Particle textParticle, iconParticle;
+;
 
   Player(int _index, color _playerColor, int _x, int _y, int _w, int _h, int _up, int _down, int _left, int _right, int _triggKey, Ability ..._ability) {
     FRICTION_FACTOR=DEFAULT_FRICTION;
