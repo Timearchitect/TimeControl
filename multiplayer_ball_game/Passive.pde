@@ -46,7 +46,7 @@ class Suicide extends Ability {//-----------------------------------------------
     void reset() {
     super.reset();
   }
-    @Override
+  @Override
     void onDeath() {
     if ((!reverse || owner.reverseImmunity)&&  owner.health<=0 && (!freeze || owner.freezeImmunity)) {
       projectiles.add( new Bomb(owner, int( owner.cx), int(owner.cy), 160, owner.playerColor, 1000, owner.angle, owner.vx, owner.vy, damage, false));
@@ -279,9 +279,8 @@ class Static extends Ability {//------------------------------------------------
       }
       endShape(CLOSE);
     }
-      count++;
-      if (count%100==0)projectiles.add( new CurrentLine(owner, int( owner.cx), int(owner.cy), int( random(300, 700)), owner.playerColor, 50, owner.angle, cos(radians(owner.angle)), sin(radians(owner.angle)), 15));
-    
+    count++;
+    if (count%100==0)projectiles.add( new CurrentLine(owner, int( owner.cx), int(owner.cy), int( random(300, 700)), owner.playerColor, 50, owner.angle, cos(radians(owner.angle)), sin(radians(owner.angle)), 15));
   }
   @Override
     void reset() {
@@ -407,6 +406,9 @@ class BackShield extends Ability {//--------------------------------------------
       shield.angle=owner.angle+90;
       shield.offsetX=int(cos(radians(owner.angle+180))*100);
       shield.offsetY=int(sin(radians(owner.angle+180))*100);
+    } else {
+      shield.dead=true;
+      shield=null;
     }
   }
   @Override
@@ -666,8 +668,10 @@ class Boost extends Ability {//-------------------------------------------------
     if (charge>maxCharge && cooldown>60) {
       cooldown=0;
       charge=0;
-      projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 0, 50, owner.playerColor, 350, 0, 1, 10));
-      owner.pushForce(35, owner.keyAngle);
+      projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 0, 60, owner.playerColor, 350, 0, 1, 10));
+
+      owner.pushForce(45, owner.keyAngle);
+      projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 10, 20, owner.playerColor, 450, owner.keyAngle, 1, 10));
     }
     charge=int(charge*.5);
   }
@@ -753,6 +757,7 @@ class Guardian extends Ability {//----------------------------------------------
     if (cooldown>interval) {
       noFill();
       strokeWeight(1);
+      stroke(WHITE);
       ellipse(owner.cx, owner.cy, range, range);
       for (Projectile p : projectiles) {
         if (!p.dead && p.ally!=owner.ally && p.damage<30&& dist(owner.cx, owner.cy, p.x, p.y)<range*.5) {
@@ -980,10 +985,11 @@ class Redemption extends Ability {//--------------------------------------------
     if (cooldown>interval ) {//&& owner.health<owner.maxHealth*percent
 
       if (!owner.stealth) { 
-        fill(owner.playerColor);
-        noStroke();
+        //nofill(owner.playerColor);
+         noFill();
+        stroke(owner.playerColor);
         ellipse(owner.cx, owner.cy, 250, 250);
-        stroke(1);
+        strokeWeight(1);
       }
       for (Projectile p : projectiles) {
         if (!p.dead && p.ally!=owner.ally && dist(owner.cx, owner.cy, p.x, p.y)<250 && owner.health<=p.damage) {
@@ -1059,7 +1065,7 @@ class Undo extends Ability {//--------------------------------------------------
       if (!owner.stealth) { 
         fill(owner.playerColor);
         noStroke();
-        ellipse(owner.cx, owner.cy, 250, 250);
+        ellipse(owner.cx, owner.cy, 150, 150);
         stroke(1);
       }
       tempHealth=owner.health;
@@ -1072,12 +1078,12 @@ class Undo extends Ability {//--------------------------------------------------
   }
 }
 
-class Dodge extends Ability {//---------------------------------------------------    bullet   ---------------------------------
+class Dash extends Ability {//---------------------------------------------------    bullet   ---------------------------------
   //int count;
   final int radius= 125, maxCharge=20; 
-  float cooldown,charge;
+  float cooldown, charge;
   long timer;
-  Dodge() {
+  Dash() {
     super();
     name=getClassName(this);
   } 
@@ -1111,7 +1117,7 @@ class Dodge extends Ability {//-------------------------------------------------
     if (timer+60<stampTime) {
       if (owner.stealth) {
         owner.stop(); 
-        Player p=seek(owner, 4000);
+        Player p=seek(owner, 4000, TARGETABLE);
         if (p!=null) {
           owner.angle=calcAngleBetween(p, owner);
         }
@@ -1142,23 +1148,23 @@ class Dodge extends Ability {//-------------------------------------------------
   }
   @Override
     void reset() {
-      owner.stealth=false;
+    owner.stealth=false;
     owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
   }
 }
-class RandomPassive extends Ability {//---------------------------------------------------    RandomPassive   ---------------------------------
-
-  RandomPassive() {
-    super();
-  } 
-  Ability randomize() {
-    Ability rA=null;
-    try {
-      rA = passiveList[int(random(passiveList.length))].clone();
-    }
-    catch(CloneNotSupportedException e) {
-      println("not cloned from Random Passive");
-    }
-    return rA;  // clone it
-  }
-}
+/*class RandomPassive extends Ability {//---------------------------------------------------    RandomPassive   ---------------------------------
+ 
+ RandomPassive() {
+ super();
+ } 
+ Ability randomize() {
+ Ability rA=null;
+ try {
+ rA = passiveList[int(random(passiveList.length))].clone();
+ }
+ catch(CloneNotSupportedException e) {
+ println("not cloned from Random Passive");
+ }
+ return rA;  // clone it
+ }
+ }*/

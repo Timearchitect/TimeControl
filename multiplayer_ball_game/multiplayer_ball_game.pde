@@ -32,8 +32,8 @@ final float flashAmount=0.5, shakeAmount=0.5;
 int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight;
 //int gameMode=0;
-GameType gameMode=GameType.BRAWL;
-final int AmountOfPlayers=4; // start players
+GameType gameMode=GameType.WILDWEST;
+final int AmountOfPlayers=3; // start players
 final float DIFFICULTY_LEVEL=1.0;
 
 final int WHITE=color(255), GREY=color(172), BLACK=color(0);
@@ -54,7 +54,7 @@ static float F=1, S=1, timeBend=1, zoom=0.8;//0.7;
 //int keyCooldown[]= new int[AmountOfPlayers];
 final int keyResponseDelay=30;  // eventhe refreashrate equal to arduino devices
 final char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='7';
-final int ICON_AMOUNT=22;
+final int ICON_AMOUNT=25;
 final PImage[] icons=new PImage[ICON_AMOUNT];
 Serial port[]=new Serial[AmountOfPlayers];  // Create object from Serial class
 String portName[]=new String[AmountOfPlayers];
@@ -69,17 +69,18 @@ ArrayList <Particle> particles = new ArrayList<Particle>();
 final Projectile allProjectiles[] = new Projectile[]{
   // new IceDagger(),new forceBall(),new RevolverBullet()
 };
-final int ABILITY_AMOUNT=44, PASSIVE_AMOUNT=22;
-Ability abilityList[] ;
+final int ABILITY_AMOUNT=45, PASSIVE_AMOUNT=22;
+Ability abilityList[];
 Ability passiveList[];
-
+Ability westAbilityList[];
+Ability westPassiveList[];
 /*Ability[][] abilities= { 
- player 1  {new Random().randomize(),new RandomPassive().randomize()}, 
- player 2  {new Random().randomize(),new RandomPassive().randomize()}, 
+ player 1  {new Random().randomize(),new Random().randomize(passiveList)}, 
+ player 2  {new Random().randomize(),new Random().randomize(passiveList)}, 
  player 3 mouse  {new  Random().randomize(),new  Random().randomize()}, 
  player 4  {new Random().randomize(),new Random().randomize()}, 
- {new Random().randomize(), new RandomPassive().randomize()}, 
- {new Random().randomize(), new RandomPassive().randomize()}
+ {new Random().randomize(), new Random().randomize(passiveList)}, 
+ {new Random().randomize(), new Random().randomize(passiveList)}
  };*/
 Ability[][] abilities= new Ability[AmountOfPlayers][];
 int playerControl[][]= {
@@ -146,7 +147,7 @@ void setup() {
     new AutoGun(), 
 
     new Combo(), 
-    new KineticPulse(), 
+    new CloudStrike(), 
     new TeslaShock(), 
     new RandoGun(), 
     new Shotgun(), 
@@ -167,7 +168,9 @@ void setup() {
     new SummonIlluminati(), 
     new SerpentFire(), 
     new SneakBall(), 
-    new TripleShot()
+    new TripleShot(), 
+
+    new StingerLauncher()
   };
 
   passiveList = new Ability[]{
@@ -193,21 +196,50 @@ void setup() {
     new Emergency(), 
     new Adrenaline(), 
     new BulletCutter(), 
-    new Dodge(), 
+    new Dash(), 
 
     new Guardian()
     //new Redemption(), // buggy on survival
     //new Undo() // buggy on survival
   };
 
+  westAbilityList= new Ability[]{
+    new Revolver(), 
+    new Stealth(), 
+    new RapidFire(), 
+    new MachineGun(), 
+    new Battery(), 
 
-    abilities= new Ability[][]{ 
-  /* player 1 */    new Ability[]{new Random().randomize(), new RandomPassive().randomize()}, 
-  /* player 2 */    new Ability[]{new Random().randomize(), new RandomPassive().randomize()}, 
-  /* player 3 mouse */    new Ability[]{new  Random().randomize(), new  Random().randomize()}, 
-  /* player 4 */    new Ability[]{new Random().randomize(), new Random().randomize()}, 
-    new Ability[]{new Random().randomize(), new RandomPassive().randomize()}, 
-    new Ability[]{new Random().randomize(), new RandomPassive().randomize()}
+    new AutoGun(), 
+    new Shotgun(), 
+    new Sluggun(), 
+    new SemiAuto(), 
+    new Pistol(), 
+
+    new TripleShot(), 
+    new StingerLauncher()
+  };
+  westPassiveList = new Ability[]{
+    new Armor(), 
+    new HpRegen(), 
+    new SuppressFire(), 
+    new Gloss(), 
+    new Boost(), 
+    new Glide(), 
+    new MpRegen(), 
+    new BulletTime(), 
+    new Emergency(), 
+    new Dash(), 
+    new Redemption(), // buggy on survival
+    new Undo() // buggy on survival
+  };
+  abilities= new Ability[][]{ 
+  /* player 1 */    new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
+  /* player 2 */    new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
+  /* player 3 mouse */    new Ability[]{new  Random().randomize(abilityList), new  Random().randomize(passiveList)}, 
+  /* player 4 */    new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
+    new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
+    new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}
   };
   colorMode(HSB);
   for (int i=0; i< AmountOfPlayers; i++) {
@@ -284,20 +316,32 @@ void setup() {
   AI.reverseImmunity=false;
   AI.slowImmunity=false;
   AI.fastforwardImmunity=false;
-  switch(gameMode) {
-  case BRAWL:
-    particles.add(new Text("Brawl", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
-    particles.add(new Gradient(8000, 0, 500, 0, 0, 500, 0.5, 0, GREY));
-    break;
-  case SURVIVAL:
-    for (Player p : players) p.ally=0;
-    players.add(AI);
-    //spawningSetup();
-    spawningReset();
-    break;
-  case PUZZLE:
-    break;
-  }
+  /*switch(gameMode) {
+   case BRAWL:
+   particles.add(new Text("Brawl", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
+   particles.add(new Gradient(8000, 0, 500, 0, 0, 500, 0.5, 0, GREY));
+   break;
+   case SURVIVAL:
+   for (Player p : players) p.ally=0;
+   players.add(AI);
+   //spawningSetup();
+   spawningReset();
+   break;
+   case PUZZLE:
+   break;
+   case WILDWEST:
+   players.add(AI);
+   players.add(new Block(players.size(), AI, 200, 200, 200, 200, 999, new Armor()));
+   players.add(new Block(players.size(), AI, width-400, 200, 200, 200, 999, new Armor()));
+   players.add(new Block(players.size(), AI, width-400, height-400, 200, 200, 999, new Armor()));
+   players.add(new Block(players.size(), AI, 200, height-400, 200, 200, 999, new Armor()));
+   
+   players.add(new Block(players.size(), AI, width/2-50,0, 100, 100, 499, new Armor()));
+   players.add(new Block(players.size(), AI,  width/2-50,height-100, 100, 100, 499, new Armor()));
+   
+   break;
+   }*/
+  resetGame();
 }
 void stop() {
   musicPlayer.pause(true);
@@ -312,6 +356,8 @@ void draw() {
     survivalSpawning();
     break;
   case PUZZLE:
+    break;
+  default:
     break;
   }
 

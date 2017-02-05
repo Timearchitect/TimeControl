@@ -1,8 +1,8 @@
- enum AbilityType {
-  ACTIVE, PASSIVE,NATIVE,GLOBAL
+enum AbilityType {
+  ACTIVE, PASSIVE, NATIVE, GLOBAL
 }
- enum GameType {
-  BRAWL, SURVIVAL,PUZZLE
+enum GameType {
+  BRAWL, SURVIVAL, PUZZLE, WILDWEST
 }
 static String getClassName(Object o) {
   return o.getClass().getSimpleName();
@@ -55,6 +55,117 @@ Player seek(Player m, int senseRange) {
   }
   return null;
 }  
+Player seek(Projectile m, int senseRange) {
+  for (int sense = 0; sense < senseRange; sense++) {
+    for (   Player p : players) {
+      if ( !p.dead && p.ally!=m.ally) {
+        if (dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
+          return p;
+        }
+      }
+    }
+  }
+  return null;
+}  
+//final int TARGETABLE=0,STATIONARY=1,INVIS=2,STEALTH=3;
+Player seek(Player m, int senseRange, int attributeIndex) {
+  switch (attributeIndex) {
+  case 0:
+    for (int sense = 0; sense < senseRange; sense++) {
+      for (   Player p : players) {
+        if (p!= m && !p.dead && p.ally!=m.ally) {
+          if (p.targetable && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
+            return p;
+          }
+        }
+      }
+    }
+    break;
+  case 1:
+    for (int sense = 0; sense < senseRange; sense++) {
+      for (   Player p : players) {
+        if (p!= m && !p.dead && p.ally!=m.ally) {
+          if (p.stationary && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
+            return p;
+          }
+        }
+      }
+    }
+    break;
+  case 2:
+    for (int sense = 0; sense < senseRange; sense++) {
+      for (   Player p : players) {
+        if (p!= m && !p.dead && p.ally!=m.ally) {
+          if (p.invis && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
+            return p;
+          }
+        }
+      }
+    }
+    break;
+  case 3:
+    for (int sense = 0; sense < senseRange; sense++) {
+      for (   Player p : players) {
+        if (p!= m && !p.dead && p.ally!=m.ally) {
+          if (p.stealth && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
+            return p;
+          }
+        }
+      }
+    }
+    break;
+  }
+  return null;
+}  
+Player seek(Projectile m, int senseRange, int attributeIndex) {
+  switch (attributeIndex) {
+  case 0:
+    for (int sense = 0; sense < senseRange; sense++) {
+      for (   Player p : players) {
+        if ( !p.dead && p.ally!=m.ally) {
+          if (p.targetable && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
+            return p;
+          }
+        }
+      }
+    }
+    break;
+  case 1:
+    for (int sense = 0; sense < senseRange; sense++) {
+      for (   Player p : players) {
+        if (!p.dead && p.ally!=m.ally) {
+          if (p.stationary && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
+            return p;
+          }
+        }
+      }
+    }
+    break;
+  case 2:
+    for (int sense = 0; sense < senseRange; sense++) {
+      for (   Player p : players) {
+        if ( !p.dead && p.ally!=m.ally) {
+          if (p.invis && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
+            return p;
+          }
+        }
+      }
+    }
+    break;
+  case 3:
+    for (int sense = 0; sense < senseRange; sense++) {
+      for (   Player p : players) {
+        if (  !p.dead && p.ally!=m.ally) {
+          if (p.stealth && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
+            return p;
+          }
+        }
+      }
+    }
+    break;
+  }
+  return null;
+}  
 static float  calcAngleBetween(Player target, Player from) {
   return degrees(atan2((target.cy-from.cy), (target.cx-from.cx)))%360;
 }
@@ -75,7 +186,20 @@ void generateRandomAbilities(int index, AbilityType _abilityType) {
   for (Player p : players) {      
     if (p!=AI && !p.clone &&  !p.turret) {  // no turret or clone weapon switch
       p.abilityList.get(index).reset();
-      p.abilityList.set(index, (_abilityType==AbilityType.ACTIVE)?new Random().randomize():new RandomPassive().randomize());
+      p.abilityList.set(index, (_abilityType==AbilityType.ACTIVE)?new Random().randomize(abilityList):new Random().randomize(passiveList));
+
+      //abilities[i].owner=players.get(i);
+      p.abilityList.get(index).setOwner(p);
+      //p.ability= p.abilityList.get(0);
+      announceAbility( p, index);
+    }
+  }
+}
+void generateRandomAbilities(int index, Ability[] list) {
+  for (Player p : players) {      
+    if (p!=AI && !p.clone &&  !p.turret) {  // no turret or clone weapon switch
+      p.abilityList.get(index).reset();
+      p.abilityList.set(index, new Random().randomize(list));
 
       //abilities[i].owner=players.get(i);
       p.abilityList.get(index).setOwner(p);

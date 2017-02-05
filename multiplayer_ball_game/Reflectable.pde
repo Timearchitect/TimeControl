@@ -16,8 +16,8 @@ interface Reflector {
 
 interface Destroyer {
   Boolean destroyable=true;
- // void destroying();
- void destroying(Projectile destroyed);
+  // void destroying();
+  void destroying(Projectile destroyed);
 }
 
 interface Container { 
@@ -28,5 +28,9 @@ interface Containable {
   Boolean containable=true;
   Containable parent(Container parent);
   void unWrap();
+}
 
+interface AmmoBased { 
+  void reload();
+  void reloadCancel();
 }

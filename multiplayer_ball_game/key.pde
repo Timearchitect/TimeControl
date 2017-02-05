@@ -19,22 +19,22 @@ void keyPressed() {
     for (int i =players.size()-1; i>= 0; i--) {
       if (players.get(i).turret || players.get(i).clone) players.remove( players.get(i));
     }
-    if(gameMode==GameType.SURVIVAL)spawningReset();
-    if(RandomSkillsOnDeath)generateRandomAbilities(0,AbilityType.ACTIVE);
 
-   /* //random weapon
+
+
+    /* //random weapon
      for (Player p:players) {    
-      if (p!=AI&&!p.clone &&  !p.turret) {  // no turret or clone respawn
-        p.reset();
-        announceAbility( p, 1);
-      } else {
-        p.dead=true;
-        p.state=0;
-      }
-    }*/
+     if (p!=AI&&!p.clone &&  !p.turret) {  // no turret or clone respawn
+     p.reset();
+     announceAbility( p, 1);
+     } else {
+     p.dead=true;
+     p.state=0;
+     }
+     }*/
 
     //random weapon end
-
+/*
     for (Player p : players) {      
       if (p.index!=-1 )
         if (p!=AI &&!p.clone &&  !p.turret) {  // no turret or clone respawn
@@ -44,37 +44,39 @@ void keyPressed() {
           p.dead=true;
           p.state=0;
         }
-    }
+    }*/
+    
+    if (RandomSkillsOnDeath)generateRandomAbilities(0, AbilityType.ACTIVE);
+    resetGame();
   }
 
   if (cheatEnabled ) {
     if (key==Character.toLowerCase('6')) {
-     /* for (Player p : players) {      
-        if (!p.clone &&  !p.turret && p!=AI) {  // no turret or clone weapon switch
-          p.abilityList.get(1).reset();
-          p.abilityList.set(1, new RandomPassive().randomize());
-          p.abilityList.get(1).setOwner(p);
-          announceAbility( p, 1);
-        }
-      }*/
-       generateRandomAbilities(1,AbilityType.PASSIVE);
-
+      /* for (Player p : players) {      
+       if (!p.clone &&  !p.turret && p!=AI) {  // no turret or clone weapon switch
+       p.abilityList.get(1).reset();
+       p.abilityList.set(1, new Random().randomize(passiveList));
+       p.abilityList.get(1).setOwner(p);
+       announceAbility( p, 1);
+       }
+       }*/
+      generateRandomAbilities(1, AbilityType.PASSIVE);
     }
     if (key==Character.toLowerCase(RandomKey)) {
-      
-            generateRandomAbilities(0,AbilityType.ACTIVE);
-/*
-      for (Player p : players) {      
-        if (p!=AI && !p.clone &&  !p.turret) {  // no turret or clone weapon switch
-          p.abilityList.get(0).reset();
-          p.abilityList.set(0, new Random().randomize());
 
-          //abilities[i].owner=players.get(i);
-          p.abilityList.get(0).setOwner(p);
-          //p.ability= p.abilityList.get(0);
-          announceAbility( p, 0);
-        }
-      }*/
+      generateRandomAbilities(0, AbilityType.ACTIVE);
+      /*
+      for (Player p : players) {      
+       if (p!=AI && !p.clone &&  !p.turret) {  // no turret or clone weapon switch
+       p.abilityList.get(0).reset();
+       p.abilityList.set(0, new Random().randomize());
+       
+       //abilities[i].owner=players.get(i);
+       p.abilityList.get(0).setOwner(p);
+       //p.ability= p.abilityList.get(0);
+       announceAbility( p, 0);
+       }
+       }*/
       /*for (int i=0; i<players.size(); i++) {
        if (!players.get(i).clone &&  !players.get(i).turret) {  // no turret or clone weapon switch
        abilities[i].reset();
@@ -262,8 +264,8 @@ void keyPressed() {
       drawTimeSymbol();
     }
     if (key==Character.toLowerCase(keyFastForward)) {
-     quitOrigo();
-     if (!noFlash)background(0, 255, 255);
+      quitOrigo();
+      if (!noFlash)background(0, 255, 255);
       fastForward=(fastForward)?false:true;
       F =(fastForward)?speedFactor:1;
       timeBend=S*F;

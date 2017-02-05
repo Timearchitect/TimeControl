@@ -1,7 +1,7 @@
 class Turret extends Player implements Containable { 
   Projectile parent;
   long deathTime, spawnTime, duration=100000;
-  Boolean stationary=true;
+
   int lvl;
   float angleSpeed=2;
   Player owner;
@@ -18,6 +18,7 @@ class Turret extends Player implements Containable {
     maxHealth=_health;
     health=maxHealth;
     abilityShortName=abilityList.get(0).name.substring(0, 1).toUpperCase();
+    stationary=true;
   }
   Turret(int _index, int _x, int _y, int _w, int _h, int _health, Ability ..._ability) { // nseutral
     super( _index, BLACK, _x, _y, _w, _h, 999, 999, 999, 999, 999, _ability) ;
@@ -30,6 +31,7 @@ class Turret extends Player implements Containable {
     maxHealth=_health;
     health=maxHealth;
     abilityShortName=abilityList.get(0).name.substring(0, 1).toUpperCase();
+    stationary=true;
   }
 
   void displayAbilityEnergy() {
@@ -141,7 +143,6 @@ class Turret extends Player implements Containable {
 class Block extends Player implements Containable { 
   Projectile parent;
   long deathTime, spawnTime, duration=100000;
-  Boolean stationary=true;
   int lvl;
   float angleSpeed=2;
   Player owner;
@@ -158,7 +159,8 @@ class Block extends Player implements Containable {
     deathTime=stampTime + duration;
     maxHealth=_health;
     health=maxHealth;
-    // abilityShortName=abilityList.get(0).name.substring(0, 1).toUpperCase();
+    stationary=true;
+    targetable=false;
   }
   Block(int _index, int _x, int _y, int _w, int _h, int _health, Ability ..._ability) { // nseutral
     super( _index, BLACK, _x, _y, _w, _h, 999, 999, 999, 999, 999, _ability) ;
@@ -170,7 +172,8 @@ class Block extends Player implements Containable {
     deathTime=stampTime + duration;
     maxHealth=_health;
     health=maxHealth;
-    //  abilityShortName=abilityList.get(0).name.substring(0, 1).toUpperCase();
+    stationary=true;
+    targetable=false;
   }
 
   void displayAbilityEnergy() {
@@ -230,10 +233,12 @@ class Block extends Player implements Containable {
       }
     }
     // super.update();
-    abilityList.get(0).passive();
-    abilityList.get(0).regen();
-    if (random(100)<1) {
-      abilityList.get(0).press();
+    for (Ability p : abilityList) {
+      p.passive();
+      p.regen();
+      if (random(100)<1) {
+        p.press();
+      }
     }
   }
   void control(int dir) {

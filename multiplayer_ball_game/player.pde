@@ -1,3 +1,5 @@
+final int TARGETABLE=0,STATIONARY=1,INVIS=2,STEALTH=3;
+
 class Player implements Cloneable {
   PShape arrowSVG = loadShape("arrow.svg");
   int  index, ally, radius, outlineDiameter, w, h, up, down, left, right, triggKey, deColor;
@@ -7,11 +9,11 @@ class Player implements Cloneable {
   //float MAX_MOUSE_ACCEL=0.0035;
   final float mouseMaxAccel=1.4;
   float  x, y, vx, vy, ax, ay, cx, cy, angle, keyAngle, f, s, bend, barFraction, fraction;
-  boolean holdTrigg, holdUp, holdDown, holdLeft, holdRight, dead, stealth, hit, arduino, arduinoHold, mouse, clone, turret;
+  boolean holdTrigg, holdUp, holdDown, holdLeft, holdRight, dead, hit, arduino, arduinoHold, mouse, clone, turret;
   PVector coord, speed, accel, arrow;
   float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR, DEFAULT_ARMOR=0; 
   long invisStampTime;
-  boolean invis, freezeImmunity, reverseImmunity, fastforwardImmunity, slowImmunity;
+  boolean invis, freezeImmunity, reverseImmunity, fastforwardImmunity, slowImmunity , stationary,stealth,targetable=true;
   //Ability ability;  
   ArrayList<Ability> abilityList= new ArrayList<Ability>();
   color playerColor;

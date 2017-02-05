@@ -2,11 +2,19 @@
 ArrayList<Spawner> spawnList= new ArrayList<Spawner>();
 boolean gameOver;
 int survivalTime;
+   //   projectiles.add( new AbilityPack(AI,new Random().randomize(),  int( owner.cx+cos(radians(owner.angle))*owner.w*2), int(owner.cy+sin(radians(owner.angle))*owner.w*2), 100, AI.playerColor, 60000, 0, 0, 0, 0, true));
 
 void spawningSetup() {
     spawnList.add(new Spawner(new Object[]{new HealBall(AI, halfWidth, halfHeight, 60, WHITE, 20000, 0, 0, 0, 50,true)}
     , 8000, 10000*DIFFICULTY_LEVEL, halfWidth, halfHeight, true, 100/DIFFICULTY_LEVEL));
-   
+       spawnList.add(new Spawner(new Object[]{new AbilityPack(AI,new Random().randomize(abilityList),  int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 60000, 0, 0, 0, 0, true)}
+    , 5000,0, true, 1));
+           spawnList.add(new Spawner(new Object[]{new AbilityPack(AI,new Random().randomize(abilityList),  int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 60000, 0, 0, 0, 0, true)}
+    , 5000,0, true, 1));
+           spawnList.add(new Spawner(new Object[]{new AbilityPack(AI,new Random().randomize(abilityList),  int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 60000, 0, 0, 0, 0, true)}
+    , 5000,0, true, 1));
+           spawnList.add(new Spawner(new Object[]{new AbilityPack(AI,new Random().randomize(abilityList),  int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 60000, 0, 0, 0, 0, true)}
+    , 5000,0, true, 1));
   /*  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.5), int(playerSize*0.5), 10, 150, 1, new Bazooka())}
     , 1000));*/
   spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.5), int(playerSize*0.5), 10, 30,2, new Suicide())}

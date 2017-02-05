@@ -46,11 +46,11 @@ void checkPlayerVSPlayerColloision() {
     for (Player p1 : players) {       
       for (Player p2 : players) {       
         if (p1.ally!=p2.ally && !p1.dead && !p2.dead ) { //  && p1!=p2
-         //    if (dist(p1.x, p1.y, p2.x, p2.y)<playerSize) { // old collision
+          //    if (dist(p1.x, p1.y, p2.x, p2.y)<playerSize) { // old collision
           if (dist(p1.cx, p1.cy, p2.cx, p2.cy)<p1.radius+p2.radius) {
             p1.hit(p2.damage);
-            float  deltaX =  p1.cx -  p2.cx, deltaY =  p1.cy -  p2.cy;
-            p1.pushForce( ((p1.radius+p2.radius)-dist(p2.cx, p2.cy, p1.cx, p1.cy)), atan2(deltaY, deltaX) * 180 / PI);
+            //float  deltaX = p1.cx -  p2.cx , deltaY =  p1.cy -  p2.cy;
+            p1.pushForce( ((p1.radius+p2.radius)-dist(p2.cx, p2.cy, p1.cx, p1.cy)), atan2(p1.cy -  p2.cy, p1.cx -  p2.cx) * 180 / PI);
           }
         }
       }
@@ -67,7 +67,7 @@ void checkPlayerVSProjectileColloision() {
         for (Player p : players) {      
           if (p.ally!=o.ally && !p.dead && !o.dead ) { // && o.playerIndex!=p.ally
             //if (dist(o.x, o.y, p.cx, p.cy)<playerSize) { //old collision
-               if (dist(o.x, o.y, p.cx, p.cy)<p.radius+o.size*.5) {
+            if (dist(o.x, o.y, p.cx, p.cy)<p.radius+o.size*.5) {
 
               //  players.get(j).hit(projectiles.get(i).damage);
               p.pushForce(o.force, o.angle);
@@ -84,33 +84,13 @@ void checkPlayerVSProjectileColloision() {
 }
 void checkProjectileVSProjectileColloision() {
   if (!freeze &&!reverse) {
-    /* for (int i=0; i< projectiles.size (); i++) {    
-     for (int j=0; j<projectiles.size (); j++) {      
-     if (projectiles.get(j).ally!=projectiles.get(i).ally && !projectiles.get(j).dead && !projectiles.get(i).dead && projectiles.get(i)!=projectiles.get(j)  ) {
-     if (dist(projectiles.get(i).x, projectiles.get(i).y, projectiles.get(j).x, projectiles.get(j).y)<projectiles.get(i).size*0.5+projectiles.get(j).size*0.5) {
-     if (projectiles.get(i) instanceof  Reflectable  && projectiles.get(j) instanceof Reflector) {
-     Reflectable reflectObject = (Reflectable)projectiles.get(i);
-     Reflector reflectorObject = (Reflector)projectiles.get(j);
-     reflectObject.reflect(projectiles.get(j).angle, projectiles.get(j).owner);
-     reflectorObject.reflecting();
-     }
-     }
-     }
-     }
-     }*/
     for (Projectile p1 : projectiles) {    
       for (Projectile p2 : projectiles) {      
         if (p2.ally!=p1.ally && !p2.dead && !p1.dead ) { //  && p1!=p2
           if (p1 instanceof  Reflectable  && p2 instanceof Reflector) {
             if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*0.5+p2.size*0.5) {
-              /*Reflectable reflectObject = (Reflectable)p1;
-               Reflector reflectorObject = (Reflector)p2;
-               reflectObject.reflect(p2.angle, p2.owner);
-               reflectorObject.reflecting();*/
               ((Reflectable)p1).reflect(p2.angle, p2.owner);
               ((Reflector)p2).reflecting();
-              //reflectObject.reflect(p2.angle, p2.owner);
-              //reflectorObject.reflecting();
             }
           }
           if (p1 instanceof  Destroyable  && p2 instanceof Destroyer) {
@@ -150,19 +130,22 @@ void checkWinner() {
     case SURVIVAL:
       if (playersAlive==0) {
         gameOver=true;
-        if(survivalTime<=0)survivalTime=int(stampTime*.001);
+        if (survivalTime<=0)survivalTime=int(stampTime*.001);
         text(" Survived for "+survivalTime+ "  sek", halfWidth, halfHeight);
         text(" Press ["+ResetKey+"] to restart", halfWidth, height*0.6);
       }
       break;
-      
+
     case PUZZLE:
       if (playersAlive<1) {
         text(" The survivor is player "+(playerAliveIndex+1), halfWidth, halfHeight);
         text(" Press ["+ResetKey+"] to restart", halfWidth, height*0.6);
       }
       break;
+    default:
+      break;
     }
+
     textSize(18);
   }
 }
@@ -214,13 +197,55 @@ void mouseDot() {
 }
 
 void announceAbility(Player p, int index ) {
-  if(p.textParticle!=null)particles.remove( p.textParticle );
-    if(p.iconParticle!=null)particles.remove( p.iconParticle );
- //p.abilityList.get(index).icon
-  p.iconParticle= new Pic(p,p.abilityList.get(index).icon,int(0),int(-150),0, 0, 100, 0, 2000, p.playerColor,1);
-  particles.add(new Pic(p,p.abilityList.get(index).icon,int(0),int(-150),0, 0, 100, -10, 300, p.playerColor,1));
+  if (p.textParticle!=null)particles.remove( p.textParticle );
+  if (p.iconParticle!=null)particles.remove( p.iconParticle );
+  //p.abilityList.get(index).icon
+  p.iconParticle= new Pic(p, p.abilityList.get(index).icon, int(0), int(-150), 0, 0, 100, 0, 3000, p.playerColor, 1);
+  particles.add(new Pic(p, p.abilityList.get(index).icon, int(0), int(-150), 0, 0, 100, -10, 300, p.playerColor, 1));
   particles.add( p.iconParticle);
 
-  p.textParticle = new Text(p, p.abilityList.get(index).name, 0, -75, 30, 0, 2000, BLACK, 0);
+  p.textParticle = new Text(p, p.abilityList.get(index).name, 0, -75, 30, 0, 3000, BLACK, 0);
   particles.add( p.textParticle );
+}
+void resetGame() {
+  switch(gameMode) {
+  case BRAWL:
+    particles.add(new Text("Brawl", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
+    particles.add(new Gradient(8000, 0, 500, 0, 0, 500, 0.5, 0, GREY));
+    break;
+  case SURVIVAL:
+    for (Player p : players) p.ally=0;
+    players.add(AI);
+    //spawningSetup();
+    spawningReset();
+    break;
+  case PUZZLE:
+    break;
+  case WILDWEST:
+    players.add(AI);
+    for (Player p : players) {
+      if (p!=AI) {
+        p.maxHealth=50;
+        p.health=50;
+        p.reset();
+      }
+    }
+    generateRandomAbilities(0, westAbilityList);
+    generateRandomAbilities(1, westPassiveList);
+
+    players.add(new Block(players.size(), AI, 200, 200, 200, 200, 999, new Armor()));
+    players.add(new Block(players.size(), AI, width-400, 200, 200, 200, 999, new Armor()));
+    players.add(new Block(players.size(), AI, width-400, height-400, 200, 200, 999, new Armor()));
+    players.add(new Block(players.size(), AI, 200, height-400, 200, 200, 999, new Armor()));
+
+    players.add(new Block(players.size(), AI, width/2-50, 0, 100, 100, 499, new Armor()));
+    players.add(new Block(players.size(), AI, width/2-50, height-100, 100, 100, 499, new Armor()));
+
+    players.add(new Block(players.size(), AI, 0, height/2-25, 50, 50, 99));
+    players.add(new Block(players.size(), AI, width-50, height/2-25, 50, 50, 99));
+    players.add(new Block(players.size(), AI, 50, height/2-25, 50, 50, 99));
+    players.add(new Block(players.size(), AI, width-100, height/2-25, 50, 50, 99));
+
+    break;
+  }
 }
