@@ -6,9 +6,9 @@ class Ability implements Cloneable {
   Player owner;  
   PImage icon;
   long cooldown;
-  int cooldownTimer;
+  int cooldownTimer,unlockCost=1000,x,y;
   float energy=90, maxEnergy=100, activeCost=5, channelCost, deChannelCost, deactiveCost, maxCooldown, regenRate=0.1, ammo, maxAmmo, loadRate;
-  boolean active, channeling, cooling, hold, regen=true, meta;
+  boolean active, channeling, cooling, hold, regen=true, meta,unlocked;
   Ability() { 
     icon=icons[8];
     //name=this.getClass().getSimpleName();
@@ -390,7 +390,9 @@ class Slow extends Ability { //-------------------------------------------------
   @Override
     void deActivate() {
     super.deActivate();
-    stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    stamps.add( new AbilityStamp(this));
+
     regen=true;
   }
   @Override
@@ -538,6 +540,7 @@ class ThrowDagger extends Ability {//-------------------------------------------
     name=getClassName(this);
     activeCost=8;
     regenRate=0.16;
+    unlockCost=1500;
   } 
   @Override
     void action() {
@@ -576,12 +579,80 @@ class ThrowDagger extends Ability {//-------------------------------------------
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+          //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
       action();
       deActivate();
     }
+  }
+}
+class Torpedo extends Ability {//---------------------------------------------------    Pistol   ---------------------------------
+  final int damage=35, angleRecoil=95;
+  int r;
+  float accuracy=1, MODIFIED_ANGLE_FACTOR=0.2;
+  Torpedo() {
+    super();
+    name=getClassName(this);
+    activeCost=maxEnergy;
+    maxAmmo=1;
+    ammo=maxAmmo;
+    cooldownTimer=240;
+    regenRate=0.85;
+    unlockCost=0;
+    unlocked=true;
+  } 
+  @Override
+    void action() {
+    stamps.add( new AbilityStamp(this));
+    RCRocket RC= new RCRocket(owner, int( owner.cx), int(owner.cy), 60, owner.playerColor, 2000, owner.angle, 0, cos(radians(owner.angle))*2*.01, sin(radians(owner.angle))*2*.01, damage, true,false);
+    RC.blastRadius=400;
+    RC.acceleration=4;
+    projectiles.add(RC);
+    particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 20, 32, 55, WHITE));
+    owner.pushForce(-20, owner.angle);
+    owner.angle+=random(-angleRecoil, angleRecoil);
+    owner.keyAngle=owner.angle;
+    ammo--;
+    r=30;
+  }
+
+  @Override
+    void press() {
+    // particles.add(new ShockWave(int(owner.cx), int(owner.cy), 20, 16, 200, owner.playerColor));
+    if ( ammo > 0&& cooldown<stampTime  &&(!reverse || owner.reverseImmunity)&&  !owner.dead && (!freeze || owner.freezeImmunity)) {
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
+      action();
+    } else {
+      if (energy>=0+activeCost  && ammo<=0) {
+        reload();
+        enableCooldown();
+        activate();
+        regen=true;
+      } else {
+        r=70;
+      }
+    }
+  }
+  @Override
+    void passive() {
+    strokeWeight(5);
+    stroke(owner.playerColor);
+    fill(0);
+    for (int i=0; i< ammo; i++)rect(owner.cx-20, owner.cy+50, 40, 50);
+    owner.ANGLE_FACTOR=MODIFIED_ANGLE_FACTOR;
+  }
+  void reload() {
+    r=-30;
+    owner.vx*=.5;
+    owner.vy*=.5;
+    owner.ax*=.5;
+    owner.ay*=.5;
+    particles.add(new ShockWave(int(owner.cx), int(owner.cy), 20, 24, 200, owner.playerColor));
+    particles.add( new  Particle(int(owner.cx), int(owner.cy), 0, 0, int(owner.w)+50, 900, color(255, 0, 255)));
+    ammo=maxAmmo;
   }
 }
 class Pistol extends Ability {//---------------------------------------------------    Pistol   ---------------------------------
@@ -596,9 +667,11 @@ class Pistol extends Ability {//------------------------------------------------
     ammo=maxAmmo;
     cooldownTimer=240;
     regenRate=0.24;
+    unlockCost=500;
   } 
   @Override
     void action() {
+    stamps.add( new AbilityStamp(this));
     if (energy>=maxEnergy)
       projectiles.add( new RevolverBullet(owner, int( owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 85, 14, owner.playerColor, 1000, owner.angle, damage));
 
@@ -617,7 +690,8 @@ class Pistol extends Ability {//------------------------------------------------
     void press() {
     // particles.add(new ShockWave(int(owner.cx), int(owner.cy), 20, 16, 200, owner.playerColor));
     if ( ammo > 0&& cooldown<stampTime  &&(!reverse || owner.reverseImmunity)&&  !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       action();
     } else {
       if (energy>=0+activeCost  && ammo<=0) {
@@ -662,9 +736,11 @@ class Revolver extends Ability {//----------------------------------------------
     ammo=maxAmmo;
     cooldownTimer=240;
     regenRate=0.26;
+    unlockCost=5000;
   } 
   @Override
     void action() {
+    stamps.add( new AbilityStamp(this));
     if (energy>=maxEnergy)  projectiles.add( new RevolverBullet(owner, int( owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 65, 30, owner.playerColor, 1000, owner.angle, damage*1.2));
     else projectiles.add( new RevolverBullet(owner, int( owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 60, 25, owner.playerColor, 1000, owner.angle, damage));
     particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 30, 32, 75, owner.playerColor));
@@ -675,7 +751,6 @@ class Revolver extends Ability {//----------------------------------------------
     owner.angle=owner.keyAngle;
     owner.pushForce(4, owner.keyAngle);
     ammo--;
-
     r=30;
   }
 
@@ -683,7 +758,8 @@ class Revolver extends Ability {//----------------------------------------------
     void press() {
     // particles.add(new ShockWave(int(owner.cx), int(owner.cy), 20, 16, 200, owner.playerColor));
     if ( ammo > 0&& cooldown<stampTime  &&(!reverse || owner.reverseImmunity)&&  !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       action();
     } else {
       if (energy>=0+activeCost  && ammo<=0) {
@@ -741,6 +817,7 @@ class ForceShoot extends Ability {//--------------------------------------------
     name=getClassName(this);
     activeCost=8;
     channelCost=0.1;
+          unlockCost=3000;
   } 
   @Override
     void action() {
@@ -755,7 +832,8 @@ class ForceShoot extends Ability {//--------------------------------------------
     void press() {
     if ((!reverse || owner.reverseImmunity)&&(!freeze || owner.freezeImmunity) && energy>(0+activeCost)&& !hold && !active && !channeling && !owner.dead) {
       activate();
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=false;
     }
   }
@@ -784,7 +862,8 @@ class ForceShoot extends Ability {//--------------------------------------------
     void release() {
     if ((!reverse || owner.reverseImmunity ) ) {
       if (!owner.dead && (!freeze || owner.freezeImmunity)&& active && channeling) {
-        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
         owner.pushForce(-forceAmount, owner.angle);
         regen=true;
         action();
@@ -826,6 +905,7 @@ class Blink extends Ability {//-------------------------------------------------
     icon=icons[7];
     name=getClassName(this);
     activeCost=10;
+     unlockCost=2000;
   } 
   @Override
     void action() {
@@ -845,7 +925,8 @@ class Blink extends Ability {//-------------------------------------------------
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
       action();
@@ -877,6 +958,7 @@ class Multiply extends Ability {//----------------------------------------------
     super();
     name=getClassName(this);
     activeCost=70;
+     unlockCost=3500;
   } 
   @Override
     void action() {
@@ -938,7 +1020,8 @@ class Multiply extends Ability {//----------------------------------------------
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
       action();
@@ -999,6 +1082,7 @@ class Stealth extends Ability {//-----------------------------------------------
     name=getClassName(this);
     activeCost=25;
     energy=25;
+     unlockCost=2500;
   } 
   @Override
     void action() {
@@ -1014,7 +1098,8 @@ class Stealth extends Ability {//-----------------------------------------------
 
     if ((!reverse || owner.reverseImmunity)&& !owner.dead && (!freeze || owner.freezeImmunity)) {
       if (energy>0+activeCost && !active) { 
-        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
         stamps.add( new StateStamp(owner.index, int(owner.x), int(owner.y), owner.state, owner.health, owner.dead));
 
         regen=false;
@@ -1070,6 +1155,7 @@ class Combo extends Ability {//-------------------------------------------------
     activeCost=stepActivateCost[1];
     energy=110;
     regenRate=0.14;
+    unlockCost=5500;
   } 
 
   @Override
@@ -1136,7 +1222,8 @@ class Combo extends Ability {//-------------------------------------------------
     if ((!reverse || owner.reverseImmunity)&& !owner.dead && (!freeze || owner.freezeImmunity)) {
       activeCost=stepActivateCost[step];
       if (energy>0+activeCost ) { 
-        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
         stamps.add( new StateStamp(owner.index, int(owner.x), int(owner.y), owner.state, owner.health, owner.dead));
 
         //particles.add(new Flash(300, 6, owner.playerColor));  
@@ -1186,6 +1273,7 @@ class Laser extends Ability {//-------------------------------------------------
     icon=icons[2];
     name=getClassName(this);
     activeCost=24;
+    unlockCost=4500;
   } 
   @Override
     void action() {
@@ -1198,7 +1286,8 @@ class Laser extends Ability {//-------------------------------------------------
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
       owner.ANGLE_FACTOR= MODIFIED_ANGLE_FACTOR;
@@ -1248,7 +1337,7 @@ class Laser extends Ability {//-------------------------------------------------
   }
 }
 class Shotgun extends Ability {//---------------------------------------------------    Shotgun   ---------------------------------
-  int damage=4, duration=900, delay=300, laserWidth=75, chargelevel;
+  int damage=5, duration=900, delay=300, laserWidth=75, chargelevel;
   long timer;
   float MODIFIED_ANGLE_FACTOR=0.5, MODIFIED_MAX_ACCEL=0.006; 
   long startTime;
@@ -1259,6 +1348,7 @@ class Shotgun extends Ability {//-----------------------------------------------
     name=getClassName(this);
     activeCost=30;
     regenRate=0.23;
+      unlockCost=3500;
   } 
   @Override
     void action() {
@@ -1272,7 +1362,8 @@ class Shotgun extends Ability {//-----------------------------------------------
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !charging&& !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
       owner.ANGLE_FACTOR= MODIFIED_ANGLE_FACTOR;
@@ -1287,13 +1378,13 @@ class Shotgun extends Ability {//-----------------------------------------------
     if (charging && (timer+delay/S/F)<millis()) {
       //particles.add(new ShockWave(int(owner.cx), int(owner.cy), 200*chargelevel, 16, 500, owner.playerColor));
       //particles.add(new Flash(50, 6, WHITE)); 
-      projectiles.add( new Bomb(owner, int( owner.cx), int(owner.cy), 40, owner.playerColor, 1, owner.angle, cos(radians(owner.angle))*20, sin(radians(owner.angle))*20, int(damage*0.6), false));
-      projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 50, 100, owner.playerColor, 200, owner.angle, damage*0.6));
-      projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 20, 200, owner.playerColor, 200, owner.angle, damage*0.6));
+      projectiles.add( new Bomb(owner, int( owner.cx), int(owner.cy), 40, owner.playerColor, 1, owner.angle, cos(radians(owner.angle))*20, sin(radians(owner.angle))*20, int(damage*0.3), false));
+      projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 50, 100, owner.playerColor, 200, owner.angle, damage*0.2));
+      projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 20, 200, owner.playerColor, 200, owner.angle, damage*0.2));
 
-      for (int i=0; i<10; i++) { //!!!
+      for (int i=0; i<12; i++) { //!!!
         float InAccurateAngle=random(-35, 35), shotSpeed=random(30, 80);
-        projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*shotSpeed, sin(radians(owner.angle+InAccurateAngle))*shotSpeed, damage));
+        projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 450, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*shotSpeed, sin(radians(owner.angle+InAccurateAngle))*shotSpeed, damage));
       }
       owner.pushForce(-40, owner.angle);
       charging=false;
@@ -1326,6 +1417,7 @@ class Sluggun extends Ability {//-----------------------------------------------
     name=getClassName(this);
     activeCost=30;
     regenRate=0.25;
+      unlockCost=3500;
   } 
   @Override
     void action() {
@@ -1339,7 +1431,8 @@ class Sluggun extends Ability {//-----------------------------------------------
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !charging&& !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
       owner.ANGLE_FACTOR= MODIFIED_ANGLE_FACTOR;
@@ -1388,6 +1481,7 @@ class TimeBomb extends Ability {//----------------------------------------------
     activeCost=12;
     regenRate=0.32;
     energy=maxEnergy*0.5;
+      unlockCost=2500;
   } 
   @Override
     void action() {
@@ -1421,7 +1515,8 @@ class TimeBomb extends Ability {//----------------------------------------------
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
       action();
@@ -1443,6 +1538,7 @@ class ElemetalLauncher extends Ability {//--------------------------------------
     activeCost=25;
     regenRate=0.2;
     energy=130;
+     unlockCost=8000;
   } 
   @Override
     void action() {
@@ -1451,7 +1547,7 @@ class ElemetalLauncher extends Ability {//--------------------------------------
     particles.add( new  Particle(int(owner.cx), int(owner.cy), 0, 0, int(owner.w), 800, color(255, 0, 255)));
     switch(ammoType%maxAmmotype) {
     case 1:
-      Container waterRocket= new Rocket(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 900, owner.angle, cos(radians(owner.angle))*shootSpeed+owner.vx, sin(radians(owner.angle))*shootSpeed+owner.vy, damage, false);
+      Container waterRocket= new Rocket(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*shootSpeed+owner.vx, sin(radians(owner.angle))*shootSpeed+owner.vy, damage, false);
       payload=new Containable[2];
       payload[0]= new ChargeLaser(owner, 0, 0, 1000, owner.playerColor, 150, owner.angle+180, 20, damage*.4 ).parent(waterRocket); 
       payload[1]= new ChargeLaser(owner, 0, 0, 1000, owner.playerColor, 150, owner.angle+180, -20, damage*.4 ).parent(waterRocket); 
@@ -1539,7 +1635,8 @@ class ElemetalLauncher extends Ability {//--------------------------------------
     void press() {
     //(!reverse || owner.reverseImmunity)
     if (cooldown<stampTime &&(!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       enableCooldown();
       activate();
@@ -1574,6 +1671,7 @@ class Bazooka extends Ability {//-----------------------------------------------
     activeCost=22;
     regenRate=0.13;
     energy=130;
+      unlockCost=4500;
   } 
   @Override
     void action() {
@@ -1583,7 +1681,7 @@ class Bazooka extends Ability {//-----------------------------------------------
     switch(ammoType%maxAmmotype) {
 
     case 0:
-      projectiles.add( new RCRocket(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 2500, owner.angle, 0, cos(radians(owner.angle))*shootSpeed*.02+owner.vx, sin(radians(owner.angle))*shootSpeed*.02+owner.vy, damage, false));
+      projectiles.add( new RCRocket(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 2500, owner.angle, 0, cos(radians(owner.angle))*shootSpeed*.02+owner.vx, sin(radians(owner.angle))*shootSpeed*.02+owner.vy, damage, false,true));
       break;
     case 1:
 
@@ -1651,7 +1749,8 @@ class Bazooka extends Ability {//-----------------------------------------------
     void press() {
     //(!reverse || owner.reverseImmunity)
     if (cooldown<stampTime &&(!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       enableCooldown();
       activate();
@@ -1681,6 +1780,7 @@ class Stars extends Ability {//-------------------------------------------------
     activeCost=32;
     regenRate=0.17;
     energy=130;
+      unlockCost=3000;
   } 
   @Override
     void action() {
@@ -1688,7 +1788,7 @@ class Stars extends Ability {//-------------------------------------------------
     particles.add(new ShockWave(int(owner.cx), int(owner.cy), 50, 16, 500, owner.playerColor));
     // particles.add( new  Particle(int(owner.cx), int(owner.cy), 0, 0, int(owner.w), 800, color(255, 0, 255)));
     for (int i=0; i<359; i+=40) {
-      projectiles.add( new RCRocket(owner, int( owner.cx+cos(radians(owner.angle+i))*50), int(owner.cy+sin(radians(owner.angle+i))*50), size, owner.playerColor, 1700, owner.angle+i, i, cos(radians(owner.angle+i))*shootSpeed*.02+owner.vx, sin(radians(owner.angle+i))*shootSpeed*.02+owner.vy, damage, false));
+      projectiles.add( new RCRocket(owner, int( owner.cx+cos(radians(owner.angle+i))*50), int(owner.cy+sin(radians(owner.angle+i))*50), size, owner.playerColor, 1700, owner.angle+i, i, cos(radians(owner.angle+i))*shootSpeed*.02+owner.vx, sin(radians(owner.angle+i))*shootSpeed*.02+owner.vy, damage, false,true));
     }
     owner.pushForce(5, owner.angle);
     // particles.add(new ShockWave(int(owner.cx), int(owner.cy), 20, 16, 200, owner.playerColor));
@@ -1705,7 +1805,8 @@ class Stars extends Ability {//-------------------------------------------------
     void press() {
     //(!reverse || owner.reverseImmunity)
     if (cooldown<stampTime &&(!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       enableCooldown();
       activate();
@@ -1736,13 +1837,15 @@ class RapidFire extends Ability {//---------------------------------------------
     name=getClassName(this);
     deactiveCost=6;
     channelCost=0.15;
+     unlockCost=1000;
   } 
 
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity) && energy>(0+activeCost) && !active && !channeling && !owner.dead) {
       activate();
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=false;
     }
   }
@@ -1778,7 +1881,8 @@ class RapidFire extends Ability {//---------------------------------------------
     void release() {
     if ((!reverse || owner.reverseImmunity ) ) {
       if (!owner.dead && (!freeze || owner.freezeImmunity)&& active && channeling) {
-        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
         regen=true;
         deChannel();
         deActivate();
@@ -1807,13 +1911,15 @@ class SerpentFire extends Ability {//-------------------------------------------
     name=getClassName(this);
     deactiveCost=0;
     channelCost=1;
+         unlockCost=3000;
   } 
 
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity) && energy>(0+activeCost) && !active && !channeling && !owner.dead) {
       activate();
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=false;
     }
   }
@@ -1869,7 +1975,8 @@ class SerpentFire extends Ability {//-------------------------------------------
     void release() {
     if ((!reverse || owner.reverseImmunity ) ) {
       if (!owner.dead && (!freeze || owner.freezeImmunity)&& active && channeling) {
-        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
         regen=true;
         deChannel();
         deActivate();
@@ -1914,6 +2021,7 @@ class MachineGun extends RapidFire {//------------------------------------------
     t=10;
     r=10;
     MODIFIED_ANGLE_FACTOR=0.001;
+    unlockCost=4000;
   } 
   void press() {
     super.press();
@@ -1977,7 +2085,8 @@ class MachineGun extends RapidFire {//------------------------------------------
   void release() {
     if ((!reverse || owner.reverseImmunity ) ) {
       if (!owner.dead && (!freeze || owner.freezeImmunity)&& active && channeling) {
-        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
         regen=true;
         deChannel();
         deActivate();
@@ -1989,7 +2098,7 @@ class MachineGun extends RapidFire {//------------------------------------------
 
         for (int i=0; sutainCount/10>i; i++) {
           float InAccurateAngle=random(-accuracy*2, accuracy*2);
-          projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 700, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*projectileSpeed, sin(radians(owner.angle+InAccurateAngle))*projectileSpeed, projectileDamage*2));
+          projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 700, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*projectileSpeed, sin(radians(owner.angle+InAccurateAngle))*projectileSpeed, projectileDamage));
         }
         owner.angle+=random(-90, 90);
         sutainCount=0;
@@ -2032,6 +2141,7 @@ class Sniper extends RapidFire {//----------------------------------------------
     channelCost=0.1;
     cooldownTimer=700;
     projectileDamage=210;
+    unlockCost=6000;
   } 
   void press() {
     super.press();
@@ -2113,7 +2223,8 @@ class Sniper extends RapidFire {//----------------------------------------------
   void release() {
     if ((!reverse || owner.reverseImmunity ) ) {
       if (!owner.dead && (!freeze || owner.freezeImmunity)&& active && channeling) {
-        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
         regen=true;
         deChannel();
         deActivate();
@@ -2150,6 +2261,7 @@ class Battery extends Ability {//-----------------------------------------------
     name=getClassName(this);
     activeCost=24;
     regenRate=0.11;
+    unlockCost=2000;
   } 
 
   @Override
@@ -2199,7 +2311,8 @@ class Battery extends Ability {//-----------------------------------------------
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && !active&& (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
       // action();
@@ -2225,7 +2338,7 @@ class Battery extends Ability {//-----------------------------------------------
   }
 }
 class AssaultBattery extends Ability {//---------------------------------------------------    Battery   ---------------------------------
-  int  maxInterval=6, damage=25, count=0, maxCount=14, flip=1;
+  int  maxInterval=5, damage=25, count=0, maxCount=14, flip=1;
   float  inAccuarcy=90, accuracy=inAccuarcy, interval, MODIFIED_ANGLE_FACTOR=0.001, MODIFIED_MAX_ACCEL=0.05; 
 
   AssaultBattery() {
@@ -2234,6 +2347,7 @@ class AssaultBattery extends Ability {//----------------------------------------
     name=getClassName(this);
     activeCost=45;
     regenRate=0.19;
+    unlockCost=5000;
   } 
 
   @Override
@@ -2274,7 +2388,8 @@ class AssaultBattery extends Ability {//----------------------------------------
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && !active&& (!freeze || owner.freezeImmunity)) {
 
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=false;
       owner.angle+= flip*accuracy*.75;
       activate();
@@ -2339,11 +2454,12 @@ class SemiAuto extends Battery implements AmmoBased {//-------------------------
     reloadCost=75;
     maxAmmo=30;
     regenRate=0.15;
+    unlockCost=6000;
   } 
 
   @Override
     void action() {
-
+    stamps.add( new AbilityStamp(this));
     //projectiles.add(charge.get(count));
     float inAccuracy;
     inAccuracy =random(-accuracy, accuracy);
@@ -2388,7 +2504,8 @@ class SemiAuto extends Battery implements AmmoBased {//-------------------------
     } else {
       reloading=false;
       if (ammo>0&& (!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && !active&& (!freeze || owner.freezeImmunity)) {
-        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
         regen=true;
         activate();
         // action();
@@ -2442,22 +2559,23 @@ class SemiAuto extends Battery implements AmmoBased {//-------------------------
   void reloadCancel() {
   }
 }
-class StingerLauncher extends Ability {//---------------------------------------------------    MissleLauncher   ---------------------------------
-  int interval, maxInterval=3, damage=10, offset=50, accuracy=10, count=0, maxCount=14, shootSpeed=35, duration=4000;
+class MarbleLauncher extends Ability {//---------------------------------------------------    MissleLauncher   ---------------------------------
+  int interval, maxInterval=3, damage=8, offset=50, accuracy=10, count=0, maxCount=14, shootSpeed=35, duration=4000;
   float  MODIFIED_ANGLE_FACTOR=0.016;
 
-  StingerLauncher() {
+  MarbleLauncher() {
     super();
     icon=icons[11];
     cooldownTimer=1200;
     name=getClassName(this);
     activeCost=25;
     regenRate=0.12;
+     unlockCost=5500;
   } 
 
   @Override
     void action() {
-    Electron e=new Electron( owner, int( owner.cx), int(owner.cy), 30, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*shootSpeed*.2+owner.vx, sin(radians(owner.angle))*shootSpeed*.2+owner.vy, damage );
+    Electron e=new Electron( owner, int( owner.cx), int(owner.cy), 30, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*shootSpeed*.2+owner.vx, sin(radians(owner.angle))*shootSpeed*.2+owner.vy, damage,false );
     e.derail();
     e.orbitAngleSpeed=1;
     e.maxDistance=50;
@@ -2493,7 +2611,8 @@ class StingerLauncher extends Ability {//---------------------------------------
     void press() {
 
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && cooldown<stampTime && !owner.dead && !active&& (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
 
@@ -2509,8 +2628,8 @@ class StingerLauncher extends Ability {//---------------------------------------
     fill(owner.playerColor);
     rotate(radians(owner.angle));
     rectMode(CENTER);
-    rect(-20, owner.radius, 50, 75);
-    rect(-20, -owner.radius, 50, 75);
+    rect(80, 0, 70, 60);
+  //  rect(-20, -owner.radius, 50, 75);
     rectMode(CORNER);
     popMatrix();
 
@@ -2551,6 +2670,7 @@ class MissleLauncher extends Ability {//----------------------------------------
     name=getClassName(this);
     activeCost=35;
     regenRate=0.12;
+     unlockCost=4000;
   } 
 
   @Override
@@ -2600,7 +2720,8 @@ class MissleLauncher extends Ability {//----------------------------------------
     void press() {
 
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && cooldown<stampTime && !owner.dead && !active&& (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
 
@@ -2661,6 +2782,7 @@ class AutoGun extends Ability {//-----------------------------------------------
     activeCost=12;
     channelCost=0.1;
     regenRate=0.18;
+     unlockCost=3500;
   } 
   @Override
     void action() {
@@ -2669,7 +2791,8 @@ class AutoGun extends Ability {//-----------------------------------------------
     void press() {
     if ((!reverse || owner.reverseImmunity) &&(!freeze || owner.freezeImmunity)&& energy>(0+activeCost) && !active && !channeling && !owner.dead) {
       activate();
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=false;
     }
   }
@@ -2685,7 +2808,7 @@ class AutoGun extends Ability {//-----------------------------------------------
         count=0;
         int amountP=0;
         for (Player p : players) {
-      
+
           if (!p.dead && owner !=p&& p.targetable && owner.ally!=p.ally) {
 
             if (amountP==alternate) {
@@ -2709,7 +2832,8 @@ class AutoGun extends Ability {//-----------------------------------------------
     void release() {
     if ((!reverse || owner.reverseImmunity ) ) {
       if (!owner.dead && (!freeze || owner.freezeImmunity)&& active && channeling) {
-        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
         regen=true;
         action();
         deChannel();
@@ -2759,6 +2883,7 @@ class SeekGun extends Ability {//-----------------------------------------------
     activeCost=40;
     channelCost=0.05;
     regenRate=0.4;
+     unlockCost=5500;
   } 
   @Override
     void action() {
@@ -2769,7 +2894,8 @@ class SeekGun extends Ability {//-----------------------------------------------
       activate();
       owner.ANGLE_FACTOR=MODIFIED_ANGLE_FACTOR;
       regen=false;
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
     }
   }
   @Override
@@ -2834,7 +2960,8 @@ class SeekGun extends Ability {//-----------------------------------------------
     void release() {
     if ((!reverse || owner.reverseImmunity ) ) {
       if (!owner.dead && (!freeze || owner.freezeImmunity)&& active && channeling) {
-        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
         particles.add(new ShockWave(int(owner.cx), int(owner.cy), 150, 62, 400, WHITE));
 
         for (Player t : targets) {
@@ -2854,7 +2981,8 @@ class SeekGun extends Ability {//-----------------------------------------------
         deActivate();
         owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
         owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
-        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       }
     }
   }
@@ -2904,6 +3032,7 @@ class ThrowBoomerang extends Ability {//----------------------------------------
     activeCost=15;
     channelCost=0.1;
     recoveryEnergy=activeCost*0.9;
+     unlockCost=2500;
   } 
   @Override
     void action() {
@@ -2913,7 +3042,8 @@ class ThrowBoomerang extends Ability {//----------------------------------------
     void press() {
     if ((!reverse || owner.reverseImmunity) && energy>(0+activeCost) && !active && !channeling && !owner.dead) {
       activate();
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=false;
     }
   }
@@ -2941,7 +3071,8 @@ class ThrowBoomerang extends Ability {//----------------------------------------
     void release() {
     if ((!reverse || owner.reverseImmunity ) ) {
       if (!owner.dead && (!freeze || owner.freezeImmunity)&& active && channeling) {
-        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
         regen=true;
         action();
         owner.pushForce(-forceAmount*0.5, owner.angle);
@@ -3030,6 +3161,7 @@ class PhotonicWall extends Ability {//------------------------------------------
     name=getClassName(this);
     activeCost=8;
     energy=40;
+     unlockCost=4000;
   } 
   @Override
     void action() {
@@ -3063,7 +3195,8 @@ class PhotonicWall extends Ability {//------------------------------------------
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
       action();
@@ -3091,6 +3224,7 @@ class PhotonicPursuit extends Ability {//---------------------------------------
     activeCost=15;
     energy=85;
     r=200;
+     unlockCost=1500;
   } 
   @Override
     void action() {
@@ -3123,7 +3257,8 @@ class PhotonicPursuit extends Ability {//---------------------------------------
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
       action();
@@ -3153,6 +3288,7 @@ class DeployThunder extends TimeBomb {//----------------------------------------
     regenRate=0.45;
     name=getClassName(this);
     activeCost=40;
+     unlockCost=2000;
   } 
   @Override
     void action() {
@@ -3200,6 +3336,7 @@ class DeployShield extends Ability {//------------------------------------------
     name=getClassName(this);
     activeCost=35;
     cooldownTimer=2750;
+     unlockCost=2000;
   } 
   @Override
     void action() {
@@ -3226,7 +3363,8 @@ class DeployShield extends Ability {//------------------------------------------
   @Override
     void press() {
     if (cooldown<stampTime &&(!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
       action();
@@ -3281,20 +3419,21 @@ class DeployElectron extends Ability {//----------------------------------------
     super();
     name=getClassName(this);
     activeCost=12;
+     unlockCost=1500;
   } 
   @Override
     void action() {
     if (energy>=maxEnergy-activeCost) {
-      stored.add( new Electron( owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 10000, owner.angle, -5, -5, damage ));
+      stored.add( new Electron( owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 10000, owner.angle, -5, -5, damage,true ));
       projectiles.add(stored.get(stored.size()-1));
-      stored.add( new Electron( owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 10000, owner.angle+120, -5, -5, damage ));
+      stored.add( new Electron( owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 10000, owner.angle+120, -5, -5, damage,true ));
       projectiles.add(stored.get(stored.size()-1));
-      stored.add( new Electron( owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 10000, owner.angle+240, -5, -5, damage ));
+      stored.add( new Electron( owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 10000, owner.angle+240, -5, -5, damage,true ));
       projectiles.add(stored.get(stored.size()-1));
     } else {
-      stored.add( new Electron( owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 10000, owner.angle, -5, -5, damage ));
+      stored.add( new Electron( owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 10000, owner.angle, -5, -5, damage ,true));
       projectiles.add(stored.get(stored.size()-1));
-      stored.add( new Electron( owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 10000, owner.angle+180, -5, -5, damage ));
+      stored.add( new Electron( owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 10000, owner.angle+180, -5, -5, damage ,true));
       projectiles.add(stored.get(stored.size()-1));
     }
   }
@@ -3304,7 +3443,8 @@ class DeployElectron extends Ability {//----------------------------------------
       if (e.distance>=e.maxDistance)e.derail();
     }
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
       action();
@@ -3344,6 +3484,7 @@ class Gravity extends Ability {//-----------------------------------------------
     activeCost=25;
     regenRate=.15;
     cooldownTimer=1000;
+     unlockCost=3000;
   } 
   @Override
     void action() {
@@ -3362,7 +3503,8 @@ class Gravity extends Ability {//-----------------------------------------------
   @Override
     void press() {
     if (cooldown<stampTime && (!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
       action();
@@ -3404,6 +3546,7 @@ class Ram extends Ability {//---------------------------------------------------
     energy=50;
     regenRate=0.3;
     cooldownTimer=1000;
+     unlockCost=2000;
   } 
   @Override
     void action() {
@@ -3426,7 +3569,8 @@ class Ram extends Ability {//---------------------------------------------------
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
       action();
@@ -3481,6 +3625,7 @@ class DeployTurret extends Ability {//------------------------------------------
     activeCost=25;
     energy=25;
     regenRate=0.16;
+     unlockCost=7000;
   } 
   @Override
     void action() {
@@ -3522,7 +3667,8 @@ class DeployTurret extends Ability {//------------------------------------------
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
 
@@ -3568,9 +3714,10 @@ class DeployDrone extends Ability {//-------------------------------------------
     super();
     cooldownTimer=2000;
     name=getClassName(this);
-    activeCost=55;
+    activeCost=50;
     energy=25;
     regenRate=0.18;
+     unlockCost=7500;
   } 
   @Override
     void action() {
@@ -3590,7 +3737,8 @@ class DeployDrone extends Ability {//-------------------------------------------
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
 
@@ -3621,6 +3769,7 @@ class DeployBodyguard extends DeployDrone {//-----------------------------------
     energy=40;
     speed=10;
     regenRate=0.18;
+     unlockCost=8000;
   } 
   @Override
     void action() {
@@ -3642,7 +3791,8 @@ class DeployBodyguard extends DeployDrone {//-----------------------------------
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
       action();
@@ -3675,6 +3825,7 @@ class CloudStrike extends Ability {//-------------------------------------------
     activeCost=22;
     cooldownTimer=1400;
     channelCost=0.01;
+     unlockCost=4000;
   } 
   @Override
     void action() {
@@ -3692,7 +3843,8 @@ class CloudStrike extends Ability {//-------------------------------------------
     void press() {
     if ((!reverse || owner.reverseImmunity)&&(!freeze || owner.freezeImmunity) && energy>(0+activeCost)&& stampTime>cooldown  && !hold && !active && !channeling && !owner.dead) {
       activate();
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=false;
       if (energy>=maxEnergy-activeCost-20) {
         owner.pushForce(-12, owner.angle);
@@ -3734,7 +3886,8 @@ class CloudStrike extends Ability {//-------------------------------------------
     void release() {
     if ((!reverse || owner.reverseImmunity ) ) {
       if (!owner.dead && (!freeze || owner.freezeImmunity)&& active && channeling) {
-        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
         //owner.pushForce(-forceAmount, owner.angle);
         regen=true;
         action();
@@ -3766,6 +3919,7 @@ class Detonator extends Ability {//---------------------------------------------
     super();
     name=getClassName(this);
     activeCost=35;
+     unlockCost=3500;
   } 
   @Override
     void action() {
@@ -3806,6 +3960,7 @@ class TeslaShock extends TimeBomb {//-------------------------------------------
     regenRate=0.43;
     name=getClassName(this);
     activeCost=10;
+     unlockCost=2500;
   } 
   @Override
     void action() {
@@ -3855,6 +4010,7 @@ class RandoGun extends Ability {//----------------------------------------------
     activeCost=18;
     regenRate=0.21;
     energy=maxEnergy*0.5;
+     unlockCost=1000;
   } 
   @Override
     void action() {
@@ -3891,8 +4047,8 @@ class RandoGun extends Ability {//----------------------------------------------
 
       break;
     case 6:
-      projectiles.add( new Electron( owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 10000, owner.angle, -5, -5, damage ));
-      projectiles.add( new Electron( owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 10000, owner.angle+180, -5, -5, damage ));
+      projectiles.add( new Electron( owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 10000, owner.angle, -5, -5, damage ,true));
+      projectiles.add( new Electron( owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 10000, owner.angle+180, -5, -5, damage,true ));
 
       break;
     case 7:
@@ -3904,7 +4060,7 @@ class RandoGun extends Ability {//----------------------------------------------
 
       break;
     case 9:
-      projectiles.add( new RCRocket(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 2500, owner.angle, random(-10, 10), cos(radians(owner.angle))*shootSpeed*.02+owner.vx, sin(radians(owner.angle))*shootSpeed*.02+owner.vy, damage, false));
+      projectiles.add( new RCRocket(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 2500, owner.angle, random(-10, 10), cos(radians(owner.angle))*shootSpeed*.02+owner.vx, sin(radians(owner.angle))*shootSpeed*.02+owner.vy, damage, false,true));
 
       break;
     case 10:
@@ -3947,7 +4103,8 @@ class RandoGun extends Ability {//----------------------------------------------
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
       action();
@@ -3977,6 +4134,7 @@ class FlameThrower extends Ability {//------------------------------------------
     projectileDamage=1;
     cooldownTimer=900;
     MODIFIED_ANGLE_FACTOR=0.035;
+     unlockCost=3000;
   } 
   void press() {
     super.press();
@@ -4020,7 +4178,8 @@ class FlameThrower extends Ability {//------------------------------------------
   void release() {
     if ((!reverse || owner.reverseImmunity ) ) {
       if (!owner.dead && (!freeze || owner.freezeImmunity)&& active) {
-        stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
         regen=true;
         deChannel();
         deActivate();
@@ -4056,12 +4215,14 @@ class SummonEvil extends Ability {//--------------------------------------------
     name=getClassName(this);
     activeCost=60;
     energy=80;
+     unlockCost=6500;
   } 
 
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       activate();
       action();
       active=true;
@@ -4115,12 +4276,14 @@ class SummonIlluminati extends Ability {//--------------------------------------
     name=getClassName(this);
     activeCost=60;
     energy=100;
+    unlockCost=10000;
   } 
 
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       activate();
       action();
       active=true;
@@ -4178,6 +4341,7 @@ class SneakBall extends Ability {//---------------------------------------------
     activeCost=40;
     energy=25;
     regenRate=0.18;
+     unlockCost=4500;
   } 
   @Override
     void action() {
@@ -4212,7 +4376,8 @@ class SneakBall extends Ability {//---------------------------------------------
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
 
@@ -4245,7 +4410,7 @@ class SneakBall extends Ability {//---------------------------------------------
 class TripleShot extends Ability {//---------------------------------------------------    DeployDrone  ---------------------------------
 
   int shootSpeed=65;
-  int damage=22,duration=600;
+  int damage=22, duration=600;
   float MODIFIED_ANGLE_FACTOR = 0.04, spreadAngle=15;   
   long timer;
   TripleShot() {
@@ -4256,10 +4421,12 @@ class TripleShot extends Ability {//--------------------------------------------
     activeCost=10;
     energy=45;
     regenRate=0.22;
+     unlockCost=2000;
   } 
   @Override
     void action() {
-    owner.pushForce(-14, owner.angle);
+    particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 20, 32, 55, WHITE));
+    owner.pushForce(-16, owner.angle);
     timer=millis();
     projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle+spreadAngle))*owner.w), int(owner.cy+sin(radians(owner.angle+spreadAngle))*owner.w), 60, owner.playerColor, 1000, owner.angle+10, cos(radians(owner.angle+spreadAngle))*32, sin(radians(owner.angle+spreadAngle))*36, int(damage*0.8)));
     projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle-spreadAngle))*owner.w), int(owner.cy+sin(radians(owner.angle-spreadAngle))*owner.w), 60, owner.playerColor, 1000, owner.angle-10, cos(radians(owner.angle-spreadAngle))*32, sin(radians(owner.angle-spreadAngle))*36, int(damage*0.8)));
@@ -4276,7 +4443,8 @@ class TripleShot extends Ability {//--------------------------------------------
   @Override
     void press() {
     if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
-      stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+    //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
 

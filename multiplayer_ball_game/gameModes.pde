@@ -2,25 +2,25 @@
 ArrayList<Spawner> spawnList= new ArrayList<Spawner>();
 boolean gameOver;
 int survivalTime;
-   //   projectiles.add( new AbilityPack(AI,new Random().randomize(),  int( owner.cx+cos(radians(owner.angle))*owner.w*2), int(owner.cy+sin(radians(owner.angle))*owner.w*2), 100, AI.playerColor, 60000, 0, 0, 0, 0, true));
+//   projectiles.add( new AbilityPack(AI,new Random().randomize(),  int( owner.cx+cos(radians(owner.angle))*owner.w*2), int(owner.cy+sin(radians(owner.angle))*owner.w*2), 100, AI.playerColor, 60000, 0, 0, 0, 0, true));
 
 void spawningSetup() {
-    spawnList.add(new Spawner(new Object[]{new HealBall(AI, halfWidth, halfHeight, 60, WHITE, 20000, 0, 0, 0, 50,true)}
+  spawnList.add(new Spawner(new Object[]{new HealBall(AI, halfWidth, halfHeight, 60, WHITE, 20000, 0, 0, 0, 50, true)}
     , 8000, 10000*DIFFICULTY_LEVEL, halfWidth, halfHeight, true, 100/DIFFICULTY_LEVEL));
-       spawnList.add(new Spawner(new Object[]{new AbilityPack(AI,new Random().randomize(abilityList),  int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 60000, 0, 0, 0, 0, true)}
-    , 5000,0, true, 1));
-           spawnList.add(new Spawner(new Object[]{new AbilityPack(AI,new Random().randomize(abilityList),  int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 60000, 0, 0, 0, 0, true)}
-    , 5000,0, true, 1));
-           spawnList.add(new Spawner(new Object[]{new AbilityPack(AI,new Random().randomize(abilityList),  int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 60000, 0, 0, 0, 0, true)}
-    , 5000,0, true, 1));
-           spawnList.add(new Spawner(new Object[]{new AbilityPack(AI,new Random().randomize(abilityList),  int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 60000, 0, 0, 0, 0, true)}
-    , 5000,0, true, 1));
+  spawnList.add(new Spawner(new Object[]{new AbilityPack(AI, new Random().randomize(abilityList), int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 60000, 0, 0, 0, 0, true)}
+    , 5000, 0, true, 1));
+  spawnList.add(new Spawner(new Object[]{new AbilityPack(AI, new Random().randomize(abilityList), int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 60000, 0, 0, 0, 0, true)}
+    , 5000, 0, true, 1));
+  spawnList.add(new Spawner(new Object[]{new AbilityPack(AI, new Random().randomize(abilityList), int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 60000, 0, 0, 0, 0, true)}
+    , 5000, 0, true, 1));
+  spawnList.add(new Spawner(new Object[]{new AbilityPack(AI, new Random().randomize(abilityList), int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 60000, 0, 0, 0, 0, true)}
+    , 5000, 0, true, 1));
   /*  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.5), int(playerSize*0.5), 10, 150, 1, new Bazooka())}
-    , 1000));*/
-  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.5), int(playerSize*0.5), 10, 30,2, new Suicide())}
+   , 1000));*/
+  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.5), int(playerSize*0.5), 10, 30, 2, new Suicide())}
     , 1000, 10000/DIFFICULTY_LEVEL, halfWidth, halfHeight, true, 20*DIFFICULTY_LEVEL));
-/*  spawnList.add(new Spawner(new Object[]{new HomingMissile(AI, halfWidth, halfHeight, 50, GREY, 2000, 0, 0, 0, 10), new HomingMissile(AI, halfWidth, halfHeight, 50, BLACK, 2000, 0, 0, 0, 10)}
-    , 1000, 100, halfWidth, halfHeight, false, 100));*/
+  /*  spawnList.add(new Spawner(new Object[]{new HomingMissile(AI, halfWidth, halfHeight, 50, GREY, 2000, 0, 0, 0, 10), new HomingMissile(AI, halfWidth, halfHeight, 50, BLACK, 2000, 0, 0, 0, 10)}
+   , 1000, 100, halfWidth, halfHeight, false, 100));*/
 
   spawnList.add(new Spawner(new Object[]{ new Bomb(AI, halfWidth, halfHeight, 200, BLACK, 1500, 0, 0, 0, 30, false)}
     , 2000, 1500/DIFFICULTY_LEVEL, halfWidth, halfHeight, true, 200*DIFFICULTY_LEVEL));
@@ -50,7 +50,7 @@ void spawningSetup() {
     , 70000, halfWidth, halfHeight));
   spawnList.add(new Spawner(new Object[]{new Turret(players.size(), AI, halfWidth, halfHeight, playerSize, playerSize, 100, new Bazooka())}
     , 85000, 15000/DIFFICULTY_LEVEL, true, 3*DIFFICULTY_LEVEL));
-  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.5), int(playerSize*0.5), 10, 60,2, new Suicide())}
+  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.5), int(playerSize*0.5), 10, 60, 2, new Suicide())}
     , 90000, 8000/DIFFICULTY_LEVEL, halfWidth, halfHeight, true, 30));
   spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.5), int(playerSize*0.5), 10, 150, 1, new SemiAuto())}
     , 120000, 10000/DIFFICULTY_LEVEL, true, 5*DIFFICULTY_LEVEL));
@@ -61,32 +61,36 @@ void spawningSetup() {
 
 
 void spawningReset() {
-  for (int i=players.size()-1; i>= AmountOfPlayers; i--) {
-    players.remove(i);
-  }
+
   stamps.clear();  
   survivalTime=0;
   gameOver=false;
-  players.add(AI);
+
   projectiles.clear();
   particles.clear(); 
   spawnList.clear();
-  forwardTime=0;
+    forwardTime=0;
   reversedTime=0;
   freezeTime=0;
   fallenTime=0;
   stampTime=0;
+  for (int i=players.size()-1; i>= AmountOfPlayers; i--) {
+    players.remove(i);
+  }   
+  for (Player p : players)  p.ally=0;
+  players.add(AI);
+
   spawningSetup();
-    particles.add(new  Text("Survival", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
-    particles.add(new Gradient(10000, 0, 500, 0, 0, 500, 0.5, 0, GREY));
+  particles.add(new  Text("Survival", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
+  particles.add(new Gradient(10000, 0, 500, 0, 0, 500, 0.5, 0, GREY));
   /*for (Spawner s : spawnList) {
    s.dead=false;
    s.times=s.initTimes;
    }*/
- if(!noFlash) background(255);
+  if (!noFlash) background(255);
 }
 void survivalSpawning() {
-  if(!gameOver) for (Spawner s : spawnList)  s.update();
+  if (!gameOver) for (Spawner s : spawnList)  s.update();
 }
 
 

@@ -27,12 +27,12 @@ final color BGcolor=color(100);
 PFont font;
 PGraphics GUILayer;
 PShader  Blur;
-boolean RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true, inGame;
+boolean cleanStart=false, RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true, inGame;
 final float flashAmount=0.5, shakeAmount=0.5;
 int mouseSelectedPlayerIndex=0;
-int halfWidth, halfHeight;
+int halfWidth, halfHeight,coins;
 //int gameMode=0;
-GameType gameMode=GameType.WILDWEST;
+GameType gameMode=GameType.MENU;
 final int AmountOfPlayers=3; // start players
 final float DIFFICULTY_LEVEL=1.0;
 
@@ -69,7 +69,7 @@ ArrayList <Particle> particles = new ArrayList<Particle>();
 final Projectile allProjectiles[] = new Projectile[]{
   // new IceDagger(),new forceBall(),new RevolverBullet()
 };
-final int ABILITY_AMOUNT=45, PASSIVE_AMOUNT=22;
+//final int ABILITY_AMOUNT=45, PASSIVE_AMOUNT=22;
 Ability abilityList[];
 Ability passiveList[];
 Ability westAbilityList[];
@@ -115,7 +115,7 @@ void setup() {
     // new Freeze(), 
     // new Reverse(), 
     // new Slow(), 
-
+    
     new ThrowDagger(), 
     new Revolver(), 
     new ForceShoot(), 
@@ -170,7 +170,8 @@ void setup() {
     new SneakBall(), 
     new TripleShot(), 
 
-    new StingerLauncher()
+    new MarbleLauncher(),
+    new Torpedo()
   };
 
   passiveList = new Ability[]{
@@ -217,7 +218,7 @@ void setup() {
     new Pistol(), 
 
     new TripleShot(), 
-    new StingerLauncher()
+    new MarbleLauncher()
   };
   westPassiveList = new Ability[]{
     new Armor(), 
@@ -242,29 +243,31 @@ void setup() {
     new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}
   };
   colorMode(HSB);
-  for (int i=0; i< AmountOfPlayers; i++) {
-    try {
-      players.add(new Player(i, color((255/AmountOfPlayers)*i, 255, 255), int(random(width-playerSize*1)+playerSize), int(random(height-playerSize*1)+playerSize), playerSize, playerSize, playerControl[i][0], playerControl[i][1], playerControl[i][2], playerControl[i][3], playerControl[i][4], abilities[i]));
-    }
-    catch(Exception e ) {
-      println(e);
-    }
-    if (players.get(i).mouse)players.get(i).FRICTION_FACTOR=0.11; //mouse
-  }
-  for (int i=0; i< startBalls; i++) {
-    projectiles.add(new Ball(int(random(width-ballSize)+ballSize*0.5), int(random(height-ballSize)+ballSize*0.5), int(random(20)-10), int(random(20)-10), int(random(ballSize)+10), color(random(255), 0, 0)));
-  }
-  println("amount of serial ports: "+Serial.list().length);
-  for (int i=0; i<Serial.list ().length; i++) {
-    portName[i] = Serial.list()[i];   // du kan också skriva COM + nummer på porten   
-    port[i] = new Serial(this, portName[i], baudRate);   // du måste ha samma baudrate t.ex 9600
-    println(" port " +port[i].available(), " avalible");
-    println(portName[i]);
-    players.get(i).MAX_ACCEL=0.16;
-    players.get(i).DEFAULT_MAX_ACCEL=0.16;
-    players.get(i).arduino=true;
-    players.get(i).FRICTION_FACTOR=0.062;
-  }
+  /* for (int i=0; i< AmountOfPlayers; i++) {
+   try {
+   players.add(new Player(i, color((255/AmountOfPlayers)*i, 255, 255), int(random(width-playerSize*1)+playerSize), int(random(height-playerSize*1)+playerSize), playerSize, playerSize, playerControl[i][0], playerControl[i][1], playerControl[i][2], playerControl[i][3], playerControl[i][4], abilities[i]));
+   }
+   catch(Exception e ) {
+   println(e);
+   }
+   if (players.get(i).mouse)players.get(i).FRICTION_FACTOR=0.11; //mouse
+   }
+   for (int i=0; i< startBalls; i++) {
+   projectiles.add(new Ball(int(random(width-ballSize)+ballSize*0.5), int(random(height-ballSize)+ballSize*0.5), int(random(20)-10), int(random(20)-10), int(random(ballSize)+10), color(random(255), 0, 0)));
+   }
+   println("amount of serial ports: "+Serial.list().length);
+   for (int i=0; i<Serial.list ().length; i++) {
+   portName[i] = Serial.list()[i];   // du kan också skriva COM + nummer på porten   
+   port[i] = new Serial(this, portName[i], baudRate);   // du måste ha samma baudrate t.ex 9600
+   println(" port " +port[i].available(), " avalible");
+   println(portName[i]);
+   players.get(i).MAX_ACCEL=0.16;
+   players.get(i).DEFAULT_MAX_ACCEL=0.16;
+   players.get(i).arduino=true;
+   players.get(i).FRICTION_FACTOR=0.062;
+   }*/
+  playerSetup();
+  controllerSetup();
   GUILayer= createGraphics(width, height);
   GUILayer.beginDraw();
   GUILayer.noStroke();
@@ -349,20 +352,9 @@ void stop() {
 }
 
 void draw() {
-  switch(gameMode) {
-  case BRAWL:
-    break;
-  case SURVIVAL:
-    survivalSpawning();
-    break;
-  case PUZZLE:
-    break;
-  default:
-    break;
-  }
-
 
   background(BGcolor);
+
   addMillis=millis()-prevMillis;
   prevMillis=millis();
   if (origo) {
@@ -497,9 +489,30 @@ void draw() {
       }
     }
     popMatrix();
+
     image(GUILayer, 0, 0);
+    if (cheatEnabled)displayInfo();
+    else displayClock();
+    
+    switch(gameMode) {
+    case BRAWL:
+      break;
+    case SURVIVAL:
+      survivalSpawning();
+      break;
+    case PUZZLE:
+      break;
+    case WILDWEST:
+      break;
+    case SHOP:
+    shopUpdate();
+      break;
+    case MENU:
+      menuUpdate();
+      break;
+    default:
+      break;
+    }
   }// origo
   // prevMillis=millis();
-  if (cheatEnabled)displayInfo();
-  else displayClock();
 }

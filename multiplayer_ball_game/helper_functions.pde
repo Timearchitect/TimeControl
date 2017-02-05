@@ -2,7 +2,7 @@ enum AbilityType {
   ACTIVE, PASSIVE, NATIVE, GLOBAL
 }
 enum GameType {
-  BRAWL, SURVIVAL, PUZZLE, WILDWEST
+  BRAWL, SURVIVAL, PUZZLE, WILDWEST, SHOP, MENU
 }
 static String getClassName(Object o) {
   return o.getClass().getSimpleName();
@@ -206,5 +206,32 @@ void generateRandomAbilities(int index, Ability[] list) {
       //p.ability= p.abilityList.get(0);
       announceAbility( p, index);
     }
+  }
+}
+void playerSetup() {
+  for (int i=0; i< AmountOfPlayers; i++) {
+    try {
+      players.add(new Player(i, color((255/AmountOfPlayers)*i, 255, 255), int(random(width-playerSize*1)+playerSize), int(random(height-playerSize*1)+playerSize), playerSize, playerSize, playerControl[i][0], playerControl[i][1], playerControl[i][2], playerControl[i][3], playerControl[i][4], abilities[i]));
+    }
+    catch(Exception e ) {
+      println(e);
+    }
+    if (players.get(i).mouse)players.get(i).FRICTION_FACTOR=0.11; //mouse
+  }
+  for (int i=0; i< startBalls; i++) {
+    projectiles.add(new Ball(int(random(width-ballSize)+ballSize*0.5), int(random(height-ballSize)+ballSize*0.5), int(random(20)-10), int(random(20)-10), int(random(ballSize)+10), color(random(255), 0, 0)));
+  }
+}
+void controllerSetup() {
+  println("amount of serial ports: "+Serial.list().length);
+  for (int i=0; i<Serial.list ().length; i++) {
+    portName[i] = Serial.list()[i];   // du kan också skriva COM + nummer på porten   
+    port[i] = new Serial(this, portName[i], baudRate);   // du måste ha samma baudrate t.ex 9600
+    println(" port " +port[i].available(), " avalible");
+    println(portName[i]);
+    players.get(i).MAX_ACCEL=0.16;
+    players.get(i).DEFAULT_MAX_ACCEL=0.16;
+    players.get(i).arduino=true;
+    players.get(i).FRICTION_FACTOR=0.062;
   }
 }

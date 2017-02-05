@@ -142,6 +142,13 @@ void checkWinner() {
         text(" Press ["+ResetKey+"] to restart", halfWidth, height*0.6);
       }
       break;
+
+    case WILDWEST:
+      if (playersAlive<2) {
+        text(" The survivor is player "+(playerAliveIndex+1), halfWidth, halfHeight);
+        text(" Press ["+ResetKey+"] to restart", halfWidth, height*0.6);
+      }
+      break;
     default:
       break;
     }
@@ -196,32 +203,49 @@ void mouseDot() {
   point(mouseX, mouseY);
 }
 
-void announceAbility(Player p, int index ) {
-  if (p.textParticle!=null)particles.remove( p.textParticle );
-  if (p.iconParticle!=null)particles.remove( p.iconParticle );
-  //p.abilityList.get(index).icon
-  p.iconParticle= new Pic(p, p.abilityList.get(index).icon, int(0), int(-150), 0, 0, 100, 0, 3000, p.playerColor, 1);
-  particles.add(new Pic(p, p.abilityList.get(index).icon, int(0), int(-150), 0, 0, 100, -10, 300, p.playerColor, 1));
-  particles.add( p.iconParticle);
 
-  p.textParticle = new Text(p, p.abilityList.get(index).name, 0, -75, 30, 0, 3000, BLACK, 0);
-  particles.add( p.textParticle );
-}
 void resetGame() {
+  if (cleanStart) {
+    clearGame();
+  }
   switch(gameMode) {
   case BRAWL:
     particles.add(new Text("Brawl", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
     particles.add(new Gradient(8000, 0, 500, 0, 0, 500, 0.5, 0, GREY));
+
+    for (Player p : players) {    
+      if (p!=AI&&!p.clone &&  !p.turret) {  // no turret or clone respawn
+        p.reset();
+        announceAbility( p, 0);
+      } else {
+        p.dead=true;
+        p.state=0;
+      }
+    }
+
+
+
     break;
   case SURVIVAL:
-    for (Player p : players) p.ally=0;
-    players.add(AI);
-    //spawningSetup();
+    for (Player p : players) {    
+      if (p!=AI&&!p.clone &&  !p.turret) {  // no turret or clone respawn
+        p.reset();
+        announceAbility( p, 0);
+      } else {
+        p.dead=true;
+        p.state=0;
+      }
+    }
+
     spawningReset();
     break;
   case PUZZLE:
+    particles.add(new Text("Puzzle", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
+    particles.add(new Gradient(8000, 0, 500, 0, 0, 500, 0.5, 0, GREY));
     break;
   case WILDWEST:
+    particles.add(new Text("WILD WILD WEST !!!", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
+    particles.add(new Gradient(8000, 0, 500, 0, 0, 500, 0.5, 0, GREY));
     players.add(AI);
     for (Player p : players) {
       if (p!=AI) {
@@ -230,8 +254,9 @@ void resetGame() {
         p.reset();
       }
     }
-    generateRandomAbilities(0, westAbilityList);
     generateRandomAbilities(1, westPassiveList);
+    generateRandomAbilities(0, westAbilityList);
+
 
     players.add(new Block(players.size(), AI, 200, 200, 200, 200, 999, new Armor()));
     players.add(new Block(players.size(), AI, width-400, 200, 200, 200, 999, new Armor()));
@@ -247,5 +272,118 @@ void resetGame() {
     players.add(new Block(players.size(), AI, width-100, height/2-25, 50, 50, 99));
 
     break;
+  default:
   }
+}
+
+void clearGame() {
+  prevMillis=millis(); 
+  addMillis=0; 
+  forwardTime=0; 
+  reversedTime=0; 
+  freezeTime=0; 
+  //stampTime=millis(); 
+  stampTime=0;
+  fallenTime=0;
+  stamps.clear();
+  projectiles.clear();
+  particles.clear();
+  if (!noFlash)background(255);
+  for (int i =players.size()-1; i>= 0; i--) {
+    //players.get(i).holdTrigg=true;
+    if (players.get(i).turret || players.get(i).clone) players.remove( players.get(i));
+  }
+}
+void announceAbility(Player p, int index ) {
+  if (p.textParticle!=null)particles.remove( p.textParticle );
+  if (p.iconParticle!=null)particles.remove( p.iconParticle );
+  //p.abilityList.get(index).icon
+  p.iconParticle= new Pic(p, p.abilityList.get(index).icon, int(0), int(-150), 0, 0, 100, 0, 3000, p.playerColor, 1);
+  particles.add(new Pic(p, p.abilityList.get(index).icon, int(0), int(-150), 0, 0, 100, -10, 300, p.playerColor, 1));
+  particles.add( p.iconParticle);
+
+  p.textParticle = new Text(p, p.abilityList.get(index).name, 0, -75, 30, 0, 3000, BLACK, 0);
+  particles.add( p.textParticle );
+}
+
+void menuUpdate() {
+
+  players.clear();
+
+  background(0);
+  textSize(50);
+  if (mousePressed&&mouseX>0 && width/2>mouseX) {
+    if (mouseY>0 && height/2>mouseY) {
+      gameMode=GameType.SURVIVAL;
+      playerSetup();
+      controllerSetup();
+      resetGame();
+    }
+  }
+  fill(255, 255, 150);
+  rect(0, 0, width/2, height/2);
+  if (mousePressed&&mouseX>width/2 && width>mouseX) {
+    if (mouseY>0 && height/2>mouseY) {
+      gameMode=GameType.BRAWL;
+      playerSetup();
+      controllerSetup();
+      resetGame();
+    }
+  }
+  fill(60, 255, 150);
+  rect(width/2, 0, width/2, height/2);
+  if (mousePressed&&mouseX>0 && width/2>mouseX) {
+    if (mouseY>height/2 && height>mouseY) {
+      gameMode=GameType.WILDWEST;
+      playerSetup();
+      controllerSetup();
+      resetGame();
+    }
+  }
+  fill(120, 255, 150);
+  rect(0, height/2, width/2, height/2);
+  if (mousePressed&&mouseX> width/2 && width>mouseX) {
+    if (mouseY>height/2 && height>mouseY) {
+      gameMode=GameType.SHOP;
+      //playerSetup();
+      //controllerSetup();
+      resetGame();
+    }
+  }
+  fill(180, 255, 150);
+  rect( width/2, height/2, width/2, height/2);
+
+  fill(0, 0, 0);
+  text(GameType.SURVIVAL.toString(), width/4, height/4);
+  text(GameType.BRAWL.toString(), width/2+width/4, height/4);
+  text(GameType.WILDWEST.toString(), width/4, height/2+height/4);
+  text(GameType.SHOP.toString(), width/2+width/4, height/2+height/4);
+  text(coins +" coins", width/2+width/4, height/2+height/3);
+}
+
+void shopUpdate() {
+  background(255);
+  int i=0;
+  textSize(40);
+  text(coins +" coins", width/2, 70);
+  textSize(10);
+  for (Ability a : abilityList) {
+
+    if (!a.unlocked) {
+      tint(255, (a.unlockCost>coins)?40:255);
+      image(a.icon, 120+(i*120)%(width-220), 160+int(i*120/(width-220))*140, 80, 80);
+      fill((a.unlockCost>coins)?240:0);
+      text(a.unlockCost, 120+(i*120)%(width-220), 240+int(i*120/(width-220))*140);
+    } else {
+      tint(80, 255, 255);
+      image(a.icon, 120+(i*120)%(width-220), 160+int(i*120/(width-220))*140, 80, 80);
+      fill(80, 255, 255);
+      text("[UNLOCKED]", 120+(i*120)%(width-220), 240+int(i*120/(width-220))*140);
+    }
+    text(a.name, 120+(i*120)%(width-220), 220+int(i*120/(width-220))*140);
+
+    i++;
+  }
+}
+class Button {
 }

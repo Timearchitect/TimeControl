@@ -1,4 +1,12 @@
 void keyPressed() {
+  if (key==27) {   // ESC disable to EXIT() show pausescreen instead 
+    if (gameMode==GameType.MENU) {
+    } else { 
+      gameMode=GameType.MENU;        
+      clearGame();  
+      key=0;
+    }
+  }
 
   key=Character.toLowerCase(key);// convert key to lower Case
   if (key == '#') {                    // enablecheats
@@ -21,8 +29,7 @@ void keyPressed() {
     }
 
 
-
-    /* //random weapon
+     //random weapon
      for (Player p:players) {    
      if (p!=AI&&!p.clone &&  !p.turret) {  // no turret or clone respawn
      p.reset();
@@ -31,21 +38,21 @@ void keyPressed() {
      p.dead=true;
      p.state=0;
      }
-     }*/
+     }
 
     //random weapon end
-/*
-    for (Player p : players) {      
-      if (p.index!=-1 )
-        if (p!=AI &&!p.clone &&  !p.turret) {  // no turret or clone respawn
-          p.reset();
-          announceAbility( p, 0);
-        } else {
-          p.dead=true;
-          p.state=0;
-        }
-    }*/
     
+    for (Player p : players) {      
+     if (p.index!=-1 )
+     if (p!=AI &&!p.clone &&  !p.turret) {  // no turret or clone respawn
+     p.reset();
+     announceAbility( p, 0);
+     } else {
+     p.dead=true;
+     p.state=0;
+     }
+     }
+
     if (RandomSkillsOnDeath)generateRandomAbilities(0, AbilityType.ACTIVE);
     resetGame();
   }
@@ -120,21 +127,7 @@ void keyPressed() {
        }*/
     }
     if (key==DELETE) {
-      prevMillis=millis(); 
-      addMillis=0; 
-      forwardTime=0; 
-      reversedTime=0; 
-      freezeTime=0; 
-      stampTime=millis(); 
-      fallenTime=0;
-      stamps.clear();
-      projectiles.clear();
-      particles.clear();
-      if (!noFlash)background(255);
-      for (int i =players.size()-1; i>= 0; i--) {
-        //players.get(i).holdTrigg=true;
-        if (players.get(i).turret || players.get(i).clone) players.remove( players.get(i));
-      }
+      clearGame();
     }
     if (key==Character.toLowerCase('-')) {
       //players.get(mouseSelectedPlayerIndex).ability.reset();

@@ -1,28 +1,28 @@
 
 void mousePressed() {
-
+  coins+=100;
   try {
     for (Player p : players) {
       if (p.mouse &&(!reverse || p.reverseImmunity || p.abilityList.get(0).meta)) { 
         if (mouseButton==LEFT) {
           //p.ability.press();
-            for (Ability a : p.abilityList)  a.press();
+          for (Ability a : p.abilityList)  a.press();
           p.holdTrigg=true;
         }
       }
     }
   }
   catch(Exception e) {
-        println(e);
+    println(e);
   }
   if (cheatEnabled) {
-       spawn(new HomingMissile(AI, mouseX, mouseY, 70, BLACK, 5000, 0, 0, 0, 10));
+    spawn(new HomingMissile(AI, mouseX, mouseY, 70, BLACK, 5000, 0, 0, 0, 10));
 
     // float X=(mouseX*zoom)+(width*(1-zoom)*mouseX);
     // float Y=(mouseY*zoom)+(height*(1-zoom)*mouseY);
-      float X=mouseX;
-      float Y=mouseY;
-            ellipse(X,Y,200,200);
+    float X=mouseX;
+    float Y=mouseY;
+    ellipse(X, Y, 200, 200);
     for (int i=0; i<players.size(); i++) {
       if (!players.get(i).dead && dist(players.get(i).cx, players.get(i).cy, X, Y)<100) {
 
@@ -63,7 +63,7 @@ void mouseReleased() {
     if (p.mouse &&(!reverse || p.reverseImmunity|| p.abilityList.get(0).meta)) { 
       if (mouseButton==LEFT) {
         p.holdTrigg=false;
-       // p.ability.release();
+        // p.ability.release();
         for (Ability a : p.abilityList)  a.release();
       }
     }

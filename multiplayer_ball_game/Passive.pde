@@ -4,6 +4,7 @@ class HpRegen extends Ability {//-----------------------------------------------
   HpRegen() {
     super();
     name=getClassName(this);
+     unlockCost=1500;
   } 
   @Override
     void action() {
@@ -32,6 +33,7 @@ class Suicide extends Ability {//-----------------------------------------------
   Suicide() {
     super();
     name=getClassName(this);
+     unlockCost=500;
   } 
   @Override
     void action() {
@@ -60,6 +62,7 @@ class MpRegen extends Ability {//-----------------------------------------------
   MpRegen() {
     super();
     name=getClassName(this);
+     unlockCost=1500;
   } 
   @Override
     void action() {
@@ -90,6 +93,7 @@ class Armor extends Ability {//-------------------------------------------------
   Armor() {
     super();
     name=getClassName(this);
+     unlockCost=1500;
   } 
   @Override
     void action() {
@@ -136,6 +140,7 @@ class Speed extends Ability {//-------------------------------------------------
   Speed() {
     super();
     name=getClassName(this);
+     unlockCost=1000;
   } 
   @Override
     void action() {
@@ -166,6 +171,7 @@ class Gravitation extends Ability {//-------------------------------------------
   Gravitation() {
     super();
     name=getClassName(this);
+     unlockCost=500;
   } 
   @Override
     void action() {
@@ -207,6 +213,7 @@ class Repel extends Ability {//-------------------------------------------------
   Repel() {
     super();
     name=getClassName(this);
+     unlockCost=500;
   } 
   @Override
     void action() {
@@ -257,6 +264,7 @@ class Static extends Ability {//------------------------------------------------
   Static() {
     super();
     name=getClassName(this);
+     unlockCost=1500;
   } 
   @Override
     void action() {
@@ -293,6 +301,7 @@ class SuppressFire extends Ability {//------------------------------------------
   SuppressFire() {
     super();
     name=getClassName(this);
+     unlockCost=2000;
   } 
   @Override
     void action() {
@@ -338,6 +347,7 @@ class Gloss extends Ability {//-------------------------------------------------
   Gloss() {
     super();
     name=getClassName(this);
+     unlockCost=2000;
   } 
   @Override
     void action() {
@@ -376,6 +386,7 @@ class BackShield extends Ability {//--------------------------------------------
   BackShield() {
     super();
     name=getClassName(this);
+     unlockCost=2000;
   } 
   @Override
     void action() {
@@ -434,6 +445,7 @@ class Trail extends Ability {//-------------------------------------------------
   Trail() {
     super();
     name=getClassName(this);
+     unlockCost=1000;
   } 
   @Override
     void action() {
@@ -476,6 +488,7 @@ class PainPulse extends Ability {//---------------------------------------------
   PainPulse() {
     super();
     name=getClassName(this);
+     unlockCost=500;
   } 
   @Override
     void action() {
@@ -519,6 +532,7 @@ class Nova extends Ability {//--------------------------------------------------
   Nova() {
     super();
     name=getClassName(this);
+     unlockCost=1500;
   } 
   @Override
     void action() {
@@ -571,6 +585,7 @@ class BulletCutter extends Ability {//------------------------------------------
   BulletCutter() {
     super();
     name=getClassName(this);
+     unlockCost=2000;
   } 
   @Override
     void action() {
@@ -649,6 +664,7 @@ class Boost extends Ability {//-------------------------------------------------
   Boost() {
     super();
     name=getClassName(this);
+     unlockCost=2000;
   } 
   @Override
     void action() {
@@ -703,6 +719,7 @@ class Glide extends Ability {//-------------------------------------------------
   Glide() {
     super();
     name=getClassName(this);
+     unlockCost=1500;
   } 
   @Override
     void action() {
@@ -738,6 +755,7 @@ class Guardian extends Ability {//----------------------------------------------
   Guardian() {
     super();
     name=getClassName(this);
+     unlockCost=1500;
   } 
   @Override
     void action() {
@@ -802,6 +820,7 @@ class BulletTime extends Ability {//--------------------------------------------
   BulletTime() {
     super();
     name=getClassName(this);
+     unlockCost=2500;
   } 
   @Override
     void action() {
@@ -846,6 +865,7 @@ class Adrenaline extends Ability {//--------------------------------------------
   Adrenaline() {
     super();
     name=getClassName(this);
+     unlockCost=2500;
   } 
   @Override
     void action() {
@@ -907,6 +927,7 @@ class Emergency extends Ability {//---------------------------------------------
   Emergency() {
     super();
     name=getClassName(this);
+     unlockCost=3000;
   } 
   @Override
     void action() {
@@ -966,6 +987,7 @@ class Redemption extends Ability {//--------------------------------------------
   Redemption() {
     super();
     name=getClassName(this);
+     unlockCost=3000;
   } 
   @Override
     void action() {
@@ -1023,6 +1045,7 @@ class Undo extends Ability {//--------------------------------------------------
   Undo() {
     super();
     name=getClassName(this);
+     unlockCost=3000;
   } 
   @Override
     void action() {
@@ -1086,6 +1109,7 @@ class Dash extends Ability {//--------------------------------------------------
   Dash() {
     super();
     name=getClassName(this);
+     unlockCost=2000;
   } 
   @Override
     void action() {

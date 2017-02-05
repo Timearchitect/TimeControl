@@ -1806,14 +1806,16 @@ class SinRocket extends Rocket implements Reflectable {//-----------------------
   }
 }
 class RCRocket extends Rocket implements Reflectable {//----------------------------------------- Bomb objects ----------------------------------------------------
-  float offsetAngle;
-  RCRocket(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _offsetAngle, float _vx, float _vy, int _damage, boolean _friendlyFire) {
+  float offsetAngle,acceleration;
+  boolean controlable;
+  RCRocket(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _offsetAngle, float _vx, float _vy, int _damage, boolean _friendlyFire,boolean _controlable) {
     super(_owner, _x, _y, _size, _projectileColor, _time, _angle, _vx, _vy, _damage, _friendlyFire);
     for (int i=0; i<2; i++) {
       particles.add(new Particle(int(x), int(y), random(10)-5+vx*0.5, random(10)-5+vy*0.5, int(random(20)+5), 800, 255));
     }
     offsetAngle=_offsetAngle;
     // friction=0.99;
+    controlable=_controlable;
   }
   @Override
     void update() {
@@ -1827,11 +1829,11 @@ class RCRocket extends Rocket implements Reflectable {//------------------------
       } else {
         particles.add(new Particle(int(x), int(y), 0, 0, int(random(25)+8), 800, owner.playerColor));
         timedScale =size-(size*(deathTime-stampTime)/time);
-        angle=owner.keyAngle+offsetAngle;
+        if(controlable)angle=owner.keyAngle+offsetAngle;
         x+=vx*timeBend;
         y+=vy*timeBend;
-        vx+=cos(radians(angle))*2;
-        vy+=sin(radians(angle))*2;
+        vx+=cos(radians(angle))*acceleration;
+        vy+=sin(radians(angle))*acceleration;
         vx*=friction;
         vy*=friction;
       }
@@ -2940,12 +2942,13 @@ class Shield extends Projectile implements Reflector { //-----------------------
 
 
 class Electron extends Projectile implements Reflectable {//----------------------------------------- Electron objects ----------------------------------------------------
-  boolean orbit=true;
+  boolean orbit=true, returning;
   int recoverEnergy=5;
   final float derailMultiplier=2.5;
   float orbitAngle, vx, vy, distance=25, maxDistance=200, orbitAngleSpeed=6;
-  Electron(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage) {
+  Electron(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage, boolean _returning) {
     super(_owner, _x, _y, _size, _projectileColor, _time);
+    returning=_returning;
     angle=_angle;
     orbitAngle=_angle;
     damage=_damage;
@@ -3027,20 +3030,25 @@ class Electron extends Projectile implements Reflectable {//--------------------
     } else { 
       enemy.hit(int(damage*derailMultiplier));
       enemy.pushForce(12*orbitAngleSpeed, angle);
-      deathTime+=3000;
-      owner.abilityList.get(0).energy+=recoverEnergy;
-      orbit=true;
-      projectiles.add( new CurrentLine(owner, int( enemy.cx), int( enemy.cx), 200, owner.playerColor, 200, owner.angle, 0, 0, 2));
-      particles.add(new ShockWave(int(x), int(y), 300, 16, 150, WHITE));
 
+      particles.add(new ShockWave(int(x), int(y), size*2, 16, 150, WHITE));
       for (int i=0; i<6; i++) {
         particles.add(new Particle(int(x), int(y), random(40)-20, random(40)-20, int(random(30)+10), 800, projectileColor));
       }
-      stroke(projectileColor);
-      strokeWeight(size);
-      line(x, y, owner.cx+cos(radians(orbitAngle))*distance, owner.cy+sin(radians(orbitAngle))*distance);
-      x=owner.cx;
-      y=owner.cy;
+      if (returning) {
+        owner.abilityList.get(0).energy+=recoverEnergy;
+        orbit=true;
+        projectiles.add( new CurrentLine(owner, int( enemy.cx), int( enemy.cx), 200, owner.playerColor, 200, owner.angle, 0, 0, 2));
+        deathTime+=3000;
+        stroke(projectileColor);
+        strokeWeight(size);
+        line(x, y, owner.cx+cos(radians(orbitAngle))*distance, owner.cy+sin(radians(orbitAngle))*distance);
+        x=owner.cx;
+        y=owner.cy;
+      } else { 
+        dead=true; 
+        deathTime=stampTime;   // dead on collision
+      }
     }
 
     // particles.add(new Flash(200, 32, 255));  

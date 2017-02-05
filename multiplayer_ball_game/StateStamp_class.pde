@@ -150,10 +150,21 @@ class StateStamp extends TimeStamp {  // save player
 }
 
 class AbilityStamp extends TimeStamp { //save player ability
-  float energy;
+  float energy, ammo;
   boolean active, channeling, cooling, regen, hold;
-
-  AbilityStamp(int _player, int _x, int _y, float _energy, boolean _active, boolean _channeling, boolean _cooling, boolean _regen, boolean _hold) {
+  AbilityStamp(Ability ability) {
+    super(ability.owner.index);
+    x=int(ability.owner.x);
+    y=int(ability.owner.y);
+    energy= ability.energy;
+    active=ability.active; 
+    channeling=ability.channeling;
+    cooling=ability.cooling; 
+    regen=ability.regen;
+    hold=ability.hold;
+    ammo=ability.ammo;
+  }
+  /*AbilityStamp(int _player, int _x, int _y, float _energy, boolean _active, boolean _channeling, boolean _cooling, boolean _regen, boolean _hold) {
     super(_player);
     x=_x;
     y=_y;
@@ -163,7 +174,7 @@ class AbilityStamp extends TimeStamp { //save player ability
     cooling=_cooling; 
     regen=_regen;
     hold=_hold;
-  }
+  }*/
 
   void display() {
     super.display();
@@ -185,6 +196,8 @@ class AbilityStamp extends TimeStamp { //save player ability
     }
   }
   void call() {
+    //println("call",ammo);
+    players.get(playerIndex).abilityList.get(0).ammo=ammo;
     players.get(playerIndex).abilityList.get(0).energy=energy;
     players.get(playerIndex).abilityList.get(0).regen=regen;
     players.get(playerIndex).abilityList.get(0).active=active;

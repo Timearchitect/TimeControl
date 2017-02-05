@@ -282,6 +282,7 @@ class TempReverse extends Particle {
   float  decay;
   TempReverse(int _time) {
     super( 0, 0, 0, 0, 0, _time, 255);
+    if(stampTime<_time)_time=int(stampTime);
     deathTime= millis()+_time;
     reverse=true;
     drawTimeSymbol();
@@ -742,7 +743,7 @@ class Text extends Particle {
   }
 
   void display() {
-    if (!dead) {
+    if (!dead ) {
       noStroke();
       switch(type) {
       case 1:
@@ -765,7 +766,7 @@ class Pic extends Particle {
   PImage pic;
   Player owner;
   //star.endShape(CLOSE);       // now call endShape(CLOSE);
-  Pic(Player _owner,PImage _pic, int _x, int _y, float _vx, float _vy, float _size, float _shrinkRate, int _time, color _particleColor, int _type) {
+  Pic(Player _owner, PImage _pic, int _x, int _y, float _vx, float _vy, float _size, float _shrinkRate, int _time, color _particleColor, int _type) {
     super( _x, _y, _vx, _vy, int(_size), _time, _particleColor);
     pic=_pic;
     type= _type;
@@ -773,7 +774,7 @@ class Pic extends Particle {
     offsetY=_y;
     shrinkRate=_shrinkRate;
     owner=_owner;
-    if(_type==1)follow=true;
+    if (_type==1)follow=true;
     opacity=255;
   }
 
@@ -801,13 +802,16 @@ class Pic extends Particle {
           y+=vy*timeBend;
         }
       }
+      if (stampTime>=deathTime) {
+        dead=true;
+      }
     }
   }
 
   void display() {
-    if (!dead) {
-      tint(owner.playerColor,opacity);
-    image(pic,x,y,size,size);
+    if (!dead && !owner.stealth) {
+      tint(owner.playerColor, opacity);
+      image(pic, x, y, size, size);
       noTint();
     }
   }
@@ -818,19 +822,19 @@ class Fragment extends Particle {
   float vAngle;
   PVector p1, p2, p3;
   int maxSize;
-  Fragment(int _x, int _y, float _vx, float _vy,float _vAngle, int _minSize, int _maxSize, int _time, color _particleColor) {
+  Fragment(int _x, int _y, float _vx, float _vy, float _vAngle, int _minSize, int _maxSize, int _time, color _particleColor) {
     super( _x, _y, _vx, _vy, _minSize, _time, _particleColor);
     vAngle=_vAngle;
-   // p1=new PVector(random(_minSize-_maxSize)+_minSize, random(_minSize-_maxSize)+_minSize);
+    // p1=new PVector(random(_minSize-_maxSize)+_minSize, random(_minSize-_maxSize)+_minSize);
     p1=new PVector(random(_minSize-_maxSize)+_minSize, 0);
-    p1.rotate(random(radians(280),radians(320)));
-   // p2=new PVector(random(_minSize-_maxSize)+_minSize, random(_minSize-_maxSize)+_minSize);
+    p1.rotate(random(radians(280), radians(320)));
+    // p2=new PVector(random(_minSize-_maxSize)+_minSize, random(_minSize-_maxSize)+_minSize);
     p2=new PVector(random(_minSize-_maxSize)+_minSize, 0);
-    p2.rotate(random(radians(160),radians(200)));
+    p2.rotate(random(radians(160), radians(200)));
     //p3=new PVector(random(_minSize-_maxSize)+_minSize, random(_minSize-_maxSize)+_minSize);
-     p3=new PVector(random(_minSize-_maxSize)+_minSize, 0);
-    p3.rotate(random(radians(40),radians(80)));
-   // println(p1.x, p1, y);
+    p3=new PVector(random(_minSize-_maxSize)+_minSize, 0);
+    p3.rotate(random(radians(40), radians(80)));
+    // println(p1.x, p1, y);
 
     opacity=255;
     x=_vx*_time*.06+_x;
@@ -866,7 +870,7 @@ class Fragment extends Particle {
   }
   void display() {
     if (!dead ) {  
-      fill(WHITE,opacity);
+      fill(WHITE, opacity);
       stroke(hue(particleColor), saturation(particleColor), brightness(particleColor)*S, opacity);
       strokeWeight(8);
       triangle(p1.x+x, p1.y+y, p2.x+x, p2.y+y, p3.x+x, p3.y+y);
