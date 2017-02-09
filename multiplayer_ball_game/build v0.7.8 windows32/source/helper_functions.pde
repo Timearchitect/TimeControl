@@ -181,15 +181,30 @@ static float  calcAngleBetween(Player target, Projectile from) {
   return degrees(atan2((target.cy-from.y), (target.cx-from.x)))%360;
 }
 
+
+void generateRandomAbilities(int index, AbilityType _abilityType) {
+  for (Player p : players) {      
+    if (p!=AI && !p.clone &&  !p.turret) {  // no turret or clone weapon switch
+      p.abilityList.get(index).reset();
+      p.abilityList.set(index, (_abilityType==AbilityType.ACTIVE)?new Random().randomize(abilityList):new Random().randomize(passiveList));
+
+      //abilities[i].owner=players.get(i);
+      p.abilityList.get(index).setOwner(p);
+      //p.ability= p.abilityList.get(0);
+      announceAbility( p, index);
+    }
+  }
+}
 void generateRandomAbilities(int index, Ability[] list) {
   for (Player p : players) {      
     if (p!=AI && !p.clone &&  !p.turret) {  // no turret or clone weapon switch
-      if (p.abilityList.size()-1>=index) {
-        p.abilityList.get(index).reset();
-        p.abilityList.set(index, new Random().randomize(list));
-        p.abilityList.get(index).setOwner(p);
-        announceAbility( p, index);
-      }
+      p.abilityList.get(index).reset();
+      p.abilityList.set(index, new Random().randomize(list));
+
+      //abilities[i].owner=players.get(i);
+      p.abilityList.get(index).setOwner(p);
+      //p.ability= p.abilityList.get(0);
+      announceAbility( p, index);
     }
   }
 }
@@ -197,12 +212,9 @@ void playerSetup() {
   for (int i=0; i< AmountOfPlayers; i++) {
     try {
       players.add(new Player(i, color((255/AmountOfPlayers)*i, 255, 255), int(random(width-playerSize*1)+playerSize), int(random(height-playerSize*1)+playerSize), playerSize, playerSize, playerControl[i][0], playerControl[i][1], playerControl[i][2], playerControl[i][3], playerControl[i][4], abilities[i]));
-      if (!perSelectedSkills) {               
-        generateRandomAbilities(1, passiveList);
-        generateRandomAbilities(0, abilityList);
-      }
-      if (players.get(i).mouse)players.get(i).FRICTION_FACTOR=0.11; //mouse
-    }
+       if (players.get(i).mouse)players.get(i).FRICTION_FACTOR=0.11; //mouse
+
+     }
     catch(Exception e ) {
       println(e);
     }

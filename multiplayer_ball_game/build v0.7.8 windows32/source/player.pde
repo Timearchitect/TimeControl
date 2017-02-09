@@ -13,11 +13,12 @@ class Player implements Cloneable {
   PVector coord, speed, accel, arrow;
   float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR, DEFAULT_ARMOR=0; 
   long invisStampTime;
-  boolean invis, freezeImmunity=true, reverseImmunity, fastforwardImmunity, slowImmunity , stationary,stealth,targetable=true;
+  boolean invis, freezeImmunity, reverseImmunity, fastforwardImmunity, slowImmunity , stationary,stealth,targetable=true;
   //Ability ability;  
   ArrayList<Ability> abilityList= new ArrayList<Ability>();
   color playerColor;
   Particle textParticle, iconParticle;
+;
 
   Player(int _index, color _playerColor, int _x, int _y, int _w, int _h, int _up, int _down, int _left, int _right, int _triggKey, Ability ..._ability) {
     FRICTION_FACTOR=DEFAULT_FRICTION;
@@ -130,7 +131,7 @@ class Player implements Cloneable {
       popMatrix();
 
       //s fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s);
-      if(abilityList.size()>0)displayAbilityEnergy(0);
+      displayAbilityEnergy(0);
       displayHealth();
       displayName();
 

@@ -1,4 +1,4 @@
-boolean pMousePressed;
+
 void mousePressed() {
   if(cheatEnabled)if(mouseButton==RIGHT)coins-=100;else coins+=100;
   try {
@@ -31,7 +31,6 @@ void mousePressed() {
       }
     }
   }
-
 }
 void mouseHold() {
   /*for (int i=0; i< players.size (); i++) {
@@ -52,6 +51,14 @@ void mouseHold() {
   }
 }
 void mouseReleased() {
+  /* for (int i=0; i< players.size (); i++) {
+   if (players.get(i).mouse &&(!reverse || players.get(i).reverseImmunity|| players.get(i).ability.meta)) { 
+   if (mouseButton==LEFT) {
+   players.get(i).holdTrigg=false;
+   players.get(i).ability.release();
+   }
+   }
+   }*/
   for (Player p : players) {
     if (p.mouse &&(!reverse || p.reverseImmunity|| p.abilityList.get(0).meta)) { 
       if (mouseButton==LEFT) {
@@ -61,5 +68,4 @@ void mouseReleased() {
       }
     }
   }
-
 }

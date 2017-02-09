@@ -1,6 +1,6 @@
 
 
-abstract class Ability implements Cloneable {
+class Ability implements Cloneable {
   AbilityType type=AbilityType.ACTIVE;
   String name="???";
   Player owner;  
@@ -8,7 +8,7 @@ abstract class Ability implements Cloneable {
   long cooldown;
   int cooldownTimer, unlockCost=1000, x, y;
   float energy=90, maxEnergy=100, activeCost=5, channelCost, deChannelCost, deactiveCost, maxCooldown, regenRate=0.1, ammo, maxAmmo, loadRate;
-  boolean active, channeling, cooling, hold, regen=true, meta, unlocked, deactivated, sellable=true, deactivatable=true;
+  boolean active, channeling, cooling, hold, regen=true, meta, unlocked,deactivated;
   Ability() { 
     icon=icons[8];
     //name=this.getClass().getSimpleName();
@@ -107,28 +107,7 @@ abstract class Ability implements Cloneable {
   }
 }
 
-class NoActive extends Ability {//---------------------------------------------------    HpRegen   ---------------------------------
 
-  NoActive() {
-    super();
-    sellable=false;
-   // deactivatable=false;
-    name=getClassName(this);
-    unlocked=true;
-  } 
-  /*@Override
-   void action() {
-   }
-   @Override
-   void press() {
-   }
-   @Override
-   void passive() {
-   }
-   @Override
-   void reset() {
-   }*/
-}
 
 class FastForward extends Ability { //---------------------------------------------------    FastForward   ---------------------------------
 
@@ -609,31 +588,34 @@ class ThrowDagger extends Ability {//-------------------------------------------
     }
   }
 }
-class Torpedo extends Ability implements AmmoBased {//---------------------------------------------------    Torpedo   ---------------------------------
-  final int damage=50, angleRecoil=115, projectileSize=60;
+class Torpedo extends Ability {//---------------------------------------------------    Torpedo   ---------------------------------
+  final int damage=45, angleRecoil=115;
+  int r;
   float accuracy=1, MODIFIED_ANGLE_FACTOR=0.2;
   Torpedo() {
     super();
     name=getClassName(this);
     activeCost=maxEnergy;
-    maxAmmo=2;
+    maxAmmo=1;
+    ammo=maxAmmo;
     cooldownTimer=240;
     regenRate=0.8;
-    unlockCost=500;
+    unlockCost=0;
     unlocked=true;
   } 
   @Override
     void action() {
     stamps.add( new AbilityStamp(this));
-    RCRocket RC= new RCRocket(owner, int( owner.cx), int(owner.cy), projectileSize, owner.playerColor, 2000, owner.angle, 0, cos(radians(owner.angle))*0, sin(radians(owner.angle))*0, damage, true, false);
+    RCRocket RC= new RCRocket(owner, int( owner.cx), int(owner.cy), 70, owner.playerColor, 2000, owner.angle, 0, cos(radians(owner.angle))*0, sin(radians(owner.angle))*0, damage, true, false);
     RC.blastRadius=300;
     RC.acceleration=4.2;
     projectiles.add(RC);
-    particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 30, 42, 65, WHITE));
-    owner.pushForce(-25, owner.angle);
+    particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 20, 32, 55, WHITE));
+    owner.pushForce(-20, owner.angle);
     owner.angle+=random(-angleRecoil, angleRecoil);
     owner.keyAngle=owner.angle;
     ammo--;
+    r=30;
   }
 
   @Override
@@ -649,40 +631,28 @@ class Torpedo extends Ability implements AmmoBased {//--------------------------
         enableCooldown();
         activate();
         regen=true;
+      } else {
+        r=70;
       }
     }
   }
   @Override
     void passive() {
-    strokeWeight(14);
-    //stroke(owner.playerColor);
-    stroke(BLACK);
-    noFill();
-    //fill(0);
-    line(owner.cx+cos(radians(owner.angle-140))*owner.radius-cos(radians(owner.angle))*+owner.w, owner.cy+sin(radians(owner.angle-140))*owner.radius-sin(radians(owner.angle))*+owner.w, owner.cx+cos(radians(owner.angle-140))*owner.radius+cos(radians(owner.angle))*+owner.radius, owner.cy+sin(radians(owner.angle-140))*owner.radius+sin(radians(owner.angle))*+owner.radius);
     strokeWeight(5);
-    if (ammo>0)triangle(owner.cx+cos(radians(owner.angle-140))*projectileSize+cos(radians(owner.angle))*+owner.w, owner.cy+sin(radians(owner.angle-140))*projectileSize+sin(radians(owner.angle))*+owner.w, owner.cx+cos(radians(owner.angle))*projectileSize+cos(radians(owner.angle))*+owner.w, owner.cy+sin(radians(owner.angle))*projectileSize+sin(radians(owner.angle))*+owner.w, owner.cx+cos(radians(owner.angle+140))*projectileSize+cos(radians(owner.angle))*+owner.w, owner.cy+sin(radians(owner.angle+140))*projectileSize +sin(radians(owner.angle))*+owner.w );
-    fill(BLACK);
-    if (ammo>1) {
-      textSize(40);
-      text(int(ammo), owner.cx+cos(radians(owner.angle))*+owner.w, owner.cy+sin(radians(owner.angle))*+owner.w);
-    }
-    // strokeWeight(5);
-    //  stroke(BLACK);
-    // fill(BLACK);
-    //ellipse(x, y, (, (size*(deathTime-stampTime)/time)-size );
-    // triangle(x+cos(radians(angle-140))*timedScale, y+sin(radians(angle-140))*timedScale, x+cos(radians(angle))*timedScale, y+sin(radians(angle))*timedScale, x+cos(radians(angle+140))*timedScale, y+sin(radians(angle+140))*timedScale  );
-    // noFill();
-
+    stroke(owner.playerColor);
+    fill(0);
+    for (int i=0; i< ammo; i++)rect(owner.cx-20, owner.cy+50, 40, 50);
     owner.ANGLE_FACTOR=MODIFIED_ANGLE_FACTOR;
   }
   void reload() {
-    owner.stop();
+    r=-30;
+    owner.vx*=.5;
+    owner.vy*=.5;
+    owner.ax*=.5;
+    owner.ay*=.5;
     particles.add(new ShockWave(int(owner.cx), int(owner.cy), 20, 24, 200, owner.playerColor));
     particles.add( new  Particle(int(owner.cx), int(owner.cy), 0, 0, int(owner.w)+50, 900, color(255, 0, 255)));
     ammo=maxAmmo;
-  }
-  void reloadCancel() {
   }
 }
 class Pistol extends Ability {//---------------------------------------------------    Pistol   ---------------------------------
@@ -1578,10 +1548,10 @@ class ElemetalLauncher extends Ability {//--------------------------------------
     particles.add( new  Particle(int(owner.cx), int(owner.cy), 0, 0, int(owner.w), 800, color(255, 0, 255)));
     switch(ammoType%maxAmmotype) {
     case 1:
-      Container waterRocket= new Rocket(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*shootSpeed+owner.vx, sin(radians(owner.angle))*shootSpeed+owner.vy, int(damage*0.6), false);
+      Container waterRocket= new Rocket(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*shootSpeed+owner.vx, sin(radians(owner.angle))*shootSpeed+owner.vy, damage, false);
       payload=new Containable[2];
-      payload[0]= new ChargeLaser(owner, 0, 0, 1000, owner.playerColor, 150, owner.angle+90, 10, damage*.3 ).parent(waterRocket); 
-      payload[1]= new ChargeLaser(owner, 0, 0, 1000, owner.playerColor, 150, owner.angle+90, -10, damage*.3 ).parent(waterRocket); 
+      payload[0]= new ChargeLaser(owner, 0, 0, 1000, owner.playerColor, 150, owner.angle+180, 20, damage*.4 ).parent(waterRocket); 
+      payload[1]= new ChargeLaser(owner, 0, 0, 1000, owner.playerColor, 150, owner.angle+180, -20, damage*.4 ).parent(waterRocket); 
 
       waterRocket.contains(payload);
       projectiles.add((Projectile)waterRocket);
@@ -1598,7 +1568,7 @@ class ElemetalLauncher extends Ability {//--------------------------------------
     case 3:
       Container rockRocket= new Rocket(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*shootSpeed*.5+owner.vx, sin(radians(owner.angle))*shootSpeed*.5+owner.vy, damage, false);
       payload=new Containable[1];
-      payload[0]= new Block(players.size(), AI, 0, 0, 200, 200, 150, new Armor()).parent(rockRocket);
+      payload[0]= new Block(players.size(), owner, 0, 0, 200, 200, 200, new Armor()).parent(rockRocket);
       rockRocket.contains(payload);
       projectiles.add((Projectile)rockRocket);
       break;
@@ -2378,7 +2348,7 @@ class AssaultBattery extends Ability {//----------------------------------------
     name=getClassName(this);
     activeCost=45;
     regenRate=0.19;
-    unlockCost=4750;
+    unlockCost=5000;
   } 
 
   @Override
@@ -2591,7 +2561,7 @@ class SemiAuto extends Battery implements AmmoBased {//-------------------------
   }
 }
 class MarbleLauncher extends Ability {//---------------------------------------------------    MissleLauncher   ---------------------------------
-  int interval, maxInterval=3, damage=7, offset=50, accuracy=10, count=0, maxCount=14, shootSpeed=35, duration=4500;
+  int interval, maxInterval=3, damage=8, offset=50, accuracy=10, count=0, maxCount=14, shootSpeed=35, duration=4000;
   float  MODIFIED_ANGLE_FACTOR=0.016;
 
   MarbleLauncher() {
@@ -2599,7 +2569,7 @@ class MarbleLauncher extends Ability {//----------------------------------------
     icon=icons[11];
     cooldownTimer=1200;
     name=getClassName(this);
-    activeCost=35;
+    activeCost=25;
     regenRate=0.12;
     unlockCost=5500;
   } 
@@ -2701,7 +2671,7 @@ class MissleLauncher extends Ability {//----------------------------------------
     name=getClassName(this);
     activeCost=35;
     regenRate=0.12;
-    unlockCost=3750;
+    unlockCost=4000;
   } 
 
   @Override
@@ -2813,7 +2783,7 @@ class AutoGun extends Ability {//-----------------------------------------------
     activeCost=12;
     channelCost=0.1;
     regenRate=0.18;
-    unlockCost=3000;
+    unlockCost=3500;
   } 
   @Override
     void action() {
@@ -2903,7 +2873,7 @@ class AutoGun extends Ability {//-----------------------------------------------
 class SeekGun extends Ability {//---------------------------------------------------    SeekGun   ---------------------------------
 
   float  MODIFIED_MAX_ACCEL=0.08, MODIFIED_ANGLE_FACTOR=0.05, count;
-  int damage=30, range=1000, minRange=400, maxSpanAngle=80;
+  int damage=28, range=1000, minRange=400, maxSpanAngle=80;
   float spanAngle=2, minAngle=1;
   ArrayList<Player> targets= new ArrayList<Player>() ;
   // int amountOfTargets;
@@ -3063,7 +3033,7 @@ class ThrowBoomerang extends Ability {//----------------------------------------
     activeCost=15;
     channelCost=0.1;
     recoveryEnergy=activeCost*0.9;
-    unlockCost=1250;
+    unlockCost=2500;
   } 
   @Override
     void action() {
@@ -3255,7 +3225,7 @@ class PhotonicPursuit extends Ability {//---------------------------------------
     activeCost=15;
     energy=85;
     r=200;
-    unlockCost=1750;
+    unlockCost=1500;
   } 
   @Override
     void action() {
@@ -3856,7 +3826,7 @@ class CloudStrike extends Ability {//-------------------------------------------
     activeCost=22;
     cooldownTimer=1400;
     channelCost=0.01;
-    unlockCost=3750;
+    unlockCost=4000;
   } 
   @Override
     void action() {
@@ -3991,7 +3961,7 @@ class TeslaShock extends TimeBomb {//-------------------------------------------
     regenRate=0.43;
     name=getClassName(this);
     activeCost=10;
-    unlockCost=2250;
+    unlockCost=2500;
   } 
   @Override
     void action() {
@@ -4165,7 +4135,7 @@ class FlameThrower extends Ability {//------------------------------------------
     projectileDamage=1;
     cooldownTimer=900;
     MODIFIED_ANGLE_FACTOR=0.035;
-    unlockCost=2750;
+    unlockCost=3000;
   } 
   void press() {
     super.press();
@@ -4514,7 +4484,7 @@ class Random extends Ability {//------------------------------------------------
     try {
       int count=0; 
       rA = list[int(random(list.length))].clone();
-      while ( !rA.unlocked || rA.deactivated &&count<300) { 
+      while ( !rA.unlocked && count<100) { 
         count++;
         rA = list[int(random(list.length))].clone();
         //println(rA.name);

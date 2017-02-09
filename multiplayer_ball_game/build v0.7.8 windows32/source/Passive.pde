@@ -1,14 +1,13 @@
 class NoPassive extends Ability {//---------------------------------------------------    HpRegen   ---------------------------------
-
+  float regenRate = 1;
+  int count;
   NoPassive() {
     super();
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlocked=true;
-    sellable=false;
-   // deactivatable=false;
   } 
- /* @Override
+  @Override
     void action() {
   }
   @Override
@@ -19,7 +18,7 @@ class NoPassive extends Ability {//---------------------------------------------
   }
   @Override
     void reset() {
-  }*/
+  }
 }
 class HpRegen extends Ability {//---------------------------------------------------    HpRegen   ---------------------------------
   float regenRate = 1;
@@ -58,21 +57,21 @@ class Suicide extends Ability {//-----------------------------------------------
     super();
     type=AbilityType.PASSIVE;
     name=getClassName(this);
-    unlockCost=250;
+    unlockCost=500;
   } 
   /*@Override
-   void action() {
-   }
-   @Override
-   void press() {
-   }
-   @Override
-   void passive() {
-   }
-   @Override
-   void reset() {
-   super.reset();
-   }*/
+    void action() {
+  }
+  @Override
+    void press() {
+  }
+  @Override
+    void passive() {
+  }
+  @Override
+    void reset() {
+    super.reset();
+  }*/
   @Override
     void onDeath() {
     if ((!reverse || owner.reverseImmunity)&&  owner.health<=0 && (!freeze || owner.freezeImmunity)) {
@@ -83,8 +82,7 @@ class Suicide extends Ability {//-----------------------------------------------
 class Reward extends Ability {//---------------------------------------------------    HpRegen   ---------------------------------
   //int damage=50;
   int bonus=1;
-  boolean drop;
-  Reward(int _bonus, boolean  drop) {
+  Reward(int _bonus) {
     super();
     bonus=_bonus;
     type=AbilityType.NATIVE;
@@ -92,26 +90,25 @@ class Reward extends Ability {//------------------------------------------------
     unlockCost=500;
   } 
   /*@Override
-   void action() {
-   }
-   @Override
-   void press() {
-   }
-   @Override
-   void passive() {
-   }
-   @Override
-   void reset() {
-   super.reset();
-   }*/
+    void action() {
+  }
+  @Override
+    void press() {
+  }
+  @Override
+    void passive() {
+  }
+  @Override
+    void reset() {
+    super.reset();
+  }*/
   @Override
     void onDeath() {
     if ((!reverse || owner.reverseImmunity)&&  owner.health<=0 && (!freeze || owner.freezeImmunity)) {
-      // projectiles.add( new Bomb(owner, int( owner.cx), int(owner.cy), 160, owner.playerColor, 1000, owner.angle, owner.vx, owner.vy, damage, false));
-      //if (drop) projectiles.add(new CoinBall(AI, owner.cx, owner.cy, 60, GOLD, 10000, 0, 0, 0, 50, true));
-      //else coins+=bonus;
+     // projectiles.add( new Bomb(owner, int( owner.cx), int(owner.cy), 160, owner.playerColor, 1000, owner.angle, owner.vx, owner.vy, damage, false));
+     coins+=bonus;
       particles.add( new Text("+"+bonus, int( owner.cx), int(owner.cy), 0, 0, 100, 0, 2000, WHITE, 1));
-      particles.add( new Text("+"+bonus, int( owner.cx), int(owner.cy), 0, 0, 140, 0, 2000, color(50, 255, 255), 0));
+      particles.add( new Text("+"+bonus, int( owner.cx), int(owner.cy), 0, 0, 150, 0, 2000, color(50,255,255), 0));
     }
   }
 }
@@ -233,7 +230,7 @@ class Gravitation extends Ability {//-------------------------------------------
   float dragForce =-0.4;
   Gravitation() {
     super();
-    type=AbilityType.PASSIVE;
+          type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=500;
   } 
@@ -368,7 +365,7 @@ class SuppressFire extends Ability {//------------------------------------------
     super();
     type=AbilityType.PASSIVE;
     name=getClassName(this);
-    unlockCost=1750;
+    unlockCost=2000;
   } 
   @Override
     void action() {
@@ -515,7 +512,7 @@ class Trail extends Ability {//-------------------------------------------------
     super();
     type=AbilityType.PASSIVE;
     name=getClassName(this);
-    unlockCost=500;
+    unlockCost=1000;
   } 
   @Override
     void action() {
@@ -527,7 +524,7 @@ class Trail extends Ability {//-------------------------------------------------
     void hold() {
     if (cooldown>6) {
       cooldown=0;
-      Blast b =new  Blast(owner, int( owner.cx), int(owner.cy), 0, 30, owner.playerColor, 2700, owner.angle, 3, 3);
+      Blast b =new  Blast(owner, int( owner.cx), int(owner.cy), 0, 30, owner.playerColor, 2500, owner.angle, 2, 2);
       projectiles.add(b);
     }
   }
@@ -569,7 +566,7 @@ class PainPulse extends Ability {//---------------------------------------------
     if (cooldown>200) {
       cooldown=0;
       for (int i=0; i<360; i+=45) {
-        projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 15, 40, owner.playerColor, 350, i, 1, 12));
+        projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 15, 40, owner.playerColor, 350, i, 1, 10));
       }
     }
   }
@@ -602,9 +599,9 @@ class Nova extends Ability {//--------------------------------------------------
   int count, cooldown;
   Nova() {
     super();
-    type=AbilityType.PASSIVE;
+          type=AbilityType.PASSIVE;
     name=getClassName(this);
-    unlockCost=1250;
+    unlockCost=1500;
   } 
   @Override
     void action() {
@@ -623,8 +620,8 @@ class Nova extends Ability {//--------------------------------------------------
     if (cooldown>50) {
       cooldown=0;
 
-      projectiles.add( new Slash(owner, int( owner.cx+sin(owner.keyAngle)*60), int(owner.cy+cos(owner.keyAngle)*60), 40, owner.playerColor, 180, owner.angle-100, -24, 110, sin(owner.keyAngle)*10, cos(owner.keyAngle)*10, 4, true));
-      projectiles.add( new Slash(owner, int( owner.cx+sin(owner.keyAngle)*60), int(owner.cy+cos(owner.keyAngle)*60), 40, owner.playerColor, 180, owner.angle-280, -24, 110, sin(owner.keyAngle)*10, cos(owner.keyAngle)*10, 4, true));
+      projectiles.add( new Slash(owner, int( owner.cx+sin(owner.keyAngle)*60), int(owner.cy+cos(owner.keyAngle)*60), 40, owner.playerColor, 180, owner.angle-100, -24, 110, sin(owner.keyAngle)*10, cos(owner.keyAngle)*10, 3, true));
+      projectiles.add( new Slash(owner, int( owner.cx+sin(owner.keyAngle)*60), int(owner.cy+cos(owner.keyAngle)*60), 40, owner.playerColor, 180, owner.angle-280, -24, 110, sin(owner.keyAngle)*10, cos(owner.keyAngle)*10, 3, true));
     }
   }
   @Override
@@ -658,7 +655,7 @@ class BulletCutter extends Ability {//------------------------------------------
     super();
     type=AbilityType.PASSIVE;
     name=getClassName(this);
-    unlockCost=2250;
+    unlockCost=2000;
   } 
   @Override
     void action() {
@@ -760,7 +757,7 @@ class Boost extends Ability {//-------------------------------------------------
       charge=0;
       projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 0, 60, owner.playerColor, 350, 0, 1, 10));
 
-      owner.pushForce(50, owner.keyAngle);
+      owner.pushForce(45, owner.keyAngle);
       projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 10, 20, owner.playerColor, 450, owner.keyAngle, 1, 10));
     }
     charge=int(charge*.5);
@@ -794,7 +791,7 @@ class Glide extends Ability {//-------------------------------------------------
     super();
     type=AbilityType.PASSIVE;
     name=getClassName(this);
-    unlockCost=1000;
+    unlockCost=1500;
   } 
   @Override
     void action() {
@@ -1006,7 +1003,7 @@ class Emergency extends Ability {//---------------------------------------------
     super();
     type=AbilityType.PASSIVE;
     name=getClassName(this);
-    unlockCost=2750;
+    unlockCost=3000;
   } 
   @Override
     void action() {
@@ -1066,7 +1063,7 @@ class Redemption extends Ability {//--------------------------------------------
   Redemption() {
     super();
     name=getClassName(this);
-    unlockCost=2750;
+    unlockCost=3000;
   } 
   @Override
     void action() {
@@ -1125,7 +1122,7 @@ class Undo extends Ability {//--------------------------------------------------
     super();
     type=AbilityType.PASSIVE;
     name=getClassName(this);
-    unlockCost=2750;
+    unlockCost=3000;
   } 
   @Override
     void action() {

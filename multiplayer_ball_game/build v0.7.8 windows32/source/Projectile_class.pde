@@ -1246,105 +1246,6 @@ class HealBall extends Projectile implements Containable {//--------------------
     vy=vel.y;
   }
 }
-class CoinBall extends Projectile implements Containable {//----------------------------------------- HealBall objects ----------------------------------------------------
-
-  float  friction=0.95;
-  long timer;
-  int flick, interval=400, amount;
-  boolean friendlyFire;
-  Projectile parent;
-  CoinBall(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _amount, boolean _friendlyFire) {
-    super(_owner, _x, _y, _size, _projectileColor, _time);
-    angle=_angle;
-    amount=_amount;
-    vx= _vx;
-    vy= _vy;
-    friendlyFire=_friendlyFire;
-  }
-
-  void update() {
-    if (!dead && !freeze) { 
-      flick=int(random(255));
-      if (reverse) {
-        x-=vx*timeBend;
-        y-=vy*timeBend;
-        vx/=friction;
-        vy/=friction;
-        angle-=0.4*timeBend;
-      } else {
-        x+=vx*timeBend;
-        y+=vy*timeBend;
-        vx*=friction;
-        vy*=friction;
-        angle+=0.4*timeBend;
-        if (timer+interval<stampTime) {
-          timer=stampTime;
-          particles.add( new  Particle(int(x+cos(radians(random(360)))*random(size)), int(y+sin(radians(random(360)))*random(size)), 0, 0, int(random(50)), 1000, WHITE));
-        }
-      }
-    }
-  }
-
-  void display() {
-    if (!dead) { 
-      strokeWeight(int(sin(radians(angle*30))*10+10));
-      // stroke((friendlyFire)? BLACK:color(owner.playerColor));
-      // fill((friendlyFire)? BLACK:color(owner.playerColor));
-      //ellipse(x, y, (size*(deathTime-stampTime)/time)-size, (size*(deathTime-stampTime)/time)-size );
-      //noFill();
-      // stroke(flick);
-      stroke(540, 255, 100);
-      fill(50, 255, 255, sin(radians(angle*4))*100+100);
-      ellipse(x, y, sin(radians(angle*4))*size, size);
-      /*if ((deathTime-stampTime)<=100)size=400;
-       else size=50;*/
-    }
-  }
-
-
-  @Override
-    void hit(Player p) {    // when fizzle
-    if ( !dead) {         
-      coins+=amount;
-      particles.add( new Text("+"+amount, int( owner.cx), int(owner.cy), 0, 0, 100, 0, 2000, WHITE, 1));
-      particles.add( new Text("+"+amount, int( owner.cx), int(owner.cy), 0, 0, 140, 0, 2000, color(50, 255, 255), 0));
-      for (int i=0; i<6; i++) {
-        particles.add( new  Particle(int(p.cx+cos(radians(random(360)))*random(p.radius*2)), int(p.cy+sin(radians(random(360)))*random(p.radius*2)), 0, 0, int(random(50)+20), 1000, GOLD));
-      }
-      particles.add(new ShockWave(int(x), int(y), int(size*0.4), 32, 150, p.playerColor));
-      particles.add(new Flash(200, 12, p.playerColor));
-      // shakeTimer+=damage*.2;
-      dead=true;
-      deathTime=stampTime;
-    }
-  }
-
-  @Override
-    void fizzle() {    // when fizzle
-    if ( !dead) {      
-      for (int i=0; i<6; i++) {
-        particles.add( new  Particle(int(x+cos(radians(random(360)))*random(size*2)), int(y+sin(radians(random(360)))*random(size*2)), 0, 0, int(random(50)+20), 1200, WHITE));
-      }
-    }
-  }
-
-  Containable parent(Container _parent) {
-    parent=(Projectile)_parent;
-    return this;
-  }
-  void unWrap() {
-    resetDuration();
-    x+=parent.x;
-    y+=parent.y;
-    PVector vel=new PVector(vx, vy);
-    PVector pVel=new PVector(parent.vx, parent.vy);
-    vel.rotate(parent.angle);
-    vel.add(pVel);
-    vx=vel.x;
-    vy=vel.y;
-  }
-}
-
 class Bomb extends Projectile implements Reflectable, Containable, Container {//----------------------------------------- Bomb objects ----------------------------------------------------
 
   float  friction=0.95;
@@ -1922,12 +1823,9 @@ class RCRocket extends Rocket implements Reflectable {//------------------------
       if (reverse) {
         x-=vx*timeBend;
         y-=vy*timeBend;
-
         vx/=friction;
         vy/=friction;
-        vx-=cos(radians(angle))*acceleration;
-        vy-=sin(radians(angle))*acceleration;
-        if (controlable)angle=owner.keyAngle+offsetAngle;
+        angle=owner.keyAngle+offsetAngle;
       } else {
         particles.add(new Particle(int(x), int(y), 0, 0, int(random(25)+8), 800, owner.playerColor));
         timedScale =size-(size*(deathTime-stampTime)/time);
@@ -3123,10 +3021,10 @@ class Electron extends Projectile implements Reflectable {//--------------------
       enemy.pushForce(8*orbitAngleSpeed, orbitAngle+90);
       deathTime=stampTime;   // dead on collision
       dead=true;
-      for (int i=0; i<10; i++) {
+      for (int i=0; i<16; i++) {
         particles.add(new Particle(int(x), int(y), random(20)-10, random(20)-10, int(random(20)+5), 800, 255));
       }
-      for (int i=0; i<4; i++) {
+      for (int i=0; i<8; i++) {
         particles.add(new Particle(int(x), int(y), random(40)-20, random(40)-20, int(random(30)+10), 800, projectileColor));
       }
     } else { 
@@ -3134,7 +3032,7 @@ class Electron extends Projectile implements Reflectable {//--------------------
       enemy.pushForce(12*orbitAngleSpeed, angle);
 
       particles.add(new ShockWave(int(x), int(y), size*2, 16, 150, WHITE));
-      for (int i=0; i<4; i++) {
+      for (int i=0; i<6; i++) {
         particles.add(new Particle(int(x), int(y), random(40)-20, random(40)-20, int(random(30)+10), 800, projectileColor));
       }
       if (returning) {
@@ -3517,16 +3415,14 @@ class AbilityPack extends Projectile implements Containable {//-----------------
       ability.setOwner(p);
       if (adding) {
         p.abilityList.add(ability);
-      } else {
+      } else
         if (ability.type==AbilityType.ACTIVE) {
           p.abilityList.set(0, ability);
           announceAbility( p, 0 );
         }
-        if (ability.type==AbilityType.PASSIVE) {
-          if (p.abilityList.size()<=1) p.abilityList.add(ability);
-          p.abilityList.set(1, ability);
-          announceAbility( p, 1 );
-        }
+      if (ability.type==AbilityType.PASSIVE) {
+        p.abilityList.set(1, ability);
+        announceAbility( p, 1 );
       }
     }
   }

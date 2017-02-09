@@ -27,7 +27,7 @@ final color BGcolor=color(100);
 PFont font;
 PGraphics GUILayer;
 PShader  Blur;
-boolean cleanStart=true, perSelectedSkills=false, RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true, inGame;
+boolean cleanStart=false, RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true, inGame;
 final float flashAmount=0.5, shakeAmount=0.5;
 int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight, coins;
@@ -36,7 +36,7 @@ GameType gameMode=GameType.MENU;
 final int AmountOfPlayers=3; // start players
 final float DIFFICULTY_LEVEL=1.0;
 
-final int WHITE=color(255), GREY=color(172), BLACK=color(0), GOLD=color(255, 220, 0);
+final int WHITE=color(255), GREY=color(172), BLACK=color(0);
 final int speedFactor= 2;
 final float slowFactor= 0.3;
 final String version="0.7.8";
@@ -113,7 +113,7 @@ void setup() {
     // new Freeze(), 
     // new Reverse(), 
     // new Slow(), 
-    new NoActive(), 
+
     new ThrowDagger(), 
     new Revolver(), 
     new ForceShoot(), 
@@ -170,11 +170,9 @@ void setup() {
 
     new MarbleLauncher(), 
     new Torpedo()
-
   };
 
   passiveList = new Ability[]{
-    new NoPassive(), 
     new Repel(), 
     new Gravitation(), 
     new Speed(), 
@@ -199,8 +197,8 @@ void setup() {
     new BulletCutter(), 
     new Dash(), 
 
-    new Guardian()
-
+    new Guardian(), 
+    new NoPassive()
     //new Redemption(), // buggy on survival
     //new Undo() // buggy on survival
   };
@@ -499,33 +497,6 @@ void draw() {
     popMatrix();
 
     image(GUILayer, 0, 0);
-
-    pushStyle();
-    textAlign(LEFT);
-    textSize(12);
-    strokeWeight(20);
-
-    for (Player p : players) {
-      if (p.index>-1 && p.index<5) {
-        for (Ability a : p.abilityList) {
-          if (a.type==AbilityType.ACTIVE) {
-            noStroke();
-            fill(WHITE);
-            rect(100+300*p.index+30, height-65-30*p.abilityList.indexOf(a), a.energy, 30);
-          }
-          fill(BLACK);
-          text(a.name, 100+300*p.index+40, height-40-30*p.abilityList.indexOf(a));
-          image(a.icon, 100+300*p.index+15, height-50-30*p.abilityList.indexOf(a), 30, 30);
-        }
-        stroke(BLACK);
-        line(100+300*p.index, height-20, 100+130+300*p.index, height-20);
-        stroke(p.playerColor);
-        float percent = ((float)p.health/p.maxHealth)*130;
-        if (p.health>0)line(100+300*p.index, height-20, 100+percent+300*p.index, height-20);
-      }
-    }
-    popStyle();
-
     if (cheatEnabled)displayInfo();
     else displayClock();
 
@@ -550,5 +521,4 @@ void draw() {
     }
   }// origo
   // prevMillis=millis();
-  pMousePressed=mousePressed;
 }

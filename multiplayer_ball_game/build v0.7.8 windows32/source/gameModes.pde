@@ -21,9 +21,9 @@ void spawningSetup() {
     , 3000, 0, true, 1));
   spawnList.add(new Spawner(new Object[]{new AbilityPack(AI, new Random().randomize(passiveList), int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 30000, 0, 0, 0, false, true)}
     , 3000, 0, true, 1));
-  spawnList.add(new Spawner(new Object[]{new AbilityPack(AI, new Random().randomize(passiveList), int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 30000, 0, 0, 0, true, true)}
+  spawnList.add(new Spawner(new Object[]{new AbilityPack(AI, new Random().randomize(passiveList), int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 30000, 0, 0, 0, false, true)}
     , 3000, 0, true, 1));
-  spawnList.add(new Spawner(new Object[]{new AbilityPack(AI, new Random().randomize(passiveList), int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 30000, 0, 0, 0, true, true)}
+  spawnList.add(new Spawner(new Object[]{new AbilityPack(AI, new Random().randomize(passiveList), int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 30000, 0, 0, 0, false, true)}
     , 3000, 0, true, 1));
   /*  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.5), int(playerSize*0.5), 10, 150, 1, new Bazooka())}
    , 1000));*/
@@ -61,39 +61,34 @@ void spawningSetup() {
   spawnList.add(new Spawner(new Object[]{new HomingMissile(AI, halfWidth, halfHeight, 50, BLACK, 2000, 0, 0, 0, 10), new HomingMissile(AI, halfWidth, halfHeight, 50, BLACK, 2000, 0, 0, 0, 10)}
     , 15000, 100/DIFFICULTY_LEVEL, halfWidth, halfHeight, false, 50*DIFFICULTY_LEVEL));
 
-  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.75), int(playerSize*0.75), 10, 100, 1, new AutoGun(), new  Reward(3, false))}
+  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.75), int(playerSize*0.75), 10, 100, 1, new AutoGun(), new  Reward(2))}
     , 20000, 4000/DIFFICULTY_LEVEL, true, 10*DIFFICULTY_LEVEL));
 
-  spawnList.add(new Spawner(new Object[]{new Drone(players.size(), halfWidth, halfHeight, int(playerSize*0.75), int(playerSize*0.75), 10, 200, new AutoGun(), new  Reward(3, false))}
+  spawnList.add(new Spawner(new Object[]{new Drone(players.size(), halfWidth, halfHeight, int(playerSize*0.75), int(playerSize*0.75), 10, 200, new AutoGun(), new  Reward(2))}
     , 35000, 12000/DIFFICULTY_LEVEL, true, 3*DIFFICULTY_LEVEL));
 
-  spawnList.add(new Spawner(new Object[]{new Turret(players.size(), AI, halfWidth, halfHeight, playerSize, playerSize, 50, new TimeBomb(), new  Reward(3, false))}
+  spawnList.add(new Spawner(new Object[]{new Turret(players.size(), AI, halfWidth, halfHeight, playerSize, playerSize, 50, new TimeBomb(), new  Reward(3))}
     , 55000, 14000/DIFFICULTY_LEVEL, true, 5*DIFFICULTY_LEVEL));
-  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.75), int(playerSize*0.5), 10, 50, 1, new Pistol(), new  Reward(5, false))}
+  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.75), int(playerSize*0.5), 10, 50, 1, new Pistol(), new  Reward(4))}
     , 70000, halfWidth, halfHeight));
-  spawnList.add(new Spawner(new Object[]{new Turret(players.size(), AI, halfWidth, halfHeight, playerSize, playerSize, 100, new Bazooka(), new  Reward(4, false))}
+  spawnList.add(new Spawner(new Object[]{new Turret(players.size(), AI, halfWidth, halfHeight, playerSize, playerSize, 100, new Bazooka(), new  Reward(4))}
     , 85000, 15000/DIFFICULTY_LEVEL, true, 3*DIFFICULTY_LEVEL));
   spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.75), int(playerSize*0.75), 30, 150, 2, new Suicide())}
     , 90000, 8000/DIFFICULTY_LEVEL, halfWidth, halfHeight, true, 30));
-  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.75), int(playerSize*0.75), 10, 120, 1, new SemiAuto(), new  Reward(8, false))}
+  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.75), int(playerSize*0.75), 10, 120, 1, new SemiAuto(), new  Reward(5))}
     , 130000, 10000/DIFFICULTY_LEVEL, true, 5*DIFFICULTY_LEVEL));
-  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.75), int(playerSize*0.75), 10, 120, 1, new Pistol(), new  Reward(5, false))}
+  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.75), int(playerSize*0.75), 10, 120, 1, new Pistol(), new  Reward(4))}
     , 150000, 10000/DIFFICULTY_LEVEL, true, 5*DIFFICULTY_LEVEL));
 
-  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1), int(playerSize*1.2), 20, 440, 1, new Torpedo(),new MpRegen(), new Torpedo(), new  Reward(10, false))}
-    , 220000, 10000/DIFFICULTY_LEVEL, true, 2*DIFFICULTY_LEVEL));
-  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1), int(playerSize*1.2), 20, 440, 1, new Torpedo(),new MpRegen(), new Torpedo(), new  Reward(10, false))}
-    , 270000, 10000/DIFFICULTY_LEVEL, true, 2*DIFFICULTY_LEVEL));
-  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1), int(playerSize*1.2), 20, 440, 1, new Torpedo(), new Torpedo(),new MpRegen(), new  Reward(10, false))}
-    , 320000, 10000/DIFFICULTY_LEVEL, true, 2*DIFFICULTY_LEVEL));
+  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1), int(playerSize*1), 20, 240, 1, new Torpedo(), new  Reward(5))}
+    , 220000, 10000/DIFFICULTY_LEVEL, true, 4*DIFFICULTY_LEVEL));
+  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1), int(playerSize*1), 20, 240, 1, new Torpedo(), new  Reward(5))}
+    , 270000, 10000/DIFFICULTY_LEVEL, true, 4*DIFFICULTY_LEVEL));
+  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1), int(playerSize*1), 20, 240, 1, new Torpedo(), new  Reward(5))}
+    , 320000, 10000/DIFFICULTY_LEVEL, true, 4*DIFFICULTY_LEVEL));
 
- spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1), int(playerSize*1.2), 20, 500, 2, new Shotgun(),new MpRegen(), new Blink(), new  Reward(15, false))}
-    , 350000, 10000/DIFFICULTY_LEVEL, true, 2*DIFFICULTY_LEVEL));
- spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1), int(playerSize*0.8), 20, 500, 1 ,new Combo(),new Stealth(),new Combo(),new MpRegen(),new Ram(), new  Reward(15, false))}
+  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1.75), int(playerSize*1.75), 15, int(400*DIFFICULTY_LEVEL), 1, new Torpedo(), new Torpedo(), new MissleLauncher(), new  Reward(10))}
     , 380000, 10000/DIFFICULTY_LEVEL, true, 1));
-
-  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1.75), int(playerSize*1.75), 15, int(1000*DIFFICULTY_LEVEL), 1, new MarbleLauncher(), new HpRegen(), new Torpedo(), new Torpedo(), new MissleLauncher(), new  Reward(25, false))}
-    , 400000, 10000/DIFFICULTY_LEVEL, true, 1));
 }
 
 
@@ -112,34 +107,17 @@ void spawningReset() {
   freezeTime=0;
   fallenTime=0;
   stampTime=0;
-
-   for (int i=players.size()-1; i>= AmountOfPlayers; i--) {
-     players.remove(i);
-   }   
-   
-  for (Player p : players) {
-    p.abilityList.clear();
-    p.abilityList.add(new Random().randomize(abilityList));
-    p.abilityList.get(0).setOwner(p);
-    p.ally=0;
-  }
-
-
- /* for (Player p : players) {    
-    if (p!=AI&&!p.clone &&  !p.turret) {  // no turret or clone respawn
-      p.reset();
-      announceAbility( p, 0);
-    } else {
-      p.dead=true;
-      p.state=0;
-    }
-  }*/
+  for (int i=players.size()-1; i>= AmountOfPlayers; i--) {
+    players.get(i).abilityList.clear();
+    players.remove(i);
+  }   
+  for (Player p : players)  p.ally=0;
   players.add(AI);
 
   spawningSetup();
   particles.add(new  Text("Survival", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
   particles.add(new Gradient(10000, 0, 500, 0, 0, 500, 0.5, 0, GREY));
-    generateRandomAbilities(1, passiveList);
+  generateRandomAbilities(1, passiveList);
   generateRandomAbilities(0, abilityList);
   /*for (Spawner s : spawnList) {
    s.dead=false;

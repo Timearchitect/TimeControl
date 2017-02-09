@@ -23,11 +23,11 @@ void displayClock() {
   text("version: "+version, halfWidth, 20);
 }
 void screenShake() {
-  if (shakeTimer>0) 
-    shake(shakeTimer);
-   else 
+  if (shakeTimer>0) {
+    shake(2*shakeTimer);
+  } else {
     shakeTimer=0;
-   // shake screen
+  } // shake screen
 }
 void shake(int amount) {
   if (!noShake) {
@@ -230,7 +230,6 @@ void mouseDot() {
 
 void resetGame() {
   gameOver=false;
-      shakeTimer=0;
   if (cleanStart) {
     clearGame();
   }
@@ -249,8 +248,20 @@ void resetGame() {
       }
     }
 
+
+
     break;
   case SURVIVAL:
+    for (Player p : players) {    
+      if (p!=AI&&!p.clone &&  !p.turret) {  // no turret or clone respawn
+        p.reset();
+        announceAbility( p, 0);
+      } else {
+        p.dead=true;
+        p.state=0;
+      }
+    }
+
     spawningReset();
     break;
   case PUZZLE:
@@ -328,14 +339,12 @@ void announceAbility(Player p, int index ) {
   if (p.textParticle!=null)particles.remove( p.textParticle );
   if (p.iconParticle!=null)particles.remove( p.iconParticle );
   //p.abilityList.get(index).icon
-  if (p.abilityList.size()-1>index) {
-    p.iconParticle= new Pic(p, p.abilityList.get(index).icon, int(0), int(-150), 0, 0, 100, 0, 3000, p.playerColor, 1);
-    particles.add(new Pic(p, p.abilityList.get(index).icon, int(0), int(-150), 0, 0, 100, -10, 300, p.playerColor, 1));
-    particles.add( p.iconParticle);
+  p.iconParticle= new Pic(p, p.abilityList.get(index).icon, int(0), int(-150), 0, 0, 100, 0, 3000, p.playerColor, 1);
+  particles.add(new Pic(p, p.abilityList.get(index).icon, int(0), int(-150), 0, 0, 100, -10, 300, p.playerColor, 1));
+  particles.add( p.iconParticle);
 
-    p.textParticle = new Text(p, p.abilityList.get(index).name, 0, -75, 30, 0, 3000, BLACK, 0);
-    particles.add( p.textParticle );
-  }
+  p.textParticle = new Text(p, p.abilityList.get(index).name, 0, -75, 30, 0, 3000, BLACK, 0);
+  particles.add( p.textParticle );
 }
 
 void menuUpdate() {
@@ -413,33 +422,17 @@ void shopUpdate() {
     image(selectedAbility.icon, width-200, height-200, 300, 300);
     rectMode(CENTER);
     if (mouseX>width/2-900*.5&&width/2+900*.5>mouseX&&mouseY>height-150-200*.5&&height-150+200*.5>mouseY) {
-      fill((selectedAbility.unlocked||coins<selectedAbility.unlockCost)?0:90, 255, 255);
+      fill(90, 255, 255);
       rect(width/2, height-150, 900, 200);
       textSize(100);
       fill(BLACK);
-      if ( !selectedAbility.sellable) {
-        text("cant be sold", width/2, height-150);
-      } else if (selectedAbility.unlocked) {      
-        text("SELL -50%", width/2, height-150);
-        if (mousePressed && !pMousePressed) {
-          selectedAbility.unlocked=false;
-          coins+=int(selectedAbility.unlockCost*.5);
-          selectedAbility=null;
-          saveProgress();
-          background(255);
-        }
-      } else if ( coins>=selectedAbility.unlockCost) {
-        text("BUY", width/2, height-150);
-        if (mousePressed && !pMousePressed) {
-          selectedAbility.unlocked=true;
-          coins-=selectedAbility.unlockCost;
-          selectedAbility=null;
-          saveProgress();
-          background(255);
-        }
-      } else {
-        textSize(50);
-        text("not enough money", width/2, height-150);
+      text("BUY", width/2, height-150);
+      if (mousePressed) {
+        selectedAbility.unlocked=true;
+        coins-=selectedAbility.unlockCost;
+        selectedAbility=null;
+        saveProgress();
+        background(255);
       }
     } else {
       fill(90, 150, 255);
@@ -502,25 +495,15 @@ class Button {
   void update() {
     if (mouseX>x-size*.5&&x+size*.5>mouseX&&mouseY>y-size*.5&&y+size*.5>mouseY) {
       pcolor=color(170, 100, 255);
-      if (mousePressed && !pMousePressed) {
-        for (Button b : bList) {
-          b.selected=false;
-        }
-        selected=true;
-        selectedAbility=a;
-        if (a.unlocked && a.deactivatable) {
-          a.deactivated=!a.deactivated;
-          int active=0;
-          for(Ability as:abilityList){
-            if(!as.deactivated && as.unlocked )active++;
+      if (mousePressed ) {
+        if ( coins>=a.unlockCost) {
+          for (Button b : bList) {
+            b.selected=false;
           }
-          if(active<1){abilityList[0].deactivated=false;abilityList[0].unlocked=true;}
-          active=0;
-           for(Ability as:passiveList){
-            if(!as.deactivated  && as.unlocked )active++;
-          }
-          if(active<1){passiveList[0].deactivated=false;passiveList[0].unlocked=true;}
+          selected=true;
+          selectedAbility=a;
         }
+        if (a.unlocked)a.deactivated=!a.deactivated;
       }
     } else {
       pcolor=color( 255);
