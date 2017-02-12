@@ -25,9 +25,9 @@ void displayClock() {
 void screenShake() {
   if (shakeTimer>0) 
     shake(shakeTimer);
-   else 
-    shakeTimer=0;
-   // shake screen
+  else 
+  shakeTimer=0;
+  // shake screen
 }
 void shake(int amount) {
   if (!noShake) {
@@ -230,7 +230,7 @@ void mouseDot() {
 
 void resetGame() {
   gameOver=false;
-      shakeTimer=0;
+  shakeTimer=0;
   if (cleanStart) {
     clearGame();
   }
@@ -253,6 +253,10 @@ void resetGame() {
   case SURVIVAL:
     spawningReset();
     break;
+  case BOSSRUSH:
+    bossRushSetup() ;
+    break;
+
   case PUZZLE:
     particles.add(new Text("Puzzle", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
     particles.add(new Gradient(8000, 0, 500, 0, 0, 500, 0.5, 0, GREY));
@@ -344,57 +348,65 @@ void menuUpdate() {
 
   background(0);
   textSize(50);
-  if (mousePressed&&mouseX>0 && width/2>mouseX) {
-    if (mouseY>0 && height/2>mouseY) {
-      gameMode=GameType.SURVIVAL;
-      playerSetup();
-      controllerSetup();
-      resetGame();
-    }
+  for (ModeButton m : mList) {
+    m.update();
+    m.display();
   }
-  fill(255, 255, 150);
-  rect(0, 0, width/2, height/2);
-  if (mousePressed&&mouseX>width/2 && width>mouseX) {
-    if (mouseY>0 && height/2>mouseY) {
-      gameMode=GameType.BRAWL;
-      playerSetup();
-      controllerSetup();
-      resetGame();
-    }
-  }
-  fill(60, 255, 150);
-  rect(width/2, 0, width/2, height/2);
-  if (mousePressed&&mouseX>0 && width/2>mouseX) {
-    if (mouseY>height/2 && height>mouseY) {
-      gameMode=GameType.WILDWEST;
-      playerSetup();
-      controllerSetup();
-      resetGame();
-    }
-  }
-  fill(120, 255, 150);
-  rect(0, height/2, width/2, height/2);
-  if (mousePressed&&mouseX> width/2 && width>mouseX) {
-    if (mouseY>height/2 && height>mouseY) {
-      gameMode=GameType.SHOP;
-      //playerSetup();
-      //controllerSetup();
-      resetGame();
-    }
-  }
-  fill(180, 255, 150);
-  rect( width/2, height/2, width/2, height/2);
 
-  fill(0, 0, 0);
-  text(GameType.SURVIVAL.toString(), width/4, height/4);
-  text(GameType.BRAWL.toString(), width/2+width/4, height/4);
-  text(GameType.WILDWEST.toString(), width/4, height/2+height/4);
-  text(GameType.SHOP.toString(), width/2+width/4, height/2+height/4);
-  text(coins +" coins", width/2+width/4, height/2+height/3);
+  /*
+  if (mousePressed&&mouseX>0 && width/2>mouseX) {
+   if (mouseY>0 && height/2>mouseY) {
+   gameMode=GameType.SURVIVAL;
+   playerSetup();
+   controllerSetup();
+   resetGame();
+   }
+   }
+   fill(255, 255, 150);
+   rect(0, 0, width/2, height/2);
+   if (mousePressed&&mouseX>width/2 && width>mouseX) {
+   if (mouseY>0 && height/2>mouseY) {
+   gameMode=GameType.BRAWL;
+   playerSetup();
+   controllerSetup();
+   resetGame();
+   }
+   }
+   fill(60, 255, 150);
+   rect(width/2, 0, width/2, height/2);
+   if (mousePressed&&mouseX>0 && width/2>mouseX) {
+   if (mouseY>height/2 && height>mouseY) {
+   gameMode=GameType.WILDWEST;
+   playerSetup();
+   controllerSetup();
+   resetGame();
+   }
+   }
+   fill(120, 255, 150);
+   rect(0, height/2, width/2, height/2);
+   if (mousePressed&&mouseX> width/2 && width>mouseX) {
+   if (mouseY>height/2 && height>mouseY) {
+   gameMode=GameType.SHOP;
+   //playerSetup();
+   //controllerSetup();
+   resetGame();
+   }
+   }
+   fill(180, 255, 150);
+   rect( width/2, height/2, width/2, height/2);
+   */
+  /*fill(0, 0, 0);
+   text(GameType.SURVIVAL.toString(), width/4, height/4);
+   text(GameType.BRAWL.toString(), width/2+width/4, height/4);
+   text(GameType.WILDWEST.toString(), width/4, height/2+height/4);
+   text(GameType.SHOP.toString(), width/2+width/4, height/2+height/4);
+   text(coins +" coins", width/2+width/4, height/2+height/3);*/
 }
 ArrayList<String> save=  new ArrayList<String>();
 ArrayList<Button> bList= new ArrayList<Button>();
+ArrayList<ModeButton> mList= new ArrayList<ModeButton>();
 Ability selectedAbility ; 
+
 void shopUpdate() {
   background(255);
   int i=0;
@@ -408,6 +420,7 @@ void shopUpdate() {
     b.display();
   }
 
+
   if (selectedAbility!=null) { 
 
     image(selectedAbility.icon, width-200, height-200, 300, 300);
@@ -418,8 +431,10 @@ void shopUpdate() {
       textSize(100);
       fill(BLACK);
       if ( !selectedAbility.sellable) {
+        textSize(60);
         text("cant be sold", width/2, height-150);
-      } else if (selectedAbility.unlocked) {      
+      } else if (selectedAbility.unlocked) {  
+        textSize(70);
         text("SELL -50%", width/2, height-150);
         if (mousePressed && !pMousePressed) {
           selectedAbility.unlocked=false;
@@ -442,7 +457,11 @@ void shopUpdate() {
         text("not enough money", width/2, height-150);
       }
     } else {
-      fill(90, 150, 255);
+      if (selectedAbility.unlocked && !selectedAbility.deactivated) fill(150, 150, 255);  
+      else if (selectedAbility.unlocked ) fill(150, 50, 255);
+      else if (selectedAbility.unlockCost<=coins) fill(90, 150, 255);
+      else fill(0, 150, 255);
+
       textSize(40);
       rect(width/2, height-150, 900, 200);
       fill(BLACK);
@@ -491,7 +510,8 @@ class Button {
   Ability a;
   int x, y, size;
   color pcolor=  color(255);
-  Boolean selected=false;
+  Boolean selected=false, hover;
+
   Button(Ability _ability, int _x, int _y, int _size) {
     a= _ability;
     size=_size;
@@ -511,15 +531,21 @@ class Button {
         if (a.unlocked && a.deactivatable) {
           a.deactivated=!a.deactivated;
           int active=0;
-          for(Ability as:abilityList){
-            if(!as.deactivated && as.unlocked )active++;
+          for (Ability as : abilityList) {
+            if (!as.deactivated && as.unlocked )active++;
           }
-          if(active<1){abilityList[0].deactivated=false;abilityList[0].unlocked=true;}
+          if (active<1) {
+            abilityList[0].deactivated=false;
+            abilityList[0].unlocked=true;
+          }
           active=0;
-           for(Ability as:passiveList){
-            if(!as.deactivated  && as.unlocked )active++;
+          for (Ability as : passiveList) {
+            if (!as.deactivated  && as.unlocked )active++;
           }
-          if(active<1){passiveList[0].deactivated=false;passiveList[0].unlocked=true;}
+          if (active<1) {
+            passiveList[0].deactivated=false;
+            passiveList[0].unlocked=true;
+          }
         }
       }
     } else {
@@ -541,6 +567,9 @@ class Button {
       fill((a.unlockCost>coins)?240:0);
       text(a.unlockCost, x, y+75);
     } else if (a.deactivated) {
+      fill(0, 100, 255);
+      stroke(0, 255, 255);
+      rect(x, y, size, size);
       tint(0, 255, 255);
       image(a.icon, x, y, size, size);
       fill(0, 255, 255);
@@ -553,5 +582,41 @@ class Button {
     }
     text(a.name, x, y+60);
     rectMode(CORNER);
+  }
+}
+
+class ModeButton extends Button {
+  GameType type;
+  int w, h;
+  ModeButton(GameType _type, int _x, int _y, int _w, int _h, color _color) {
+    super(null, _x, _y, 0);
+    pcolor=_color;
+    w=_w;
+    h=_h;
+    type =_type;
+  }
+  void update() {
+    if (mouseX>x&&x+w>mouseX&&mouseY>y&&y+h>mouseY) {
+      hover=true;
+      if (mousePressed && !pMousePressed) {
+        gameMode=type;
+        playerSetup();
+        controllerSetup();
+        resetGame();
+      }
+    } else hover=false;
+  }
+
+  void display() {
+
+    fill(pcolor, (hover)?255:150);
+    stroke(pcolor);
+    rect(x, y, w, h);
+    tint(pcolor);
+    //image(a.icon, x, y, size, size);
+    //text(a.name, x, y+60);
+
+    fill(0, 0, 0);
+    text(type.toString(), x+w*.5, y+h*.5);
   }
 }

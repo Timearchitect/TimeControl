@@ -8,7 +8,6 @@ class Turret extends Player implements Containable {
   String abilityShortName;
 
   Turret(int _index, Player _owner, int _x, int _y, int _w, int _h, int _health, Ability ..._ability) {
-
     super( _index, _owner.playerColor, _x, _y, _w, _h, 999, 999, 999, 999, 999, _ability) ;
     owner=_owner;
     this.ally=_owner.ally;
@@ -22,7 +21,6 @@ class Turret extends Player implements Containable {
   }
   Turret(int _index, int _x, int _y, int _w, int _h, int _health, Ability ..._ability) { // nseutral
     super( _index, BLACK, _x, _y, _w, _h, 999, 999, 999, 999, 999, _ability) ;
-
     owner=null;
     this.ally=-1;
     turret=true;
@@ -639,8 +637,8 @@ class Drone extends Player {
 
     //}
   }
-  void control(int dir) {
-  }
+  /* void control(int dir) {
+   }*/
   /* void pushForce(float amount, float angle) {
    if (!stationary) super.pushForce( amount, angle);
    }
@@ -661,7 +659,6 @@ class FollowDrone extends Drone {
 
   Player target;
 
-
   FollowDrone(int _index, Player _owner, int _x, int _y, int _w, int _h, int speed, int _health, int _type, Ability ..._ability) {
     super( _index, _owner, _x, _y, _w, _h, speed, _health, _ability) ;
     owner=_owner;
@@ -680,7 +677,6 @@ class FollowDrone extends Drone {
   }
   FollowDrone(int _index, int _x, int _y, int _w, int _h, int speed, int _health, int _type, Ability ..._ability) {
     super( _index, _x, _y, _w, _h, speed, _health, _ability) ;
-
     type=_type;
     damage=5;
     armor=-10;
@@ -764,7 +760,7 @@ class FollowDrone extends Drone {
     }
     switch(type) {
     case 2:
-      target = seek(this, 2000);
+      target = seek(this, 2200);
       if (target!=null) {
         angle=angleAgainst(int(x), int(y), int(target.x), int(target.y));
         keyAngle=angle;
@@ -781,8 +777,46 @@ class FollowDrone extends Drone {
           for (Ability a : this.abilityList)a.release();
       } else wait++;
       break;
+    case 3:  // faster
+      target = seek(this, 2500);
+      if (target!=null) {
+        angle=angleAgainst(int(x), int(y), int(target.x), int(target.y));
+        keyAngle=angle;
+      }
+      pushForce(0.5, angle);
+      //control(2);
+      if (wait>130) {
+        for (Ability a : this.abilityList) { 
+          a.press();
+          a.hold();
+          wait=1;
+        }
+        wait+=int(random(35));
+        if (random(100)<1)
+          for (Ability a : this.abilityList)a.release();
+      } else wait++;
+      break;
+    case 4:  // sniper Boss
+      target = seek(this, 4000);
+      if (target!=null) {
+         angle=angleAgainst(int(x), int(y), int(target.x), int(target.y));  
+        keyAngle=angle;
+      }
+      pushForce(-0.05, angle);
+      //control(2);
+      if (wait>130) {
+        for (Ability a : this.abilityList) { 
+          if(!a.active)a.press();
+          a.hold();
+          //wait=1;
+        }
+        wait+=int(random(10));
+        if (random(100)<1)
+          for (Ability a : this.abilityList)a.release();
+      } else wait++;
+      break;
     default:
-      target = seek(this, 1500);
+      target = seek(this, 2000);
       if (target!=null) {
         angle=angleAgainst(int(x), int(y), int(target.x), int(target.y));
       }
@@ -796,8 +830,8 @@ class FollowDrone extends Drone {
       } else wait++;
     }
   }
-  void control(int dir) {
-  }
+  /*  void control(int dir) {
+   }*/
   /* void pushForce(float amount, float angle) {
    //if (!stationary) super.pushForce( amount, angle);
    }

@@ -2,7 +2,7 @@ enum AbilityType {
   ACTIVE, PASSIVE, NATIVE, GLOBAL
 }
 enum GameType {
-  BRAWL, SURVIVAL, PUZZLE, WILDWEST, SHOP, MENU
+  BRAWL, SURVIVAL, PUZZLE, WILDWEST, SHOP, MENU,BOSSRUSH
 }
 static String getClassName(Object o) {
   return o.getClass().getSimpleName();

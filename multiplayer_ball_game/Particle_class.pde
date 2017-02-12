@@ -110,6 +110,10 @@ class ShockWave extends Particle {
       } else {
         size+=sizeRate*timeBend;
         opacity-=halfSizeRate*timeBend;
+        if (opacity<=0) {
+          dead=true;
+          deathTime=stampTime;
+        }
       }
     }
   }
@@ -282,7 +286,7 @@ class TempReverse extends Particle {
   float  decay;
   TempReverse(int _time) {
     super( 0, 0, 0, 0, 0, _time, 255);
-    if(stampTime<_time)_time=int(stampTime);
+    if (stampTime<_time)_time=int(stampTime);
     deathTime= millis()+_time;
     reverse=true;
     drawTimeSymbol();
@@ -548,7 +552,10 @@ class Spark extends Particle {
         x+=vx*timeBend;
         y+=vy*timeBend;
       }
-      if (size<=0)dead=true;
+      if (size<=0) {
+        dead=true;
+        deathTime=stampTime;
+      }
     }
   }
 

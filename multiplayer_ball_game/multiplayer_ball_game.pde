@@ -27,8 +27,9 @@ final color BGcolor=color(100);
 PFont font;
 PGraphics GUILayer;
 PShader  Blur;
-boolean cleanStart=true, perSelectedSkills=false, RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true, inGame;
-final float flashAmount=0.5, shakeAmount=0.5;
+boolean cleanStart=true, perSelectedSkills=true, RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true, inGame;
+boolean gradualCleaning=true;
+final float flashAmount=0.5, shakeAmount=1.5;
 int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight, coins;
 //int gameMode=0;
@@ -50,7 +51,7 @@ static int playersAlive; // amount of players alive
 static Player AI;
 final int offsetX=1250, offsetY=-50;//final int offsetX=950, offsetY=100;
 static int shakeTimer, shakeX=0, shakeY=0;
-static float F=1, S=1, timeBend=1, zoom=0.8;//0.7;
+static float F=1, S=1, timeBend=1, zoom=0.7, tempZoom=1.0, tempOffsetX=0, tempOffsetY=0;//0.7;
 //int keyCooldown[]= new int[AmountOfPlayers];
 final int keyResponseDelay=30;  // eventhe refreashrate equal to arduino devices
 final char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='7';
@@ -94,8 +95,11 @@ int playerControl[][]= {
  }
  */
 void setup() {
+
   fullScreen(P3D);
   imageMode(CENTER);
+  textAlign(CENTER, CENTER);
+
   //size(displayWidth, displayHeight, P3D);
   font= loadFont("PressStart2P-Regular-28.vlw");
   Blur= loadShader("blur.glsl");
@@ -242,9 +246,15 @@ void setup() {
   catch (Exception e) {
     println(e);
   }
+
+  mList.add( new ModeButton(GameType.BRAWL, 0, 0, 400, 600, color(255, 0, 0)));
+  mList.add( new ModeButton(GameType.SURVIVAL, 400, 0, 400, 600, color(255, 255, 0)));
+  mList.add( new ModeButton(GameType.WILDWEST, 800, 0, 400, 600, color(0, 255, 0)));
+  mList.add( new ModeButton(GameType.SHOP, 1200, 0, 400, 600, color(0, 255, 255)));
+  mList.add( new ModeButton(GameType.BOSSRUSH, 1600, 0, 400, 600, color(0, 0, 255)));
   println("loaded save ... abilities!");
   abilities= new Ability[][]{ 
-  /* player 1 */    new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
+  /* player 1 */    new Ability[]{new DeployTurret(), new Random().randomize(passiveList)}, 
   /* player 2 */    new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
   /* player 3 mouse */    new Ability[]{new  Random().randomize(abilityList), new  Random().randomize(passiveList)}, 
   /* player 4 */    new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
@@ -328,31 +338,7 @@ void setup() {
   AI.reverseImmunity=false;
   AI.slowImmunity=false;
   AI.fastforwardImmunity=false;
-  /*switch(gameMode) {
-   case BRAWL:
-   particles.add(new Text("Brawl", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
-   particles.add(new Gradient(8000, 0, 500, 0, 0, 500, 0.5, 0, GREY));
-   break;
-   case SURVIVAL:
-   for (Player p : players) p.ally=0;
-   players.add(AI);
-   //spawningSetup();
-   spawningReset();
-   break;
-   case PUZZLE:
-   break;
-   case WILDWEST:
-   players.add(AI);
-   players.add(new Block(players.size(), AI, 200, 200, 200, 200, 999, new Armor()));
-   players.add(new Block(players.size(), AI, width-400, 200, 200, 200, 999, new Armor()));
-   players.add(new Block(players.size(), AI, width-400, height-400, 200, 200, 999, new Armor()));
-   players.add(new Block(players.size(), AI, 200, height-400, 200, 200, 999, new Armor()));
-   
-   players.add(new Block(players.size(), AI, width/2-50,0, 100, 100, 499, new Armor()));
-   players.add(new Block(players.size(), AI,  width/2-50,height-100, 100, 100, 499, new Armor()));
-   
-   break;
-   }*/
+  
   resetGame();
 }
 void stop() {
@@ -361,7 +347,18 @@ void stop() {
 }
 
 void draw() {
-
+  if (cheatEnabled && (gameMode!=GameType.MENU || gameMode!=GameType.SHOP ) && stampTime>500) {    
+    //tempOffsetX=(tempZoom*zoom)*(width)-(tempZoom*zoom)*players.get(0).cx-(tempZoom*zoom)*(width*.75);
+    //tempOffsetY=(tempZoom*zoom)*(height)-(tempZoom*zoom)*players.get(0).cy-(tempZoom*zoom)*(height*.75);
+    tempOffsetX=-tempZoom*zoom*players.get(mouseSelectedPlayerIndex).cx+tempZoom*zoom*width*(.5/(tempZoom*zoom));//
+    tempOffsetY=-tempZoom*zoom*players.get(mouseSelectedPlayerIndex).cy+tempZoom*zoom*height*(.5/(tempZoom*zoom));//
+    tempZoom=(float)mouseX/width+1;
+  } else {
+    tempZoom=1;
+   // zoom=.8;
+    tempOffsetX=-tempZoom*zoom*width*.5+tempZoom*zoom*width*(.5/(tempZoom*zoom));//
+    tempOffsetY=-tempZoom*zoom*height*.5+tempZoom*zoom*height*(.5/(tempZoom*zoom));//
+  }
   background(BGcolor);
   addMillis=millis()-prevMillis;
   prevMillis=millis();
@@ -414,8 +411,10 @@ void draw() {
     // println("forward"+forwardTime);
     // println("reverse"+reversedTime);
     pushMatrix();
-    translate(width*(1-zoom)*.5, height*(1-zoom)*.5);
-    scale(zoom, zoom);
+    // translate(width*(1-zoom)*.5+tempOffsetX, height*(1-zoom)*.5+tempOffsetY);
+    translate(tempOffsetX, tempOffsetY);
+
+    scale(zoom*tempZoom, zoom*tempZoom);
 
     //noStroke()
     stroke(BLACK);
@@ -430,6 +429,7 @@ void draw() {
       projectiles.get(i).update();  
       projectiles.get(i).display();
       projectiles.get(i).revert();
+      if (gradualCleaning&&!reverse  &&  projectiles.get(i).deathTime+10000<stampTime) projectiles.remove(i);
     }
 
 
@@ -440,6 +440,7 @@ void draw() {
       particles.get(i).update();  
       particles.get(i).display();
       particles.get(i).revert();
+      if (gradualCleaning &&!reverse &&  particles.get(i).deathTime+5000<stampTime) particles.remove(i);
     }
 
     //-----------------------  USB ------------------------
@@ -519,7 +520,7 @@ void draw() {
         }
         stroke(BLACK);
         line(100+300*p.index, height-20, 100+130+300*p.index, height-20);
-        stroke(p.playerColor);
+        stroke((p.playerColor==BLACK)?WHITE:p.playerColor);
         float percent = ((float)p.health/p.maxHealth)*130;
         if (p.health>0)line(100+300*p.index, height-20, 100+percent+300*p.index, height-20);
       }
@@ -545,10 +546,15 @@ void draw() {
     case MENU:
       menuUpdate();
       break;
+    case BOSSRUSH:
+      bossRushSpawning();
+
+      break;
     default:
       break;
     }
   }// origo
   // prevMillis=millis();
   pMousePressed=mousePressed;
+
 }

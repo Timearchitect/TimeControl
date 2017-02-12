@@ -1,4 +1,4 @@
-final int TARGETABLE=0,STATIONARY=1,INVIS=2,STEALTH=3;
+final int TARGETABLE=0, STATIONARY=1, INVIS=2, STEALTH=3;
 
 class Player implements Cloneable {
   PShape arrowSVG = loadShape("arrow.svg");
@@ -13,7 +13,7 @@ class Player implements Cloneable {
   PVector coord, speed, accel, arrow;
   float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR, DEFAULT_ARMOR=0; 
   long invisStampTime;
-  boolean invis, freezeImmunity=true, reverseImmunity, fastforwardImmunity, slowImmunity , stationary,stealth,targetable=true;
+  boolean invis, freezeImmunity, reverseImmunity, fastforwardImmunity, slowImmunity, stationary, stealth, targetable=true;
   //Ability ability;  
   ArrayList<Ability> abilityList= new ArrayList<Ability>();
   color playerColor;
@@ -21,10 +21,10 @@ class Player implements Cloneable {
 
   Player(int _index, color _playerColor, int _x, int _y, int _w, int _h, int _up, int _down, int _left, int _right, int _triggKey, Ability ..._ability) {
     FRICTION_FACTOR=DEFAULT_FRICTION;
-    if (_up==888) { 
+    if (_up==888) {  // mouse Handicap
       mouse=true;
       FRICTION_FACTOR=0.045;
-      maxHealth=400;
+      maxHealth=250;
       health=maxHealth;
     }
     index=_index;
@@ -116,7 +116,8 @@ class Player implements Cloneable {
       stroke((freeze && !freezeImmunity)?255:0);
       strokeWeight(2);
       fill(255, 0, 255-deColor*0.5, 50+deColor);
-      textAlign(CENTER, CENTER);
+      //textAlign(CENTER, CENTER);
+
       //textMode(CENTER);
       //rect(x, y, w, h);
       ellipse(cx, cy, w, h);
@@ -130,7 +131,7 @@ class Player implements Cloneable {
       popMatrix();
 
       //s fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s);
-      if(abilityList.size()>0)displayAbilityEnergy(0);
+      if (abilityList.size()>0)displayAbilityEnergy(0);
       displayHealth();
       displayName();
 
@@ -233,10 +234,14 @@ class Player implements Cloneable {
         ay+=-MAX_ACCEL*bend;
         //accel.set(accel.x, accel.y-MAX_ACCEL*bend);
         break;
-      case 2: // hold
+      case 2: // hold  / forward
+        ax+=cos(radians(angle))*(MAX_ACCEL*bend);
+        ay+=sin(radians(angle))*(MAX_ACCEL*bend);
         //ay=0;
         break;
-      case 3: // none
+      case 3: // none/ backwards
+        ax-=cos(radians(angle))*(MAX_ACCEL*bend);
+        ay-=sin(radians(angle))*(MAX_ACCEL*bend);
         break;
       case 4: // left
         // vx+=-0.0;
@@ -401,7 +406,7 @@ class Player implements Cloneable {
     state=2;
     hit=true;
     for (Ability a : this.abilityList) {
-      a.onHit();
+      a.wallHit();
     }
     particles.add(new Particle(int(cx), int(cy), random(-10, 10)+vx*0.5, random(-10, 10)+vy*0.5, int(random(5, 20)), 500, playerColor));
   }

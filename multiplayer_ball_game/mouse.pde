@@ -16,18 +16,17 @@ void mousePressed() {
     println(e);
   }
   if (cheatEnabled) {
-    spawn(new HomingMissile(AI, mouseX, mouseY, 70, BLACK, 5000, 0, 0, 0, 10));
+
+    //spawn(new HomingMissile(AI, mouseX, mouseY, 70, BLACK, 5000, 0, 0, 0, 10));
 
     // float X=(mouseX*zoom)+(width*(1-zoom)*mouseX);
     // float Y=(mouseY*zoom)+(height*(1-zoom)*mouseY);
-    float X=mouseX;
-    float Y=mouseY;
-    ellipse(X, Y, 200, 200);
+    ellipse((float)mouseX, (float)mouseY, 200, 200);
     for (int i=0; i<players.size(); i++) {
-      if (!players.get(i).dead && dist(players.get(i).cx, players.get(i).cy, X, Y)<100) {
-
+      if (!players.get(i).dead && dist(players.get(i).cx, players.get(i).cy, mouseX, mouseY)<100) {
+        println(i);
         mouseSelectedPlayerIndex=i;
-        particles.add( new Text("player "+(i+1)+" selected", int(X), int(Y-75), 0, 0, 40, 0, 500, color(players.get(i).playerColor), 1));
+        particles.add( new Text("player "+(i+1)+" selected", int(mouseX), int(mouseY-75), 0, 0, 40, 0, 500, color(players.get(i).playerColor), 1));
       }
     }
   }

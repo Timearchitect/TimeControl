@@ -2,6 +2,7 @@ void keyPressed() {
   if (key==27) {   // ESC disable to EXIT() show pausescreen instead 
     if (gameMode==GameType.MENU) {
     } else { 
+      cheatEnabled=false;
       gameMode=GameType.MENU;        
       clearGame();  
       key=0;
