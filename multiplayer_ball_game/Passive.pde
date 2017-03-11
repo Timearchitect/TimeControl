@@ -45,19 +45,19 @@ class HpRegen extends Ability {//-----------------------------------------------
   @Override
     void passive() {
     if (!owner.stealth) {
+
+      count++;
       noFill();
       stroke(owner.playerColor);
       strokeWeight(1);
-      ellipse(owner.cx, owner.cy, 200, 200);
-      count++;
-
 
 
       if (count%interval==0 && owner.maxHealth>owner.health ) {
         //if (existInList(Poison.class, owner.buffList)) {
-          existInList(Buff.class,owner.buffList,Poison.class); //poison
+        if (!existInList(owner.buffList, Poison.class)) { //poison
           owner.health += regenRate;
-        //}
+          ellipse(owner.cx, owner.cy, 200, 200);
+        }
       }
     }
   }
@@ -370,10 +370,10 @@ class Static extends Ability {//------------------------------------------------
   @Override
     void passive() {
     if (!owner.stealth) {
+      beginShape();
       noFill();
       stroke(owner.playerColor);
       strokeWeight(2);
-      beginShape();
       for (int i=0; i<360; i+=60) {
         vertex(owner.cx+sin(radians(i))*175, owner.cy+cos(radians(i))*175);
       }
@@ -415,10 +415,11 @@ class SuppressFire extends Ability {//------------------------------------------
   @Override
     void passive() {
     if (!owner.stealth) {
+      beginShape();
       noFill();
       stroke(owner.playerColor);
       strokeWeight(2);
-      beginShape();
+
       for (int i=0; i<360; i+=72.5) {
         vertex(owner.cx+sin(radians(i))*150, owner.cy+cos(radians(i))*150);
       }
@@ -563,10 +564,10 @@ class Trail extends Ability {//-------------------------------------------------
   @Override
     void passive() {
     if (!owner.stealth) {
+      beginShape();
       noFill();
       stroke(owner.playerColor);
       strokeWeight(2);
-      beginShape();
       for (int i=0; i<360; i+=20) {
         vertex(owner.cx+sin(radians(i))*150, owner.cy+cos(radians(i))*150);
       }

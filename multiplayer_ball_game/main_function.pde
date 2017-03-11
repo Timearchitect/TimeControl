@@ -33,8 +33,8 @@ void shake(int amount) {
   if (!noShake) {
     // int shakeX=0, shakeY=0;
     if (!freeze) {
-      shakeX=int(random(amount)-amount*0.5);
-      shakeY=int(random(amount)-amount*0.5);
+      shakeX=int(random(amount)-amount*.5);
+      shakeY=int(random(amount)-amount*.5);
       shakeTimer--;
     }
     translate( shakeX*shakeAmount, shakeY*shakeAmount);
@@ -63,7 +63,6 @@ void checkPlayerVSProjectileColloision() {
 
     try {
       for (Projectile o : projectiles) {    
-
         for (Player p : players) {      
           if (p.ally!=o.ally && !p.dead && !o.dead ) { // && o.playerIndex!=p.ally
             //if (dist(o.x, o.y, p.cx, p.cy)<playerSize) { //old collision
@@ -78,6 +77,7 @@ void checkPlayerVSProjectileColloision() {
     }
     catch(Exception e) {
       println(e +" onmain projectile ");
+      background(255,0,0);
     }
   }
 }
@@ -87,13 +87,13 @@ void checkProjectileVSProjectileColloision() {
       for (Projectile p2 : projectiles) {      
         if (p2.ally!=p1.ally && !p2.dead && !p1.dead ) { //  && p1!=p2
           if (p1 instanceof  Reflectable  && p2 instanceof Reflector) {
-            if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*0.5+p2.size*0.5) {
+            if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*.5+p2.size*.5) {
               ((Reflectable)p1).reflect(p2.angle, p2.owner);
               ((Reflector)p2).reflecting();
             }
           }
           if (p1 instanceof  Destroyable  && p2 instanceof Destroyer) {
-            if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*0.5+p2.size*0.5) {
+            if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*.5+p2.size*.5) {
               ((Destroyable)p1).destroy(p2);
               ((Destroyer)p2).destroying(p1);
             }
@@ -233,8 +233,13 @@ void resetGame() {
   if (cleanStart) {
     clearGame();
   }
+  if (RandomSkillsOnDeath) {
+    generateRandomAbilities(1, passiveList, true);
+    generateRandomAbilities(0, abilityList, true);
+  }
   switch(gameMode) {
   case BRAWL:
+
     particles.add(new Text("Brawl", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
     particles.add(new Gradient(8000, 0, 500, 0, 0, 500, 0.5, 0, GREY));
 
@@ -343,6 +348,10 @@ void clearGame() {
   if (!noFlash)background(255);
   for (int i =players.size()-1; i>= 0; i--) {
     //players.get(i).holdTrigg=true;
+    players.get(i).buffList.clear();
+    /*for (Ability a: players.get(i).abilityList){
+      players.get(i).abilityList.remove(a);
+    }*/
     if (players.get(i).turret || players.get(i).clone) players.remove( players.get(i));
   }
 }
@@ -441,12 +450,11 @@ Ability selectedAbility ;
 
 void shopUpdate() {
   background(255);
-  int i=0;
+  //int i=0;
   textSize(40);
   text(coins +" coins", halfWidth, 70);
-  textSize(10);
 
-
+  textSize(8);
   for (Button b : bList) {
     b.update();
     b.display();
@@ -522,15 +530,15 @@ void loadProgress() throws Exception {
   int i=0;
   for (Ability a : abilityList) {
     a.unlocked=parseBoolean(parseInt(s[i]));   
-    
-    bList.add(new Button(a, int(120+(i*120)%(width-220)), int(160+int(i*120/(width-220))*140), 80));
+
+    bList.add(new Button(a, int(120+(i*110)%(width-220)), int(160+int(i*110/(width-220))*140), 80));
     //  println(parseBoolean(parseInt(s[i])));
     i++;
   }
 
   for (Ability a : passiveList) {
     a.unlocked=parseBoolean(parseInt(s[i]));
-    bList.add(new Button(a, int(120+(i*120)%(width-220)), int(160+int(i*120/(width-220))*140), 80));
+    bList.add(new Button(a, int(120+(i*110)%(width-220)), int(160+int(i*110/(width-220))*140), 80));
     i++;
   }
   coins=parseInt(s[i]);

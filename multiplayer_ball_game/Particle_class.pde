@@ -96,7 +96,6 @@ class RParticles extends Particle {
 
 class ShockWave extends Particle {
   int sizeRate, halfSizeRate;
-  ;
   ShockWave(int _x, int _y, int _size, int _sizeRate, int _time, color _particleColor) {
     super( _x, _y, 0, 0, _size, _time, _particleColor);
     sizeRate=_sizeRate;
@@ -169,6 +168,39 @@ class MShockWave extends ShockWave {
   }
 }
 
+//-------------------------------------------------------------//    ShockWave    //-------------------------------------------------------------------------
+
+class Rectwave extends Particle {
+  int sizeRate, halfSizeRate;
+  Rectwave(int _x, int _y, int _size, int _sizeRate, int _time, color _particleColor) {
+    super( _x, _y, 0, 0, _size, _time, _particleColor);
+    sizeRate=_sizeRate;
+    halfSizeRate=int(sizeRate*0.5);
+  }
+  void update() {
+    if (!dead && !freeze) { 
+      if (reverse) {
+        size-=sizeRate*timeBend;
+        opacity+=halfSizeRate*timeBend;
+      } else {
+        size+=sizeRate*timeBend;
+        opacity-=halfSizeRate*timeBend;
+        if (opacity<=0) {
+          dead=true;
+          deathTime=stampTime;
+        }
+      }
+    }
+  }
+  void display() {
+    if (!dead ) {  
+      noFill();
+      stroke(hue(particleColor), saturation(particleColor), brightness(particleColor)*S, opacity);
+      strokeWeight(int(0.1*opacity));
+      rect(x-size*.5, y-size*.5, size, size);
+    }
+  }
+}
 //-------------------------------------------------------------//    LineWave    //-------------------------------------------------------------------------
 
 class LineWave extends Particle {

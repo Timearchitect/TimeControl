@@ -1,8 +1,8 @@
 
 
 class Projectile  implements Cloneable {
-  PVector coord;
-  PVector speed;
+  //PVector coord;
+  //PVector speed;
   int  size, ally=-1;
   float x, y, vx, vy, angle, force, damage;
   long deathTime, spawnTime;
@@ -64,7 +64,7 @@ class Projectile  implements Cloneable {
   void fizzle() { // timed out death
   }
   void hit(Player enemy) {// collide death
-   // ArrayList<Buff> bcList= new ArrayList<Buff>();
+    // ArrayList<Buff> bcList= new ArrayList<Buff>();
     /* bcList=(ArrayList<Buff>)buffList.clone();
      for (Buff b : bcList) {
      b=b.clone();
@@ -74,7 +74,7 @@ class Projectile  implements Cloneable {
     //print(enemy.index);
     //enemy.buffList.add(buffList.get(0).clone());
     //enemy.buffList.addAll(bcList);
-    
+
     if (buffList.size()>0) { 
       //println("test");
       Buff clone = buffList.get(0);
@@ -118,7 +118,10 @@ class Projectile  implements Cloneable {
 
   Projectile addBuff( Buff ...bA ) {
     buffList=new ArrayList<Buff>();
-    for (Buff b : bA) buffList.add( b);
+    for (Buff b : bA) { 
+      buffList.add( b); 
+      b.parent=this;
+    }
     return this;
   }
 }
@@ -132,11 +135,11 @@ class Ball extends Projectile implements Reflectable { //-----------------------
     super( _x, _y, _size, _color, 999999);
     projectileColor=_color;
     damage=1;
-    coord= new PVector(_x, _y);
-    speed= new PVector(_speedX, _speedY);
+    //coord= new PVector(_x, _y);
+    //speed= new PVector(_speedX, _speedY);
     vx=_speedX;
     vy=_speedY;
-    angle=degrees( PVector.angleBetween(coord, speed));
+    //angle=degrees( PVector.angleBetween(coord, speed));
   }
   /*void playerBounds() {
    if (!reverse) {
@@ -346,7 +349,7 @@ class IceDagger extends Projectile implements Reflectable, Destroyable, Containa
   }
   @Override
     void hit(Player enemy) {
-    // super.hit();
+    super.hit(enemy);
     enemy.hit(damage);
     enemy.ax*=.3;
     enemy.ay*=.3;
@@ -707,7 +710,7 @@ class Blast extends Projectile implements Containable { //----------------------
     super(_owner, _x, _y, _size, _projectileColor, _time);
     angle=_angle;
     angleV=10;
-    damage=int(_damage);
+    damage=_damage;
     v=_v;
     force=5;
     opacity=255;
@@ -719,7 +722,7 @@ class Blast extends Projectile implements Containable { //----------------------
     super(_owner, _x, _y, _size, _projectileColor, _time);
     angle=_angle;
     angleV=_angleV;
-    damage=int(_damage);
+    damage=_damage;
     v=_v;
     force=5;
     opacity=255;

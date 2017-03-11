@@ -1,8 +1,9 @@
 class Buff implements Cloneable {
   long spawnTime, deathTime, duration, timer;
   boolean dead, effectAll;
-  String name=" ??";
+  String name="??";
   Player owner, enemy;
+  Projectile parent;
   Buff(Player p, int _duration) {
 
     owner=p;
@@ -84,8 +85,9 @@ class Poison extends Buff {
   }
   void transfer(Player formerOwner, Player formerEnemy) {
     super.transfer( formerOwner, formerEnemy);
-    for (int i=0;i<360;i+=30) {
-      particles.add(  new  Particle(int(formerEnemy.cx), int(formerEnemy.cy), cos(radians(i))*10,  sin(radians(i))*10, int(random(50)+10), 500, BLACK));
+    for (int i=0; i<360; i+=30) {
+      if(parent!=null)particles.add(  new  Particle(int(formerEnemy.cx), int(formerEnemy.cy), cos(radians(i))*5, sin(radians(i))*5, int(random(50)+10), 500, BLACK));
+      else particles.add(  new  Particle(int(parent.x), int(parent.y), cos(radians(i))*5, sin(radians(i))*5, int(random(50)+10), 500, BLACK));
     }
   }
 }
@@ -99,6 +101,10 @@ class Cold extends Buff {
     super(p, _duration);
     name=getClassName(this);
     enemy=e;
+  }
+    Cold(Player p, int _duration) {
+    super(p, _duration);
+    name=getClassName(this);
   }
   void update() {
     super.update();
@@ -128,10 +134,9 @@ class Stun extends Buff {
     name=getClassName(this);
     enemy=e;
   }
-    Stun(Player p,int _duration) {
+  Stun(Player p, int _duration) {
     super(p, _duration);
     name=getClassName(this);
-
   }
   void update() {
     owner.stunned=true;
@@ -139,7 +144,7 @@ class Stun extends Buff {
     if (owner.textParticle!=null)particles.remove( owner.textParticle );
     owner.textParticle = new Text(owner, "STUNNED", 0, -75, 30, 0, 100, enemy.playerColor, 0);
     particles.add( owner.textParticle );
-    count+=.4;
+    if(!freeze || owner.freezeImmunity)count+=.4;
     strokeWeight(30);
     stroke(enemy.playerColor);
     noFill();
@@ -151,5 +156,105 @@ class Stun extends Buff {
   void kill() {
     dead=true;
     owner.stunned=false;
+    owner.holdTrigg=false;
+    owner.holdUp=false;
+    owner.holdDown=false;
+    owner.holdLeft=false;
+    owner.holdRight=false;
+  }
+}
+
+
+class Steady extends Buff {
+  // float damage = 2;
+  float count;
+
+  Steady(Player p, Player e, int _duration) {
+    super(p, _duration);
+    name=getClassName(this);
+    enemy=e;
+  }
+  Steady(Player p, int _duration) {
+    super(p, _duration);
+    name=getClassName(this);
+  }
+  void update() {
+    owner.stunned=true;
+    super.update();
+    if (owner.textParticle!=null)particles.remove( owner.textParticle );
+    owner.textParticle = new Text(owner, "STUNNED", 0, -75, 30, 0, 100, enemy.playerColor, 0);
+    particles.add( owner.textParticle );
+    count+=.4;
+    strokeWeight(30);
+    stroke(enemy.playerColor);
+    noFill();
+    
+    for (float i =0; i<=PI*2; i+=PI/10) {
+      arc(int( owner.cx), int(owner.cy), owner.w+sin(count)*30+15, owner.h+sin(count)*30+15, i+count, i+PI*.03+count);
+    }
+  }
+
+  void kill() {
+    dead=true;
+    owner.stunned=false;
+  }
+}
+
+class Paralysis extends Buff {
+  // float damage = 2;
+  float count;
+
+  Paralysis(Player p, Player e, int _duration) {
+    super(p, _duration);
+    name=getClassName(this);
+    enemy=e;
+  }
+  Paralysis(Player p, int _duration) {
+    super(p, _duration);
+    name=getClassName(this);
+  }
+  void update() {
+    owner.stunned=true;
+    super.update();
+    if (owner.textParticle!=null)particles.remove( owner.textParticle );
+    owner.textParticle = new Text(owner, "STUNNED", 0, -75, 30, 0, 100, enemy.playerColor, 0);
+    particles.add( owner.textParticle );
+    count+=.4;
+    strokeWeight(30);
+    stroke(enemy.playerColor);
+    noFill();
+    
+    for (float i =0; i<=PI*2; i+=PI/10) {
+      arc(int( owner.cx), int(owner.cy), owner.w+sin(count)*30+15, owner.h+sin(count)*30+15, i+count, i+PI*.03+count);
+    }
+  }
+
+  void kill() {
+    dead=true;
+    owner.stunned=false;
+  }
+}
+
+class ArmorPiercing extends Buff {
+  // float damage = 2;
+  float count;
+  float amount;
+  ArmorPiercing(Player p, Player e, int _duration) {
+    super(p, _duration);
+    name=getClassName(this);
+    enemy=e;
+  }
+  ArmorPiercing(Player p, int _duration) {
+    super(p, _duration);
+    name=getClassName(this);
+  }
+  void update() {
+    super.update();
+
+  }
+
+  void kill() {
+    dead=true;
+    owner.armor=int(owner.DEFAULT_ARMOR);
   }
 }

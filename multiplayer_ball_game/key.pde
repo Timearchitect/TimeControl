@@ -1,6 +1,7 @@
 void keyPressed() {
   if (key==27) {   // ESC disable to EXIT() show pausescreen instead 
     if (gameMode==GameType.MENU) {
+      exit();
     } else { 
       cheatEnabled=false;
       gameMode=GameType.MENU;        
@@ -54,10 +55,7 @@ void keyPressed() {
         }
     }
 
-    if (RandomSkillsOnDeath) {
-      generateRandomAbilities(1, passiveList,true);
-      generateRandomAbilities(0, abilityList,true);
-    }
+
     resetGame();
   }
 
@@ -122,25 +120,7 @@ void keyPressed() {
         } //else println("not player"+ i);
       }
 
-      /*players.get(mouseSelectedPlayerIndex).ability.reset();
-       for (  int i=0; i<abilityList.length; i++) {
-       //if (players.get(0).ability==abilityList[i]) {
-       if (players.get(mouseSelectedPlayerIndex).ability.getClass()==abilityList[i].getClass()) {
-       //println("ability match "+i+" "+abilityList[i].getClass());
-       //if (i>=abilityList.length)i=0;
-       if (i<=0)i=abilityList.length;
-       try {
-       //abilities[0]= abilityList[i-1].clone();
-       //abilityList[i-1].clone().setOwner(players.get(0));
-       players.get(mouseSelectedPlayerIndex).ability=abilityList[i-1].clone();
-       players.get(mouseSelectedPlayerIndex).ability.setOwner(players.get(mouseSelectedPlayerIndex));
-       announceAbility( players.get(mouseSelectedPlayerIndex));
-       }
-       catch(CloneNotSupportedException e) {
-       println("not cloned from Random");
-       }
-       } else println("not player"+ i);
-       }*/
+
     }
     if (key==Character.toLowerCase('+')) {
       //players.get(mouseSelectedPlayerIndex).ability.reset();

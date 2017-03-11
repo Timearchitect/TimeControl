@@ -126,55 +126,46 @@ void setup() {
     new ForceShoot(), 
     new Blink(), 
     new Multiply(), 
-
     new Stealth(), 
     new Laser(), 
     new TimeBomb(), 
     new RapidFire(), 
     new MachineGun(), 
-
     new Battery(), 
     new Ram(), 
     new Detonator(), 
     new PhotonicWall(), 
     new Sniper(), 
-
     new ThrowBoomerang(), 
     new PhotonicPursuit(), 
     new DeployThunder(), 
     new DeployShield(), 
     new DeployElectron(), 
-
     new Gravity(), 
     new DeployTurret(), 
     new Bazooka(), 
     new MissleLauncher(), 
     new AutoGun(), 
-
     new Combo(), 
     new CloudStrike(), 
     new TeslaShock(), 
     new RandoGun(), 
     new Shotgun(), 
-
     new Sluggun(), 
     new FlameThrower(), 
     new DeployDrone(), 
     new DeployBodyguard(), 
     new SemiAuto(), 
-
     new Pistol(), 
     new AssaultBattery(), 
     new Stars(), 
     new SeekGun(), 
     new ElemetalLauncher(), 
-
     new SummonEvil(), 
     new SummonIlluminati(), 
     new SerpentFire(), 
     new SneakBall(), 
     new TripleShot(), 
-
     new MarbleLauncher(), 
     new Torpedo(),
     new PoisonDart()
@@ -187,27 +178,22 @@ void setup() {
     new Speed(), 
     new Armor(), 
     new HpRegen(), 
-
     new Static(), 
     new SuppressFire(), 
     new Nova(), 
     new Trail(), 
     new Gloss(), 
-
     new BackShield(), 
     new PainPulse(), 
     new Boost(), 
     new Glide(), 
     new MpRegen(), 
-
     new BulletTime(), 
     new Emergency(), 
     new Adrenaline(), 
     new BulletCutter(), 
     new Dash(), 
-
     new Guardian()
-
     //new Redemption(), // buggy on survival
     //new Undo() // buggy on survival
   };
@@ -218,13 +204,11 @@ void setup() {
     new RapidFire(), 
     new MachineGun(), 
     new Battery(), 
-
     new AutoGun(), 
     new Shotgun(), 
     new Sluggun(), 
     new SemiAuto(), 
     new Pistol(), 
-
     new TripleShot(), 
     new MarbleLauncher()
   };
@@ -400,13 +384,10 @@ void draw() {
           Gain g3 = new Gain(an, 1, 0.0);
           g3.setGain((6000-stampTime)*0.0000001);
           if (!noisy)g3.addInput(n);
-
           an.out.addInput(g3);
-
           shake(int((6000-stampTime)*0.01) );
           noisy=true;
         } else {
-
           shake(4);
         }
         if (!noFlash)fill(40, 200*timeBend, flashAmount*255*F);
@@ -555,33 +536,33 @@ void draw() {
       break;
     case SHOP:
       shopUpdate();
-      for (int i=particles.size ()-1; i>= 0; i--) { // checkStamps
+     /* for (int i=particles.size ()-1; i>= 0; i--) { // checkStamps
         particles.get(i).update();  
         particles.get(i).display();
         particles.get(i).revert();
         if (gradualCleaning &&!reverse &&  particles.get(i).deathTime+5000<stampTime) particles.remove(i);
-      }
+      }*/
       break;
     case MENU:
       menuUpdate();
-      for (int i=particles.size ()-1; i>= 0; i--) { // checkStamps
+     /* for (int i=particles.size ()-1; i>= 0; i--) { // checkStamps
         particles.get(i).update();  
         particles.get(i).display();
         particles.get(i).revert();
         if (gradualCleaning &&!reverse &&  particles.get(i).deathTime+5000<stampTime) particles.remove(i);
-      }
+      }*/
       break;
     case BOSSRUSH:
       bossRushSpawning();
       break;
     case SETTINGS:
       settingsUpdate();
-      for (int i=particles.size ()-1; i>= 0; i--) { // checkStamps
+     /* for (int i=particles.size ()-1; i>= 0; i--) { // checkStamps
         particles.get(i).update();  
         particles.get(i).display();
         particles.get(i).revert();
         if (gradualCleaning &&!reverse &&  particles.get(i).deathTime+5000<stampTime) particles.remove(i);
-      }
+      }*/
       break;
     default:
       break;

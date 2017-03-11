@@ -15,9 +15,7 @@ void targetHommingVarning(Player target) {
   noFill();
   ellipse(tcx, tcy, r, r);
   line(tcx+r, tcy, tcx-r, tcy);
-  // line(tcx, tcy, tcx+r, tcy);
   line(tcx, tcy+r, tcx, tcy-r);
-  // line(tcx, tcy, tcx, tcy+r);
 }
 
 
@@ -27,11 +25,8 @@ void crossVarning(int x, int y) {
   strokeWeight(3);
   stroke(255);
   noFill();
-  //ellipse(tcx, tcy, r, r);
   line(x+r, y+r, x-r, y-r);
-  //line(tcx, tcy, tcx+r, tcy);
   line(x+r, y-r, x-r, y+r);
-  //line(tcx, tcy, tcx, tcy+r);
   strokeWeight(6);
   ellipse(x, y, r*4, r*4);
   strokeWeight(3);
@@ -69,51 +64,34 @@ Player seek(Projectile m, int senseRange) {
 }  
 //final int TARGETABLE=0,STATIONARY=1,INVIS=2,STEALTH=3;
 Player seek(Player m, int senseRange, int attributeIndex) {
-  switch (attributeIndex) {
-  case 0:
-    for (int sense = 0; sense < senseRange; sense++) {
-      for (   Player p : players) {
-        if (p!= m && !p.dead && p.ally!=m.ally) {
+
+  for (int sense = 0; sense < senseRange; sense++) {
+    for (   Player p : players) {
+      if (p!= m && !p.dead && p.ally!=m.ally) {
+        switch (attributeIndex) {
+        case 0:
           if (p.targetable && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
             return p;
           }
-        }
-      }
-    }
-    break;
-  case 1:
-    for (int sense = 0; sense < senseRange; sense++) {
-      for (   Player p : players) {
-        if (p!= m && !p.dead && p.ally!=m.ally) {
+          break;
+        case 1:
           if (p.stationary && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
             return p;
           }
-        }
-      }
-    }
-    break;
-  case 2:
-    for (int sense = 0; sense < senseRange; sense++) {
-      for (   Player p : players) {
-        if (p!= m && !p.dead && p.ally!=m.ally) {
+          break;
+        case 2:
           if (p.invis && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
             return p;
           }
-        }
-      }
-    }
-    break;
-  case 3:
-    for (int sense = 0; sense < senseRange; sense++) {
-      for (   Player p : players) {
-        if (p!= m && !p.dead && p.ally!=m.ally) {
+          break;
+        case 3:
           if (p.stealth && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
             return p;
           }
+          break;
         }
       }
     }
-    break;
   }
   return null;
 }  
@@ -123,41 +101,27 @@ Player seek(Projectile m, int senseRange, int attributeIndex) {
     for (int sense = 0; sense < senseRange; sense++) {
       for (   Player p : players) {
         if ( !p.dead && p.ally!=m.ally) {
-          if (p.targetable && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
-            return p;
-          }
-        }
-      }
-    }
-    break;
-  case 1:
-    for (int sense = 0; sense < senseRange; sense++) {
-      for (   Player p : players) {
-        if (!p.dead && p.ally!=m.ally) {
-          if (p.stationary && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
-            return p;
-          }
-        }
-      }
-    }
-    break;
-  case 2:
-    for (int sense = 0; sense < senseRange; sense++) {
-      for (   Player p : players) {
-        if ( !p.dead && p.ally!=m.ally) {
-          if (p.invis && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
-            return p;
-          }
-        }
-      }
-    }
-    break;
-  case 3:
-    for (int sense = 0; sense < senseRange; sense++) {
-      for (   Player p : players) {
-        if (  !p.dead && p.ally!=m.ally) {
-          if (p.stealth && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
-            return p;
+          switch (attributeIndex) {
+          case 0:
+            if (p.targetable && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
+              return p;
+            }
+            break;
+          case 1:
+            if (p.stationary && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
+              return p;
+            }
+            break;
+          case 2:
+            if (p.invis && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
+              return p;
+            }
+            break;
+          case 3:
+            if (p.stealth && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
+              return p;
+            }
+            break;
           }
         }
       }
@@ -224,33 +188,9 @@ void controllerSetup() {
     players.get(i).FRICTION_FACTOR=0.062;
   }
 }
-
-/*static <T extends Object> boolean  existInList(Class<?> compareType, ArrayList<T> list) {
-  T temp;
-  Class classType=temp.getClass(); 
-  for (classType i : (ArrayList<classType>)list) {
-    if (i instanceof P) {
-      println("have it");
-      return true;
-    }
+public static <C, L> boolean existInList(ArrayList<L> list, Class<C> genericType2) {
+  for (L i : (ArrayList<L>)list) {
+    if (i.getClass().getSimpleName().equals(genericType2.getSimpleName()))return true;
   }
   return false;
 }
-*/
-
-/*public static <T extends Buff> boolean existInList( Class<T> classType,ArrayList<T> list) {
-
-  for (classType i : (ArrayList<classType>)list) {
-  }
-  return true;
-}*/
-
-
-    public static <T,C,L> boolean existInList(Class<T> genericType,ArrayList<L> list,Class<C> genericType2){
-     String s=getClassName(genericType2);
-     println(s);
-      for(T i:(ArrayList<T>)list){
-        if(((Buff)i).name.equals("Poison"))return true;
-      }
-      return false;
-    }

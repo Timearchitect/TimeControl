@@ -23,10 +23,14 @@ interface Destroyer {
 interface Container { 
   Boolean container=true;
   Container contains(Containable[] payload);
+  
 }
 interface Containable { 
   Boolean containable=true;
   Containable parent(Container parent);
+   //<T extends Object & Containable> T parent(Container parent);
+  //  public <t extends Containable> t parent(Container parent);
+   // public move parent(Container parent);
   void unWrap();
 }
 

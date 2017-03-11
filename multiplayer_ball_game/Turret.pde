@@ -167,6 +167,7 @@ class Block extends Player implements Containable {
     health=maxHealth;
     stationary=true;
     targetable=false;
+    
   }
   Block(int _index, int _x, int _y, int _w, int _h, int _health, Ability ..._ability) { // nseutral
     super( _index, BLACK, _x, _y, _w, _h, 999, 999, 999, 999, 999, _ability) ;
@@ -293,6 +294,7 @@ class Block extends Player implements Containable {
     //angle=90;
     vx=vel.x;
     vy=vel.y;
+    particles.add(new Rectwave( int(cx),int(cy),radius, 20, 500,owner.playerColor) );
   }
 }
 class Illuminati extends Player implements Containable { 
