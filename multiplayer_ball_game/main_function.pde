@@ -35,6 +35,7 @@ void shake(int amount) {
     if (!freeze) {
       shakeX=int(random(amount)-amount*.5);
       shakeY=int(random(amount)-amount*.5);
+      if(shakeTimer>maxShake)shakeTimer=maxShake;
       shakeTimer--;
     }
     translate( shakeX*shakeAmount, shakeY*shakeAmount);
@@ -530,15 +531,24 @@ void loadProgress() throws Exception {
   int i=0;
   for (Ability a : abilityList) {
     a.unlocked=parseBoolean(parseInt(s[i]));   
-
-    bList.add(new Button(a, int(120+(i*110)%(width-220)), int(160+int(i*110/(width-220))*140), 80));
+     try{
+      bList.add(new Button(a, int(120+(i*110)%(width-220)), int(160+int(i*110/(width-220))*140), 80));
+      }
+    catch(Exception e){
+      println(a.name+" not loaded");
+    }
     //  println(parseBoolean(parseInt(s[i])));
     i++;
   }
 
   for (Ability a : passiveList) {
     a.unlocked=parseBoolean(parseInt(s[i]));
-    bList.add(new Button(a, int(120+(i*110)%(width-220)), int(160+int(i*110/(width-220))*140), 80));
+    try{
+      bList.add(new Button(a, int(120+(i*110)%(width-220)), int(160+int(i*110/(width-220))*140), 80));
+    }
+    catch(Exception e){
+      println(a.name+" not loaded");
+    }
     i++;
   }
   coins=parseInt(s[i]);
@@ -568,6 +578,7 @@ class Button {
     size=_size;
     x=_x;
     y=_y;
+    //print(a.name+" ");
   }
 
   void update() {

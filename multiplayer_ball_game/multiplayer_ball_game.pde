@@ -5,7 +5,7 @@
  //  av: Alrik He    v.0.7.9                                   //
  //  Arduino verstad Malmö                                     //
  //                                                            //
- //      2014-09-21    -     2016-11-05                        //
+ //      2014-09-21    -     2017-05-03                        //
  //                                                            //
  //                                                            //
  //         Used for weapon test & prototyping timebending     //
@@ -27,9 +27,9 @@ final color BGcolor=color(100);
 PFont font;
 PGraphics GUILayer;
 PShader  Blur;
-boolean cleanStart=true, perSelectedSkills=true, RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true, inGame;
+boolean hitBox=false,cleanStart=true, perSelectedSkills=true, RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true, inGame;
 boolean gradualCleaning=true;
-final float flashAmount=0.5, shakeAmount=1.5;
+final float flashAmount=0.5, shakeAmount=0.5;
 int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight, coins;
 //int gameMode=0;
@@ -40,7 +40,7 @@ final float DIFFICULTY_LEVEL=1.0;
 final int WHITE=color(255), GREY=color(172), BLACK=color(0), GOLD=color(255, 220, 0);
 final int speedFactor= 2;
 final float slowFactor= 0.3;
-final String version="0.7.9";
+final String version="0.7.10";
 static long prevMillis, addMillis, forwardTime, reversedTime, freezeTime, stampTime, fallenTime;
 final int baudRate= 19200;
 final static float DEFAULT_FRICTION=0.1;
@@ -50,13 +50,13 @@ final int playerSize=100;
 static int playersAlive; // amount of players alive
 static Player AI;
 final int offsetX=1250, offsetY=-50;//final int offsetX=950, offsetY=100;
-static int shakeTimer, shakeX=0, shakeY=0;
+static int shakeTimer, shakeX=0, shakeY=0,maxShake=80;
 final float DEFAULT_ZOOMRATE=0.02;
 static float F=1, S=1, timeBend=1, zoom=0.7, tempZoom=1.0, tempOffsetX=0, tempOffsetY=0, zoomX, zoomY, zoomXAim, zoomYAim, zoomAim=1, zoomRate=0.02;
 //int keyCooldown[]= new int[AmountOfPlayers];
 final int keyResponseDelay=30;  // eventhe refreashrate equal to arduino devices
 final char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='7';
-final int ICON_AMOUNT=35;
+final int ICON_AMOUNT=40;
 final PImage[] icons=new PImage[ICON_AMOUNT];
 Serial port[]=new Serial[AmountOfPlayers];  // Create object from Serial class
 String portName[]=new String[AmountOfPlayers];
@@ -100,7 +100,6 @@ void setup() {
   fullScreen(P3D);
   imageMode(CENTER);
   textAlign(CENTER, CENTER);
-
   //size(displayWidth, displayHeight, P3D);
   font= loadFont("PressStart2P-Regular-28.vlw");
   Blur= loadShader("blur.glsl");
@@ -167,8 +166,12 @@ void setup() {
     new SneakBall(), 
     new TripleShot(), 
     new MarbleLauncher(), 
-    new Torpedo(),
-    new PoisonDart()
+    new Torpedo(), 
+    new PoisonDart(), 
+    new Artilery(),
+    new LaserSword(),
+    new StunGun(),
+    new ChargeSlash()
   };
 
   passiveList = new Ability[]{
@@ -193,9 +196,10 @@ void setup() {
     new Adrenaline(), 
     new BulletCutter(), 
     new Dash(), 
-    new Guardian()
+    new Guardian(),
+    new SnakeShield()
     //new Redemption(), // buggy on survival
-    //new Undo() // buggy on survival
+    // new Undo() // buggy on survival
   };
 
   westAbilityList= new Ability[]{
@@ -229,14 +233,15 @@ void setup() {
   };
 
   try {
+    println("load savefile...");
     loadProgress();
+    println("loaded");
   }
   catch (Exception e) {
     println(e);
   }
   abilityList[0].unlocked=true; // noActive
-   passiveList[0].unlocked=true; // noPassive
-   
+  passiveList[0].unlocked=true; // noPassive
   mList.add( new ModeButton(GameType.BRAWL, 0, 100, 350, 600, color(255, 0, 0)));
   mList.add( new ModeButton(GameType.SURVIVAL, 300, 300, 350, 600, color(255, 255, 0)));
   mList.add( new ModeButton(GameType.WILDWEST, 600, 100, 350, 600, color(0, 255, 0)));
@@ -246,10 +251,10 @@ void setup() {
 
   println("loaded save ... abilities!");
   abilities= new Ability[][]{ 
-  /* player 1 */    new Ability[]{new SeekGun(), new Random().randomize(passiveList)}, 
-  /* player 2 */    new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
-  /* player 3 mouse */    new Ability[]{new  Random().randomize(abilityList), new  Random().randomize(passiveList)}, 
-  /* player 4 */    new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
+  /* player 1 */      new Ability[]{new SeekGun(), new Random().randomize(passiveList)}, 
+  /* player 2 */      new Ability[]{new Artilery(), new Random().randomize(passiveList)}, 
+  /* player 3 mouse */new Ability[]{new  Random().randomize(abilityList), new  Random().randomize(passiveList)}, 
+  /* player 4 */      new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
     new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
     new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}
   };
@@ -536,33 +541,33 @@ void draw() {
       break;
     case SHOP:
       shopUpdate();
-     /* for (int i=particles.size ()-1; i>= 0; i--) { // checkStamps
-        particles.get(i).update();  
-        particles.get(i).display();
-        particles.get(i).revert();
-        if (gradualCleaning &&!reverse &&  particles.get(i).deathTime+5000<stampTime) particles.remove(i);
-      }*/
+      /* for (int i=particles.size ()-1; i>= 0; i--) { // checkStamps
+       particles.get(i).update();  
+       particles.get(i).display();
+       particles.get(i).revert();
+       if (gradualCleaning &&!reverse &&  particles.get(i).deathTime+5000<stampTime) particles.remove(i);
+       }*/
       break;
     case MENU:
       menuUpdate();
-     /* for (int i=particles.size ()-1; i>= 0; i--) { // checkStamps
-        particles.get(i).update();  
-        particles.get(i).display();
-        particles.get(i).revert();
-        if (gradualCleaning &&!reverse &&  particles.get(i).deathTime+5000<stampTime) particles.remove(i);
-      }*/
+      /* for (int i=particles.size ()-1; i>= 0; i--) { // checkStamps
+       particles.get(i).update();  
+       particles.get(i).display();
+       particles.get(i).revert();
+       if (gradualCleaning &&!reverse &&  particles.get(i).deathTime+5000<stampTime) particles.remove(i);
+       }*/
       break;
     case BOSSRUSH:
       bossRushSpawning();
       break;
     case SETTINGS:
       settingsUpdate();
-     /* for (int i=particles.size ()-1; i>= 0; i--) { // checkStamps
-        particles.get(i).update();  
-        particles.get(i).display();
-        particles.get(i).revert();
-        if (gradualCleaning &&!reverse &&  particles.get(i).deathTime+5000<stampTime) particles.remove(i);
-      }*/
+      /* for (int i=particles.size ()-1; i>= 0; i--) { // checkStamps
+       particles.get(i).update();  
+       particles.get(i).display();
+       particles.get(i).revert();
+       if (gradualCleaning &&!reverse &&  particles.get(i).deathTime+5000<stampTime) particles.remove(i);
+       }*/
       break;
     default:
       break;

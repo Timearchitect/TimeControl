@@ -11,7 +11,7 @@ class Player implements Cloneable {
   float  x, y, vx, vy, ax, ay, cx, cy, angle, keyAngle, f, s, bend, barFraction, fraction,armor;
   boolean holdTrigg, holdUp, holdDown, holdLeft, holdRight, dead, hit, arduino, arduinoHold, mouse, clone, turret;
   PVector coord, speed, accel, arrow;
-  float DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR, DEFAULT_FRICTION_FACTOR=0.1, DEFAULT_ARMOR=0; 
+  float DEFAULT_RADIUS,DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR, DEFAULT_FRICTION_FACTOR=0.1, DEFAULT_ARMOR=0; 
   long invisStampTime;
   boolean invis, freezeImmunity=true, reverseImmunity, fastforwardImmunity, slowImmunity, stationary, stunned, stealth, targetable=true;
   //Ability ability;  
@@ -52,7 +52,8 @@ class Player implements Cloneable {
     w=_w;
     h=_h;
     radius=int(_w*0.5);
-    outlineDiameter=int(w*1.1);
+    DEFAULT_RADIUS=radius;
+    outlineDiameter=int(radius*2.2);
     cx=x+radius;
     cy=y+radius;
     up=_up;
@@ -63,7 +64,7 @@ class Player implements Cloneable {
     shapeMode(CENTER);
     arrowSVG.disableStyle();
     shape(arrowSVG, -arrowSVG.width*0.5+30, -arrowSVG.height, arrowSVG.width, arrowSVG.height);
-    buffList.add(new Stun(this, AI, 2000));
+     //if(!clone) buffList.add(new Stun(this, AI, 2000));
   }
   void checkBounds() {
     //if (!reverse && reverseImmunity) {
@@ -131,7 +132,7 @@ class Player implements Cloneable {
       rotate(radians(angle+90));
       // shape(arrowSVG,x+radius- arrowSVG.width*.5, y-arrowSVG.halfHeight, arrowSVG.width, arrowSVG.height); // default render
       fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s, 50+deColor);
-      shape(arrowSVG, -arrowSVG.width*0.5+30, -arrowSVG.height, arrowSVG.width, arrowSVG.height);
+      shape(arrowSVG, -arrowSVG.width*0.5+30, -30-radius, arrowSVG.width, arrowSVG.height);
       popMatrix();
 
       //s fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s);
@@ -379,7 +380,7 @@ class Player implements Cloneable {
 
   void hit(float damage) {
     stamps.add( new StateStamp(index, int(x), int(y), state, health, dead));
-    damage=damage-=armor;
+    damage=damage-armor;
     if (damage>0) {
       health-=damage;
       deColor=255;
@@ -431,6 +432,7 @@ class Player implements Cloneable {
       a.reset();
     }
     dead=true;
+    buffList.clear();
     // ability.reset();
     shakeTimer+=10;
     for (int i=0; i<16; i++) {
@@ -472,7 +474,7 @@ class Player implements Cloneable {
     fill(255);
     if (abilityList.get(index).regen) { 
       noStroke();
-    } else {
+      } else {
       strokeWeight(6);
       stroke(hue(playerColor), 255*S, 255*S);
     }
@@ -509,6 +511,11 @@ class Player implements Cloneable {
     ax=0;
     ay=0;
     health=maxHealth;
+    armor=DEFAULT_ARMOR;
+    radius=int(DEFAULT_RADIUS);
+     outlineDiameter=int(radius*2.2);
+    w=radius*2;
+    h=radius*2;
     dead=false;
     //ability.reset();
     for (Ability a : this.abilityList) a.reset();

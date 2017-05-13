@@ -1,4 +1,4 @@
-class NoPassive extends Ability {//---------------------------------------------------    HpRegen   ---------------------------------
+class NoPassive extends Ability {//---------------------------------------------------       ---------------------------------
 
   NoPassive() {
     super();
@@ -404,7 +404,7 @@ class SuppressFire extends Ability {//------------------------------------------
     if (cooldown>40) {
       noStroke();
       fill(255);
-      ellipse(owner.cx+cos(radians(owner.angle))*100, owner.cy+sin(radians(owner.angle))*100, 100, 100);
+      ellipse(owner.cx+cos(radians(owner.angle))*100, owner.cy+sin(radians(owner.angle))*100, 50, 50);
       projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*46, sin(radians(owner.angle))*46, 7));
       cooldown=0;
     }
@@ -473,6 +473,50 @@ class Gloss extends Ability {//-------------------------------------------------
     owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
   }
 }
+class SnakeShield extends Ability {//---------------------------------------------------    Gloss   ---------------------------------
+  int count, x, y;
+  SnakeShield() {
+    super();
+    type=AbilityType.PASSIVE;
+    name=getClassName(this);
+    unlockCost=2000;
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void press() {
+  }
+  @Override
+    void hold() {
+  }
+  @Override
+    void passive() {
+    if (!owner.stealth && !owner.stationary) {
+
+      // cooldown+=1;
+      //for (int i=0; i<360; i+=30) {
+      //if (cooldown%360==i) {
+      if (dist(owner.cx, owner.cy, x, y)>60) {
+        float ang=degrees(atan2(y-owner.cy, x-owner.cx));
+        Shield s=new Shield( owner, int( owner.cx+cos(radians(ang))*60), int(owner.cy+sin(radians(ang))*60), owner.playerColor, 1500, ang, 0);
+        s.size=45;
+        projectiles.add( s);
+        x=int(owner.cx);
+        y=int(owner.cy);
+      }
+      //  projectiles.add( new Shield( owner, int( owner.cx+cos(radians(i+180))*180), int(owner.cy+sin(radians(i+180))*180), owner.playerColor, 1000, i+270, 1, int( cos(radians(i+180))*180), int(sin(radians(i+180))*180)));
+      //}
+      // }
+      //count++;
+      //  if (count%30==0)   projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*46, sin(radians(owner.angle))*46, 3));
+    }
+  }
+  @Override
+    void reset() {
+    owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+  }
+}
 
 class BackShield extends Ability {//---------------------------------------------------    BackShield   ---------------------------------
   int count;
@@ -514,8 +558,13 @@ class BackShield extends Ability {//--------------------------------------------
       shield.offsetX=int(cos(radians(owner.angle+180))*100);
       shield.offsetY=int(sin(radians(owner.angle+180))*100);
     } else {
-      shield.dead=true;
-      shield=null;
+      //shield.dead=true;
+      if (shield!=null ) {       
+        shield.fizzle();
+        shield.deathTime=stampTime;
+        shield.dead=true;
+        shield=null;
+      }
     }
   }
   @Override
@@ -812,7 +861,7 @@ class BulletCutter extends Ability {//------------------------------------------
   }
 }
 class Boost extends Ability {//---------------------------------------------------    bullet   ---------------------------------
-  int count, charge, cooldown;
+  int count, charge, cooldown, force=60;
   final int radius= 145, maxCharge=50; 
   Boost() {
     super();
@@ -840,7 +889,7 @@ class Boost extends Ability {//-------------------------------------------------
       charge=0;
       projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 0, 60, owner.playerColor, 350, 0, 1, 60, 12));
 
-      owner.pushForce(50, owner.keyAngle);
+      owner.pushForce(force, owner.keyAngle);
       projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 10, 20, owner.playerColor, 450, owner.keyAngle, 1, 30, 10));
     }
     charge=int(charge*.5);
@@ -868,7 +917,7 @@ class Boost extends Ability {//-------------------------------------------------
   }
 }
 
-class Glide extends Ability {//---------------------------------------------------    bullet   ---------------------------------
+class Glide extends Ability {//---------------------------------------------------    Glide   ---------------------------------
 
   Glide() {
     super();
@@ -929,12 +978,14 @@ class Guardian extends Ability {//----------------------------------------------
     void passive() {
     if (range<maxRange)range+= 1*timeBend;
     if (cooldown>interval) {
-      noFill();
-      strokeWeight(1);
-      stroke(WHITE);
-      ellipse(owner.cx, owner.cy, range, range);
+      if (!owner.stealth) {     
+        noFill();
+        strokeWeight(1);
+        stroke(WHITE);
+        ellipse(owner.cx, owner.cy, range, range);
+      }
       for (Projectile p : projectiles) {
-        if (!p.dead && p.ally!=owner.ally && p.damage<30&& dist(owner.cx, owner.cy, p.x, p.y)<range*.5) {
+        if (!p.dead && p.ally!=owner.ally&& !(p instanceof Shield)&& !(p instanceof Boomerang) && p.damage<30&& dist(owner.cx, owner.cy, p.x, p.y)<range*.5) {
           trigger=true;
           break;
         }
@@ -947,7 +998,7 @@ class Guardian extends Ability {//----------------------------------------------
         strokeWeight(20);
         ellipse(owner.cx, owner.cy, range, range);
         for (Projectile p : projectiles) {
-          if (!p.dead &&p.ally!=owner.ally&& !p.meta && p.damage<30 && dist(owner.cx, owner.cy, p.x, p.y)<range*.5) {
+          if (!p.dead &&p.ally!=owner.ally&& !p.meta  && p.damage<30 && dist(owner.cx, owner.cy, p.x, p.y)<range*.5) {
             p.fizzle();
             p.deathTime=stampTime;   // dead on collision
             p.dead=true;
@@ -969,9 +1020,9 @@ class Guardian extends Ability {//----------------------------------------------
     owner.slowImmunity=false;
   }
 }
-class BulletTime extends Ability {//---------------------------------------------------    bullet   ---------------------------------
+class BulletTime extends Ability {//---------------------------------------------------    BulletTime   ---------------------------------
   float  cooldown;
-  final int interval=150;
+  final int interval=150, distance=300;
   boolean trigger;
   BulletTime() {
     super();
@@ -996,12 +1047,15 @@ class BulletTime extends Ability {//--------------------------------------------
 
     if (cooldown>interval) {
       for (Projectile p : projectiles) {
-        if (!p.dead && p.ally!=owner.ally && dist(owner.cx, owner.cy, p.x, p.y)<300) {
+        if (!p.dead && p.ally!=owner.ally && !(p instanceof Shield) && dist(owner.cx, owner.cy, p.x, p.y)<distance) {
           trigger=true;
           break;
         }
       }
       if (trigger) {
+        fill(owner.playerColor);
+        noStroke();
+        ellipse(owner.cx, owner.cy, distance*1.5, distance*1.5);
         owner.slowImmunity=true;
         particles.add(new TempSlow(1500, 0.03, 1.05));
         trigger=false;
@@ -1299,7 +1353,7 @@ class Dash extends Ability {//--------------------------------------------------
   }
   @Override
     void passive() {
-    if (timer+60<stampTime) {
+    if (timer+60*timeBend<stampTime) {
       if (owner.stealth) {
         owner.stop(); 
         Player p=seek(owner, 4000, TARGETABLE);
@@ -1310,7 +1364,7 @@ class Dash extends Ability {//--------------------------------------------------
       }
       owner.stealth=false;
     } else particles.add(new Particle(int(owner.cx), int(owner.cy), owner.vx*.2, owner.vy*.2, 120, 50, WHITE));
-    if (timer+60<stampTime && timer+300>stampTime) {
+    if (timer+60*timeBend<stampTime && timer+300*timeBend>stampTime) {
       owner.ANGLE_FACTOR=0;
     } else {
       owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;

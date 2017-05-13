@@ -724,12 +724,19 @@ class Spark extends Particle {
 }
 
 class Gradient extends Particle {
-  float shrinkRate, opacity=200, size=100;
+  float shrinkRate, opacity=200, size=100,length;
   Gradient(int _time, int _x, int _y, float _vx, float _vy, int _maxSize, float _shrinkRate, float _angle, color _particleColor) {
     super( _x, _y, _vx, _vy, _maxSize, _time, _particleColor);
     size=_maxSize;
     angle=_angle;
     shrinkRate=_shrinkRate;
+  }
+    Gradient(int _time, int _x, int _y, float _vx, float _vy,float _length, int _maxSize, float _shrinkRate, float _angle, color _particleColor) {
+    super( _x, _y, _vx, _vy, _maxSize, _time, _particleColor);
+    size=_maxSize;
+    angle=_angle;
+    shrinkRate=_shrinkRate;
+    length=_length;
   }
   void update() {
     if (!dead && !freeze) { 
@@ -761,7 +768,7 @@ class Gradient extends Particle {
       // ellipse(x, y, size*(deathTime-stampTime)/time, size*(deathTime-stampTime)/time );
       //  stroke(projectileColor);
       //ellipse(x, y, size, size);
-      rect(-(size*.5), -(size*.5), 2400, size);
+      rect(-(size*.5), -(size*.5), length, size);
       popMatrix();
       //   strokeWeight(8);
       //     line(x+cos(radians(angle))*(maxSize-size), y+sin(radians(angle))*(maxSize-size), x+cos(radians(angle))*(maxSize), y+sin(radians(angle))*(maxSize));

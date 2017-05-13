@@ -1,3 +1,6 @@
+enum BuffType {
+  ONCE, MULTIPLE
+}
 enum AbilityType {
   ACTIVE, PASSIVE, NATIVE, GLOBAL
 }

@@ -185,7 +185,15 @@ void bossRushSetup() {
   }
   bossCleared=0;
   bossList.clear();
-    bossList.add(new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1), int(playerSize*1), 15, int(1300*DIFFICULTY_LEVEL), 4, new HpRegen(10, 10), new RapidFire(), new RapidFire(), new MachineGun(), new MachineGun(), new  Reward(25, false))); //, new MissleLauncher()
+  bossList.add(new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1), int(playerSize*1), 15, int(700*DIFFICULTY_LEVEL), 2, new Gravity(), new MpRegen(), new Ram(), new PanicBlink(), new  Reward(10, false)));// shield
+
+  bossList.add(new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1), int(playerSize*1), 15, int(700*DIFFICULTY_LEVEL), 1, new TimeBomb(), new MpRegen(), new Ram(), new TimeBomb(), new PanicBlink(), new  Reward(10, false)));// shield
+
+  bossList.add(new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1), int(playerSize*1), 15, int(700*DIFFICULTY_LEVEL), 4, new ForceShoot(), new MpRegen(), new MpRegen(), new ForceShoot(), new HpRegen(8, 10), new PanicBlink(), new  Reward(10, false)));// shield
+
+  bossList.add(new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1), int(playerSize*1), 15, int(700*DIFFICULTY_LEVEL), 3, new Ram(), new Speed(), new SnakeShield(), new HpRegen(8, 10), new PanicBlink(), new  Reward(10, false)));// shield
+
+  bossList.add(new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1), int(playerSize*1), 15, int(1000*DIFFICULTY_LEVEL), 4, new HpRegen(10, 10), new RapidFire(), new RapidFire(), new MachineGun(), new MachineGun(), new  Reward(25, false))); //, new MissleLauncher()
 
   bossList.add(new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1), int(playerSize*1), 15, int(1200*DIFFICULTY_LEVEL), 1, new Sluggun(), new MpRegen(), new Sluggun(), new PanicBlink(), new  Reward(25, false))); //, new MissleLauncher()
   bossList.add(new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1.75), int(playerSize*1.75), 15, int(1100*DIFFICULTY_LEVEL), 1, new Bazooka(), new Bazooka(), new Bazooka(), new  Reward(25, false))); //, new MissleLauncher()
@@ -199,7 +207,6 @@ void bossRushSetup() {
   sA.channelCost=0;
   sA.deactiveCost=0;
   bossList.add(new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1), int(playerSize*1), 15, int(800*DIFFICULTY_LEVEL), 4, sA, new HpRegen(10, 10), new Repel(500, 0.8), new PanicBlink(), new  Reward(30, false))); //, new DeployShield()
-
   bossList.add(new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*2), int(playerSize*2), 15, int(900*DIFFICULTY_LEVEL), 4, new HpRegen(10, 10), new DeployBodyguard(), new DeployDrone(), new  Reward(35, false))); //, new DeployShield()
   bossList.add(new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*2), int(playerSize*2), 15, int(1000*DIFFICULTY_LEVEL), 4, new Blink(), new Static(), new MpRegen(), new HpRegen(10, 10), new Multiply(), new  Reward(35, false))); //, new DeployShield()
 
