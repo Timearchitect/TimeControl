@@ -35,7 +35,7 @@ void shake(int amount) {
     if (!freeze) {
       shakeX=int(random(amount)-amount*.5);
       shakeY=int(random(amount)-amount*.5);
-      if(shakeTimer>maxShake)shakeTimer=maxShake;
+      if (shakeTimer>maxShake)shakeTimer=maxShake;
       shakeTimer--;
     }
     translate( shakeX*shakeAmount, shakeY*shakeAmount);
@@ -49,9 +49,10 @@ void checkPlayerVSPlayerColloision() {
         if (p1.ally!=p2.ally && !p1.dead && !p2.dead ) { //  && p1!=p2
           //    if (dist(p1.x, p1.y, p2.x, p2.y)<playerSize) { // old collision
           if (dist(p1.cx, p1.cy, p2.cx, p2.cy)<p1.radius+p2.radius) {
+            p1.collide(p2);
             p1.hit(p2.damage);
             //float  deltaX = p1.cx -  p2.cx , deltaY =  p1.cy -  p2.cy;
-            p1.pushForce( ((p1.radius+p2.radius)-dist(p2.cx, p2.cy, p1.cx, p1.cy)), atan2(p1.cy -  p2.cy, p1.cx -  p2.cx) * 180 / PI);
+            p1.pushForce( (p1.radius+p2.radius-dist(p2.cx, p2.cy, p1.cx, p1.cy)), atan2(p1.cy -  p2.cy, p1.cx -  p2.cx) * 180 / PI);
           }
         }
       }
@@ -65,7 +66,7 @@ void checkPlayerVSProjectileColloision() {
     try {
       for (Projectile o : projectiles) {    
         for (Player p : players) {      
-          if (p.ally!=o.ally && !p.dead && !o.dead ) { // && o.playerIndex!=p.ally
+          if ( !p.dead && !o.dead &&p.ally!=o.ally  ) { // && o.playerIndex!=p.ally
             //if (dist(o.x, o.y, p.cx, p.cy)<playerSize) { //old collision
             if (dist(o.x, o.y, p.cx, p.cy)<p.radius+o.size*.5) {
               //  players.get(j).hit(projectiles.get(i).damage);
@@ -78,7 +79,7 @@ void checkPlayerVSProjectileColloision() {
     }
     catch(Exception e) {
       println(e +" onmain projectile ");
-      background(255,0,0);
+      //background(255,0,0);
     }
   }
 }
@@ -86,7 +87,7 @@ void checkProjectileVSProjectileColloision() {
   if (!freeze &&!reverse) {
     for (Projectile p1 : projectiles) {    
       for (Projectile p2 : projectiles) {      
-        if (p2.ally!=p1.ally && !p2.dead && !p1.dead ) { //  && p1!=p2
+        if ( !p2.dead && !p1.dead &&p2.ally!=p1.ally ) { //  && p1!=p2
           if (p1 instanceof  Reflectable  && p2 instanceof Reflector) {
             if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*.5+p2.size*.5) {
               ((Reflectable)p1).reflect(p2.angle, p2.owner);
@@ -234,7 +235,8 @@ void resetGame() {
   if (cleanStart) {
     clearGame();
   }
-  if (RandomSkillsOnDeath) {
+
+  if ( RandomSkillsOnDeath) {
     generateRandomAbilities(1, passiveList, true);
     generateRandomAbilities(0, abilityList, true);
   }
@@ -259,6 +261,15 @@ void resetGame() {
     spawningReset();
     break;
   case BOSSRUSH:
+      for (Player p : players) {    
+      if (p!=AI&&!p.clone &&  !p.turret) {  // no turret or clone respawn
+        p.reset();
+        announceAbility( p, 0);
+      } else {
+        p.dead=true;
+        p.state=0;
+      }
+    }
     bossRushSetup() ;
     break;
   case SETTINGS:
@@ -351,8 +362,8 @@ void clearGame() {
     //players.get(i).holdTrigg=true;
     players.get(i).buffList.clear();
     /*for (Ability a: players.get(i).abilityList){
-      players.get(i).abilityList.remove(a);
-    }*/
+     players.get(i).abilityList.remove(a);
+     }*/
     if (players.get(i).turret || players.get(i).clone) players.remove( players.get(i));
   }
 }
@@ -380,55 +391,6 @@ void menuUpdate() {
     m.update();
     m.display();
   }
-
-  /*
-  if (mousePressed&&mouseX>0 && halfWidth>mouseX) {
-   if (mouseY>0 && halfHeight>mouseY) {
-   gameMode=GameType.SURVIVAL;
-   playerSetup();
-   controllerSetup();
-   resetGame();
-   }
-   }
-   fill(255, 255, 150);
-   rect(0, 0, halfWidth, halfHeight);
-   if (mousePressed&&mouseX>halfWidth && width>mouseX) {
-   if (mouseY>0 && halfHeight>mouseY) {
-   gameMode=GameType.BRAWL;
-   playerSetup();
-   controllerSetup();
-   resetGame();
-   }
-   }
-   fill(60, 255, 150);
-   rect(halfWidth, 0, halfWidth, halfHeight);
-   if (mousePressed&&mouseX>0 && halfWidth>mouseX) {
-   if (mouseY>halfHeight && height>mouseY) {
-   gameMode=GameType.WILDWEST;
-   playerSetup();
-   controllerSetup();
-   resetGame();
-   }
-   }
-   fill(120, 255, 150);
-   rect(0, halfHeight, halfWidth, halfHeight);
-   if (mousePressed&&mouseX> halfWidth && width>mouseX) {
-   if (mouseY>halfHeight && height>mouseY) {
-   gameMode=GameType.SHOP;
-   //playerSetup();
-   //controllerSetup();
-   resetGame();
-   }
-   }
-   fill(180, 255, 150);
-   rect( halfWidth, halfHeight, halfWidth, halfHeight);
-   */
-  /*fill(0, 0, 0);
-   text(GameType.SURVIVAL.toString(), width/4, height/4);
-   text(GameType.BRAWL.toString(), halfWidth+width/4, height/4);
-   text(GameType.WILDWEST.toString(), width/4, halfHeight+height/4);
-   text(GameType.SHOP.toString(), halfWidth+width/4, halfHeight+height/4);
-   text(coins +" coins", halfWidth+width/4, halfHeight+height/3);*/
 }
 
 void wildWestUpdate() {
@@ -446,6 +408,7 @@ void wildWestUpdate() {
 
 ArrayList<String> save=  new ArrayList<String>();
 ArrayList<Button> bList= new ArrayList<Button>();
+ArrayList<SettingButton> sList= new ArrayList<SettingButton>();
 ArrayList<ModeButton> mList= new ArrayList<ModeButton>();
 Ability selectedAbility ; 
 
@@ -510,19 +473,47 @@ void shopUpdate() {
     rectMode(CORNER);
   }
 }
-ArrayList<Button> sBList= new ArrayList<Button>();
-void settingsUpdate() {
+ArrayList<SettingButton> sBList= new ArrayList<SettingButton>(); 
+ArrayList<StatButton> pSBList= new ArrayList<StatButton>(); 
+int[] abilitySettingsIndex= new int[4];  
+int settingSkillXOffset=700;
+void settingsUpdate() { //----------------------------------------------------   settingsupdate
   background(255);
   textSize(50);
-  fill(BLACK);
+
+  /* for (Button b: sList){
+   b.update();
+   b.display();
+   }*/
+
+  textSize(46);
   for (Player p : players) {
-    text("player "+(p.index+1), 200, p.index*200+200);
+    fill(p.playerColor,150);
+    text("player "+(p.index+1), 250, p.index*200+200);
   }
-  for (    Button s : sBList) {
+
+  fill(WHITE);
+  stroke(BLACK);
+  for (SettingButton s : sBList) {
     s.update();
     s.display();
+    s.updateSettings();
+  }
+   for (StatButton s : pSBList) {
+    s.update();
+    s.display();
+    //s.updateSettings();
+  }
+  noFill();
+  strokeWeight(8);
+  for (int i=0; i< abilitySettingsIndex.length-1; i++) {
+    stroke(int((255/AmountOfPlayers)*i), 255, 255);
+    rect(  abilitySettingsIndex[i]*200+settingSkillXOffset-55, i*200+145, 110, 110);
   }
 }
+
+int shopXEdgePadding=90,shopYEdgePadding=150;
+int shopXInterval=100,shopYInterval=115;
 void loadProgress() throws Exception {
   save.clear();
   bList.clear();
@@ -531,22 +522,21 @@ void loadProgress() throws Exception {
   int i=0;
   for (Ability a : abilityList) {
     a.unlocked=parseBoolean(parseInt(s[i]));   
-     try{
-      bList.add(new Button(a, int(120+(i*110)%(width-220)), int(160+int(i*110/(width-220))*140), 80));
-      }
-    catch(Exception e){
+    try {
+      bList.add(new Button(a, int(shopXEdgePadding+(i*shopXInterval)%(width-shopXEdgePadding*2)), int(shopYEdgePadding+int(i*shopXInterval/(width-shopXEdgePadding*2))*shopYInterval), 70));
+    }
+    catch(Exception e) {
       println(a.name+" not loaded");
     }
-    //  println(parseBoolean(parseInt(s[i])));
     i++;
   }
 
   for (Ability a : passiveList) {
     a.unlocked=parseBoolean(parseInt(s[i]));
-    try{
-      bList.add(new Button(a, int(120+(i*110)%(width-220)), int(160+int(i*110/(width-220))*140), 80));
+    try {
+      bList.add(new Button(a, int(shopXEdgePadding+(i*shopXInterval)%(width-shopXEdgePadding*2)), int(shopYEdgePadding+int(i*shopXInterval/(width-shopXEdgePadding*2))*shopYInterval), 70));
     }
-    catch(Exception e){
+    catch(Exception e) {
       println(a.name+" not loaded");
     }
     i++;
@@ -565,134 +555,4 @@ void saveProgress() {
   save.add(String.valueOf(coins));
   saveStrings("save", save.toArray(new String[0]));
   //println(save);
-}
-
-class Button {
-  Ability a;
-  int x, y, size;
-  color pcolor=  color(255);
-  Boolean selected=false, hover;
-
-  Button(Ability _ability, int _x, int _y, int _size) {
-    a= _ability;
-    size=_size;
-    x=_x;
-    y=_y;
-    //print(a.name+" ");
-  }
-
-  void update() {
-    if (mouseX>x-size*.5&&x+size*.5>mouseX&&mouseY>y-size*.5&&y+size*.5>mouseY) {
-      pcolor=color(170, 100, 255);
-      if (mousePressed && !pMousePressed) {
-        for (Button b : bList) {
-          b.selected=false;
-        }
-        selected=true;
-        selectedAbility=a;
-        if (a.unlocked && a.deactivatable) {
-          a.deactivated=!a.deactivated;
-          int active=0;
-          for (Ability as : abilityList) {
-            if (!as.deactivated && as.unlocked )active++;
-          }
-          if (active<1) {
-            abilityList[0].deactivated=false;
-            abilityList[0].unlocked=true;
-          }
-          active=0;
-          for (Ability as : passiveList) {
-            if (!as.deactivated  && as.unlocked )active++;
-          }
-          if (active<1) {
-            passiveList[0].deactivated=false;
-            passiveList[0].unlocked=true;
-          }
-        }
-      }
-    } else {
-      pcolor=color( 255);
-    }
-    if (selected) {
-      pcolor=color( 170, 255, 255);
-    }
-  }
-
-  void display() {
-    rectMode(CENTER);
-    if (!a.unlocked) {
-      fill(pcolor);
-      stroke(pcolor);
-      rect(x, y, size, size);
-      tint(255, (a.unlockCost>coins)?40:255);
-      image(a.icon, x, y, size, size);
-      fill((a.unlockCost>coins)?240:0);
-      text(a.unlockCost, x, y+75);
-    } else if (a.deactivated) {
-      fill(0, 100, 255);
-      stroke(0, 255, 255);
-      rect(x, y, size, size);
-      tint(0, 255, 255);
-      image(a.icon, x, y, size, size);
-      fill(0, 255, 255);
-      text("[DEACTIVATED]", x, y+75);
-    } else {
-      tint(80, 255, 255);
-      image(a.icon, x, y, size, size);
-      fill(80, 255, 255);
-      text("[UNLOCKED]", x, y+75);
-    }
-    text(a.name, x, y+60);
-    rectMode(CORNER);
-  }
-}
-
-class ModeButton extends Button {
-  GameType type;
-
-  int w, h, offset;
-  ModeButton(GameType _type, int _x, int _y, int _w, int _h, color _color) {
-    super(null, _x, _y, 0);
-    pcolor=_color;
-    w=_w;
-    h=_h;
-    type =_type;
-  }
-  void update() {
-
-    if (mouseX>x&&x+w>mouseX&&mouseY>y&&y+h>mouseY) {
-      hover=true; 
-      //    for (int i=0; i<6; i++) {
-      particles.add( new  Particle(int(x+random(w)), int(y+random(h)), 0, 0, int(random(50)+20), 1000, WHITE));
-      // }
-      if (offset<30)offset+=5;
-      if (mousePressed && !pMousePressed) {
-        gameMode=type;
-        playerSetup();
-        controllerSetup();
-        resetGame();
-        for (int i=0; i<36; i++) {
-          particles.add( new  Particle(int(x+random(w)), int(y+random(h)), 0, 0, int(random(50)+20), 1000, pcolor));
-        }
-      }
-    } else { 
-      hover=false;    
-      if (offset>0)offset--;
-    }
-  }
-
-  void display() {
-    textSize(30+int(offset*.5));
-    fill(pcolor, (hover)?255:150);
-    stroke(pcolor);
-    strokeWeight(int(offset*.7));
-    rect(x-offset*.5, y-offset*.5, w+offset, h+offset);
-    tint(pcolor);
-    //image(a.icon, x, y, size, size);
-    //text(a.name, x, y+60);
-
-    fill(0, 0, 0);
-
-    text(type.toString(), x+w*.5, y+h*.5);
-  }
 }

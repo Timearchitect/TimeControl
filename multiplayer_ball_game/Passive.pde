@@ -436,6 +436,87 @@ class SuppressFire extends Ability {//------------------------------------------
   }
 }
 
+class Tumble extends Ability {//---------------------------------------------------    SuppressFire   ---------------------------------
+  int count ;
+  boolean rolling=false;
+  float cooldown, forcedAngle, staticAngle, cooldownDuration=100;
+  Tumble() {
+    super();
+    type=AbilityType.PASSIVE;
+    name=getClassName(this);
+    unlockCost=1750;
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void press() {
+    if (cooldown>cooldownDuration) {
+      rolling=true;
+      forcedAngle=owner.keyAngle;
+      staticAngle=owner.keyAngle;
+      owner.ANGLE_FACTOR=0;
+      /* noStroke();
+       fill(255);
+       ellipse(owner.cx+cos(radians(owner.angle))*100, owner.cy+sin(radians(owner.angle))*100, 50, 50);
+       projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*46, sin(radians(owner.angle))*46, 7));
+       
+       projectiles.add( new  Needle(owner, int( owner.cx ), int(owner.cy) , 200, color(0,150,0), 2000, 0, 20, 5, 20) );
+       */
+      owner.armor=5;
+      owner.damage=10;
+      cooldown=0;
+    }
+  }
+  @Override
+    void hold() {
+  }
+  @Override
+    void passive() {
+    if (rolling) {
+      owner.pushForce(3.2*timeBend, staticAngle);
+      // forcedAngle+=21*timeBend
+      //      owner.angle=forcedAngle;
+      // owner.keyAngle=forcedAngle;
+      owner.angle+=21*timeBend;
+      owner.keyAngle+=21*timeBend;
+
+
+      if (!owner.stealth)particles.add( new  Particle(int(owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), owner.vx*.6, owner.vy*.6, 40, 100, owner.playerColor));
+      // owner.angle+=random(-90, 90);
+      if (cooldown>=17) {
+        rolling=false;
+        owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
+
+        owner.armor=owner.DEFAULT_ARMOR;
+        owner.damage=int(owner.DEFAULT_DAMAGE);
+        if (!owner.stealth)particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle))*85), int(owner.cy+sin(radians(owner.angle))*85), 50, 20, 300, owner.playerColor));
+        else  particles.add( new  Particle(int(owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 0, 0, 20, 100, WHITE));
+      }
+    }
+    cooldown+=1*timeBend;
+
+    if (!owner.stealth) {
+      if (cooldown>cooldownDuration) {
+        beginShape();
+        noFill();
+        stroke(owner.playerColor);
+        strokeWeight(4);
+        for (int i=0; i<720; i+=72.5*2) {
+          vertex(owner.cx+sin(radians(i))*150, owner.cy+cos(radians(i))*150);
+        }
+        endShape(CLOSE);
+      }
+      //count++;
+      //  if (count%30==0)   projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*46, sin(radians(owner.angle))*46, 3));
+    }
+  }
+  @Override
+    void reset() {
+    owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+  }
+}
+
 class Gloss extends Ability {//---------------------------------------------------    Gloss   ---------------------------------
   int count;
   Gloss() {
@@ -779,7 +860,7 @@ class Nova extends Ability {//--------------------------------------------------
   }
 }
 
-class BulletCutter extends Ability {//---------------------------------------------------    bullet   ---------------------------------
+class BulletCutter extends Ability {//---------------------------------------------------    BulletCutter passive   ---------------------------------
   int window=12, count, cooldown, range=450;
   float a=0, randX, randY;
   boolean alternate;
@@ -840,9 +921,11 @@ class BulletCutter extends Ability {//------------------------------------------
 
       if (trigger) {          
         alternate=!alternate;
-        if (alternate)projectiles.add( new Slash(owner, int( owner.cx+sin(tempA)*range), int(owner.cy+cos(tempA)*range), 60, owner.playerColor, 140, tempA+5, -15, distance-velocity, sin(tempA)*distance, cos(tempA)*distance, 0, true));
-        else      projectiles.add( new Slash(owner, int( owner.cx+sin(tempA)*range), int(owner.cy+cos(tempA)*range), 60, owner.playerColor, 140, tempA-5, +15, distance-velocity, sin(tempA)*distance, cos(tempA)*distance, 0, true));
-      }
+     //   if (alternate)projectiles.add( new Slash(owner, int( owner.cx+sin(tempA)*range), int(owner.cy+cos(tempA)*range), 60, owner.playerColor, 140, tempA+5, -15, distance-velocity, sin(tempA)*distance, cos(tempA)*distance, 0, true));
+       // else      projectiles.add( new Slash(owner, int( owner.cx+sin(tempA)*range), int(owner.cy+cos(tempA)*range), 60, owner.playerColor, 140, tempA-5, +15, distance-velocity, sin(tempA)*distance, cos(tempA)*distance, 0, true));
+        if (alternate)projectiles.add( new Slash(owner, int( owner.cx+sin(tempA)*range), int(owner.cy+cos(tempA)*range), 60, owner.playerColor, 140, tempA+5, -15, distance-velocity, 0, 0, 0, true));
+        else      projectiles.add( new Slash(owner, int( owner.cx+sin(tempA)*range), int(owner.cy+cos(tempA)*range), 60, owner.playerColor, 140, tempA-5, +15, distance-velocity,0, 0, 0, true));  
+    }
     }
   }
 
@@ -918,7 +1001,7 @@ class Boost extends Ability {//-------------------------------------------------
 }
 
 class Glide extends Ability {//---------------------------------------------------    Glide   ---------------------------------
-
+  float MODIFIED_FRICTION=0.08;
   Glide() {
     super();
     type=AbilityType.PASSIVE;
@@ -936,17 +1019,21 @@ class Glide extends Ability {//-------------------------------------------------
   }
   @Override
     void hold() {
-    owner.pushForce(1, owner.keyAngle);
+    owner.pushForce(0.4, owner.keyAngle);
   }
   @Override
     void release() {
   }
   @Override
     void passive() {
+    owner.FRICTION_FACTOR= MODIFIED_FRICTION;
+
     // owner.pushForce(1,owner.keyAngle);
   }
   @Override
     void reset() {
+    owner.FRICTION_FACTOR= owner.DEFAULT_FRICTION_FACTOR;
+
     // owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
   }
 }
@@ -985,7 +1072,7 @@ class Guardian extends Ability {//----------------------------------------------
         ellipse(owner.cx, owner.cy, range, range);
       }
       for (Projectile p : projectiles) {
-        if (!p.dead && p.ally!=owner.ally&& !(p instanceof Shield)&& !(p instanceof Boomerang) && p.damage<30&& dist(owner.cx, owner.cy, p.x, p.y)<range*.5) {
+        if (!p.dead && p.ally!=owner.ally&&!(p instanceof AbilityPack) && !(p instanceof Shield)&& !(p instanceof Boomerang) && p.damage<30&& dist(owner.cx, owner.cy, p.x, p.y)<range*.5) {
           trigger=true;
           break;
         }
@@ -1320,6 +1407,7 @@ class Dash extends Ability {//--------------------------------------------------
   final int radius= 125, maxCharge=20; 
   float cooldown, charge;
   long timer;
+  boolean dashing;
   Dash() {
     super();
     type=AbilityType.PASSIVE;
@@ -1337,7 +1425,7 @@ class Dash extends Ability {//--------------------------------------------------
   }
   @Override
     void hold() {
-    if (charge<=maxCharge)  charge+=1*timeBend;
+    if (charge<=maxCharge) charge+=1*timeBend;
   }
   @Override
     void release() {
@@ -1345,6 +1433,7 @@ class Dash extends Ability {//--------------------------------------------------
       timer=stampTime;
       cooldown=0;
       charge=0;
+      dashing=true;
       //projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 0, 50, owner.playerColor, 350, 0, 1, 10));
       owner.stealth=true;
       owner.pushForce(50, owner.keyAngle);
@@ -1363,11 +1452,16 @@ class Dash extends Ability {//--------------------------------------------------
         owner.keyAngle=owner.angle;
       }
       owner.stealth=false;
-    } else particles.add(new Particle(int(owner.cx), int(owner.cy), owner.vx*.2, owner.vy*.2, 120, 50, WHITE));
-    if (timer+60*timeBend<stampTime && timer+300*timeBend>stampTime) {
-      owner.ANGLE_FACTOR=0;
-    } else {
-      owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
+    } else { 
+      particles.add(new Particle(int(owner.cx), int(owner.cy), owner.vx*.2, owner.vy*.2, 120, 50, WHITE));
+      if (timer+60*timeBend<stampTime && timer+300*timeBend>stampTime) {
+        owner.ANGLE_FACTOR=0;
+      } else {
+        if (dashing) {
+          owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
+          dashing=false;
+        }
+      }
     }
 
     if (!owner.stealth) {
@@ -1387,7 +1481,137 @@ class Dash extends Ability {//--------------------------------------------------
   }
   @Override
     void reset() {
+    cooldown=0;
+    timer=stampTime;
+    dashing=false;
+    owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
     owner.stealth=false;
+    owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+  }
+}
+
+class Stalker extends Ability {//---------------------------------------------------    bullet   ---------------------------------
+  int count, cooldown, interval=200;
+  float behindRangeMultiplyer=2.4;
+  Player target;
+
+  Stalker() {
+    super();
+    type=AbilityType.PASSIVE;
+    name=getClassName(this);
+    unlockCost=500;
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void onHit() {
+    if (cooldown>interval) {
+      cooldown=0;
+      particles.add(new Flash(300, 8, BLACK));  
+      particles.add( new TempFreeze(400));
+      particles.add(new ShockWave(int(owner.cx), int(owner.cy), 20, 16, 200, owner.playerColor));
+      particles.add( new  Particle(int(owner.cx), int(owner.cy), 0, 0, int(owner.w), 800, color(255, 0, 255)));
+      owner.stop();
+      for (int i =0; i<3; i++) {
+        particles.add( new Feather(300, int(owner.cx), int(owner.cy), random(-2, 2), random(-2, 2), 15, owner.playerColor));
+      }
+      target= seek(owner, 2500);
+      if (target!=null) {
+        stroke(owner.playerColor);
+        strokeWeight(100);
+        line(owner.cx, owner.cy, target.cx+cos(radians(owner.angle))*owner.radius*behindRangeMultiplyer, target.cy+sin(radians(owner.angle))*owner.radius*behindRangeMultiplyer);
+        owner.x=target.x+cos(radians(owner.angle))*owner.radius*behindRangeMultiplyer;
+        owner.y=target.y+sin(radians(owner.angle))*owner.radius*behindRangeMultiplyer;
+        owner.angle+=180;
+        owner.keyAngle=owner.angle;
+      }
+    }
+  }
+  @Override
+    void hold() {
+  }
+  @Override
+    void release() {
+  }
+  @Override
+    void passive() {
+    if (!owner.stealth) {
+      if (cooldown>interval) {
+        target= seek(owner, 2500);
+        if (target!=null) {//crossVarning(int(target.cx), int(target.cy));
+          stroke(owner.playerColor);
+          noFill();
+          ellipse(target.cx+cos(radians(owner.angle))*owner.radius*behindRangeMultiplyer, target.cy+sin(radians(owner.angle))*owner.radius*behindRangeMultiplyer, owner.w, owner.w);
+        }
+      }
+      noFill();
+      stroke(owner.playerColor);
+      strokeWeight(2);
+      beginShape();
+      for (int i=0; i<360; i+=30) {
+        vertex(owner.cx+sin(radians(i))*100, owner.cy+cos(radians(i))*100);
+      }
+      endShape(CLOSE);
+      cooldown++;
+      if (target!=null) {
+        if (debug) {
+          fill(owner.playerColor);
+          text(calcAngleBetween(target, owner), target.cx+200, target.cy+200);
+        }
+        //targetVarning(target);
+      }
+    }
+  }
+  @Override
+    void reset() {
+    owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+  }
+}
+class Scatter extends Ability {//---------------------------------------------------    bullet   ---------------------------------
+  int count, cooldown, damage=10;
+  Scatter() {
+    super();
+    type=AbilityType.PASSIVE;
+    name=getClassName(this);
+    unlockCost=500;
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void onHit() {
+    if (cooldown>2) {
+      cooldown=0;
+      Bomb b=new Bomb(owner, int( owner.cx), int(owner.cy), 15, owner.playerColor, int( random(1000 ) )+200, owner.angle-20, cos(radians(random(360)))*random(15), sin(radians(random(360)))*random(15), damage, false);
+      b.blastForce=15;
+      b.blastRadius=80;
+      projectiles.add( b);
+      // projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 15, 40, owner.playerColor, 350, random(360), 1, 10, 12));
+    }
+  }
+  @Override
+    void hold() {
+  }
+  @Override
+    void release() {
+  }
+  @Override
+    void passive() {
+    if (!owner.stealth) {
+      noFill();
+      stroke(owner.playerColor);
+      strokeWeight(2);
+      beginShape();
+      for (int i=0; i<360; i+=10) {
+        vertex(owner.cx+sin(radians(i))*100, owner.cy+cos(radians(i))*100);
+      }
+      endShape(CLOSE);
+      cooldown++;
+    }
+  }
+  @Override
+    void reset() {
     owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
   }
 }

@@ -2,18 +2,18 @@ final int TARGETABLE=0, STATIONARY=1, INVIS=2, STEALTH=3;
 
 class Player implements Cloneable {
   PShape arrowSVG = loadShape("arrow.svg");
-  int  index, ally, radius, outlineDiameter, w, h, up, down, left, right, triggKey, deColor;
+  int  index, ally, radius, outlineDiameter, w, h, up, down, left, right, DEFAULT_UP, DEFAULT_DOWN, DEFAULT_LEFT, DEFAULT_RIGHT, triggKey, deColor;
   int state=1, maxHealth=200, health=maxHealth, damage=1;
   final int barSize=12, barDiameter=75, invinsTime=400, buttonHoldTime=300;
-  final int mouseMargin=200;
+  final int mouseMargin=60;
   //float MAX_MOUSE_ACCEL=0.0035;
   final float mouseMaxAccel=1.4;
-  float  x, y, vx, vy, ax, ay, cx, cy, angle, keyAngle, f, s, bend, barFraction, fraction,armor;
+  float  x, y, vx, vy, ax, ay, cx, cy, angle, keyAngle, f, s, bend, barFraction, fraction, armor, weaponDamage=0, weaponSpeed, weaponAttackSpeed, weaponCost, weaponAccuracy=0,weaponCritChance,weaponCritDamage;
   boolean holdTrigg, holdUp, holdDown, holdLeft, holdRight, dead, hit, arduino, arduinoHold, mouse, clone, turret;
   PVector coord, speed, accel, arrow;
-  float DEFAULT_RADIUS,DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR, DEFAULT_FRICTION_FACTOR=0.1, DEFAULT_ARMOR=0; 
+  float DEFAULT_DAMAGE=1, DEFAULT_RADIUS, DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR, DEFAULT_FRICTION_FACTOR=0.1, DEFAULT_ARMOR=0; 
   long invisStampTime;
-  boolean invis, freezeImmunity=true, reverseImmunity, fastforwardImmunity, slowImmunity, stationary, stunned, stealth, targetable=true;
+  boolean invis, freezeImmunity=false, reverseImmunity, fastforwardImmunity, slowImmunity, stationary, stunned, stealth, targetable=true;
   //Ability ability;  
   ArrayList<Ability> abilityList= new ArrayList<Ability>();
   ArrayList<Buff> buffList= new ArrayList<Buff>();
@@ -24,14 +24,26 @@ class Player implements Cloneable {
   Player(int _index, color _playerColor, int _x, int _y, int _w, int _h, int _up, int _down, int _left, int _right, int _triggKey, Ability ..._ability) {
     DEFAULT_FRICTION_FACTOR=DEFAULT_FRICTION;
     FRICTION_FACTOR=DEFAULT_FRICTION;
+      index=_index;
+    ally=_index;
+      println("player "+index);
     if (_up==888) {  // mouse Handicap
       mouse=true;
       FRICTION_FACTOR=0.045;
-      maxHealth=250;
-      health=maxHealth;
+      maxHealth=250+int(addStat(_index,0))*5;
+  
     }
-    index=_index;
-    ally=_index;
+    maxHealth+=int(addStat(index,0))*5;
+    armor+=int(addStat(index,3))*.5;
+    DEFAULT_ARMOR=armor;
+    weaponDamage+=int(addStat(index,6));
+    weaponAttackSpeed+=int(addStat(index,8));
+    //weaponCost+=int(addStat(index,3));
+    weaponAccuracy+=int(addStat(index,7))*3;
+    weaponCritChance+=int(addStat(index,4));
+    weaponCritDamage+=int(addStat(index,5));
+  
+    println("reborn acc:"+weaponAccuracy);
     //ability= _ability[0];
     //ability.setOwner(this);
     //if (_ability[0]==null) ability= new Ability();
@@ -60,11 +72,15 @@ class Player implements Cloneable {
     down= _down;
     left=_left;
     right=_right;
+    DEFAULT_UP=_up;
+    DEFAULT_DOWN= _down;
+    DEFAULT_LEFT=_left;
+    DEFAULT_RIGHT=_right;
     // arrowSVG = loadShape("arrow.svg");
     shapeMode(CENTER);
     arrowSVG.disableStyle();
     shape(arrowSVG, -arrowSVG.width*0.5+30, -arrowSVG.height, arrowSVG.width, arrowSVG.height);
-     //if(!clone) buffList.add(new Stun(this, AI, 2000));
+    //if(!clone) buffList.add(new Stun(this, AI, 2000));
   }
   void checkBounds() {
     //if (!reverse && reverseImmunity) {
@@ -117,6 +133,7 @@ class Player implements Cloneable {
   }
 
   void display() {
+    //println(index+" "+health);
     if (!stealth) {
       stroke((freeze && !freezeImmunity)?255:0);
       strokeWeight(2);
@@ -184,15 +201,15 @@ class Player implements Cloneable {
           //speed.set(speed.x-(accel.x*bend), speed.y-(accel.y*bend));
           for (int i=buffList.size()-1; i>=0; i--) {
             buffList.get(i).update(); 
-            
-            if ( buffList.get(i).dead)   buffList.remove( buffList.get(i)); 
+
+            if ( buffList.get(i).dead)   buffList.remove( buffList.get(i));
           }
           for (Ability a : this.abilityList) a.regen();
         } else {
           for (Ability a : this.abilityList) a.regen();
           for (int i=buffList.size()-1; i>=0; i--) {
             buffList.get(i).update(); 
-          // print( " "+buffList.get(i).name);
+            // print( " "+buffList.get(i).name);
             if ( buffList.get(i).dead)   buffList.remove( buffList.get(i));
           }
           //speed.set(speed.x+(accel.x*bend), speed.y+(accel.y*bend));
@@ -221,7 +238,6 @@ class Player implements Cloneable {
   void control(int dir) {
 
     if (dir==8) { // ability control
-      //ability.press(); 
       for (Ability a : this.abilityList) a.press();
       //---------------    hold    --------------------
       int temp =int(prevMillis-millis());
@@ -432,6 +448,9 @@ class Player implements Cloneable {
       a.reset();
     }
     dead=true;
+    for (Buff b : this.buffList) {
+      b.onOwnerDeath();
+    }
     buffList.clear();
     // ability.reset();
     shakeTimer+=10;
@@ -474,7 +493,7 @@ class Player implements Cloneable {
     fill(255);
     if (abilityList.get(index).regen) { 
       noStroke();
-      } else {
+    } else {
       strokeWeight(6);
       stroke(hue(playerColor), 255*S, 255*S);
     }
@@ -495,6 +514,11 @@ class Player implements Cloneable {
     vy+=_vy;
     stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
   }
+  void collide(Player e) {
+    for (Buff b : buffList) {
+      b.onCollide(this, e);
+    }
+  }
   void stop() {
     vx=0;
     vy=0;
@@ -510,10 +534,15 @@ class Player implements Cloneable {
     vy=0;
     ax=0;
     ay=0;
+    up= DEFAULT_UP;
+    down= DEFAULT_DOWN;
+    left=DEFAULT_LEFT;
+    right=DEFAULT_RIGHT;
+
     health=maxHealth;
     armor=DEFAULT_ARMOR;
     radius=int(DEFAULT_RADIUS);
-     outlineDiameter=int(radius*2.2);
+    outlineDiameter=int(radius*2.2);
     w=radius*2;
     h=radius*2;
     dead=false;
@@ -538,5 +567,16 @@ class Player implements Cloneable {
       println(c +" player");
       return null;
     }
+  }
+  public void replaceAbility(Ability discardA, Ability replacementA) {
+    //println(discardA.getClass().getSimpleName() +"  to  " +replacementA.getClass().getSimpleName());
+    for (int i=0; i< abilityList.size()-1;i++) {
+     // println(abilityList.get(i).getClass().getSimpleName());
+      if (abilityList.get(i).getClass().getSimpleName().equals(discardA.getClass().getSimpleName())) {
+        abilityList.set(i,replacementA);
+        //println("replaced to:"+abilityList.get(i).getClass().getSimpleName());
+      }
+    }
+
   }
 }

@@ -9,7 +9,11 @@ void keyPressed() {
       key=0;
     }
   }
+  //println(int(keyCode));
+  if (keyCode==148) { // PAUSE
 
+    background(255);
+  }
   key=Character.toLowerCase(key);// convert key to lower Case
   if (key == '#') {                    // enablecheats
     cheatEnabled=(cheatEnabled==true)?false:true;
@@ -17,6 +21,7 @@ void keyPressed() {
   if (key == '"') {                    // enablecheats
     debug=(debug==true)?false:true;
   }
+
   if (key == '¤') {      
     //ac.setPause(true);
     mute=!mute;
@@ -25,6 +30,7 @@ void keyPressed() {
   }
 
   if ((cheatEnabled||playersAlive<=1 ) && key==ResetKey) {
+
     if (!noFlash) background(255);
     for (int i =players.size()-1; i>= 0; i--) {
       if (players.get(i).turret || players.get(i).clone) players.remove( players.get(i));
@@ -60,12 +66,21 @@ void keyPressed() {
   }
 
   if (cheatEnabled ) {
+    if (key == ')') {                    // enablecheats
+      coins=999999;
+    }
+    if (key == '=') {                    // enablecheats
+      coins=0;
+    }
+    if (key=='!') {
+      hitBox=!hitBox;
+    }
     if (key==Character.toLowerCase('6')) {
 
-      generateRandomAbilities(1, passiveList,true);
+      generateRandomAbilities(1, passiveList, true);
     }
     if (key==Character.toLowerCase(RandomKey)) {
-      generateRandomAbilities(0, abilityList,true);
+      generateRandomAbilities(0, abilityList, true);
     }
     if (key==Character.toLowerCase('9')) {
       for (int i=0; i<players.size()-1; i++) {
@@ -119,8 +134,6 @@ void keyPressed() {
           }
         } //else println("not player"+ i);
       }
-
-
     }
     if (key==Character.toLowerCase('+')) {
       //players.get(mouseSelectedPlayerIndex).ability.reset();
@@ -194,18 +207,28 @@ void keyPressed() {
     }
     if (key==Character.toLowerCase(keyFreeze)) {
       quitOrigo();
-      for (int i=0; i<players.size (); i++) {  
-        stamps.add( new ControlStamp(players.get(i).index, int(players.get(i).x), int(players.get(i).y), players.get(i).vx, players.get(i).vy, players.get(i).ax, players.get(i).ay));
+      /* for (int i=0; i<players.size (); i++) {  
+       stamps.add( new ControlStamp(players.get(i).index, int(players.get(i).x), int(players.get(i).y), players.get(i).vx, players.get(i).vy, players.get(i).ax, players.get(i).ay));
+       }*/
+      for (Player p : players) {  
+        stamps.add( new ControlStamp(p.index, int(p.x), int(p.y), p.vx, p.vy, p.ax, p.ay));
       }
       freeze=(freeze)?false:true;
       speedControl.clear();
       speedControl.addSegment((freeze)?0:1, 150); //now stop
       controlable=(controlable)?false:true;
-      for (int i=0; i< players.size (); i++) {
+      /*for (int i=0; i< players.size (); i++) {
+       //stamps.add( new AbilityStamp(player.index, int(player.x), int(player.y), energy, active, channeling, cooling, regen, hold));
+       stamps.add( new ControlStamp(i, int(players.get(i).x), int( players.get(i).y), 0, 0, 0, 0));
+       samps.add( new ControlStamp(i, int(players.get(i).x), int( players.get(i).y), players.get(i).vx, players.get(i).vy, players.get(i).ax, players.get(i).ay));
+       }*/
+
+      for (Player p : players) { 
         //stamps.add( new AbilityStamp(player.index, int(player.x), int(player.y), energy, active, channeling, cooling, regen, hold));
-        stamps.add( new ControlStamp(i, int(players.get(i).x), int( players.get(i).y), 0, 0, 0, 0));
-        stamps.add( new ControlStamp(i, int(players.get(i).x), int( players.get(i).y), players.get(i).vx, players.get(i).vy, players.get(i).ax, players.get(i).ay));
+        stamps.add( new ControlStamp(p.index, int(p.x), int( p.y), 0, 0, 0, 0));
+        stamps.add( new ControlStamp(p.index, int(p.x), int( p.y), p.vx, p.vy, p.ax, p.ay));
       }
+
       controlable=(controlable)?false:true;
       drawTimeSymbol();
     }
@@ -283,6 +306,102 @@ void keyPressed() {
   catch(Exception e) {
     println(e +" keyboard");
   }
+
+  if (gameMode==GameType.SETTINGS) {
+    try {
+      for (int i=0; i< players.size()-1; i++) {
+        if (key==Character.toLowerCase(players.get(i).triggKey)) {// ability trigg key
+                    if(abilities[i][abilitySettingsIndex[i]].type==AbilityType.ACTIVE){
+                      abilities[i][abilitySettingsIndex[i]]=new NoPassive();
+                    }else abilities[i][abilitySettingsIndex[i]]=new NoActive();
+        }
+
+        if (keyCode==players.get(i).down) {//down
+          for (  int j=0; j<abilityList.length; j++) {
+            if (abilities[i][abilitySettingsIndex[i]].getClass()==abilityList[j].getClass()) {
+              while ( j==0 || !abilityList[j-1].unlocked ) {
+                j--;
+               if (j<=0)j=abilityList.length;
+              }    
+              try {
+                abilities[i][abilitySettingsIndex[i]]= abilityList[j-1].clone();
+              }
+              catch(CloneNotSupportedException e) {
+                println("not cloned from Random");
+              }
+            }
+          }
+           for (  int j=0; j<passiveList.length; j++) {
+            if (abilities[i][abilitySettingsIndex[i]].getClass()==passiveList[j].getClass()) {
+              while ( j==0 ||!passiveList[j-1].unlocked) {
+                if (j<=0)j=passiveList.length;
+                j--;
+              }
+              try {
+                abilities[i][abilitySettingsIndex[i]]= passiveList[j-1].clone();
+              }
+              catch(CloneNotSupportedException e) {
+                println("not cloned from Random");
+              }
+            }
+          }
+        }
+        if (keyCode==players.get(i).up) {//up
+          // print("change Ability down ");
+          for (  int j=0; j<abilityList.length; j++) {
+            if (abilities[i][abilitySettingsIndex[i]].getClass()==abilityList[j].getClass()) {
+
+              while ( j>=abilityList.length-1 ||!abilityList[j+1].unlocked) {
+                if (j>=abilityList.length-1)j=-2;
+                j++;
+              }
+     
+              try {
+                abilities[i][abilitySettingsIndex[i]]= abilityList[j+1].clone();
+              }
+              catch(CloneNotSupportedException e) {
+                println("not cloned from Random");
+              }
+
+              break;
+            }
+          }
+          for (  int j=0; j<passiveList.length; j++) {
+            if (abilities[i][abilitySettingsIndex[i]].getClass()==passiveList[j].getClass()) {
+              while (j>=passiveList.length-1 ||!passiveList[j+1].unlocked) {
+                if (j>=passiveList.length-1)j=-2;
+                j++;
+              }
+              try {
+                abilities[i][abilitySettingsIndex[i]]= passiveList[j+1].clone();
+              }
+              catch(CloneNotSupportedException e) {
+                println("not cloned from Random");
+              }
+
+              break;
+            }
+          }
+        }
+        if (keyCode==players.get(i).left) {//left
+          if (abilitySettingsIndex[i]>0) abilitySettingsIndex[i]--;
+        }
+        if (keyCode==players.get(i).right) {//right
+          if (abilitySettingsIndex[i]<players.get(i).abilityList.size()-1) abilitySettingsIndex[i]++;
+        }
+      }
+    } 
+    catch(Exception e) {
+      println(e +" keyboard");
+    }
+    /* sBList.clear();
+     for (int j=0; j<AmountOfPlayers; j++) {
+     for (int i=0; i<2; i++) {
+     sBList.add( new SettingButton(i, 600+200*i, 200+200*j, 100, players.get(j)) );
+     }
+     }*/
+  }
+
   //   keyCooldown[i]=keyResponseDelay;
 
   // keyCooldown[i]--;

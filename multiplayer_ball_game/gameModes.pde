@@ -30,14 +30,14 @@ void spawningSetup() {
   /*  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.5), int(playerSize*0.5), 10, 150, 1, new Bazooka())}
    , 1000));*/
 
-  spawnList.add(new Spawner(new Object[]{new AbilityPack(AI, new Random(true).randomize(passiveList), int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 30000, 0, 0, 0, true, true)}
-    , 5000, 0, true, 1));
-  spawnList.add(new Spawner(new Object[]{new AbilityPack(AI, new Random(true).randomize(passiveList), int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 30000, 0, 0, 0, true, true)}
-    , 5000, 0, true, 1));
-  spawnList.add(new Spawner(new Object[]{new AbilityPack(AI, new Random(true).randomize(abilityList), int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 30000, 0, 0, 0, true, true)}
-    , 5000, 0, true, 1));
-  spawnList.add(new Spawner(new Object[]{new AbilityPack(AI, new Random(true).randomize(passiveList), int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 30000, 0, 0, 0, true, true)}
-    , 5000, 0, true, 1));
+  /* spawnList.add(new Spawner(new Object[]{new AbilityPack(AI, new Random(true).randomize(passiveList), int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 30000, 0, 0, 0, true, true)}
+   , 5000, 0, true, 1));
+   spawnList.add(new Spawner(new Object[]{new AbilityPack(AI, new Random(true).randomize(passiveList), int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 30000, 0, 0, 0, true, true)}
+   , 5000, 0, true, 1));
+   spawnList.add(new Spawner(new Object[]{new AbilityPack(AI, new Random(true).randomize(abilityList), int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 30000, 0, 0, 0, true, true)}
+   , 5000, 0, true, 1));
+   spawnList.add(new Spawner(new Object[]{new AbilityPack(AI, new Random(true).randomize(passiveList), int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 30000, 0, 0, 0, true, true)}
+   , 5000, 0, true, 1));*/
   spawnList.add(new Spawner(new Object[]{new AbilityPack(AI, new Random(true).randomize(abilityList), int( AI.cx+cos(radians(AI.angle))*AI.w*2), int(AI.cy+sin(radians(AI.angle))*AI.w*2), 100, AI.playerColor, 30000, 0, 0, 0, true, true)}
     , 5000, 0, true, 1));
 
@@ -130,9 +130,14 @@ void spawningReset() {
   }   
 
   for (Player p : players) {
-    p.abilityList.clear();
-    p.abilityList.add(new Random().randomize(abilityList));
-    p.abilityList.get(0).setOwner(p);
+    if (!preSelectedSkills) {  
+      p.abilityList.clear();
+      p.abilityList.add(new Random().randomize(abilityList));
+      p.abilityList.get(0).setOwner(p);
+    }
+    for (Ability a : p.abilityList) {
+      a.reset();
+    }
     p.ally=0;
   }
 
@@ -151,8 +156,10 @@ void spawningReset() {
   spawningSetup();
   particles.add(new  Text("Survival", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
   particles.add(new Gradient(10000, 0, 500, 0, 0, 500, 0.5, 0, GREY));
-  generateRandomAbilities(1, passiveList, true);
-  generateRandomAbilities(0, abilityList, true);
+  if (!preSelectedSkills) {  
+    generateRandomAbilities(1, passiveList, true);
+    generateRandomAbilities(0, abilityList, true);
+  }
   /*for (Spawner s : spawnList) {
    s.dead=false;
    s.times=s.initTimes;

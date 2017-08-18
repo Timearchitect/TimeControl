@@ -5,7 +5,7 @@
  //  av: Alrik He    v.0.7.9                                   //
  //  Arduino verstad Malmö                                     //
  //                                                            //
- //      2014-09-21    -     2017-05-03                        //
+ //      2014-09-21    -     2017-08-18                        //
  //                                                            //
  //                                                            //
  //         Used for weapon test & prototyping timebending     //
@@ -27,20 +27,20 @@ final color BGcolor=color(100);
 PFont font;
 PGraphics GUILayer;
 PShader  Blur;
-boolean hitBox=false,cleanStart=true, perSelectedSkills=true, RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true, inGame;
+boolean hitBox=false, cleanStart=true, preSelectedSkills=true, RandomSkillsOnDeath=false, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true, inGame;
 boolean gradualCleaning=true;
-final float flashAmount=0.5, shakeAmount=0.5;
+final float flashAmount=0.5, shakeAmount=0.8;
 int mouseSelectedPlayerIndex=0;
-int halfWidth, halfHeight, coins;
+int halfWidth, halfHeight, coins, mouseScroll;
 //int gameMode=0;
 GameType gameMode=GameType.MENU;
 final int AmountOfPlayers=3; // start players
-final float DIFFICULTY_LEVEL=1.0;
+final float DIFFICULTY_LEVEL=1.2;
 
 final int WHITE=color(255), GREY=color(172), BLACK=color(0), GOLD=color(255, 220, 0);
 final int speedFactor= 2;
 final float slowFactor= 0.3;
-final String version="0.7.10";
+final String version="0.7.11";
 static long prevMillis, addMillis, forwardTime, reversedTime, freezeTime, stampTime, fallenTime;
 final int baudRate= 19200;
 final static float DEFAULT_FRICTION=0.1;
@@ -50,13 +50,13 @@ final int playerSize=100;
 static int playersAlive; // amount of players alive
 static Player AI;
 final int offsetX=1250, offsetY=-50;//final int offsetX=950, offsetY=100;
-static int shakeTimer, shakeX=0, shakeY=0,maxShake=80;
+static int shakeTimer, shakeX=0, shakeY=0, maxShake=80;
 final float DEFAULT_ZOOMRATE=0.02;
 static float F=1, S=1, timeBend=1, zoom=0.7, tempZoom=1.0, tempOffsetX=0, tempOffsetY=0, zoomX, zoomY, zoomXAim, zoomYAim, zoomAim=1, zoomRate=0.02;
 //int keyCooldown[]= new int[AmountOfPlayers];
 final int keyResponseDelay=30;  // eventhe refreashrate equal to arduino devices
 final char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='7';
-final int ICON_AMOUNT=40;
+final int ICON_AMOUNT=56;
 final PImage[] icons=new PImage[ICON_AMOUNT];
 Serial port[]=new Serial[AmountOfPlayers];  // Create object from Serial class
 String portName[]=new String[AmountOfPlayers];
@@ -65,7 +65,7 @@ ArrayList <Player> players = new ArrayList<Player>();
 ArrayList <TimeStamp> stamps= new ArrayList<TimeStamp>();
 ArrayList <Projectile> projectiles = new ArrayList<Projectile>();
 ArrayList <Particle> particles = new ArrayList<Particle>();
-
+Ability[] ChloeSet;
 
 
 final Projectile allProjectiles[] = new Projectile[]{
@@ -168,10 +168,16 @@ void setup() {
     new MarbleLauncher(), 
     new Torpedo(), 
     new PoisonDart(), 
-    new Artilery(),
-    new LaserSword(),
-    new StunGun(),
-    new ChargeSlash()
+    new Artilery(), 
+    new LaserSword(), 
+    new StunGun(), 
+    new ChargeSlash(), 
+    new GranadeLauncher(), 
+    new DoubleTap(), 
+    new RapidBattery(), 
+    new Chivalry(), 
+    new HitScanGun(), 
+    new HanzoMain()
   };
 
   passiveList = new Ability[]{
@@ -196,8 +202,11 @@ void setup() {
     new Adrenaline(), 
     new BulletCutter(), 
     new Dash(), 
-    new Guardian(),
-    new SnakeShield()
+    new Guardian(), 
+    new SnakeShield(), 
+    new Stalker(), 
+    new Scatter(), 
+    new Tumble()
     //new Redemption(), // buggy on survival
     // new Undo() // buggy on survival
   };
@@ -251,13 +260,17 @@ void setup() {
 
   println("loaded save ... abilities!");
   abilities= new Ability[][]{ 
-  /* player 1 */      new Ability[]{new SeekGun(), new Random().randomize(passiveList)}, 
-  /* player 2 */      new Ability[]{new Artilery(), new Random().randomize(passiveList)}, 
-  /* player 3 mouse */new Ability[]{new  Random().randomize(abilityList), new  Random().randomize(passiveList)}, 
-  /* player 4 */      new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
+  /* player 1 */    new Ability[]{new RapidBattery(), new Tumble()}, 
+  /* player 2 */    new Ability[]{new RapidBattery(), new Random().randomize(passiveList)}, 
+  /* player 3 mouse */    new Ability[]{new  Random().randomize(abilityList), new  Random().randomize(passiveList)}, 
+  /* player 4 */    new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
     new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
     new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}
   };
+
+  //ChloeSet = new Ability[]{new ForceShoot(),new RapidFire(), new Dash(), new Tumble(),new Emergency()};
+  //abilities[1]=ChloeSet;
+
   colorMode(HSB);
   /* for (int i=0; i< AmountOfPlayers; i++) {
    try {
@@ -337,6 +350,24 @@ void setup() {
   AI.fastforwardImmunity=false;
 
   resetGame();
+  for (int j=0; j<AmountOfPlayers; j++) {
+    for (int i=0; i<2; i++) {
+      sBList.add( new SettingButton(i, settingSkillXOffset+200*i, 200+200*j, 100, players.get(j)) );
+    }
+
+    pSBList.add( new StatButton(icons[46],0, "HP", 50, 250+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[47],1, "MP", 100, 250+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[48],2, "Sp", 150, 250+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[49],3, "Armor", 200, 250+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[50],4, "Crit%", 250, 250+200*j, 50, players.get(j)) );
+
+    pSBList.add( new StatButton(icons[51],5, "CritD", 300, 250+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[52],6, "Damage", 350, 250+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[53],7, "Acc", 400, 250+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[54],8, "AttSp", 450, 250+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[54],9, "CDR", 500, 250+200*j, 50, players.get(j)) );
+
+  }
 }
 void stop() {
   musicPlayer.pause(true);
@@ -445,7 +476,7 @@ void draw() {
 
     //-----------------------  USB ------------------------
 
-    for (int i=0; i<Serial.list().length; i++) {   // USB devices
+    for (int i=0; i<Serial.list().length; i++) {   // USB devices & k
       if (portName[i]!= null && port[i].available() > 0) {  //ta in data och ignorerar skräpdata    
         players.get(i).control(port[i].read());
         // println("INPUT!:  "+char(port[i].read()));
@@ -461,11 +492,12 @@ void draw() {
         if (!p.dead) {
           if (!freeze ||  p.freezeImmunity) {
             p.mouseControl() ;
-            p.update();
+            //p.update();
             if (!reverse || p.reverseImmunity) {
               p.checkBounds();
             }
           }
+          p.update(); // !!!
           p.display();
         }
       }
@@ -506,7 +538,7 @@ void draw() {
     strokeWeight(20);
 
     for (Player p : players) {
-      if (p.index>-1 && p.index<5) {
+      if (p.index>-1 && p.index<5 &&!p.clone) {
         for (Ability a : p.abilityList) {
           if (a.type==AbilityType.ACTIVE) {
             noStroke();
@@ -576,4 +608,5 @@ void draw() {
   // origo
   // prevMillis=millis();
   pMousePressed=mousePressed;
+  mouseScroll=0;
 }

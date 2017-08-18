@@ -512,7 +512,7 @@ class TempZoom extends Particle {
     reset=_reset;
     diffRate=_zoomRate;
   }
-  TempZoom(Player _player, int _time, float _zoomLvl ,float _zoomRate, boolean _reset) {
+  TempZoom(Player _player, int _time, float _zoomLvl, float _zoomRate, boolean _reset) {
     super( 0, 0, 0, 0, 0, _time, 255);
     deathTime= millis()+_time;
     followP=_player;
@@ -724,14 +724,15 @@ class Spark extends Particle {
 }
 
 class Gradient extends Particle {
-  float shrinkRate, opacity=200, size=100,length;
+  float shrinkRate, opacity=200, size=100, length;
   Gradient(int _time, int _x, int _y, float _vx, float _vy, int _maxSize, float _shrinkRate, float _angle, color _particleColor) {
     super( _x, _y, _vx, _vy, _maxSize, _time, _particleColor);
     size=_maxSize;
     angle=_angle;
     shrinkRate=_shrinkRate;
+    length=2800;
   }
-    Gradient(int _time, int _x, int _y, float _vx, float _vy,float _length, int _maxSize, float _shrinkRate, float _angle, color _particleColor) {
+  Gradient(int _time, int _x, int _y, float _vx, float _vy, float _length, int _maxSize, float _shrinkRate, float _angle, color _particleColor) {
     super( _x, _y, _vx, _vy, _maxSize, _time, _particleColor);
     size=_maxSize;
     angle=_angle;
@@ -1041,6 +1042,85 @@ class Fragment extends Particle {
       stroke(hue(particleColor), saturation(particleColor), brightness(particleColor)*S, opacity);
       strokeWeight(8);
       triangle(p1.x+x, p1.y+y, p2.x+x, p2.y+y, p3.x+x, p3.y+y);
+    }
+  }
+}
+
+//-------------------------------------------------------------//    Star    //-------------------------------------------------------------------------
+
+class Star extends Particle {
+  boolean follow;
+  float shrinkRate, size=100, scale=1;
+  PShape form= createShape();
+  Star(int _time, int _x, int _y, float _vx, float _vy, int _size,float _shrinkRate, color _particleColor) {
+    super( _x, _y, _vx, _vy, 100, _time, _particleColor);
+    size = _size;
+    shrinkRate=_shrinkRate;
+    // opacity=0;
+    //stroke(_particleColor, opacity);
+    // fill(WHITE, opacity);
+    form.disableStyle();
+    form.beginShape();
+   // form.stroke(_particleColor, opacity);
+   // form.fill(WHITE, opacity);
+   // form.strokeWeight(size/10); 
+    form.vertex(0, -size );
+    form.vertex(size*.5 -size/4, - size*.5+size/4);
+    form.vertex(size, 0);
+    form.vertex(size*.5-size/4, size*.5-size/4);
+    form.vertex(0, size);
+    form.vertex(-size*.5+size/4, size*.5-size/4);
+    form.vertex(-size, 0);
+    form.vertex(-size*.5+size/4, -size*.5+size/4);
+    form.endShape(CLOSE);
+       // form.translate(form.width*.5, form.height*.5);
+     form.translate(size, size);
+    //form.setVisible(false);
+    opacity=255;
+
+  }
+  void update() {
+      
+
+    if (!dead && !freeze) { 
+      //f =(fastForward)?speedFactor:1;
+      if (reverse) {
+        angle+=4*timeBend;
+        scale/=shrinkRate*timeBend;
+
+        opacity+=6*timeBend;
+        x-=vx*timeBend;
+        y-=vy*timeBend;
+      } else {
+        angle-=4*timeBend;
+        scale*=shrinkRate*timeBend;
+
+        opacity-=6*timeBend;
+        x+=vx*timeBend;
+        y+=vy*timeBend;
+      }
+    }
+  }
+
+  void display() {
+
+    if (!dead ) {
+     // super.display();
+      // form.setStroke(color(particleColorparticleColor),blue(particleColor)));  
+      strokeWeight(size/10*scale); 
+      stroke(particleColor,opacity);
+      fill(WHITE,opacity);
+      
+      //tint(particleColor, opacity);
+      pushMatrix();
+      translate(x, y);
+      rotate(radians(angle));
+      //tint(255,opacity);
+       scale(scale*random(0.5,1));
+     // shape(form, form.width*.5, form.height*.5);
+       shape(form);
+      //strokeWeight(opacity*0.1);
+      popMatrix();
     }
   }
 }

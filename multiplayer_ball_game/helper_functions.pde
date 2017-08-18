@@ -21,6 +21,18 @@ void targetHommingVarning(Player target) {
   line(tcx, tcy+r, tcx, tcy-r);
 }
 
+float  crit(Player owner, float precent, float damage) {
+  if (precent>random(100)) {
+    particles.add(new Flash(5, 32, WHITE));  
+    fill(WHITE);
+    stroke(owner.playerColor);
+    strokeWeight(8);
+    triangle(owner.cx+random(50)-150, owner.cy+random(50)-25, owner.cx+random(50)+100, owner.cy+random(50)-25, owner.cx+random(50)-50, owner.cy+random(50)+75);
+    particles.add(new Fragment(int(owner.cx), int(owner.cy), 0, 0, 40, 10, 500, 100, owner.playerColor) );
+    return  damage;
+  }
+  return 0;
+}
 
 void crossVarning(int x, int y) {
   final int r=40;
@@ -45,7 +57,7 @@ Player seek(Player m, int senseRange) {
   for (int sense = 0; sense < senseRange; sense++) {
     for (   Player p : players) {
       if (p!= m && !p.dead && p.ally!=m.ally) {
-        if (dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
+        if (dist(p.x, p.y, m.x, m.y)<sense*.5) {  
           return p;
         }
       }
@@ -57,7 +69,7 @@ Player seek(Projectile m, int senseRange) {
   for (int sense = 0; sense < senseRange; sense++) {
     for (   Player p : players) {
       if ( !p.dead && p.ally!=m.ally) {
-        if (dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
+        if (dist(p.x, p.y, m.x, m.y)<sense*.5) {  
           return p;
         }
       }
@@ -72,22 +84,22 @@ Player seek(Player m, int senseRange, int attributeIndex) {
     for (   Player p : players) {
       if (p!= m && !p.dead && p.ally!=m.ally) {
         switch (attributeIndex) {
-        case 0:
+        case 0: //TARGETABLE
           if (p.targetable && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
             return p;
           }
           break;
-        case 1:
+        case 1: //STATIONARY
           if (p.stationary && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
             return p;
           }
           break;
-        case 2:
+        case 2: //INVIS
           if (p.invis && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
             return p;
           }
           break;
-        case 3:
+        case 3://STEALTH
           if (p.stealth && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
             return p;
           }
@@ -164,9 +176,13 @@ void playerSetup() {
   for (int i=0; i< AmountOfPlayers; i++) {
     try {
       players.add(new Player(i, color((255/AmountOfPlayers)*i, 255, 255), int(random(width-playerSize*1)+playerSize), int(random(height-playerSize*1)+playerSize), playerSize, playerSize, playerControl[i][0], playerControl[i][1], playerControl[i][2], playerControl[i][3], playerControl[i][4], abilities[i]));
-      if (!perSelectedSkills) {               
+      if (!preSelectedSkills) {               
         generateRandomAbilities(1, passiveList, true);
         generateRandomAbilities(0, abilityList, true);
+      } else {
+        /* for(int j=0;j<abilityList[i].length; j++){
+         players.get(j).abilityList.add(abilities[i][j]);
+         }*/
       }
       if (players.get(i).mouse)players.get(i).FRICTION_FACTOR=0.11; //mouse
     }

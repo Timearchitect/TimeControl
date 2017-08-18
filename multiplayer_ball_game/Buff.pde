@@ -3,11 +3,12 @@ class Buff implements Cloneable {
   boolean dead, effectAll;
   String name="??";
   BuffType type= BuffType.MULTIPLE;
-  Player owner, enemy;
+  Player OGowner,owner, enemy;
   Projectile parent;
   Buff(Player p, int _duration) {
 
     owner=p;
+    OGowner=p;
     duration=_duration;
     spawnTime=stampTime;
     deathTime=stampTime + _duration;
@@ -17,8 +18,14 @@ class Buff implements Cloneable {
       kill();
     }
   }
+  void carryUpdate() {
+  }
   void kill() {
     dead=true;
+  }
+  void onOwnerDeath() {
+  }
+  void onCollide(Player o, Player e) {
   }
   void transfer(Player formerOwner, Player formerEnemy) {
     spawnTime=stampTime;
@@ -26,10 +33,14 @@ class Buff implements Cloneable {
     enemy=formerOwner;
     owner=formerEnemy;
   }
+  void onHit(){}
   Buff apply(BuffType b) {
     type=b;
     return this;
   }
+  void onFizzle() {
+  }
+
   public Buff clone() {  
     try {
       return (Buff)super.clone();
@@ -68,7 +79,13 @@ class Burn extends Buff {
 class Poison extends Buff {
   float percent=.005;
   int interval=350;
-
+  
+  Poison(Player p, int _duration, float _percent) {
+    super(p, _duration);
+    percent=_percent;
+    name=getClassName(this);
+    
+  }
   Poison(Player p, Player e, int _duration) {
     super(p, _duration);
     name=getClassName(this);
@@ -100,7 +117,7 @@ class Poison extends Buff {
 class Cold extends Buff {
   // float damage = 2;
   int count;
-  float friction= 0.25;
+  float friction= 0.18;
 
   Cold(Player p, Player e, int _duration) {
     super(p, _duration);
@@ -111,19 +128,44 @@ class Cold extends Buff {
     super(p, _duration);
     name=getClassName(this);
   }
+  Cold(Player p, int _duration, float _effect) {
+    super(p, _duration);
+    name=getClassName(this);
+    friction= _effect;
+  }
   void update() {
     super.update();
     //owner.FRICTION_FACTOR=friction;
-    owner.vx*=.92;
-    owner.vy*=.92;
+    owner.vx*=1-friction;
+    owner.vy*=1-friction;
     count++;
     if (count%14==0) {
-      Blast b=new  Blast(owner, int(owner.x+random(owner.w)), int(owner.y+random(owner.h)), 0, int(random(10, 100)), enemy.playerColor, 1000, 0, 0, 10, 0);
-      b.angleV=45;
-      b.opacity=30;
-      projectiles.add(b);
+       Blast b=new  Blast(owner, int(owner.x+random(owner.w)), int(owner.y+random(owner.h)), 0, int(random(10, 100)), enemy.playerColor, 1000, 0, 0, 10, 0);
+       b.angleV=45;
+       b.opacity=30;
+       projectiles.add(b);
+
     }
   }
+
+  void onFizzle() {
+    if(parent.blastRadius>0){
+      Blast b=new  Blast(OGowner, int(parent.x), int(parent.y), 0, int(parent.blastRadius), OGowner.playerColor, 1000, 0, 0, 10, 0);
+       b.angleV=45;
+       b.opacity=10;
+       projectiles.add(b);
+      for (int i=0; i<35; i++) {
+        float angle= random(360);
+        float range= parent.blastRadius;
+         b=new  Blast(owner, int(parent.x+cos(angle)*range), int(parent.y+sin(angle)*range), 0, int(random(10, 120)), OGowner.playerColor, 1500, 0, 0, 10, 0);
+        b.angleV=45;
+        b.opacity=20;
+        projectiles.add(b);
+      }
+    }
+  }
+  void onHit(){onFizzle();}
+
   void kill() {
     dead=true;
     // owner.FRICTION_FACTOR=owner.DEFAULT_FRICTION_FACTOR;
@@ -187,7 +229,7 @@ class Steady extends Buff {
     owner.stunned=true;
     super.update();
     if (owner.textParticle!=null)particles.remove( owner.textParticle );
-    owner.textParticle = new Text(owner, "STUNNED", 0, -75, 30, 0, 100, enemy.playerColor, 0);
+    owner.textParticle = new Text(owner, "Steady", 0, -75, 30, 0, 100, enemy.playerColor, 0);
     particles.add( owner.textParticle );
     count+=.4;
     strokeWeight(30);
@@ -240,6 +282,9 @@ class Paralysis extends Buff {
       arc(int( owner.cx), int(owner.cy), owner.w+sin(count)*30+15, owner.h+sin(count)*30+15, i+count, i+PI*.03+count);
     }
   }
+  void onFizzle() {
+    particles.add(new  Tesla( int(parent.x), int(parent.y), 200, 500, owner.playerColor));
+  }
 
   void kill() {
     dead=true;
@@ -265,6 +310,12 @@ class ArmorPiercing extends Buff {
   ArmorPiercing(Player p, int _duration) {
     super(p, _duration);
     name=getClassName(this);
+  }
+  void onFizzle() {
+    strokeWeight(8);
+    for (int i=0; i< 360; i+=18) {
+      line(parent.x, parent.y, parent.x+cos(radians(i+count))*250, parent.y+sin(radians(i+count))*250);
+    }
   }
   void update() {
     super.update();
@@ -390,7 +441,6 @@ class Confusion extends Buff {
     owner.down=defaultUp;
     owner.left=defaultRight;
     owner.right=defaultLeft;
-
   }
   void update() {
     super.update();
@@ -444,5 +494,164 @@ class MindControlled extends Buff {
     owner.down=owner.up;
     owner.left=owner.right;
     owner.right=owner.left;
+  }
+}
+
+class StickyBomb extends Buff {
+  // float damage = 2;
+  float count, graceTimer, graceDuration=900;
+  float amount;
+  String type="Projectile";
+  Projectile savedParent;
+  StickyBomb(Player p, int _duration, int _amount) {
+    super(p, _duration);
+    name=getClassName(this);
+    amount=_amount;
+    graceDuration=stampTime;
+  }
+  StickyBomb(Player p, Player e, int _duration, int _amount) {
+    super(p, _duration);
+    name=getClassName(this);
+    enemy=e;
+    amount=_amount;
+    graceDuration=stampTime;
+  }
+  void onCollide(Player o, Player e) {
+    if (graceTimer+graceDuration>stampTime) {
+      transfer(e, o);
+    }
+  }
+  void transfer(Player formerOwner, Player formerEnemy) {
+    if (!dead) {
+
+      super.transfer(formerOwner, formerEnemy);
+      particles.add(new RShockWave(int(owner.cx), int(owner.cy), owner.radius*2+300, 30, 500, enemy.playerColor));
+
+      parent.dead=true;
+      savedParent=parent.clone();
+      type=getClassName(savedParent);
+      //savedParent.spawnTime =stampTime;
+      //savedParent.time=parent.time;
+      parent.deathTime=stampTime;
+      parent.dead=true;
+      parent.deathAnimation=true;
+    }
+    // projectiles.remove(parent);
+  }
+  void display() {
+    // ellipse(owner.cx, owner.cy, 50, 50);
+    if (!freeze)count+=22*timeBend;
+    stroke(enemy.playerColor);
+    strokeWeight(8);
+    noFill();
+    arc(owner.cx, owner.cy, owner.radius*2.8, owner.radius*2.8, radians(count), radians(count+40));
+    arc(owner.cx, owner.cy, owner.radius*2.8, owner.radius*2.8, radians(count+180), radians(count+220));
+    //line(owner.cx+cos(count)*(graceTimer-stampTime)*.01, owner.cy+sin(count)*(graceTimer-stampTime)*.01, owner.cx, owner.cy);
+  }
+  void update() {
+    if (!dead) {
+      super.update();
+      display();
+      if (owner.textParticle!=null)particles.remove( owner.textParticle );
+      owner.textParticle = new Text(owner, type+" Sticked", 0, -75, 30, 0, 100, owner.playerColor, 1);
+      particles.add( owner.textParticle );
+    }
+  }
+  void kill() {
+    if (!dead && savedParent!=null) {
+      dead=true;
+      background(0, 0, 0);
+      savedParent.buffList.clear();
+      savedParent.x=owner.cx;
+      savedParent.y=owner.cy;
+      savedParent.vx=0;
+      savedParent.vy=0;
+      savedParent.dead=false;
+      savedParent.deathAnimation=false;
+      projectiles.add( savedParent);
+    }
+  }
+  void onOwnerDeath() {
+    if (savedParent!=null) {
+      savedParent.buffList.clear();
+      savedParent.x=owner.cx;
+      savedParent.y=owner.cy;
+      savedParent.vx=random(-2, 2);
+      savedParent.vy=random(-2, 2);
+      savedParent.dead=false;
+      savedParent.deathAnimation=false;
+      projectiles.add( savedParent);
+    }
+  }
+  void onFizzle() {
+    this.dead=true;
+  }
+}
+
+
+class AimLocked extends Buff {
+  // float damage = 2;
+  float count;
+
+  AimLocked(Player p, int _duration) {
+    super(p, _duration);
+    name=getClassName(this);
+  }
+  AimLocked(Player p, Player e, int _duration) {
+    super(p, _duration);
+    name=getClassName(this);
+    enemy=e;
+  }
+  void transfer(Player formerOwner, Player formerEnemy) {
+    super.transfer(formerOwner, formerEnemy);
+  }
+  void update() {
+    super.update();
+    if (owner.textParticle!=null)particles.remove( owner.textParticle );
+    owner.textParticle = new Text(owner, "AIMLOCKED", 0, -75, 30, 0, 100, enemy.playerColor, 0);
+    enemy.angle=calcAngleBetween(owner, enemy);
+    particles.add( owner.textParticle );
+    targetHommingVarning(owner);
+  }
+  void kill() {
+    dead=true;
+  }
+}
+
+class CriticalHit extends Buff {
+  // float damage = 2;
+  float precent, damage;
+
+  CriticalHit(Player p, Player e, float _precentChance, float _damage) {
+    super(p, 50);
+    damage=_damage;
+    precent= _precentChance;
+    name=getClassName(this);
+    enemy=e;
+  }
+  CriticalHit(Player p, float _precentChance, float _damage) {
+    super(p, 50);
+    damage=_damage;
+    precent= _precentChance;
+    name=getClassName(this);
+  }
+  void transfer(Player formerOwner, Player formerEnemy) {
+    super.transfer(formerOwner, formerEnemy);
+    if (precent>random(100)) {
+      owner.hit(damage);
+      particles.add(new Flash(5, 32, WHITE));  
+
+      fill(WHITE);
+      stroke(enemy.playerColor);
+      strokeWeight(8);
+      triangle(owner.cx+random(50)-150, owner.cy+random(50)-25, owner.cx+random(50)+100, owner.cy+random(50)-25, owner.cx+random(50)-50, owner.cy+random(50)+75);
+      particles.add(new Fragment(int(owner.cx), int(owner.cy), 0, 0, 40, 10, 500, 100, enemy.playerColor) );
+    }
+  }
+  void update() {
+  }
+
+  void kill() {
+    dead=true;
   }
 }

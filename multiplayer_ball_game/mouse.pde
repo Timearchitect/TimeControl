@@ -17,8 +17,8 @@ void mousePressed() {
     println(e +" mouse");
   }
   if (cheatEnabled) {
-   // if (mouseButton==LEFT) particles.add(new TempZoom(mouseX, mouseY, 2000, 1,DEFAULT_ZOOMRATE,false));
-   // if (mouseButton==RIGHT)particles.add(new TempZoom(mouseX, mouseY, 2000, 0.5,DEFAULT_ZOOMRATE,false));
+    // if (mouseButton==LEFT) particles.add(new TempZoom(mouseX, mouseY, 2000, 1,DEFAULT_ZOOMRATE,false));
+    // if (mouseButton==RIGHT)particles.add(new TempZoom(mouseX, mouseY, 2000, 0.5,DEFAULT_ZOOMRATE,false));
     //spawn(new HomingMissile(AI, mouseX, mouseY, 70, BLACK, 5000, 0, 0, 0, 10));
 
     // float X=(mouseX*zoom)+(width*(1-zoom)*mouseX);
@@ -60,4 +60,15 @@ void mouseReleased() {
       }
     }
   }
+}
+
+void mouseWheel(MouseEvent event) {
+  float e = event.getCount();
+    mouseScroll=0;
+  if (e>0) {
+    mouseScroll=1;
+  } else {
+      mouseScroll=-1;
+  }
+  //println(e);
 }
