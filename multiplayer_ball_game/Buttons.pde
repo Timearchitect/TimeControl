@@ -343,46 +343,6 @@ class StatButton extends Button {
     //print(a.name+" ");
   }
 
-  void change(int amount) {
-
-    for (Player p : players)if (p.index==playerIndex)owner=p;
-    switch(index) {
-    case 0:
-      owner.maxHealth+=amount*10;
-      owner.health+=amount*10;
-      println(owner.health);
-      break;
-    case 1:
-
-      break;
-    case 2:
-      // player.speed=0;
-      break;
-    case 3:
-      owner.armor=0;
-      break;
-    case 4:
-      break;
-    case 5:
-      break;
-    case 6:
-      break;
-    case 7:
-      break;
-    case 8:
-      break;
-    case 9:
-      break;
-    }
-    /*  damage=1;
-     armor
-     weaponDamage
-     weaponSpeed
-     weaponAttackSpeed
-     weaponCost
-     weaponAccuracy*/
-  }
-
   void update() {
     if (mouseX>x-size*.5 && x+size*.5>mouseX && mouseY>y-size*.5 && y+size*.5>mouseY) {
       pcolor=color(170, 100, 255);
@@ -391,13 +351,13 @@ class StatButton extends Button {
       if (mouseScroll<0) {
         if (level<100) {
           level++;
-          change(1);
+         // change(1);
         }
       }
       if (mouseScroll>0) {
         if (level>0) {
           level--;
-          change(-1);
+         // change(-1);
         }
       }
 
@@ -443,14 +403,11 @@ class StatButton extends Button {
   }
 }
 public float addStat(int playerIndex, int stat) {
-
   for (StatButton p : pSBList) {
     if (p.playerIndex==playerIndex &&  p.index==stat) {
       print(p.label+" : "+p.level+"  ");
       return p.level;
     }
   }
-
-
   return 0;
 }

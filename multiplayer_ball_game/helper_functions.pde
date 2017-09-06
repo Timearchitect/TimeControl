@@ -33,7 +33,18 @@ float  crit(Player owner, float precent, float damage) {
   }
   return 0;
 }
-
+float  crit(color c,Player target, float precent, float damage) {
+  if (precent>random(100)) {
+    particles.add(new Flash(5, 32, WHITE));  
+    fill(WHITE);
+    stroke(c);
+    strokeWeight(8);
+    triangle(target.cx+random(50)-150, target.cy+random(50)-25, target.cx+random(50)+100, target.cy+random(50)-25, target.cx+random(50)-50, target.cy+random(50)+75);
+    particles.add(new Fragment(int(target.cx), int(target.cy), 0, 0, 40, 10, 500, 100, target.playerColor) );
+    return  damage;
+  }
+  return 0;
+}
 void crossVarning(int x, int y) {
   final int r=40;
   // float tcx=target.cx, tcy=target.cy;

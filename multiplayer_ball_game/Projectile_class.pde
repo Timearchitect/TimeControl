@@ -3,7 +3,7 @@
 class Projectile  implements Cloneable {
   //PVector coord;
   //PVector speed;
-  int  size, ally=-1,blastRadius;
+  int  size, ally=-1, blastRadius;
   float x, y, vx, vy, angle, force, damage;
   long deathTime, spawnTime;
   color projectileColor;
@@ -94,11 +94,10 @@ class Projectile  implements Cloneable {
       //println("test");
       for (Buff b : buffList) {
         Buff clone = b;
-       
+
         clone.transfer(owner, enemy);
         if (b.type==BuffType.ONCE &&   existInList(enemy.buffList, b.getClass())) {
         } else  enemy.buffList.add(clone.clone());
-      
       }
       /*  Buff clone = buffList.get(0);
        clone.transfer(owner, enemy);
@@ -599,11 +598,11 @@ class ForceBall extends Projectile implements Reflectable { //------------------
     enemy.hit(damage);
     deathTime=stampTime;   // projectile is dead on collision
     dead=true;
-    
+
     for (int i=0; i<int (v*0.3); i++) { // particles
       particles.add(new Particle(int(x), int(y), random(-int(v*0.2), int(v*0.2)), random(-int(v*0.2), int(v*0.2)), int(random(5, 30)), 800, 255));
     }
-    
+
     for (int i=0; i<int (v*0.4); i++) { // particles
       particles.add(new Particle(int(x), int(y), random(-int(v*0.4), int(v*0.4)), random(-int(v*0.4), int(v*0.4)), int(random(10, 50)), 800, projectileColor));
     }
@@ -1539,7 +1538,7 @@ class Bomb extends Projectile implements Reflectable, Containable, Container {//
     super(_owner, _x, _y, _size, _projectileColor, _time);
     angle=_angle;
     damage=_damage;
-     blastRadius=200;
+    blastRadius=200;
     vx= _vx;
     vy= _vy;
     friendlyFire=_friendlyFire;
@@ -1551,16 +1550,16 @@ class Bomb extends Projectile implements Reflectable, Containable, Container {//
   void update() {
     if (!dead && !freeze) { 
       flick=int(random(255));
-      if (reverse) {
+      if (reverse) {  // inverse function
+        vx/=1-((1-friction)*timeBend);
+        vy/=1-((1-friction)*timeBend);
         x-=vx*timeBend;
         y-=vy*timeBend;
-        vx/=friction;
-        vy/=friction;
       } else {
         x+=vx*timeBend;
         y+=vy*timeBend;
-        vx*=friction;
-        vy*=friction;
+        vx*=1-((1-friction)*timeBend);
+        vy*=1-((1-friction)*timeBend);
       }
     }
   }
@@ -1741,7 +1740,7 @@ class DetonateBomb extends Bomb {//----------------------------------------- Bom
   DetonateBomb(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage, boolean _friendlyFire) {
     super(_owner, _x, _y, _size, _projectileColor, _time, _angle, _vx, _vy, _damage, _friendlyFire);
     originalDeathTime=deathTime;
-     blastRadius=160;
+    blastRadius=160;
   }
   void update() {
     if (!dead && !freeze) { 
@@ -1811,10 +1810,10 @@ class DetonateBomb extends Bomb {//----------------------------------------- Bom
         projectiles.add(p);
         projectiles.add( new Needle(owner, int(x+cos(radians(i))*200), int(y+sin(radians(i))*200), 60, owner.playerColor, 600, i+180, -cos(radians(i))*20, -sin(radians(i))*20, 10));
       }
-            for (int i=15; i<360; i+=30) {
+      for (int i=15; i<360; i+=30) {
         projectiles.add( new  Blast(owner, int( x+cos(radians(i))*200), int(y+sin(radians(i))*200), -20, 50, BLACK, 350, i, 2, 50, 12));
       }
-                  for (int i=0; i<360; i+=30) {
+      for (int i=0; i<360; i+=30) {
         projectiles.add( new  Blast(owner, int( x+cos(radians(i))*200), int(y+sin(radians(i))*200), 15, 40, owner.playerColor, 350, i, 1, 30, 12));
       }
       for (int i=0; i<8; i++) {
@@ -1948,7 +1947,7 @@ class Rocket extends Bomb implements Reflectable, Destroyable, Container {//----
     void hit(Player enemy) {    // when hit
     super.hit(enemy);
     particles.add( new TempSlow(10, 0.15, 1.05));
-     super.fizzle();
+    super.fizzle();
     // fizzle();
     deathTime=stampTime;   // projectile is dead on collision
     dead=true;
@@ -3067,7 +3066,7 @@ class Boomerang extends Projectile implements Reflectable {//-------------------
 class HomingMissile extends Projectile implements Reflectable, Destroyable, Containable {//----------------------------------------- HomingMissile objects ----------------------------------------------------
 
   PShape  sh, c ;
-  float  homeRate, gravityRate=0.008, count;
+  float  homeRate, gravityRate=0.008, count, smoke;
   int reactionTime=40;
   final int  leapAccel=10, lockRange=300, seekRadius=4000;
   boolean locked, leap;
@@ -3132,7 +3131,13 @@ class HomingMissile extends Projectile implements Reflectable, Destroyable, Cont
         } else if (leap) {
           vx+=cos(radians(angle))*leapAccel*timeBend;
           vy+=sin(radians(angle))*leapAccel*timeBend;
-          particles.add(new Particle(int(x), int(y), cos(radians(angle+180))*(abs(vx)+abs(vy))*0.05, sin(radians(angle+180))*(abs(vx)+abs(vy))*0.05, 15, 300, WHITE));
+
+          if (smoke>1) {
+            smoke=0;
+            particles.add(new Particle(int(x), int(y), cos(radians(angle+180))*(abs(vx)+abs(vy))*0.1, sin(radians(angle+180))*(abs(vx)+abs(vy))*0.1, 15, 300, WHITE));
+            // particles.add(new Particle(int(x), int(y), vx*0.2, vy*0.2, int(random(10)+5), 900, projectileColor));
+          }        
+          smoke+=1*timeBend;
         } else if (!locked) {
           calcAngle();
           vx+=cos(radians(angle))*homeRate*timeBend;

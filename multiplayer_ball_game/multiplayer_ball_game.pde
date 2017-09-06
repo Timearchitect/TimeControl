@@ -2,7 +2,7 @@
 /**------------------------------------------------------------//
  //                                                            //
  //  Coding dojo  - Prototype of a timecontrol game            //
- //  av: Alrik He    v.0.7.9                                   //
+ //  av: Alrik He    v.0.7.12                                  //
  //  Arduino verstad Malmö                                     //
  //                                                            //
  //      2014-09-21    -     2017-08-18                        //
@@ -40,7 +40,7 @@ final float DIFFICULTY_LEVEL=1.2;
 final int WHITE=color(255), GREY=color(172), BLACK=color(0), GOLD=color(255, 220, 0);
 final int speedFactor= 2;
 final float slowFactor= 0.3;
-final String version="0.7.11";
+final String version="0.7.12";
 static long prevMillis, addMillis, forwardTime, reversedTime, freezeTime, stampTime, fallenTime;
 final int baudRate= 19200;
 final static float DEFAULT_FRICTION=0.1;
@@ -53,10 +53,9 @@ final int offsetX=1250, offsetY=-50;//final int offsetX=950, offsetY=100;
 static int shakeTimer, shakeX=0, shakeY=0, maxShake=80;
 final float DEFAULT_ZOOMRATE=0.02;
 static float F=1, S=1, timeBend=1, zoom=0.7, tempZoom=1.0, tempOffsetX=0, tempOffsetY=0, zoomX, zoomY, zoomXAim, zoomYAim, zoomAim=1, zoomRate=0.02;
-//int keyCooldown[]= new int[AmountOfPlayers];
 final int keyResponseDelay=30;  // eventhe refreashrate equal to arduino devices
 final char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='7';
-final int ICON_AMOUNT=56;
+final int ICON_AMOUNT=60;
 final PImage[] icons=new PImage[ICON_AMOUNT];
 Serial port[]=new Serial[AmountOfPlayers];  // Create object from Serial class
 String portName[]=new String[AmountOfPlayers];
@@ -91,6 +90,7 @@ int playerControl[][]= {
   , { int('g')-32, int('b')-32, int('v')-32, int('n')-32, int('m')-32}
   , { '8', '5', '4', '6', '3'}
 };
+
 /*boolean sketchFullScreen() { // p2 legacy
  return false;
  }
@@ -262,7 +262,7 @@ void setup() {
   abilities= new Ability[][]{ 
   /* player 1 */    new Ability[]{new RapidBattery(), new Tumble()}, 
   /* player 2 */    new Ability[]{new RapidBattery(), new Random().randomize(passiveList)}, 
-  /* player 3 mouse */    new Ability[]{new  Random().randomize(abilityList), new  Random().randomize(passiveList)}, 
+  /* player 3 mouse */   new Ability[]{new  Random().randomize(abilityList), new  Random().randomize(passiveList)}, 
   /* player 4 */    new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
     new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
     new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}
@@ -354,7 +354,6 @@ void setup() {
     for (int i=0; i<2; i++) {
       sBList.add( new SettingButton(i, settingSkillXOffset+200*i, 200+200*j, 100, players.get(j)) );
     }
-
     pSBList.add( new StatButton(icons[46],0, "HP", 50, 250+200*j, 50, players.get(j)) );
     pSBList.add( new StatButton(icons[47],1, "MP", 100, 250+200*j, 50, players.get(j)) );
     pSBList.add( new StatButton(icons[48],2, "Sp", 150, 250+200*j, 50, players.get(j)) );

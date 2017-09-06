@@ -3,7 +3,7 @@ class Buff implements Cloneable {
   boolean dead, effectAll;
   String name="??";
   BuffType type= BuffType.MULTIPLE;
-  Player OGowner,owner, enemy;
+  Player OGowner, owner, enemy;
   Projectile parent;
   Buff(Player p, int _duration) {
 
@@ -33,7 +33,8 @@ class Buff implements Cloneable {
     enemy=formerOwner;
     owner=formerEnemy;
   }
-  void onHit(){}
+  void onHit() {
+  }
   Buff apply(BuffType b) {
     type=b;
     return this;
@@ -79,12 +80,11 @@ class Burn extends Buff {
 class Poison extends Buff {
   float percent=.005;
   int interval=350;
-  
+
   Poison(Player p, int _duration, float _percent) {
     super(p, _duration);
     percent=_percent;
     name=getClassName(this);
-    
   }
   Poison(Player p, Player e, int _duration) {
     super(p, _duration);
@@ -140,31 +140,32 @@ class Cold extends Buff {
     owner.vy*=1-friction;
     count++;
     if (count%14==0) {
-       Blast b=new  Blast(owner, int(owner.x+random(owner.w)), int(owner.y+random(owner.h)), 0, int(random(10, 100)), enemy.playerColor, 1000, 0, 0, 10, 0);
-       b.angleV=45;
-       b.opacity=30;
-       projectiles.add(b);
-
+      Blast b=new  Blast(owner, int(owner.x+random(owner.w)), int(owner.y+random(owner.h)), 0, int(random(10, 100)), enemy.playerColor, 1000, 0, 0, 10, 0);
+      b.angleV=45;
+      b.opacity=30;
+      projectiles.add(b);
     }
   }
 
   void onFizzle() {
-    if(parent.blastRadius>0){
+    if (parent.blastRadius>0) {
       Blast b=new  Blast(OGowner, int(parent.x), int(parent.y), 0, int(parent.blastRadius), OGowner.playerColor, 1000, 0, 0, 10, 0);
-       b.angleV=45;
-       b.opacity=10;
-       projectiles.add(b);
+      b.angleV=45;
+      b.opacity=10;
+      projectiles.add(b);
       for (int i=0; i<35; i++) {
         float angle= random(360);
         float range= parent.blastRadius;
-         b=new  Blast(owner, int(parent.x+cos(angle)*range), int(parent.y+sin(angle)*range), 0, int(random(10, 120)), OGowner.playerColor, 1500, 0, 0, 10, 0);
+        b=new  Blast(owner, int(parent.x+cos(angle)*range), int(parent.y+sin(angle)*range), 0, int(random(10, 120)), OGowner.playerColor, 1500, 0, 0, 10, 0);
         b.angleV=45;
         b.opacity=20;
         projectiles.add(b);
       }
     }
   }
-  void onHit(){onFizzle();}
+  void onHit() {
+    onFizzle();
+  }
 
   void kill() {
     dead=true;
@@ -188,10 +189,10 @@ class Stun extends Buff {
   void update() {
     owner.stunned=true;
     super.update();
-    if (owner.textParticle!=null)particles.remove( owner.textParticle );
+    if (owner.textParticle!=null) particles.remove( owner.textParticle );
     owner.textParticle = new Text(owner, "STUNNED", 0, -75, 30, 0, 100, enemy.playerColor, 0);
     particles.add( owner.textParticle );
-    if (!freeze || owner.freezeImmunity)count+=.4;
+    if (!freeze || owner.freezeImmunity) count+=.4;
     strokeWeight(30);
     stroke(enemy.playerColor);
     noFill();
@@ -202,6 +203,14 @@ class Stun extends Buff {
 
   void kill() {
     dead=true;
+    owner.stunned=false;
+    owner.holdTrigg=false;
+    owner.holdUp=false;
+    owner.holdDown=false;
+    owner.holdLeft=false;
+    owner.holdRight=false;
+  }
+  void onOwnerDeath() {
     owner.stunned=false;
     owner.holdTrigg=false;
     owner.holdUp=false;
@@ -244,6 +253,10 @@ class Steady extends Buff {
   void kill() {
     dead=true;
     owner.stunned=false;
+  }
+    void onOwnerDeath() {
+    owner.stunned=false;
+
   }
 }
 
@@ -455,6 +468,12 @@ class Confusion extends Buff {
     owner.left=defaultLeft;
     owner.right=defaultRight;
   }
+    void onOwnerDeath() {
+    owner.up=defaultUp;
+    owner.down=defaultDown;
+    owner.left=defaultLeft;
+    owner.right=defaultRight;
+  }
 }
 
 class MindControlled extends Buff {
@@ -494,6 +513,12 @@ class MindControlled extends Buff {
     owner.down=owner.up;
     owner.left=owner.right;
     owner.right=owner.left;
+  }
+      void onOwnerDeath() {
+    owner.up=defaultUp;
+    owner.down=defaultDown;
+    owner.left=defaultLeft;
+    owner.right=defaultRight;
   }
 }
 

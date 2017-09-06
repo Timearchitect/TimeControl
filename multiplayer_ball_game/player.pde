@@ -8,7 +8,7 @@ class Player implements Cloneable {
   final int mouseMargin=60;
   //float MAX_MOUSE_ACCEL=0.0035;
   final float mouseMaxAccel=1.4;
-  float  x, y, vx, vy, ax, ay, cx, cy, angle, keyAngle, f, s, bend, barFraction, fraction, armor, weaponDamage=0, weaponSpeed, weaponAttackSpeed, weaponCost, weaponAccuracy=0,weaponCritChance,weaponCritDamage;
+  float  x, y, vx, vy, ax, ay, cx, cy, angle, keyAngle, f, s, bend, barFraction, fraction, armor, weaponDamage=0, weaponEnergy,weaponSpeed, weaponAttackSpeed, weaponCost, weaponRegen, weaponAccuracy=0,weaponCritChance,weaponCritDamage;
   boolean holdTrigg, holdUp, holdDown, holdLeft, holdRight, dead, hit, arduino, arduinoHold, mouse, clone, turret;
   PVector coord, speed, accel, arrow;
   float DEFAULT_DAMAGE=1, DEFAULT_RADIUS, DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR, DEFAULT_FRICTION_FACTOR=0.1, DEFAULT_ARMOR=0; 
