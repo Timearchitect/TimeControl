@@ -726,7 +726,7 @@ class PainPulse extends Ability {//---------------------------------------------
     if (cooldown>200) {
       cooldown=0;
       for (int i=0; i<360; i+=45) {
-        projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 15, 40, owner.playerColor, 350, i, 1, 30, 12));
+        projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 15, 40, owner.playerColor, 350, i, 2, 30, 12));
       }
     }
   }
@@ -739,14 +739,17 @@ class PainPulse extends Ability {//---------------------------------------------
   @Override
     void passive() {
     if (!owner.stealth) {
-      noFill();
-      stroke(owner.playerColor);
-      strokeWeight(2);
-      beginShape();
-      for (int i=0; i<360; i+=10) {
-        vertex(owner.cx+sin(radians(i))*100, owner.cy+cos(radians(i))*100);
+      if (cooldown>200) { 
+        noFill();
+        stroke(cooldown%4<2?255:owner.playerColor);
+        strokeWeight(8);
+        ellipse(owner.cx, owner.cy, 120, 120);
       }
-      endShape(CLOSE);
+      /*beginShape();
+       for (int i=0; i<360; i+=10) {
+       vertex(owner.cx+sin(radians(i))*100, owner.cy+cos(radians(i))*100);
+       }
+       endShape(CLOSE);*/
       cooldown++;
     }
   }
@@ -921,11 +924,11 @@ class BulletCutter extends Ability {//------------------------------------------
 
       if (trigger) {          
         alternate=!alternate;
-     //   if (alternate)projectiles.add( new Slash(owner, int( owner.cx+sin(tempA)*range), int(owner.cy+cos(tempA)*range), 60, owner.playerColor, 140, tempA+5, -15, distance-velocity, sin(tempA)*distance, cos(tempA)*distance, 0, true));
-       // else      projectiles.add( new Slash(owner, int( owner.cx+sin(tempA)*range), int(owner.cy+cos(tempA)*range), 60, owner.playerColor, 140, tempA-5, +15, distance-velocity, sin(tempA)*distance, cos(tempA)*distance, 0, true));
+        //   if (alternate)projectiles.add( new Slash(owner, int( owner.cx+sin(tempA)*range), int(owner.cy+cos(tempA)*range), 60, owner.playerColor, 140, tempA+5, -15, distance-velocity, sin(tempA)*distance, cos(tempA)*distance, 0, true));
+        // else      projectiles.add( new Slash(owner, int( owner.cx+sin(tempA)*range), int(owner.cy+cos(tempA)*range), 60, owner.playerColor, 140, tempA-5, +15, distance-velocity, sin(tempA)*distance, cos(tempA)*distance, 0, true));
         if (alternate)projectiles.add( new Slash(owner, int( owner.cx+sin(tempA)*range), int(owner.cy+cos(tempA)*range), 60, owner.playerColor, 140, tempA+5, -15, distance-velocity, 0, 0, 0, true));
-        else      projectiles.add( new Slash(owner, int( owner.cx+sin(tempA)*range), int(owner.cy+cos(tempA)*range), 60, owner.playerColor, 140, tempA-5, +15, distance-velocity,0, 0, 0, true));  
-    }
+        else      projectiles.add( new Slash(owner, int( owner.cx+sin(tempA)*range), int(owner.cy+cos(tempA)*range), 60, owner.playerColor, 140, tempA-5, +15, distance-velocity, 0, 0, 0, true));
+      }
     }
   }
 
@@ -987,7 +990,7 @@ class Boost extends Ability {//-------------------------------------------------
         ellipse(owner.cx, owner.cy, radius, radius);
       } else {
         strokeWeight(10);
-        arc(owner.cx, owner.cy, radius, radius, -HALF_PI, (PI*2/(maxCharge+1-charge))-HALF_PI);
+        arc(owner.cx, owner.cy, radius, radius, -HALF_PI, (TAU/(maxCharge+1-charge))-HALF_PI);
       }
       cooldown++;
       // count++;
@@ -1474,7 +1477,7 @@ class Dash extends Ability {//--------------------------------------------------
       } else {
         strokeWeight(10);
         noFill();
-        arc(owner.cx, owner.cy, radius, radius, -HALF_PI, (PI*2/(maxCharge+1-charge))-HALF_PI);
+        arc(owner.cx, owner.cy, radius, radius, -HALF_PI, (TAU/(maxCharge+1-charge))-HALF_PI);
       }
       cooldown+=1*timeBend;
     }

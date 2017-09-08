@@ -52,7 +52,8 @@ void checkPlayerVSPlayerColloision() {
             p1.collide(p2);
             p1.hit(p2.damage);
             //float  deltaX = p1.cx -  p2.cx , deltaY =  p1.cy -  p2.cy;
-            p1.pushForce( (p1.radius+p2.radius-dist(p2.cx, p2.cy, p1.cx, p1.cy)), atan2(p1.cy -  p2.cy, p1.cx -  p2.cx) * 180 / PI);
+            //p1.pushForce( (p1.radius+p2.radius-dist(p2.cx, p2.cy, p1.cx, p1.cy)), atan2(p1.cy -  p2.cy, p1.cx -  p2.cx) * 180 / PI);
+            p1.pushForce( (p1.radius+p2.radius-dist(p2.cx, p2.cy, p1.cx, p1.cy)), degrees(atan2(p1.cy -  p2.cy, p1.cx -  p2.cx)) );
           }
         }
       }
@@ -89,13 +90,15 @@ void checkProjectileVSProjectileColloision() {
       for (Projectile p2 : projectiles) {      
         if ( !p2.dead && !p1.dead &&p2.ally!=p1.ally ) { //  && p1!=p2
           if (p1 instanceof  Reflectable  && p2 instanceof Reflector) {
-            if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*.5+p2.size*.5) {
+            //if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*.5+p2.size*.5) {
+              if (dist(p1.x, p1.y, p2.x, p2.y)<(p1.size+p2.size)*.5) {
               ((Reflectable)p1).reflect(p2.angle, p2.owner);
               ((Reflector)p2).reflecting();
             }
           }
           if (p1 instanceof  Destroyable  && p2 instanceof Destroyer) {
-            if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*.5+p2.size*.5) {
+           // if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*.5+p2.size*.5) {
+              if (dist(p1.x, p1.y, p2.x, p2.y)<(p1.size+p2.size)*.5) {
               ((Destroyable)p1).destroy(p2);
               ((Destroyer)p2).destroying(p1);
             }

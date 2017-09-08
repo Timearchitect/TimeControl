@@ -1290,7 +1290,7 @@ class HealBall extends Projectile implements Containable {//--------------------
     if ( !dead) {         
       p.heal(damage);
       for (int i=0; i<6; i++) {
-        particles.add( new  Particle(int(p.cx+cos(radians(random(360)))*random(p.radius*2)), int(p.cy+sin(radians(random(360)))*random(p.radius*2)), 0, 0, int(random(50)+20), 1000, WHITE));
+        particles.add( new  Particle(int(p.cx+cos(radians(random(360)))*random(p.diameter)), int(p.cy+sin(radians(random(360)))*random(p.diameter)), 0, 0, int(random(50)+20), 1000, WHITE));
       }
       particles.add(new ShockWave(int(x), int(y), int(size*0.4), 32, 150, p.playerColor));
       particles.add(new Flash(200, 12, p.playerColor));
@@ -1392,7 +1392,7 @@ class ManaBall extends Projectile implements Containable {//--------------------
         a.ammo=a.maxAmmo;
       }
       for (int i=0; i<6; i++) {
-        particles.add( new  Particle(int(p.cx+cos(radians(random(360)))*random(p.radius*2)), int(p.cy+sin(radians(random(360)))*random(p.radius*2)), 0, 0, int(random(50)+20), 1000, WHITE));
+        particles.add( new  Particle(int(p.cx+cos(radians(random(360)))*random(p.diameter)), int(p.cy+sin(radians(random(360)))*random(p.diameter)), 0, 0, int(random(50)+20), 1000, WHITE));
       }
       particles.add(new ShockWave(int(x), int(y), int(size*0.4), 32, 150, p.playerColor));
       particles.add(new Flash(200, 12, p.playerColor));
@@ -1491,7 +1491,7 @@ class CoinBall extends Projectile implements Containable {//--------------------
       particles.add( new Text("+"+amount, int( owner.cx), int(owner.cy), 0, 0, 100, 0, 2000, WHITE, 1));
       particles.add( new Text("+"+amount, int( owner.cx), int(owner.cy), 0, 0, 140, 0, 2000, color(50, 255, 255), 0));
       for (int i=0; i<6; i++) {
-        particles.add( new  Particle(int(p.cx+cos(radians(random(360)))*random(p.radius*2)), int(p.cy+sin(radians(random(360)))*random(p.radius*2)), 0, 0, int(random(50)+20), 1000, GOLD));
+        particles.add( new  Particle(int(p.cx+cos(radians(random(360)))*random(p.diameter)), int(p.cy+sin(radians(random(360)))*random(p.diameter)), 0, 0, int(random(50)+20), 1000, GOLD));
       }
       particles.add(new ShockWave(int(x), int(y), int(size*0.4), 32, 150, p.playerColor));
       particles.add(new Flash(200, 12, p.playerColor));
@@ -2814,12 +2814,12 @@ class Slice extends Projectile implements Destroyer {//-------------------------
     defaultSize=_size;
     if (freeze)follow=false;
     melee=true;
-    for (int i=0; i<3; i++) {
+   /* for (int i=0; i<3; i++) {
       particles.add(new Particle(int(x), int(y), vx/(2-0.12*i), vy/(2-0.12*i), 10+i*4, _time, _projectileColor));
     }
     for (int i=0; i<2; i++) {
       particles.add(new Particle(int(x), int(y), random(10)-5+vx*0.5, random(10)-5+vy*0.5, int(random(20)+5), 800, 255));
-    }
+    }*/
   }
   void update() {
     if (!dead && !freeze) { 
@@ -3009,13 +3009,15 @@ class Boomerang extends Projectile implements Reflectable {//-------------------
     if (!owner.dead&&owner.angle-selfHitAngle<angle && owner.angle+selfHitAngle>angle) { 
       owner.hit(int(damage*.4*(abs(vx)+abs(vy))));
       particles.add( new TempFreeze(int((abs(vx)+abs(vy))*2)));
-      owner.pushForce(vx, vy, angle);
+      //owner.pushForce(vx, vy, angle);
+      owner.pushForce(vx, vy);
       for (int i=0; i<16; i++) {
         particles.add(new Spark( 1000, int(x), int(y), (vx+random(-spray, spray))*random(0, 0.8), (vy+random(-spray, spray))*random(0, 0.8), 6, angle, projectileColor));
       }
     } else {
 
-      owner.pushForce(vx*0.2, vy*0.2, angle);
+     // owner.pushForce(vx*0.2, vy*0.2, angle);
+     owner.pushForce(vx*0.2, vy*0.2);
       owner.abilityList.get(0).energy+=recoverEnergy;
       particles.add(new RShockWave(int(owner.cx), int(owner.cy), 350, 32, 300, WHITE));
       // particles.add(new ShockWave(int(players.get(playerIndex).x+players.get(playerIndex).w*0.5), int(players.get(playerIndex).y+players.get(playerIndex).h*0.5), 20, 100, projectileColor));
@@ -3029,7 +3031,8 @@ class Boomerang extends Projectile implements Reflectable {//-------------------
     super.hit(enemy);
 
     enemy.hit(floor(damage*(abs(vx)+abs(vy))*0.08));
-    enemy.pushForce(vx*0.05, vy*0.05, angle);
+    //enemy.pushForce(vx*0.05, vy*0.05, angle);
+    enemy.pushForce(vx*0.05, vy*0.05);
     //dead=true;
     for (int i=0; i<2; i++) {
       // particles.add(new Particle(int(x), int(y), vx, vy, int(random(30)+10), 800, projectileColor));
@@ -3226,7 +3229,9 @@ class HomingMissile extends Projectile implements Reflectable, Destroyable, Cont
     enemy.hit(int(leap?damage:(locked?damage*0.25:damage*0.5)));
     deathTime=stampTime;   // dead on collision
     dead=true;
-    enemy.pushForce(vx*0.05, vy*0.05, angle);
+    //enemy.pushForce(vx*0.05, vy*0.05, angle);
+    enemy.pushForce(vx*0.05, vy*0.05);
+
     for (int i=0; i<6; i++) {
       particles.add(new Particle(int(x), int(y), random(40)-20, random(40)-20, int(random(30)+10), 800, projectileColor));
     }
@@ -3695,11 +3700,11 @@ class Graviton extends Projectile implements Containable {//--------------------
     vy= _vy;
     arms=_arms;
     dragRadius=_size;
-    for (int i=0; i<2; i++) {
+   /* for (int i=0; i<2; i++) {
       particles.add(new Particle(int(x), int(y), random(10)-5+vx*0.5, random(10)-5+vy*0.5, int(random(20)+5), 800, 255));
     }
     particles.add(new ShockWave(int(x), int(y), int(dragRadius*0.5), 16, _size+50, color(_projectileColor)));
-    particles.add(new ShockWave(int(x), int(y), int(dragRadius*0.4), 16, _size, WHITE));
+    particles.add(new ShockWave(int(x), int(y), int(dragRadius*0.4), 16, _size, WHITE));*/
   }
   void update() {
     if (!dead && !freeze) { 

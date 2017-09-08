@@ -111,9 +111,9 @@ class Turret extends Player implements Containable {
   void pushForce(float amount, float angle) {
     if (!stationary) super.pushForce( amount, angle);
   }
-  void pushForce(float _vx, float _vy, float _angle) {
+ /* void pushForce(float _vx, float _vy, float _angle) {
     if (!stationary) super.pushForce( _vx, _vy, _angle);
-  }
+  }*/
   void displayName() {
     //pushStyle();
     fill(playerColor);
@@ -186,14 +186,14 @@ class Block extends Player implements Containable {
   void displayAbilityEnergy() {
   }
   void displayHealth() {
-    fraction=((PI*2)/maxHealth)*health;
+    fraction=(TAU/maxHealth)*health;
     strokeWeight(barSize);
     //strokeCap(SQUARE);
     noFill();
     stroke(hue(playerColor), 80*S, (80-deColor)*S);
     ellipse(cx, cy, radius*1.8, radius*1.8);
     stroke(hue(playerColor), (255-deColor*0.5)*S, ally==-1?0:255*S);
-    arc(cx, cy, radius*1.8, radius*1.8, -HALF_PI +(PI*2)-fraction, PI+HALF_PI);
+    arc(cx, cy, radius*1.8, radius*1.8,PI_HALF-fraction, PI_HALF);
     //strokeWeight(1);
   }
   void display() {
@@ -261,9 +261,9 @@ class Block extends Player implements Containable {
   void pushForce(float amount, float angle) {
     if (!stationary) super.pushForce( amount, angle);
   }
-  void pushForce(float _vx, float _vy, float _angle) {
+  /*void pushForce(float _vx, float _vy, float _angle) {
     if (!stationary) super.pushForce( _vx, _vy, _angle);
-  }
+  }*/
   void displayName() {
     //pushStyle();
     // fill(playerColor);
@@ -362,14 +362,14 @@ class Illuminati extends Player implements Containable {
   void displayAbilityEnergy() {
   }
   void displayHealth() {
-    /*  fraction=((PI*2)/maxHealth)*health;
+    /*  fraction=((TAU)/maxHealth)*health;
      strokeWeight(barSize);
      //strokeCap(SQUARE);
      noFill();
      stroke(hue(playerColor), 80*S, (80-deColor)*S);
      ellipse(cx, cy, radius*1.8, radius*1.8);
      stroke(hue(playerColor), (255-deColor*0.5)*S, ally==-1?0:255*S);
-     arc(cx, cy, radius*1.8, radius*1.8, -HALF_PI +(PI*2)-fraction, PI+HALF_PI);*/
+     arc(cx, cy, radius*1.8, radius*1.8, -HALF_PI +(TAU)-fraction, PI_HALF);*/
     //strokeWeight(1);
   }
   void display() {
@@ -502,9 +502,9 @@ class Illuminati extends Player implements Containable {
   void pushForce(float amount, float angle) {
     if (!stationary) super.pushForce( amount, angle);
   }
-  void pushForce(float _vx, float _vy, float _angle) {
+  /*void pushForce(float _vx, float _vy, float _angle) {
     if (!stationary) super.pushForce( _vx, _vy, _angle);
-  }
+  }*/
   void displayName() {
     //pushStyle();
     // fill(playerColor);

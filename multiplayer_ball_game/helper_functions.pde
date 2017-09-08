@@ -1,3 +1,5 @@
+final float PI_QUARTER=PI+QUARTER_PI,PI_HALF=PI+HALF_PI;
+
 enum BuffType {
   ONCE, MULTIPLE
 }

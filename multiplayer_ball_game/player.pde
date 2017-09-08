@@ -2,13 +2,15 @@ final int TARGETABLE=0, STATIONARY=1, INVIS=2, STEALTH=3;
 
 class Player implements Cloneable {
   PShape arrowSVG = loadShape("arrow.svg");
-  int  index, ally, radius, outlineDiameter, w, h, up, down, left, right, DEFAULT_UP, DEFAULT_DOWN, DEFAULT_LEFT, DEFAULT_RIGHT, triggKey, deColor;
+  int  index, ally, radius,diameter, outlineDiameter, w, h, up, down, left, right, DEFAULT_UP, DEFAULT_DOWN, DEFAULT_LEFT, DEFAULT_RIGHT, triggKey, deColor;
   int state=1, maxHealth=200, health=maxHealth, damage=1;
-  final int barSize=12, barDiameter=75, invinsTime=400, buttonHoldTime=300;
+  int holdTime;
+  final int  invinsTime=400, buttonHoldTime=300;
+  final byte barSize=12,barDiameter=75;
   final int mouseMargin=60;
   //float MAX_MOUSE_ACCEL=0.0035;
   final float mouseMaxAccel=1.4;
-  float  x, y, vx, vy, ax, ay, cx, cy, angle, keyAngle, f, s, bend, barFraction, fraction, armor, weaponDamage=0, weaponEnergy,weaponSpeed, weaponAttackSpeed, weaponCost, weaponRegen, weaponAccuracy=0,weaponCritChance,weaponCritDamage;
+  float  x, y, vx, vy, ax, ay, cx, cy, angle, keyAngle, f, s, bend, barFraction, fraction, armor, weaponDamage=0, weaponEnergy, weaponSpeed, weaponAttackSpeed, weaponCost, weaponRegen, weaponAccuracy=0, weaponCritChance, weaponCritDamage;
   boolean holdTrigg, holdUp, holdDown, holdLeft, holdRight, dead, hit, arduino, arduinoHold, mouse, clone, turret;
   PVector coord, speed, accel, arrow;
   float DEFAULT_DAMAGE=1, DEFAULT_RADIUS, DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR, DEFAULT_FRICTION_FACTOR=0.1, DEFAULT_ARMOR=0; 
@@ -17,33 +19,32 @@ class Player implements Cloneable {
   //Ability ability;  
   ArrayList<Ability> abilityList= new ArrayList<Ability>();
   ArrayList<Buff> buffList= new ArrayList<Buff>();
-
+  String label;
   color playerColor;
   Particle textParticle, iconParticle;
 
   Player(int _index, color _playerColor, int _x, int _y, int _w, int _h, int _up, int _down, int _left, int _right, int _triggKey, Ability ..._ability) {
     DEFAULT_FRICTION_FACTOR=DEFAULT_FRICTION;
     FRICTION_FACTOR=DEFAULT_FRICTION;
-      index=_index;
+    index=_index;
     ally=_index;
-      println("player "+index);
+    println("player "+index);
     if (_up==888) {  // mouse Handicap
       mouse=true;
       FRICTION_FACTOR=0.045;
-      maxHealth=250+int(addStat(_index,0))*5;
-  
+      maxHealth=250+int(addStat(_index, 0))*5;
     }
-    maxHealth+=int(addStat(index,0))*5;
-    armor+=int(addStat(index,3))*.5;
+    maxHealth+=int(addStat(index, 0))*5;
+    armor+=int(addStat(index, 3))*.5;
     DEFAULT_ARMOR=armor;
-    weaponDamage+=int(addStat(index,6));
-    weaponAttackSpeed+=int(addStat(index,8));
+    weaponDamage+=int(addStat(index, 6));
+    weaponAttackSpeed+=int(addStat(index, 8));
     //weaponCost+=int(addStat(index,3));
-    weaponAccuracy+=int(addStat(index,7))*3;
-    weaponCritChance+=int(addStat(index,4));
-    weaponCritDamage+=int(addStat(index,5));
-  
-    println("reborn acc:"+weaponAccuracy);
+    weaponAccuracy+=int(addStat(index, 7))*3;
+    weaponCritChance+=int(addStat(index, 4));
+    weaponCritDamage+=int(addStat(index, 5));
+
+    //println("reborn acc:"+weaponAccuracy);
     //ability= _ability[0];
     //ability.setOwner(this);
     //if (_ability[0]==null) ability= new Ability();
@@ -55,15 +56,16 @@ class Player implements Cloneable {
     }
     playerColor=_playerColor;
     triggKey=_triggKey;
-    speed= new PVector(0.0, 0.0);
-    accel= new PVector(0.0, 0.0);
-    coord= new PVector(_x, _y);
-    arrow= new PVector(0.0, 0.0);
+    /* speed= new PVector(0.0, 0.0);
+     accel= new PVector(0.0, 0.0);
+     coord= new PVector(_x, _y);
+     arrow= new PVector(0.0, 0.0);*/
     x=_x;
     y=_y;
     w=_w;
     h=_h;
     radius=int(_w*0.5);
+    diameter=w;
     DEFAULT_RADIUS=radius;
     outlineDiameter=int(radius*2.2);
     cx=x+radius;
@@ -81,6 +83,8 @@ class Player implements Cloneable {
     arrowSVG.disableStyle();
     shape(arrowSVG, -arrowSVG.width*0.5+30, -arrowSVG.height, arrowSVG.width, arrowSVG.height);
     //if(!clone) buffList.add(new Stun(this, AI, 2000));
+    label="P"+(index+1);
+    if (clone)  label="P"+ (ally+1);
   }
   void checkBounds() {
     //if (!reverse && reverseImmunity) {
@@ -201,15 +205,13 @@ class Player implements Cloneable {
           //speed.set(speed.x-(accel.x*bend), speed.y-(accel.y*bend));
           for (int i=buffList.size()-1; i>=0; i--) {
             buffList.get(i).update(); 
-
             if ( buffList.get(i).dead)   buffList.remove( buffList.get(i));
           }
-          for (Ability a : this.abilityList) a.regen();
+          for (Ability a : abilityList) a.regen();
         } else {
-          for (Ability a : this.abilityList) a.regen();
+          for (Ability a : abilityList) a.regen();
           for (int i=buffList.size()-1; i>=0; i--) {
             buffList.get(i).update(); 
-            // print( " "+buffList.get(i).name);
             if ( buffList.get(i).dead)   buffList.remove( buffList.get(i));
           }
           //speed.set(speed.x+(accel.x*bend), speed.y+(accel.y*bend));
@@ -240,8 +242,8 @@ class Player implements Cloneable {
     if (dir==8) { // ability control
       for (Ability a : this.abilityList) a.press();
       //---------------    hold    --------------------
-      int temp =int(prevMillis-millis());
-      if (buttonHoldTime< temp) {
+       holdTime =int(prevMillis-millis());
+      if (buttonHoldTime< holdTime) {
         //ability.hold();
         for (Ability a : this.abilityList) a.hold();
         //   TimeSpan t = new TimeSpan(DateTime.Now.Ticks);
@@ -350,7 +352,7 @@ class Player implements Cloneable {
      } else {
      keyAngle=degrees( atan2( (accel.y+coord.y) - coord.y, (accel.x+coord.x) -coord.x ));
      }*/
-    if (((-0.01) <ay && ay<(0.01)) && ((-0.02) <ax && ax<(0.01))) {  // volitile low value calc of angle is no alowed
+    if ((-0.01 <ay && ay<0.01) && (-0.02<ax && ax<0.01)) {  // volitile low value calc of angle is no alowed
       //  println("ax:"+ax + " ay:"+ay);
     } else {
       keyAngle=degrees( atan2( (ay+y) - y, (ax+x) -x ));
@@ -389,7 +391,6 @@ class Player implements Cloneable {
       angle-= 360;
     } else    angle+= (keyAngle-angle)*ANGLE_FACTOR;
 
-
     if (Float.isNaN(angle))angle=keyAngle; // if bugged out
   }
 
@@ -421,17 +422,12 @@ class Player implements Cloneable {
       health+=_health;
       deColor=255;
       state=2;
-      //  hit=true;
-      //}
-      /*for (Ability a : this.abilityList) {
-       a.onHit();
-       }*/
       particles.add(new Particle(int(cx), int(cy), random(-10, 10)+vx*0.5, random(-10, 10)+vy*0.5, int(random(5, 20)), 500, playerColor));
       invisStampTime=stampTime+invinsTime;
       invis=true;
     }
   }
-  void wallHit(int damage) {
+  void wallHit(int _damage) {
     stamps.add( new StateStamp(index, int(x), int(y), state, health, dead));
     deColor=255;
     state=2;
@@ -454,7 +450,7 @@ class Player implements Cloneable {
     buffList.clear();
     // ability.reset();
     shakeTimer+=10;
-    for (int i=0; i<16; i++) {
+    for (int i=0; i<14; i++) {
       particles.add(new Particle(int(cx), int(cy), random(50)-25, random(50)-25, int(random(40)+10), 1500, playerColor));
     }
     particles.add(new ShockWave(int(cx), int(cy), int(random(40)+10), 16, 400, playerColor));
@@ -466,30 +462,32 @@ class Player implements Cloneable {
   void displayName() {
     fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s);
     textSize(20);
-
-    if (clone) {
+    text(label,cx,cy);
+   /* if (clone) {
       text("P"+ (ally+1), cx, cy);
       if (debug) text("index:"+ (index), cx+50, cy);
     } else {
       text("P"+ (index+1), cx, cy);
       // if (cheatEnabled) text("                              vx:"+int(vx)+" vy:"+int(vy)+" ax:"+int(ax)+" ay:"+int(ay) + " A:"+ angle, cx, cy);
       // if (cheatEnabled) text("                              left:"+holdLeft+" right:"+holdRight+" up:"+holdUp+" down:"+holdDown, cx, cy-100);
-    }
+    }*/
   }
   void displayHealth() {
 
-    fraction=((PI*2)/maxHealth)*health;
+    fraction=(TAU/maxHealth)*health;
     strokeWeight(barSize);
     //strokeCap(SQUARE);
     noFill();
     stroke(hue(playerColor), 80*S, (80-deColor)*S);
     ellipse(cx, cy, barDiameter, barDiameter);
     stroke(hue(playerColor), (255-deColor*0.5)*S, ally==-1?0:255*S);
-    arc(cx, cy, barDiameter, barDiameter, -HALF_PI +(PI*2)-fraction, PI+HALF_PI);
+   // arc(cx, cy, barDiameter, barDiameter, -HALF_PI +(TAU)-fraction, PI+HALF_PI);
+    arc(cx, cy, barDiameter, barDiameter, PI_HALF-fraction, PI_HALF);
+
     //strokeWeight(1);
   }
   void displayAbilityEnergy(int index ) {
-    barFraction=((PI*2)/abilityList.get(index).maxEnergy)*abilityList.get(index).energy;
+    barFraction=(TAU/abilityList.get(index).maxEnergy)*abilityList.get(index).energy;
     fill(255);
     if (abilityList.get(index).regen) { 
       noStroke();
@@ -497,9 +495,9 @@ class Player implements Cloneable {
       strokeWeight(6);
       stroke(hue(playerColor), 255*S, 255*S);
     }
-    arc(cx, cy, barDiameter, barDiameter, (PI*1.5)-barFraction, PI+HALF_PI);
+    arc(cx, cy, barDiameter, barDiameter, PI_HALF-barFraction, PI_HALF);
 
-    //arc(cx, cy, barDiameter, barDiameter, -HALF_PI +(PI*2)-barFraction, PI+HALF_PI);
+    //arc(cx, cy, barDiameter, barDiameter, -HALF_PI +(TAU)-barFraction, PI_HALF);
     // strokeWeight(1);
   }
   void pushForce(float amount, float angle) {
@@ -508,12 +506,12 @@ class Player implements Cloneable {
     vy+=sin(radians(angle))*amount;
     stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
   }
-  void pushForce(float _vx, float _vy, float _angle) {
-    stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
-    vx+=_vx;
-    vy+=_vy;
-    stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
-  }
+  /*void pushForce(float _vx, float _vy, float _angle) {
+   stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
+   vx+=_vx;
+   vy+=_vy;
+   stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
+   }*/
   void collide(Player e) {
     for (Buff b : buffList) {
       b.onCollide(this, e);
@@ -543,11 +541,13 @@ class Player implements Cloneable {
     armor=DEFAULT_ARMOR;
     radius=int(DEFAULT_RADIUS);
     outlineDiameter=int(radius*2.2);
-    w=radius*2;
-    h=radius*2;
+    w=diameter;
+    h=diameter;
     dead=false;
     //ability.reset();
     for (Ability a : this.abilityList) a.reset();
+        for (Buff b : this.buffList) b.kill();
+
     buffList.clear();
     //for (Buff b : this.buffList) b.reset();
   }
@@ -570,13 +570,12 @@ class Player implements Cloneable {
   }
   public void replaceAbility(Ability discardA, Ability replacementA) {
     //println(discardA.getClass().getSimpleName() +"  to  " +replacementA.getClass().getSimpleName());
-    for (int i=0; i< abilityList.size()-1;i++) {
-     // println(abilityList.get(i).getClass().getSimpleName());
+    for (int i=0; i< abilityList.size()-1; i++) {
+      // println(abilityList.get(i).getClass().getSimpleName());
       if (abilityList.get(i).getClass().getSimpleName().equals(discardA.getClass().getSimpleName())) {
-        abilityList.set(i,replacementA);
+        abilityList.set(i, replacementA);
         //println("replaced to:"+abilityList.get(i).getClass().getSimpleName());
       }
     }
-
   }
 }

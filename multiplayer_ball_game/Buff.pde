@@ -196,7 +196,7 @@ class Stun extends Buff {
     strokeWeight(30);
     stroke(enemy.playerColor);
     noFill();
-    for (float i =0; i<=PI*2; i+=PI/10) {
+    for (float i =0; i<=TAU; i+=PI/10) {
       arc(int( owner.cx), int(owner.cy), owner.w+sin(count)*30+15, owner.h+sin(count)*30+15, i+count, i+PI*.03+count);
     }
   }
@@ -245,7 +245,7 @@ class Steady extends Buff {
     stroke(enemy.playerColor);
     noFill();
 
-    for (float i =0; i<=PI*2; i+=PI/10) {
+    for (float i =0; i<=TAU; i+=PI/10) {
       arc(int( owner.cx), int(owner.cy), owner.w+sin(count)*30+15, owner.h+sin(count)*30+15, i+count, i+PI*.03+count);
     }
   }
@@ -254,9 +254,8 @@ class Steady extends Buff {
     dead=true;
     owner.stunned=false;
   }
-    void onOwnerDeath() {
+  void onOwnerDeath() {
     owner.stunned=false;
-
   }
 }
 
@@ -291,7 +290,7 @@ class Paralysis extends Buff {
       owner.keyAngle=owner.angle;
       particles.add(new  Tesla( int(owner.cx), int(owner.cy), 250, 400, enemy.playerColor));
     }
-    for (float i =0; i<=PI*2; i+=PI/2) {
+    for (float i =0; i<=TAU; i+=PI/2) {
       arc(int( owner.cx), int(owner.cy), owner.w+sin(count)*30+15, owner.h+sin(count)*30+15, i+count, i+PI*.03+count);
     }
   }
@@ -365,10 +364,11 @@ class Enlarge extends Buff {
   void transfer(Player formerOwner, Player formerEnemy) {
     super.transfer(formerOwner, formerEnemy);
     owner.radius+=int(amount);
+    owner.diameter+=int(amount*2);
     owner.x-=amount;
     owner.y-=amount;
-    owner.w=owner.radius*2;
-    owner.h=owner.radius*2;
+    owner.w=owner.diameter;
+    owner.h=owner.diameter;
     owner.outlineDiameter=int(owner.radius*2.2);
   }
   void update() {
@@ -382,8 +382,9 @@ class Enlarge extends Buff {
     owner.x+=amount;
     owner.y+=amount;
     owner.radius-=amount;
-    owner.w=owner.radius*2;
-    owner.h=owner.radius*2;
+    owner.diameter-=int(amount*2);
+    owner.w=owner.diameter;
+    owner.h=owner.diameter;
     owner.outlineDiameter=int(owner.radius*2.2);
   }
 }
@@ -406,10 +407,12 @@ class Shrink extends Buff {
   void transfer(Player formerOwner, Player formerEnemy) {
     super.transfer(formerOwner, formerEnemy);
     owner.radius-=int(amount);
+    owner.diameter-=int(amount*2);
+
     owner.x+=amount;
     owner.y+=amount;
-    owner.w=owner.radius*2;
-    owner.h=owner.radius*2;
+    owner.w=owner.diameter;
+    owner.h=owner.diameter;
     owner.outlineDiameter=int(owner.radius*2.2);
   }
   void update() {
@@ -423,8 +426,9 @@ class Shrink extends Buff {
     owner.x-=amount;
     owner.y-=amount;
     owner.radius+=amount;
-    owner.w=owner.radius*2;
-    owner.h=owner.radius*2;
+    owner.diameter+=int(amount*2);
+    owner.w=owner.diameter;
+    owner.h=owner.diameter;
     owner.outlineDiameter=int(owner.radius*2.2);
   }
 }
@@ -468,7 +472,7 @@ class Confusion extends Buff {
     owner.left=defaultLeft;
     owner.right=defaultRight;
   }
-    void onOwnerDeath() {
+  void onOwnerDeath() {
     owner.up=defaultUp;
     owner.down=defaultDown;
     owner.left=defaultLeft;
@@ -514,7 +518,7 @@ class MindControlled extends Buff {
     owner.left=owner.right;
     owner.right=owner.left;
   }
-      void onOwnerDeath() {
+  void onOwnerDeath() {
     owner.up=defaultUp;
     owner.down=defaultDown;
     owner.left=defaultLeft;
@@ -550,7 +554,7 @@ class StickyBomb extends Buff {
     if (!dead) {
 
       super.transfer(formerOwner, formerEnemy);
-      particles.add(new RShockWave(int(owner.cx), int(owner.cy), owner.radius*2+300, 30, 500, enemy.playerColor));
+      particles.add(new RShockWave(int(owner.cx), int(owner.cy), owner.diameter+300, 30, 500, enemy.playerColor));
 
       parent.dead=true;
       savedParent=parent.clone();

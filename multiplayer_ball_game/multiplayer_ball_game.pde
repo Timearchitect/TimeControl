@@ -5,7 +5,7 @@
  //  av: Alrik He    v.0.7.12                                  //
  //  Arduino verstad Malmö                                     //
  //                                                            //
- //      2014-09-21    -     2017-08-18                        //
+ //      2014-09-21    -     2017-09-07                        //
  //                                                            //
  //                                                            //
  //         Used for weapon test & prototyping timebending     //
@@ -27,14 +27,14 @@ final color BGcolor=color(100);
 PFont font;
 PGraphics GUILayer;
 PShader  Blur;
-boolean hitBox=false, cleanStart=true, preSelectedSkills=true, RandomSkillsOnDeath=false, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true, inGame;
+boolean hitBox=false, cleanStart=true, preSelectedSkills=false, RandomSkillsOnDeath=true, noFlash=true, noShake=true, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true, inGame;
 boolean gradualCleaning=true;
 final float flashAmount=0.5, shakeAmount=0.8;
 int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight, coins, mouseScroll;
 //int gameMode=0;
 GameType gameMode=GameType.MENU;
-final int AmountOfPlayers=3; // start players
+final int AmountOfPlayers=4; // start players
 final float DIFFICULTY_LEVEL=1.2;
 
 final int WHITE=color(255), GREY=color(172), BLACK=color(0), GOLD=color(255, 220, 0);
@@ -89,6 +89,7 @@ int playerControl[][]= {
   , { int('i')-32, int('k')-32, int('j')-32, int('l')-32, int('ö')-32 }
   , { int('g')-32, int('b')-32, int('v')-32, int('n')-32, int('m')-32}
   , { '8', '5', '4', '6', '3'}
+  , { int('f')-32, int('v')-32, int('c')-32, int('b')-32, int(' ')-32}
 };
 
 /*boolean sketchFullScreen() { // p2 legacy
@@ -251,18 +252,19 @@ void setup() {
   }
   abilityList[0].unlocked=true; // noActive
   passiveList[0].unlocked=true; // noPassive
-  mList.add( new ModeButton(GameType.BRAWL, 0, 100, 350, 600, color(255, 0, 0)));
-  mList.add( new ModeButton(GameType.SURVIVAL, 300, 300, 350, 600, color(255, 255, 0)));
-  mList.add( new ModeButton(GameType.WILDWEST, 600, 100, 350, 600, color(0, 255, 0)));
-  mList.add( new ModeButton(GameType.BOSSRUSH, 900, 300, 350, 600, color(0, 255, 255)));
-  mList.add( new ModeButton(GameType.SHOP, 1200, 100, 350, 600, color(0, 0, 255)));
-  mList.add( new ModeButton(GameType.SETTINGS, 1500, 300, 350, 600, color(255, 0, 255)));
+  int menuBtnWidth=275,menuBtnHeight=500;
+  mList.add( new ModeButton(GameType.BRAWL, 0, 100, menuBtnWidth, menuBtnHeight, color(255, 0, 0)));
+  mList.add( new ModeButton(GameType.SURVIVAL, 300, 300, menuBtnWidth, menuBtnHeight, color(255, 255, 0)));
+  mList.add( new ModeButton(GameType.WILDWEST, 600, 100, menuBtnWidth, menuBtnHeight, color(0, 255, 0)));
+  mList.add( new ModeButton(GameType.BOSSRUSH, 900, 300, menuBtnWidth, menuBtnHeight, color(0, 255, 255)));
+  mList.add( new ModeButton(GameType.SHOP, 1200, 100, menuBtnWidth, menuBtnHeight, color(0, 0, 255)));
+  mList.add( new ModeButton(GameType.SETTINGS, 1500, 300, menuBtnWidth, menuBtnHeight, color(255, 0, 255)));
 
   println("loaded save ... abilities!");
   abilities= new Ability[][]{ 
   /* player 1 */    new Ability[]{new RapidBattery(), new Tumble()}, 
   /* player 2 */    new Ability[]{new RapidBattery(), new Random().randomize(passiveList)}, 
-  /* player 3 mouse */   new Ability[]{new  Random().randomize(abilityList), new  Random().randomize(passiveList)}, 
+  /* player 3 mouse */    new Ability[]{new  Random().randomize(abilityList), new  Random().randomize(passiveList)}, 
   /* player 4 */    new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
     new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
     new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}
@@ -276,7 +278,7 @@ void setup() {
    try {
    players.add(new Player(i, color((255/AmountOfPlayers)*i, 255, 255), int(random(width-playerSize*1)+playerSize), int(random(height-playerSize*1)+playerSize), playerSize, playerSize, playerControl[i][0], playerControl[i][1], playerControl[i][2], playerControl[i][3], playerControl[i][4], abilities[i]));
    }
-   catch(Exception e ) {
+   catch(Exception e ) {§
    println(e);
    }
    if (players.get(i).mouse)players.get(i).FRICTION_FACTOR=0.11; //mouse
@@ -354,18 +356,17 @@ void setup() {
     for (int i=0; i<2; i++) {
       sBList.add( new SettingButton(i, settingSkillXOffset+200*i, 200+200*j, 100, players.get(j)) );
     }
-    pSBList.add( new StatButton(icons[46],0, "HP", 50, 250+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[47],1, "MP", 100, 250+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[48],2, "Sp", 150, 250+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[49],3, "Armor", 200, 250+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[50],4, "Crit%", 250, 250+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[46], 0, "HP", 50, 250+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[47], 1, "MP", 100, 250+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[48], 2, "Sp", 150, 250+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[49], 3, "Armor", 200, 250+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[50], 4, "Crit%", 250, 250+200*j, 50, players.get(j)) );
 
-    pSBList.add( new StatButton(icons[51],5, "CritD", 300, 250+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[52],6, "Damage", 350, 250+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[53],7, "Acc", 400, 250+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[54],8, "AttSp", 450, 250+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[54],9, "CDR", 500, 250+200*j, 50, players.get(j)) );
-
+    pSBList.add( new StatButton(icons[51], 5, "CritD", 300, 250+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[52], 6, "Damage", 350, 250+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[53], 7, "Acc", 400, 250+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[54], 8, "AttSp", 450, 250+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[54], 9, "CDR", 500, 250+200*j, 50, players.get(j)) );
   }
 }
 void stop() {
@@ -459,7 +460,7 @@ void draw() {
       projectiles.get(i).update();  
       projectiles.get(i).display();
       projectiles.get(i).revert();
-      if (gradualCleaning&&!reverse  &&  projectiles.get(i).deathTime+10000<stampTime) projectiles.remove(i);
+      if (gradualCleaning&&!reverse  &&  projectiles.get(i).deathTime+10000<stampTime) projectiles.remove(i);   //     10 SEK CLEAN
     }
 
 
@@ -470,7 +471,7 @@ void draw() {
       particles.get(i).update();  
       particles.get(i).display();
       particles.get(i).revert();
-      if (gradualCleaning &&!reverse &&  particles.get(i).deathTime+5000<stampTime) particles.remove(i);
+      if (gradualCleaning &&!reverse &&  particles.get(i).deathTime+5000<stampTime) particles.remove(i); // 5 SEK
     }
 
     //-----------------------  USB ------------------------
@@ -529,7 +530,7 @@ void draw() {
     }
     popMatrix();
 
-    image(GUILayer, 0, 0);
+    // image(GUILayer, 0, 0);
 
     pushStyle();
     textAlign(LEFT);
