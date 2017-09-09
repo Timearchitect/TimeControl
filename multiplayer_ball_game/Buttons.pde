@@ -124,7 +124,7 @@ class ModeButton extends Button {
   }
 
   void display() {
-    textSize(30+int(offset*.5));
+    textSize(20+int(offset*.5));
     fill(pcolor, (hover)?255:150);
     stroke(pcolor);
     strokeWeight(int(offset*.7));

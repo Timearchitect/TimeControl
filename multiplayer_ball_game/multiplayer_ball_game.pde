@@ -2,10 +2,10 @@
 /**------------------------------------------------------------//
  //                                                            //
  //  Coding dojo  - Prototype of a timecontrol game            //
- //  av: Alrik He    v.0.7.12                                  //
+ //  av: Alrik He    v.0.7.13                                  //
  //  Arduino verstad Malmö                                     //
  //                                                            //
- //      2014-09-21    -     2017-09-07                        //
+ //      2014-09-21    -     2017-09-09                        //
  //                                                            //
  //                                                            //
  //         Used for weapon test & prototyping timebending     //
@@ -27,7 +27,7 @@ final color BGcolor=color(100);
 PFont font;
 PGraphics GUILayer;
 PShader  Blur;
-boolean hitBox=false, cleanStart=true, preSelectedSkills=false, RandomSkillsOnDeath=true, noFlash=true, noShake=true, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true, inGame;
+boolean hitBox=false, cleanStart=true, preSelectedSkills=false, RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true, inGame;
 boolean gradualCleaning=true;
 final float flashAmount=0.5, shakeAmount=0.8;
 int mouseSelectedPlayerIndex=0;
@@ -40,7 +40,7 @@ final float DIFFICULTY_LEVEL=1.2;
 final int WHITE=color(255), GREY=color(172), BLACK=color(0), GOLD=color(255, 220, 0);
 final int speedFactor= 2;
 final float slowFactor= 0.3;
-final String version="0.7.12";
+final String version="0.7.13";
 static long prevMillis, addMillis, forwardTime, reversedTime, freezeTime, stampTime, fallenTime;
 final int baudRate= 19200;
 final static float DEFAULT_FRICTION=0.1;

@@ -13,6 +13,7 @@ abstract class Ability implements Cloneable {
   ArrayList<Buff> buffList;
   Ability() { 
     icon=icons[8];
+    setAllMod();
     //name=this.getClass().getSimpleName();
     //name=this.getClass().getCanonicalName();
 
@@ -98,7 +99,6 @@ abstract class Ability implements Cloneable {
     cooldown=0;
     setAllMod();
     if (owner!=null) {
-
       owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
       owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
     }
@@ -123,7 +123,7 @@ abstract class Ability implements Cloneable {
   }
   public void setSpeedMod() {
     if (owner!=null) {
-      speedMod=owner.weaponDamage;
+      speedMod=owner.weaponSpeed;
     }
   }
   public void setAccuracyMod() {
@@ -133,17 +133,17 @@ abstract class Ability implements Cloneable {
   }
   public void setCostMod() {
     if (owner!=null) {
-      costMod=owner.weaponDamage;
+      costMod=owner.weaponCost;
     }
   }
   public void setRangeMod() {
     if (owner!=null) {
-      rangeMod=owner.weaponDamage;
+      rangeMod=owner.weaponRange;
     }
   }
   public void setAttackSpeedMod() {
     if (owner!=null) {
-      attackSpeedMod=owner.weaponDamage;
+      attackSpeedMod=owner.weaponAttackSpeed;
     }
   }
   public void setCriticalChanceMod() {
@@ -700,7 +700,7 @@ class Torpedo extends Ability implements AmmoBased {//--------------------------
     name=getClassName(this);
     activeCost=maxEnergy;
     maxAmmo=2;
-    cooldownTimer=300;
+    cooldownTimer=400;
     regenRate=0.7;
     unlockCost=500;
     unlocked=true;
@@ -725,11 +725,12 @@ class Torpedo extends Ability implements AmmoBased {//--------------------------
     if ( ammo > 0&& cooldown<stampTime  &&(!reverse || owner.reverseImmunity)&&  !owner.dead && (!freeze || owner.freezeImmunity)) {
       //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
       stamps.add( new AbilityStamp(this));
+      enableCooldown();
+
       action();
     } else {
       if (energy>=0+activeCost  && ammo<=0 && !owner.dead) {
         reload();
-        enableCooldown();
         activate();
         regen=true;
       }
@@ -769,15 +770,20 @@ class Torpedo extends Ability implements AmmoBased {//--------------------------
   }
   void reloadCancel() {
   }
+  void reset() {
+    super.reset();
+    cooldownTimer=int(400-attackSpeedMod*3); //100
+  }
 }
 class Pistol extends Ability {//---------------------------------------------------    Pistol   ---------------------------------
-  final int damage=15, angleRecoil=45;
+  final int damage=16, angleRecoil=45;
   int r;
   float accuracy=1, MODIFIED_ANGLE_FACTOR=0.2;
   Pistol() {
     super();
     name=getClassName(this);
     activeCost=maxEnergy;
+    cooldownTimer=200;
     maxAmmo=12;
     ammo=0;
     icon=icons[38];
@@ -790,11 +796,10 @@ class Pistol extends Ability {//------------------------------------------------
     void action() {
     stamps.add( new AbilityStamp(this));
     if (energy>=maxEnergy)
-      projectiles.add( new RevolverBullet(owner, int( owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 70, 16, owner.playerColor, 1000, owner.angle, int(damage+damageMod*.5)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod)*1.2)));
-
+      projectiles.add( new RevolverBullet(owner, int( owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 70, 16, owner.playerColor, 1000, owner.angle, int(damage+damageMod*.6)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod)*1.5)));
 
     else
-      projectiles.add( new RevolverBullet(owner, int( owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 60, 14, owner.playerColor, 1000, owner.angle, int(damage+damageMod*.5)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod)*1.2)));
+      projectiles.add( new RevolverBullet(owner, int( owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 60, 14, owner.playerColor, 1000, owner.angle, int(damage+damageMod*.6)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod)*1.5)));
 
 
     particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 20, 32, 55, WHITE));
@@ -808,14 +813,15 @@ class Pistol extends Ability {//------------------------------------------------
   @Override
     void press() {
     // particles.add(new ShockWave(int(owner.cx), int(owner.cy), 20, 16, 200, owner.playerColor));
-    if ( ammo > 0&& cooldown<stampTime  &&(!reverse || owner.reverseImmunity)&&  !owner.dead && (!freeze || owner.freezeImmunity)) {
+    if ( cooldown<stampTime && ammo > 0&& cooldown<stampTime  &&(!reverse || owner.reverseImmunity)&&  !owner.dead && (!freeze || owner.freezeImmunity)) {
       //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
       stamps.add( new AbilityStamp(this));
       action();
+      enableCooldown();
     } else {
       if (energy>=0+activeCost  && ammo<=0) {
         reload();
-        enableCooldown();
+
         activate();
         regen=true;
       } else {
@@ -843,6 +849,10 @@ class Pistol extends Ability {//------------------------------------------------
     particles.add( new  Particle(int(owner.cx), int(owner.cy), 0, 0, int(owner.w), 800, color(255, 0, 255)));
     ammo=maxAmmo;
   }
+  void reset() {
+    super.reset();
+    cooldownTimer=int(170-attackSpeedMod*1.7); //100
+  }
 }
 class Revolver extends Ability {//---------------------------------------------------    Revolver   ---------------------------------
   final int damage=45, angleRecoil=180;
@@ -855,7 +865,7 @@ class Revolver extends Ability {//----------------------------------------------
     activeCost=maxEnergy;
     maxAmmo=6;
     ammo=0;
-    cooldownTimer=240;
+    cooldownTimer=250;
     regenRate=0.24;
     critDamage=20;
     critChance=20;
@@ -884,10 +894,10 @@ class Revolver extends Ability {//----------------------------------------------
       //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
       stamps.add( new AbilityStamp(this));
       action();
+      enableCooldown();
     } else {
       if (energy>=0+activeCost  && ammo<=0) {
         reload();
-        enableCooldown();
         activate();
         regen=true;
       } else {
@@ -5674,12 +5684,14 @@ class Chivalry extends Ability {
   float damage=8, forceAmount=0, MODIFIED_MAX_ACCEL=0.034, MODIFIED_ANGLE_FACTOR=0.03, damageFactor=1;
   ArrayList<Projectile> shields;
   int shieldRange=175;
+  boolean maxed;
   Chivalry() {
     super();
     icon=icons[58];
     name=getClassName(this);
     regenRate=0.35;
     activeCost=15;
+    cooldownTimer=1000;
     channelCost=0.15;
     unlockCost=3000;
     shields=new ArrayList<Projectile>();
@@ -5721,18 +5733,21 @@ class Chivalry extends Ability {
       }
       if (shields.size()<3) {
         if (!freeze ) {
-          shields.add( new Shield( owner, int( owner.cx+cos(radians(owner.angle+30))*shieldRange), int(owner.cy+sin(radians(owner.angle+30))*shieldRange), owner.playerColor, 4000, owner.angle-90+30, damage, int(cos(radians(owner.angle+30))*125), int(sin(radians(owner.angle+30))*125)));
-          shields.add( new Shield( owner, int( owner.cx+cos(radians(owner.angle))*shieldRange), int(owner.cy+sin(radians(owner.angle))*shieldRange), owner.playerColor, 5000, owner.angle-90, damage, int(cos(radians(owner.angle))*125), int(sin(radians(owner.angle))*125)));
-          shields.add( new Shield( owner, int( owner.cx+cos(radians(owner.angle-30))*shieldRange), int(owner.cy+sin(radians(owner.angle-30))*shieldRange), owner.playerColor, 4000, owner.angle-90-30, damage, int(cos(radians(owner.angle-30))*125), int(sin(radians(owner.angle-30))*125)));
+          shields.add( new Shield( owner, int( owner.cx+cos(radians(owner.angle+30))*shieldRange), int(owner.cy+sin(radians(owner.angle+30))*shieldRange), owner.playerColor, 10000, owner.angle-90+30, damage, int(cos(radians(owner.angle+30))*125), int(sin(radians(owner.angle+30))*125)));
+          shields.add( new Shield( owner, int( owner.cx+cos(radians(owner.angle))*shieldRange), int(owner.cy+sin(radians(owner.angle))*shieldRange), owner.playerColor, 10000, owner.angle-90, damage, int(cos(radians(owner.angle))*125), int(sin(radians(owner.angle))*125)));
+          shields.add( new Shield( owner, int( owner.cx+cos(radians(owner.angle-30))*shieldRange), int(owner.cy+sin(radians(owner.angle-30))*shieldRange), owner.playerColor, 10000, owner.angle-90-30, damage, int(cos(radians(owner.angle-30))*125), int(sin(radians(owner.angle-30))*125)));
         } else {
-          shields.add( new Shield( owner, int( owner.cx+cos(radians(owner.angle+30))*shieldRange), int(owner.cy+sin(radians(owner.angle+30))*shieldRange), owner.playerColor, 4000, owner.angle-90+30, damage));
-          shields.add( new Shield( owner, int( owner.cx+cos(radians(owner.angle))*shieldRange), int(owner.cy+sin(radians(owner.angle))*shieldRange), owner.playerColor, 5000, owner.angle-90, damage));
-          shields.add( new Shield( owner, int( owner.cx+cos(radians(owner.angle-30))*shieldRange), int(owner.cy+sin(radians(owner.angle-30))*shieldRange), owner.playerColor, 4000, owner.angle-90-30, damage));
+          shields.add( new Shield( owner, int( owner.cx+cos(radians(owner.angle+30))*shieldRange), int(owner.cy+sin(radians(owner.angle+30))*shieldRange), owner.playerColor, 10000, owner.angle-90+30, damage));
+          shields.add( new Shield( owner, int( owner.cx+cos(radians(owner.angle))*shieldRange), int(owner.cy+sin(radians(owner.angle))*shieldRange), owner.playerColor, 10000, owner.angle-90, damage));
+          shields.add( new Shield( owner, int( owner.cx+cos(radians(owner.angle-30))*shieldRange), int(owner.cy+sin(radians(owner.angle-30))*shieldRange), owner.playerColor, 10000, owner.angle-90-30, damage));
         }
         projectiles.addAll(shields);
       }
       particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle))), int(owner.cy+sin(radians(owner.angle))), int(forceAmount*.5), 16, int(forceAmount*.5), owner.playerColor));
-      // particles.add( new  Particle(int(owner.cx+cos(radians(owner.angle))*forceAmount*12), int(owner.cy+sin(radians(owner.angle))*forceAmount*11), 0, 0, int(MAX_FORCE*1.5), 30, color(255, 0, 255)));
+      if (cooldown<stampTime && !maxed ) {
+        particles.add( new Star(1000, int(owner.cx), int( owner.cy), 0, 0, 150, 0.9, WHITE) );
+        maxed=true;
+      }
     }
     //if (!active)press(); // cancel
     if (owner.hit)release(); // cancel
@@ -5740,16 +5755,18 @@ class Chivalry extends Ability {
   @Override
     void release() {
     if ((!reverse || owner.reverseImmunity ) ) {
-      if (!owner.dead && (!freeze || owner.freezeImmunity)&& active && channeling) {
+      if ( !owner.dead && (!freeze || owner.freezeImmunity)&& active && channeling) {
         //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
         stamps.add( new AbilityStamp(this));
         particles.add(new ShockWave(int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 25, 20, 400, owner.playerColor));
         regen=true;
         owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
         owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
-        action();
+        if (cooldown<stampTime)action();
         deChannel();
         deactivate();
+        enableCooldown();
+        maxed=false;
         //owner.pushForce(8, owner.keyAngle);
       }
       removeShields();
@@ -5758,8 +5775,8 @@ class Chivalry extends Ability {
   void reset() {
     super.reset();
     forceAmount=0;
-    //   hold=false;
-    //  active=false;
+    cooldownTimer=int(1000-attackSpeedMod*9);
+
     regen=true;
     //  channeling=false;
     deChannel();
@@ -5811,19 +5828,15 @@ class ChargeSlash extends Ability {//-------------------------------------------
     //particles.add(new Gradient(int(forceAmount*11), int(owner.cx), int(owner.cy), 0, 0, 4, 100, owner.angle, owner.playerColor));
     //particles.add(new Gradient(1500, int(owner.cx +cos(radians(owner.angle))*owner.radius), int(owner.cy+sin(radians(owner.angle))*owner.radius), 0, 0, int(forceAmount*11), int(forceAmount*11),4, owner.angle, owner.playerColor));
     particles.add(new  Gradient(  1000, int(owner.cx +cos(radians(owner.angle))*owner.radius), int(owner.cy+sin(radians(owner.angle))*owner.radius), 0, 0, int(forceAmount*11), int(owner.radius*2), 8, owner.angle, owner.playerColor));
-    projectiles.add(new Slash(owner, int(owner.cx), int(owner.cy), 150, WHITE, int(3.3*forceAmount), owner.angle, 50, 1.5*forceAmount+50, cos(radians(owner.angle))*forceAmount*.5, sin(radians(owner.angle))*forceAmount*.3, int(forceAmount*damageFactor)+int(damageMod*.3), true));
-    projectiles.add(new Slash(owner, int(owner.cx), int(owner.cy), 150, WHITE, 280, owner.angle, -20, 70, cos(radians(owner.angle))*forceAmount, sin(radians(owner.angle))*forceAmount, int(forceAmount*damageFactor)+int(damageMod*.8), false));
+    projectiles.add(new Slash(owner, int(owner.cx), int(owner.cy), 150, WHITE, int(3.3*forceAmount), owner.angle, 50, 1.5*forceAmount+50, cos(radians(owner.angle))*forceAmount*.5, sin(radians(owner.angle))*forceAmount*.3, int(forceAmount*damageFactor)+int(damageMod*.2), true));
+    projectiles.add(new Slash(owner, int(owner.cx), int(owner.cy), 150, WHITE, 280, owner.angle, -20, 70, cos(radians(owner.angle))*forceAmount, sin(radians(owner.angle))*forceAmount, int(forceAmount*damageFactor*2)+int(damageMod*2), false));
     owner.x+=cos(radians(owner.angle))*forceAmount*11;
     owner.y+=sin(radians(owner.angle))*forceAmount*11;
-    //  projectiles.add( new ForceBall(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), forceAmount*2+4, 35, owner.playerColor, 2000, owner.angle, forceAmount*damageFactor));
   }
   @Override
     void press() {
-    if ((!reverse || owner.reverseImmunity)&&(!freeze || owner.freezeImmunity) && energy>(0+activeCost)&& !hold && !active && !channeling && !owner.dead) {
-
-
+    if (cooldown<stampTime&&(!reverse || owner.reverseImmunity)&&(!freeze || owner.freezeImmunity) && energy>(0+activeCost)&& !hold && !active && !channeling && !owner.dead) {
       projectiles.add(new Slice(owner, int(owner.cx-cos(radians(owner.angle))*250), int(owner.cy-sin(radians(owner.angle))*250), 350, owner.playerColor, 180, owner.angle+145, 6, 130, cos(radians(owner.angle))*forceAmount*.5, sin(radians(owner.angle))*forceAmount*.5, int(30*damageFactor+damageMod*.1), false));
-
       activate();
       forceAmount=5;
       //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
@@ -5868,6 +5881,8 @@ class ChargeSlash extends Ability {//-------------------------------------------
         owner.pushForce(forceAmount*.4, owner.angle);
         regen=true;
         action();
+        enableCooldown();
+
         deChannel();
         deactivate();
         owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
@@ -5879,11 +5894,9 @@ class ChargeSlash extends Ability {//-------------------------------------------
   void reset() {
     super.reset();
     forceAmount=0;
+    cooldownTimer=int(400-attackSpeedMod*3);
     maxed=false;
-    //   hold=false;
-    //  active=false;
     regen=true;
-    //  channeling=false;
     deChannel();
     release();
   }
