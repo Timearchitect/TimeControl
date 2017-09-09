@@ -15,7 +15,7 @@ class Player implements Cloneable {
   PVector coord, speed, accel, arrow;
   float DEFAULT_DAMAGE=1, DEFAULT_RADIUS, DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR, DEFAULT_FRICTION_FACTOR=0.1, DEFAULT_ARMOR=0; 
   long invisStampTime;
-  boolean invis, freezeImmunity=false, reverseImmunity, fastforwardImmunity, slowImmunity, stationary, stunned, stealth, targetable=true;
+  boolean allyCollision,invis, freezeImmunity=false, reverseImmunity, fastforwardImmunity, slowImmunity, stationary, stunned, stealth, targetable=true;
   //Ability ability;  
   ArrayList<Ability> abilityList= new ArrayList<Ability>();
   ArrayList<Buff> buffList= new ArrayList<Buff>();
@@ -32,10 +32,10 @@ class Player implements Cloneable {
     if (_up==888) {  // mouse Handicap
       mouse=true;
       FRICTION_FACTOR=0.045;
-      maxHealth=250+int(addStat(_index, 0))*5;
+      maxHealth=250+int(addStat(_index, 0))*8;
     }
-    maxHealth+=int(addStat(index, 0))*5;
-    armor+=int(addStat(index, 3))*.5;
+    maxHealth+=int(addStat(index, 0))*8;
+    armor+=int(addStat(index, 3))*.2;
     DEFAULT_ARMOR=armor;
     weaponDamage+=int(addStat(index, 6));
     weaponAttackSpeed+=int(addStat(index, 8));

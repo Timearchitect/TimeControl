@@ -7,7 +7,7 @@ enum AbilityType {
   ACTIVE, PASSIVE, NATIVE, GLOBAL
 }
 enum GameType {
-  BRAWL, SURVIVAL, PUZZLE, WILDWEST, SHOP, MENU, BOSSRUSH, SETTINGS
+  BRAWL,HORDE, SURVIVAL, PUZZLE, WILDWEST, SHOP, MENU, BOSSRUSH, SETTINGS
 }
 static String getClassName(Object o) {
   return o.getClass().getSimpleName();
@@ -67,7 +67,7 @@ static float angleAgainst(int x, int y, int x2, int y2) {
 }
 
 Player seek(Player m, int senseRange) {
-  for (int sense = 0; sense < senseRange; sense++) {
+  for (int sense = 0; sense < senseRange; sense+=5) { // interval 3
     for (   Player p : players) {
       if (p!= m && !p.dead && p.ally!=m.ally) {
         if (dist(p.x, p.y, m.x, m.y)<sense*.5) {  
@@ -79,7 +79,7 @@ Player seek(Player m, int senseRange) {
   return null;
 }  
 Player seek(Projectile m, int senseRange) {
-  for (int sense = 0; sense < senseRange; sense++) {
+  for (int sense = 0; sense < senseRange; sense+=5) { // interval 3
     for (   Player p : players) {
       if ( !p.dead && p.ally!=m.ally) {
         if (dist(p.x, p.y, m.x, m.y)<sense*.5) {  

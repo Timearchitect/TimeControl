@@ -111,9 +111,9 @@ class Turret extends Player implements Containable {
   void pushForce(float amount, float angle) {
     if (!stationary) super.pushForce( amount, angle);
   }
- /* void pushForce(float _vx, float _vy, float _angle) {
-    if (!stationary) super.pushForce( _vx, _vy, _angle);
-  }*/
+  /* void pushForce(float _vx, float _vy, float _angle) {
+   if (!stationary) super.pushForce( _vx, _vy, _angle);
+   }*/
   void displayName() {
     //pushStyle();
     fill(playerColor);
@@ -167,7 +167,6 @@ class Block extends Player implements Containable {
     health=maxHealth;
     stationary=true;
     targetable=false;
-    
   }
   Block(int _index, int _x, int _y, int _w, int _h, int _health, Ability ..._ability) { // nseutral
     super( _index, BLACK, _x, _y, _w, _h, 999, 999, 999, 999, 999, _ability) ;
@@ -193,7 +192,7 @@ class Block extends Player implements Containable {
     stroke(hue(playerColor), 80*S, (80-deColor)*S);
     ellipse(cx, cy, radius*1.8, radius*1.8);
     stroke(hue(playerColor), (255-deColor*0.5)*S, ally==-1?0:255*S);
-    arc(cx, cy, radius*1.8, radius*1.8,PI_HALF-fraction, PI_HALF);
+    arc(cx, cy, radius*1.8, radius*1.8, PI_HALF-fraction, PI_HALF);
     //strokeWeight(1);
   }
   void display() {
@@ -262,8 +261,8 @@ class Block extends Player implements Containable {
     if (!stationary) super.pushForce( amount, angle);
   }
   /*void pushForce(float _vx, float _vy, float _angle) {
-    if (!stationary) super.pushForce( _vx, _vy, _angle);
-  }*/
+   if (!stationary) super.pushForce( _vx, _vy, _angle);
+   }*/
   void displayName() {
     //pushStyle();
     // fill(playerColor);
@@ -294,7 +293,7 @@ class Block extends Player implements Containable {
     //angle=90;
     vx=vel.x;
     vy=vel.y;
-    particles.add(new Rectwave( int(cx),int(cy),radius, 20, 500,owner.playerColor) );
+    particles.add(new Rectwave( int(cx), int(cy), radius, 20, 500, owner.playerColor) );
   }
 }
 class Illuminati extends Player implements Containable { 
@@ -503,8 +502,8 @@ class Illuminati extends Player implements Containable {
     if (!stationary) super.pushForce( amount, angle);
   }
   /*void pushForce(float _vx, float _vy, float _angle) {
-    if (!stationary) super.pushForce( _vx, _vy, _angle);
-  }*/
+   if (!stationary) super.pushForce( _vx, _vy, _angle);
+   }*/
   void displayName() {
     //pushStyle();
     // fill(playerColor);
@@ -692,7 +691,7 @@ class Drone extends Player {
 class FollowDrone extends Drone { 
 
   Player target;
-
+  boolean degenerate=true;
   FollowDrone(int _index, Player _owner, int _x, int _y, int _w, int _h, int speed, int _health, int _type, Ability ..._ability) {
     super( _index, _owner, _x, _y, _w, _h, speed, _health, _ability) ;
     owner=_owner;
@@ -705,6 +704,11 @@ class FollowDrone extends Drone {
     //health=maxHealth;
     damage=5;
     armor=-10;
+    if (type>=10) {
+      allyCollision=true;
+      degenerate=false;
+      damage=2;
+    }
     angle=owner.angle;
     //println(abilityList.get(0).name);
     if (type==2)wait=-30;
@@ -713,6 +717,11 @@ class FollowDrone extends Drone {
     super( _index, _x, _y, _w, _h, speed, _health, _ability) ;
     type=_type;
     damage=5;
+    if (type>=10) {
+      allyCollision=true;
+      degenerate=false;
+      damage=2;
+    }
     armor=-10;
     if (type==2)wait=-30;
   }
@@ -720,29 +729,29 @@ class FollowDrone extends Drone {
   }
   void display() {
     if (!stealth) {
-      stroke((freeze && !freezeImmunity)?255:0);
+      //stroke((freeze && !freezeImmunity)?255:0);
+      stroke(0);
       strokeWeight(2);
-      fill(255, 0, 255-deColor*0.5, 50+deColor);
+      // fill(255, 0, 255-deColor*0.5, 50+deColor);
+      fill(255, 0, 200);
 
-      //textMode(CENTER);
-      //rect(x, y, w, h);
       ellipse(cx, cy, w, h);
-
-      pushMatrix();
-      translate(cx, cy);
-      rotate(radians(angle+90));
-      // shape(arrowSVG,x+w*.5- arrowSVG.width*.5, y-arrowSVG.halfHeight, arrowSVG.width, arrowSVG.height); // default render
-      //fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s, 50+deColor);
-      shape(arrowSVG, -arrowSVG.width*0.5+30, -arrowSVG.height+0, arrowSVG.width, arrowSVG.height);
-      popMatrix();
-
-      fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s);
-      //displayAbilityEnergy();
-      displayHealth();
-      displayName();
+      if (type!=10) {
+        pushMatrix();
+        translate(cx, cy);
+        rotate(radians(angle+90));
+        // shape(arrowSVG,x+w*.5- arrowSVG.width*.5, y-arrowSVG.halfHeight, arrowSVG.width, arrowSVG.height); // default render
+        //fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s, 50+deColor);
+        shape(arrowSVG, -arrowSVG.width*0.5+30, -arrowSVG.height+0, arrowSVG.width, arrowSVG.height);
+        popMatrix();
+        fill(hue(playerColor), saturation(playerColor)*s, brightness(playerColor)*s);
+        //displayAbilityEnergy();
+        displayHealth();
+        displayName();
+        if (deColor>0)deColor-=int(10*s*f);
+      }
       //if (cheatEnabled && ability.active)text("A", x+w*0.5, y-h*2);
       //if (cheatEnabled && holdTrigg)text("H", x+w*0.5, y+h*0.5-h);
-      if (deColor>0)deColor-=int(10*s*f);
     } else { //stealth
       stroke(255, 40);
       noFill();
@@ -779,7 +788,7 @@ class FollowDrone extends Drone {
           buffList.get(i).update(); 
           if ( buffList.get(i).dead)   buffList.remove( buffList.get(i));
         }
-        if (wait>50)health--;
+        if (  degenerate && wait>50)health--;
         if (health<=0)death();
         x+=vx;
         y+=vy;
@@ -800,76 +809,97 @@ class FollowDrone extends Drone {
       a.passive();
       a.regen();
     }
-    switch(type) {
-    case 2:
-      target = seek(this, 2200);
-      if (target!=null) {
-        angle=angleAgainst(int(x), int(y), int(target.x), int(target.y));
-        keyAngle=angle;
-      }
-      if (wait>1) pushForce(0.15, angle);
-      if (wait>100) {
-        for (Ability a : this.abilityList) { 
-          a.press();
-          a.hold();
-          wait=1;
+    if (!gameOver) {
+      switch(type) {
+      case 2:
+        target = seek(this, 2200);
+        if (target!=null) {
+          angle=angleAgainst(int(x), int(y), int(target.x), int(target.y));
+          keyAngle=angle;
         }
-        wait+=int(random(35));
-        if (random(100)<1)
-          for (Ability a : this.abilityList)a.release();
-      } else wait++;
-      break;
-    case 3:  // faster
-      target = seek(this, 2500);
-      if (target!=null) {
-        angle=angleAgainst(int(x), int(y), int(target.x), int(target.y));
-        keyAngle=angle;
-      }
-      pushForce(0.5, angle);
-      //control(2);
-      if (wait>130) {
-        for (Ability a : this.abilityList) { 
-          a.press();
-          a.hold();
-          wait=1;
+        if (wait>1) pushForce(0.15, angle);
+        if (wait>100) {
+          for (Ability a : this.abilityList) { 
+            a.press();
+            a.hold();
+            wait=1;
+          }
+          wait+=int(random(35));
+          if (random(100)<1)
+            for (Ability a : this.abilityList)a.release();
+        } else wait++;
+        break;
+      case 3:  // faster
+        target = seek(this, 2500);
+        if (target!=null) {
+          angle=angleAgainst(int(x), int(y), int(target.x), int(target.y));
+          keyAngle=angle;
         }
-        wait+=int(random(35));
-        if (random(100)<1)
-          for (Ability a : this.abilityList)a.release();
-      } else wait++;
-      break;
-    case 4:  // sniper Boss
-      target = seek(this, 4000);
-      if (target!=null) {
-        angle=angleAgainst(int(x), int(y), int(target.x), int(target.y));  
-        keyAngle=angle;
-      }
-      pushForce(-0.05, angle);
-      //control(2);
-      if (wait>130) {
-        for (Ability a : this.abilityList) { 
-          if (!a.active)a.press();
-          a.hold();
-          //wait=1;
+        pushForce(0.5, angle);
+        //control(2);
+        if (wait>130) {
+          for (Ability a : this.abilityList) { 
+            a.press();
+            a.hold();
+            wait=1;
+          }
+          wait+=int(random(35));
+          if (random(100)<1)
+            for (Ability a : this.abilityList)a.release();
+        } else wait++;
+        break;
+      case 4:  // sniper Boss
+        target = seek(this, 4000);
+        if (target!=null) {
+          angle=angleAgainst(int(x), int(y), int(target.x), int(target.y));  
+          keyAngle=angle;
         }
-        wait+=int(random(10));
-        if (random(100)<1)
-          for (Ability a : this.abilityList)a.release();
-      } else wait++;
-      break;
-    default:
-      target = seek(this, 2000);
-      if (target!=null) {
-        angle=angleAgainst(int(x), int(y), int(target.x), int(target.y));
-      }
-      if (wait>50) {
+        pushForce(-0.05, angle);
+        //control(2);
+        if (wait>130) {
+          for (Ability a : this.abilityList) { 
+            if (!a.active)a.press();
+            a.hold();
+            //wait=1;
+          }
+          wait+=int(random(10));
+          if (random(100)<1)
+            for (Ability a : this.abilityList)a.release();
+        } else wait++;
+        break;
+      case 10:  // slow no degen allyCollide
+        target = seek(this, 1800);
+        if (target!=null) {
+          angle=angleAgainst(int(x), int(y), int(target.x), int(target.y));
+          // keyAngle=angle;
+          pushForce(0.15, angle);
+        }
+        //control(2);
+        /* if (wait>130) {
+         for (Ability a : this.abilityList) { 
+         a.press();
+         a.hold();
+         wait=1;
+         }
+         wait+=int(random(35));
+         if (random(100)<1)
+         for (Ability a : this.abilityList)a.release();
+         } else wait++;*/
+        break;
+      default:
+        target = seek(this, 2000);
+        if (target!=null) {
+          angle=angleAgainst(int(x), int(y), int(target.x), int(target.y));
+        }
+        if (wait>50) {
 
-        wait=20;
-        for (Ability a : this.abilityList) { 
-          a.press();
-          a.hold();
-        }
-      } else wait++;
+          wait=20;
+          for (Ability a : this.abilityList) { 
+            a.press();
+            a.hold();
+          }
+        } else wait++;
+      }
     }
   }
   /*  void control(int dir) {
@@ -880,6 +910,25 @@ class FollowDrone extends Drone {
    void pushForce(float _vx, float _vy, float _angle) {
    //if (!stationary) super.pushForce( _vx, _vy, _angle);
    }*/
+  void death() {
+    //ability.onDeath();
+          dead=true;
+
+    if (type!=10) {  
+      for (Ability a : this.abilityList) {
+        a.onDeath();
+        a.reset();
+      }
+      for (Buff b : this.buffList) {
+        b.onOwnerDeath();
+      }
+      buffList.clear();
+    }
+particles.add(new Particle(int(cx), int(cy), 0, 0, w, 2000, playerColor));
+    particles.add(new ShockWave(int(cx), int(cy), int(random(40)+10), 16, 400, playerColor));
+    state=0;
+    //stamps.add( new StateStamp(index, int(x), int(y), state, health,dead));
+  }
   void displayName() {
     //pushStyle();
     fill(playerColor);

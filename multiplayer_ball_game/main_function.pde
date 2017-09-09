@@ -13,7 +13,7 @@ void displayInfo() {
   text("add Time: "+addMillis+" freezeTime: " + freezeTime+" reversed: " + reversedTime+" forward: " + forwardTime+ " current: "+  stampTime +" fallenTime: "+fallenTime, halfWidth, 50);
   text("version: "+version, halfWidth, 20);
   text("players: "+players.size()+" projectiles: "+projectiles.size()+" particles: "+particles.size()+" stamps: "+stamps.size(), halfWidth, 75);
-  text(frameRate, width-80, 50);
+  text(int(frameRate), width-80, 100);
 }
 void displayClock() {
   fill(0);
@@ -46,14 +46,16 @@ void checkPlayerVSPlayerColloision() {
   if (!freeze &&!reverse) {
     for (Player p1 : players) {       
       for (Player p2 : players) {       
-        if (p1.ally!=p2.ally && !p1.dead && !p2.dead ) { //  && p1!=p2
+        if (   p1!=p2 &&  !p1.dead && !p2.dead ) { //  && p1!=p2
           //    if (dist(p1.x, p1.y, p2.x, p2.y)<playerSize) { // old collision
           if (dist(p1.cx, p1.cy, p2.cx, p2.cy)<p1.radius+p2.radius) {
-            p1.collide(p2);
-            p1.hit(p2.damage);
-            //float  deltaX = p1.cx -  p2.cx , deltaY =  p1.cy -  p2.cy;
-            //p1.pushForce( (p1.radius+p2.radius-dist(p2.cx, p2.cy, p1.cx, p1.cy)), atan2(p1.cy -  p2.cy, p1.cx -  p2.cx) * 180 / PI);
-            p1.pushForce( (p1.radius+p2.radius-dist(p2.cx, p2.cy, p1.cx, p1.cy)), degrees(atan2(p1.cy -  p2.cy, p1.cx -  p2.cx)) );
+            if (p1.allyCollision || p1.ally!=p2.ally) {  
+              p1.collide(p2);
+              if (!p1.allyCollision)p1.hit(p2.damage);
+              //float  deltaX = p1.cx -  p2.cx , deltaY =  p1.cy -  p2.cy;
+              //p1.pushForce( (p1.radius+p2.radius-dist(p2.cx, p2.cy, p1.cx, p1.cy)), atan2(p1.cy -  p2.cy, p1.cx -  p2.cx) * 180 / PI);
+              p1.pushForce( (p1.radius+p2.radius-dist(p2.cx, p2.cy, p1.cx, p1.cy)), degrees(atan2(p1.cy -  p2.cy, p1.cx -  p2.cx)) );
+            }
           }
         }
       }
@@ -91,14 +93,14 @@ void checkProjectileVSProjectileColloision() {
         if ( !p2.dead && !p1.dead &&p2.ally!=p1.ally ) { //  && p1!=p2
           if (p1 instanceof  Reflectable  && p2 instanceof Reflector) {
             //if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*.5+p2.size*.5) {
-              if (dist(p1.x, p1.y, p2.x, p2.y)<(p1.size+p2.size)*.5) {
+            if (dist(p1.x, p1.y, p2.x, p2.y)<(p1.size+p2.size)*.5) {
               ((Reflectable)p1).reflect(p2.angle, p2.owner);
               ((Reflector)p2).reflecting();
             }
           }
           if (p1 instanceof  Destroyable  && p2 instanceof Destroyer) {
-           // if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*.5+p2.size*.5) {
-              if (dist(p1.x, p1.y, p2.x, p2.y)<(p1.size+p2.size)*.5) {
+            // if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*.5+p2.size*.5) {
+            if (dist(p1.x, p1.y, p2.x, p2.y)<(p1.size+p2.size)*.5) {
               ((Destroyable)p1).destroy(p2);
               ((Destroyer)p2).destroying(p1);
             }
@@ -114,7 +116,7 @@ void checkPlayerVSProjectileColloisionLine() {
 }
 
 void checkWinner() {
-  int playerAliveIndex=0;
+  //playerAliveIndex=0;
   playersAlive=0;
   for (Player p : players) {      
     if (!p.dead && !p.turret && !p.clone) {
@@ -137,6 +139,21 @@ void checkWinner() {
       text(" Winner is player "+(playerAliveIndex+1), halfWidth, halfHeight);
       text(" Press ["+ResetKey+"] to restart", halfWidth, height*0.6);
       text( reward+" coins earned!!!]", halfWidth, height*0.7);
+      break;
+    case HORDE:
+      if (playersAlive==0) {
+        if (survivalTime<=0)survivalTime=int(stampTime*.001);
+        if (!gameOver) {
+          reward=survivalTime; 
+          coins+=reward;
+          saveProgress();
+        }
+        gameOver=true;
+
+        text(" Survived for "+survivalTime+ "  sek", halfWidth, halfHeight);
+        text(" Press ["+ResetKey+"] to restart", halfWidth, height*0.6);
+        text( reward +" coins earned!!!]", halfWidth, height*0.7);
+      }
       break;
     case SURVIVAL:
       if (playersAlive==0) {
@@ -260,11 +277,14 @@ void resetGame() {
     }
 
     break;
+  case HORDE:
+    hordeSpawningReset();
+    break;
   case SURVIVAL:
     spawningReset();
     break;
   case BOSSRUSH:
-      for (Player p : players) {    
+    for (Player p : players) {    
       if (p!=AI&&!p.clone &&  !p.turret) {  // no turret or clone respawn
         p.reset();
         announceAbility( p, 0);
@@ -478,8 +498,9 @@ void shopUpdate() {
 }
 ArrayList<SettingButton> sBList= new ArrayList<SettingButton>(); 
 ArrayList<StatButton> pSBList= new ArrayList<StatButton>(); 
-int[] abilitySettingsIndex= new int[4];  
-int settingSkillXOffset=700;
+int[] abilitySettingsIndex= new int[AmountOfPlayers];  
+int[] statPoints =  new int[AmountOfPlayers];  
+int settingSkillXOffset=650, settingSkillYOffset=100, settingSkillInterval=180;
 void settingsUpdate() { //----------------------------------------------------   settingsupdate
   background(255);
   textSize(50);
@@ -491,8 +512,8 @@ void settingsUpdate() { //----------------------------------------------------  
 
   textSize(46);
   for (Player p : players) {
-    fill(p.playerColor,150);
-    text("player "+(p.index+1), 250, p.index*200+200);
+    fill(p.playerColor, 150);
+    text("player "+(p.index+1), 250, p.index*200+settingSkillYOffset);
   }
 
   fill(WHITE);
@@ -502,21 +523,21 @@ void settingsUpdate() { //----------------------------------------------------  
     s.display();
     s.updateSettings();
   }
-   for (StatButton s : pSBList) {
+  for (StatButton s : pSBList) {
     s.update();
     s.display();
     //s.updateSettings();
   }
   noFill();
-  strokeWeight(8);
-  for (int i=0; i< abilitySettingsIndex.length-1; i++) {
+  strokeWeight(8);//
+  for (int i=0; i< AmountOfPlayers; i++) {//abilitySettingsIndex.length-1
     stroke(int((255/AmountOfPlayers)*i), 255, 255);
-    rect(  abilitySettingsIndex[i]*200+settingSkillXOffset-55, i*200+145, 110, 110);
+    rect(  abilitySettingsIndex[i]*settingSkillInterval+settingSkillXOffset-55, i*200+settingSkillYOffset-55, 110, 110);
   }
 }
 
-int shopXEdgePadding=90,shopYEdgePadding=150;
-int shopXInterval=100,shopYInterval=115;
+int shopXEdgePadding=90, shopYEdgePadding=150;
+int shopXInterval=100, shopYInterval=115;
 void loadProgress() throws Exception {
   save.clear();
   bList.clear();

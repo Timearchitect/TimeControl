@@ -108,8 +108,22 @@ void spawningSetup() {
     , 400000, 10000/DIFFICULTY_LEVEL, true, 1));
 }
 
-
-
+void spawningHordeSetup() {
+  spawnList.add(new Spawner(new Object[]{new ManaBall(AI, halfWidth, halfHeight, 60, WHITE, 20000, 0, 0, 0, 50, true)}
+    , 13000, 8000*DIFFICULTY_LEVEL, halfWidth, halfHeight, true, 100/DIFFICULTY_LEVEL));
+  /*spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.75), int(playerSize*0.75), 10, 200, 1, new AutoGun(), new  Reward(1, false))}
+   , 2000, 4000/DIFFICULTY_LEVEL, true, 50*DIFFICULTY_LEVEL));*/
+  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1), int(playerSize*1), 30, 250, 10, new  Reward(2, false))}
+    , 1200, 5000/DIFFICULTY_LEVEL, halfWidth, halfHeight, true, 50));
+  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.75), int(playerSize*0.75), 30, 250, 10, new  Reward(2, false))}
+    , 1000, 5000/DIFFICULTY_LEVEL, halfWidth, halfHeight, true, 50));
+  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1.25), int(playerSize*1.25), 30, 250, 10, new  Reward(2, false))}
+    , 800, 5000/DIFFICULTY_LEVEL, halfWidth, halfHeight, true, 50));
+  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.9), int(playerSize*0.9), 30, 250, 10, new  Reward(2, false))}
+    , 800, 4000/DIFFICULTY_LEVEL, halfWidth, halfHeight, true, 50));
+  /* spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.75), int(playerSize*0.75), 15, 50, 2, new Suicide())}
+   , 500, 10000/DIFFICULTY_LEVEL, halfWidth, halfHeight, true, 50*DIFFICULTY_LEVEL));*/
+}
 void spawningReset() {
 
   stamps.clear();  
@@ -141,18 +155,7 @@ void spawningReset() {
     p.ally=0;
   }
 
-
-  /* for (Player p : players) {    
-   if (p!=AI&&!p.clone &&  !p.turret) {  // no turret or clone respawn
-   p.reset();
-   announceAbility( p, 0);
-   } else {
-   p.dead=true;
-   p.state=0;
-   }
-   }*/
   players.add(AI);
-
   spawningSetup();
   particles.add(new  Text("Survival", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
   particles.add(new Gradient(10000, 0, 500, 0, 0, 500, 0.5, 0, GREY));
@@ -168,6 +171,42 @@ void spawningReset() {
 }
 void survivalSpawning() {
   if (!gameOver) for (Spawner s : spawnList)  s.update();
+}
+void hordeSpawning() {
+  if (!gameOver) for (Spawner s : spawnList)  s.update();
+}
+
+void hordeSpawningReset() {
+
+  stamps.clear();  
+  survivalTime=0;
+  gameOver=false;
+  projectiles.clear();
+  particles.clear(); 
+  spawnList.clear();
+  forwardTime=0;
+  reversedTime=0;
+  freezeTime=0;
+  fallenTime=0;
+  stampTime=0;
+
+  for (int i=players.size()-1; i>= AmountOfPlayers; i--) {
+    players.remove(i);
+  }   
+
+  for (Player p : players) {
+    if (!preSelectedSkills) {  
+      p.abilityList.clear();
+      p.abilityList.add(new Random(true).randomize(abilityList));
+      p.abilityList.get(0).setOwner(p);
+    }
+    for (Ability a : p.abilityList) {
+      a.reset();
+    }
+    p.ally=0;
+  }
+
+  spawningHordeSetup();
 }
 ArrayList<Player> bossList= new ArrayList<Player>();
 int bossCleared=0;

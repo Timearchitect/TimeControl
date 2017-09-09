@@ -2,7 +2,7 @@
 /**------------------------------------------------------------//
  //                                                            //
  //  Coding dojo  - Prototype of a timecontrol game            //
- //  av: Alrik He    v.0.7.13                                  //
+ //  av: Alrik He    v.0.7.14                                  //
  //  Arduino verstad Malmö                                     //
  //                                                            //
  //      2014-09-21    -     2017-09-09                        //
@@ -27,27 +27,29 @@ final color BGcolor=color(100);
 PFont font;
 PGraphics GUILayer;
 PShader  Blur;
-boolean hitBox=false, cleanStart=true, preSelectedSkills=false, RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true, inGame;
+boolean hitBox=false, cleanStart=true, preSelectedSkills=true, RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true, inGame;
 boolean gradualCleaning=true;
 final float flashAmount=0.5, shakeAmount=0.8;
 int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight, coins, mouseScroll;
 //int gameMode=0;
 GameType gameMode=GameType.MENU;
-final int AmountOfPlayers=4; // start players
+final int AmountOfPlayers=6,AmountOfModes=7; // start players
 final float DIFFICULTY_LEVEL=1.2;
 
 final int WHITE=color(255), GREY=color(172), BLACK=color(0), GOLD=color(255, 220, 0);
 final int speedFactor= 2;
 final float slowFactor= 0.3;
-final String version="0.7.13";
+final String version="0.7.14";
 static long prevMillis, addMillis, forwardTime, reversedTime, freezeTime, stampTime, fallenTime;
 final int baudRate= 19200;
 final static float DEFAULT_FRICTION=0.1;
 final int startBalls=0;
 final int  ballSize=100;
 final int playerSize=100;
-static int playersAlive; // amount of players alive
+static int playersAlive,playerAliveIndex; // amount of players alive
+      float GUIpercent;
+
 static Player AI;
 final int offsetX=1250, offsetY=-50;//final int offsetX=950, offsetY=100;
 static int shakeTimer, shakeX=0, shakeY=0, maxShake=80;
@@ -252,13 +254,16 @@ void setup() {
   }
   abilityList[0].unlocked=true; // noActive
   passiveList[0].unlocked=true; // noPassive
-  int menuBtnWidth=275,menuBtnHeight=500;
-  mList.add( new ModeButton(GameType.BRAWL, 0, 100, menuBtnWidth, menuBtnHeight, color(255, 0, 0)));
-  mList.add( new ModeButton(GameType.SURVIVAL, 300, 300, menuBtnWidth, menuBtnHeight, color(255, 255, 0)));
-  mList.add( new ModeButton(GameType.WILDWEST, 600, 100, menuBtnWidth, menuBtnHeight, color(0, 255, 0)));
-  mList.add( new ModeButton(GameType.BOSSRUSH, 900, 300, menuBtnWidth, menuBtnHeight, color(0, 255, 255)));
-  mList.add( new ModeButton(GameType.SHOP, 1200, 100, menuBtnWidth, menuBtnHeight, color(0, 0, 255)));
-  mList.add( new ModeButton(GameType.SETTINGS, 1500, 300, menuBtnWidth, menuBtnHeight, color(255, 0, 255)));
+  int menuBtnWidth=275, menuBtnHeight=500;
+    colorMode(HSB);
+
+  mList.add( new ModeButton(GameType.BRAWL   , width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
+  mList.add( new ModeButton(GameType.HORDE   , width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
+  mList.add( new ModeButton(GameType.SURVIVAL, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
+  mList.add( new ModeButton(GameType.WILDWEST, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
+  mList.add( new ModeButton(GameType.BOSSRUSH, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
+  mList.add( new ModeButton(GameType.SHOP    , width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
+  mList.add( new ModeButton(GameType.SETTINGS, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
 
   println("loaded save ... abilities!");
   abilities= new Ability[][]{ 
@@ -273,7 +278,6 @@ void setup() {
   //ChloeSet = new Ability[]{new ForceShoot(),new RapidFire(), new Dash(), new Tumble(),new Emergency()};
   //abilities[1]=ChloeSet;
 
-  colorMode(HSB);
   /* for (int i=0; i< AmountOfPlayers; i++) {
    try {
    players.add(new Player(i, color((255/AmountOfPlayers)*i, 255, 255), int(random(width-playerSize*1)+playerSize), int(random(height-playerSize*1)+playerSize), playerSize, playerSize, playerControl[i][0], playerControl[i][1], playerControl[i][2], playerControl[i][3], playerControl[i][4], abilities[i]));
@@ -354,20 +358,24 @@ void setup() {
   resetGame();
   for (int j=0; j<AmountOfPlayers; j++) {
     for (int i=0; i<2; i++) {
-      sBList.add( new SettingButton(i, settingSkillXOffset+200*i, 200+200*j, 100, players.get(j)) );
+      sBList.add( new SettingButton(i, settingSkillXOffset+settingSkillInterval*i, settingSkillYOffset+200*j, 100, players.get(j)) );
     }
-    pSBList.add( new StatButton(icons[46], 0, "HP", 50, 250+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[47], 1, "MP", 100, 250+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[48], 2, "Sp", 150, 250+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[49], 3, "Armor", 200, 250+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[50], 4, "Crit%", 250, 250+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[46], 0, "HP", 50, settingSkillYOffset+50+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[47], 1, "MP", 100, settingSkillYOffset+50+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[48], 2, "Sp", 150, settingSkillYOffset+50+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[49], 3, "Armor", 200, settingSkillYOffset+50+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[50], 4, "Crit%", 250, settingSkillYOffset+50+200*j, 50, players.get(j)) );
 
-    pSBList.add( new StatButton(icons[51], 5, "CritD", 300, 250+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[52], 6, "Damage", 350, 250+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[53], 7, "Acc", 400, 250+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[54], 8, "AttSp", 450, 250+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[54], 9, "CDR", 500, 250+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[51], 5, "CritD", 300, settingSkillYOffset+50+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[52], 6, "Damage", 350, settingSkillYOffset+50+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[53], 7, "Acc", 400, settingSkillYOffset+50+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[54], 8, "AttSp", 450, settingSkillYOffset+50+200*j, 50, players.get(j)) );
+    pSBList.add( new StatButton(icons[54], 9, "CDR", 500, settingSkillYOffset+50+200*j, 50, players.get(j)) );
   }
+ /*   String[] args = {"Rename player"};
+  PApplet sa = new PApplet();
+  PApplet.runSketch(args, sa);
+*/
 }
 void stop() {
   musicPlayer.pause(true);
@@ -513,7 +521,7 @@ void draw() {
       // }
     } 
     //image(GUILayer, 0, 0);
-    mouseDot();
+    if(cheatEnabled)mouseDot();
     checkKeyHold();
     for (int i=stamps.size ()-1; i>= 0; i--) { // checkStamps
       // stamps.get(i).display(); // hid this when not DEBUGGING
@@ -536,12 +544,11 @@ void draw() {
     textAlign(LEFT);
     textSize(12);
     strokeWeight(20);
-
     for (Player p : players) {
       if (p.index>-1 && p.index<5 &&!p.clone) {
+        noStroke();
         for (Ability a : p.abilityList) {
           if (a.type==AbilityType.ACTIVE) {
-            noStroke();
             fill(WHITE);
             rect(100+300*p.index+30, height-65-30*p.abilityList.indexOf(a), a.energy, 30);
           }
@@ -550,10 +557,10 @@ void draw() {
           image(a.icon, 100+300*p.index+15, height-50-30*p.abilityList.indexOf(a), 30, 30);
         }
         stroke(BLACK);
-        line(100+300*p.index, height-20, 100+130+300*p.index, height-20);
+        line(100+300*p.index, height-20, 230+300*p.index, height-20);
         stroke((p.playerColor==BLACK)?WHITE:p.playerColor);
-        float percent = ((float)p.health/p.maxHealth)*130;
-        if (p.health>0)line(100+300*p.index, height-20, 100+percent+300*p.index, height-20);
+         GUIpercent = ((float)p.health/p.maxHealth)*130;
+        if (p.health>0)line(100+300*p.index, height-20, 100+GUIpercent+300*p.index, height-20);
       }
     }
     popStyle();
@@ -562,6 +569,9 @@ void draw() {
     else displayClock();
     switch(gameMode) {
     case BRAWL:
+      break;
+    case HORDE:
+      hordeSpawning();
       break;
     case SURVIVAL:
       survivalSpawning();
@@ -573,33 +583,15 @@ void draw() {
       break;
     case SHOP:
       shopUpdate();
-      /* for (int i=particles.size ()-1; i>= 0; i--) { // checkStamps
-       particles.get(i).update();  
-       particles.get(i).display();
-       particles.get(i).revert();
-       if (gradualCleaning &&!reverse &&  particles.get(i).deathTime+5000<stampTime) particles.remove(i);
-       }*/
       break;
     case MENU:
       menuUpdate();
-      /* for (int i=particles.size ()-1; i>= 0; i--) { // checkStamps
-       particles.get(i).update();  
-       particles.get(i).display();
-       particles.get(i).revert();
-       if (gradualCleaning &&!reverse &&  particles.get(i).deathTime+5000<stampTime) particles.remove(i);
-       }*/
       break;
     case BOSSRUSH:
       bossRushSpawning();
       break;
     case SETTINGS:
       settingsUpdate();
-      /* for (int i=particles.size ()-1; i>= 0; i--) { // checkStamps
-       particles.get(i).update();  
-       particles.get(i).display();
-       particles.get(i).revert();
-       if (gradualCleaning &&!reverse &&  particles.get(i).deathTime+5000<stampTime) particles.remove(i);
-       }*/
       break;
     default:
       break;
