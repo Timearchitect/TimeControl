@@ -108,19 +108,21 @@ void spawningSetup() {
     , 400000, 10000/DIFFICULTY_LEVEL, true, 1));
 }
 
-void spawningHordeSetup() {
+void spawningHordeSetup() {   // HORDE MODE
   spawnList.add(new Spawner(new Object[]{new ManaBall(AI, halfWidth, halfHeight, 60, WHITE, 20000, 0, 0, 0, 50, true)}
     , 13000, 8000*DIFFICULTY_LEVEL, halfWidth, halfHeight, true, 100/DIFFICULTY_LEVEL));
   /*spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.75), int(playerSize*0.75), 10, 200, 1, new AutoGun(), new  Reward(1, false))}
    , 2000, 4000/DIFFICULTY_LEVEL, true, 50*DIFFICULTY_LEVEL));*/
-  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1), int(playerSize*1), 30, 250, 10, new  Reward(2, false))}
+  spawnList.add(new Spawner(new Object[]{new Zombie(players.size(), halfWidth, halfHeight, int(playerSize*1), int(playerSize*1), 30, 200, 10, new  Reward(3, true))}
     , 1200, 5000/DIFFICULTY_LEVEL, halfWidth, halfHeight, true, 50));
-  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.75), int(playerSize*0.75), 30, 250, 10, new  Reward(2, false))}
+  spawnList.add(new Spawner(new Object[]{new Zombie(players.size(), halfWidth, halfHeight, int(playerSize*0.75), int(playerSize*0.75), 30, 150, 10, new  Reward(2, true))}
     , 1000, 5000/DIFFICULTY_LEVEL, halfWidth, halfHeight, true, 50));
-  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1.25), int(playerSize*1.25), 30, 250, 10, new  Reward(2, false))}
+  spawnList.add(new Spawner(new Object[]{new Zombie(players.size(), halfWidth, halfHeight, int(playerSize*1.25), int(playerSize*1.25), 30, 250, 10, new  Reward(4, true))}
     , 800, 5000/DIFFICULTY_LEVEL, halfWidth, halfHeight, true, 50));
-  spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.9), int(playerSize*0.9), 30, 250, 10, new  Reward(2, false))}
+  spawnList.add(new Spawner(new Object[]{new Zombie(players.size(), halfWidth, halfHeight, int(playerSize*0.9), int(playerSize*0.9), 30, 170, 10, new  Reward(2, true))}
     , 800, 4000/DIFFICULTY_LEVEL, halfWidth, halfHeight, true, 50));
+  spawnList.add(new Spawner(new Object[]{new Zombie(players.size(), halfWidth, halfHeight, int(playerSize*0.9), int(playerSize*0.9), 30, 170, 10, new  Reward(1, true))}
+    , 500, 2000/DIFFICULTY_LEVEL, halfWidth, halfHeight, true, 100));
   /* spawnList.add(new Spawner(new Object[]{new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*0.75), int(playerSize*0.75), 15, 50, 2, new Suicide())}
    , 500, 10000/DIFFICULTY_LEVEL, halfWidth, halfHeight, true, 50*DIFFICULTY_LEVEL));*/
 }
@@ -343,14 +345,11 @@ class Spawner {
   void  spawn() throws Exception {
     //println("SPAWN");
 
-
     for (Object o : object) {
       if (random) {
         x=int(random(width));
         y=int(random(height));
       }
-
-
       if ( o instanceof Projectile) {
         particles.add(new ShockWave(x, y, 20, 16, 150, AI.playerColor));
         Projectile temp=((Projectile)o).clone();
@@ -359,24 +358,15 @@ class Spawner {
         temp.x=x;
         temp.y=y;
         projectiles.add(temp);
-        /*((Projectile)o).spawnTime+=startTime;
-         ((Projectile)o).deathTime+=startTime;
-         ((Projectile)o).x=x;
-         ((Projectile)o).y=y;*/
-        //projectiles.add( ((Projectile)o).clone());
       } else if ( o instanceof Player) {
-        particles.add(new ShockWave(x, y, 40, 26, 350, AI.playerColor));
+        particles.add(new ShockWave(x, y, 40, 5, 850, AI.playerColor));
         Player temp = ((Player)o).clone();
+        temp.abilityList=(ArrayList<Ability>)((Player)o).abilityList.clone();
         temp.cx=x;
         temp.cy=y;
         temp.x=x-temp.radius;
-        temp.y=x-temp.radius;
+        temp.y=y-temp.radius;
         players.add(temp);
-        /*((Player)o).cx=x;
-         ((Player)o).cy=y;
-         ((Player)o).x=x;
-         ((Player)o).y=y;
-         players.add(((Player)o).clone());*/
       } else if ( o instanceof Particle) {
         ((Particle)o).x=x;
         ((Particle)o).y=y;

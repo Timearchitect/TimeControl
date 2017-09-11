@@ -93,7 +93,7 @@ Player seek(Projectile m, int senseRange) {
 //final int TARGETABLE=0,STATIONARY=1,INVIS=2,STEALTH=3;
 Player seek(Player m, int senseRange, int attributeIndex) {
 
-  for (int sense = 0; sense < senseRange; sense++) {
+  for (int sense = 0; sense < senseRange; sense+=5) { //interval 5
     for (   Player p : players) {
       if (p!= m && !p.dead && p.ally!=m.ally) {
         switch (attributeIndex) {
@@ -172,6 +172,12 @@ static float  calcAngleBetween(Projectile target, Player from) {
 static float  calcAngleBetween(Player target, Projectile from) {
   return degrees(atan2((target.cy-from.y), (target.cx-from.x)))%360;
 }
+ static float calcAngleFromBlastZone(float x, float y, float px, float py) {
+//    double deltaY = py - y;
+ //   double deltaX = px - x;
+    return (float)Math.atan2(py - y, px - x) * 180 / PI;
+  }
+
 
 void generateRandomAbilities(int index, Ability[] list, boolean noEmpty) {
   for (Player p : players) {      

@@ -684,3 +684,75 @@ class CriticalHit extends Buff {
     dead=true;
   }
 }
+
+class DamageBuff extends Buff {
+  // float damage = 2;
+  float count, amount;
+  int defaultUp, defaultDown, defaultLeft, defaultRight;
+  DamageBuff(Player p, int _duration, int _amount) {
+    super(p, _duration);
+    name=getClassName(this);
+    amount=_amount;
+  }
+  DamageBuff(Player p, Player e, int _duration, int _amount) {
+    super(p, _duration);
+    name=getClassName(this);
+    enemy=e;
+    amount=_amount;
+  }
+  void transfer(Player formerOwner, Player formerEnemy) {
+    super.transfer(formerOwner, formerEnemy);
+    projectiles.add( new CurrentLine(owner, int( owner.cx), int(owner.cy), int( random(300, 700)), owner.playerColor, 50, owner.angle, cos(radians(owner.angle)), sin(radians(owner.angle)), 5));
+    owner.weaponDamage+=amount;
+    for (Ability a : owner.abilityList)a.setAllMod();
+  }
+  void update() {
+    super.update();
+    if (owner.textParticle!=null)particles.remove( owner.textParticle );
+    owner.textParticle = new Text(owner, "ATTACK+", 0, -75, 30, 0, 100, owner.playerColor, 0);
+    particles.add( owner.textParticle );
+  }
+  void kill() {
+    dead=true;
+    owner.weaponDamage-=amount;
+    for (Ability a : owner.abilityList)a.setAllMod();
+  }
+  void onOwnerDeath() {
+    kill();
+  }
+}
+class SpeedBuff extends Buff {
+  // float damage = 2;
+  float count, amount;
+  int defaultUp, defaultDown, defaultLeft, defaultRight;
+  SpeedBuff(Player p, int _duration, float _amount) {
+    super(p, _duration);
+    name=getClassName(this);
+    amount=_amount;
+  }
+  SpeedBuff(Player p, Player e, int _duration, float _amount) {
+    super(p, _duration);
+    name=getClassName(this);
+    enemy=e;
+    amount=_amount;
+  }
+  void transfer(Player formerOwner, Player formerEnemy) {
+    super.transfer(formerOwner, formerEnemy);
+    projectiles.add( new CurrentLine(owner, int( owner.cx), int(owner.cy), int( random(300, 700)), owner.playerColor, 50, owner.angle, cos(radians(owner.angle)), sin(radians(owner.angle)), 0));
+    owner.MAX_ACCEL+=amount;
+  }
+  void update() {
+    super.update();
+    if (owner.textParticle!=null)particles.remove( owner.textParticle );
+    owner.textParticle = new Text(owner, "SPEED+", 0, -75, 30, 0, 100, owner.playerColor, 0);
+    particles.add( owner.textParticle );
+          particles.add(new Particle(int(owner.cx), int(owner.cy), owner.vx*.2, owner.vy*.2, 100, 100, owner.playerColor));
+
+  }
+  void kill() {
+    dead=true;
+    owner.MAX_ACCEL-=amount;
+  }
+  void onOwnerDeath() {
+  }
+}

@@ -22,6 +22,7 @@ interface Destroyer {
 
 interface Container { 
   Boolean container=true;
+//    Containable payload[]= new  Containable[]();
   Container contains(Containable[] payload);
   
 }

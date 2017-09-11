@@ -15,7 +15,7 @@ class Player implements Cloneable {
   PVector coord, speed, accel, arrow;
   float DEFAULT_DAMAGE=1, DEFAULT_RADIUS, DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR, DEFAULT_FRICTION_FACTOR=0.1, DEFAULT_ARMOR=0; 
   long invisStampTime;
-  boolean allyCollision,invis, freezeImmunity=false, reverseImmunity, fastforwardImmunity, slowImmunity, stationary, stunned, stealth, targetable=true;
+  boolean allyCollision, invis, freezeImmunity=false, reverseImmunity, fastforwardImmunity, slowImmunity, stationary, stunned, stealth, targetable=true;
   //Ability ability;  
   ArrayList<Ability> abilityList= new ArrayList<Ability>();
   ArrayList<Buff> buffList= new ArrayList<Buff>();
@@ -28,7 +28,7 @@ class Player implements Cloneable {
     FRICTION_FACTOR=DEFAULT_FRICTION;
     index=_index;
     ally=_index;
-    println("player "+index);
+    // println("player "+index);
     if (_up==888) {  // mouse Handicap
       mouse=true;
       FRICTION_FACTOR=0.045;
@@ -515,6 +515,22 @@ class Player implements Cloneable {
   void collide(Player e) {
     for (Buff b : buffList) {
       b.onCollide(this, e);
+    }
+  }
+  void addBuff(Buff buff) {
+    if (buffList.size()>0) {
+     // for (Buff b : buffList) {
+        // Buff clone = buff;
+
+        if (buff.type==BuffType.ONCE  &&   existInList(buffList, buff.getClass())) {
+        } else {  
+          buffList.add(buff);
+          buff.transfer(this, this);
+        }
+      //}
+    } else {
+      buff.transfer(this, this);
+      buffList.add(buff);
     }
   }
   void stop() {

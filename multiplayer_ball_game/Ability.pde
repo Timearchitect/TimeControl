@@ -794,6 +794,7 @@ class Pistol extends Ability {//------------------------------------------------
   } 
   @Override
     void action() {
+    owner.addBuff(new SpeedBuff(owner, 1500, 0.12).apply(BuffType.ONCE));
     stamps.add( new AbilityStamp(this));
     if (energy>=maxEnergy)
       projectiles.add( new RevolverBullet(owner, int( owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 70, 16, owner.playerColor, 1000, owner.angle, int(damage+damageMod*.6)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod)*1.5)));
@@ -1675,7 +1676,7 @@ class Shotgun extends Ability {//-----------------------------------------------
   }
 }
 class Sluggun extends Ability {//---------------------------------------------------    Shotgun   ---------------------------------
-  int damage=5, duration=900, delay=300, laserWidth=75, chargelevel;
+  int damage=45, duration=900, delay=300, laserWidth=75, chargelevel;
   long timer;
   float MODIFIED_ANGLE_FACTOR=0.5, MODIFIED_MAX_ACCEL=0.006, InAccurateAngle; 
   long startTime;
@@ -1723,7 +1724,7 @@ class Sluggun extends Ability {//-----------------------------------------------
       projectiles.add( new Bomb(owner, int( owner.cx), int(owner.cy), 40, owner.playerColor, 1, owner.angle, cos(radians(owner.angle))*20, sin(radians(owner.angle))*20, damage, false));
       projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 30, 100, owner.playerColor, 200, owner.angle, damage));
       projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 10, 200, owner.playerColor, 200, owner.angle, damage));
-      projectiles.add( new Slug(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 70, owner.playerColor, 1500, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*36, sin(radians(owner.angle+InAccurateAngle))*36, int(damage*8+damageMod)));
+      projectiles.add( new Slug(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 70, owner.playerColor, 1500, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*36, sin(radians(owner.angle+InAccurateAngle))*36, int(damage+damageMod)));
       owner.pushForce(-40, owner.angle);
       charging=false;
       // chargelevel=0;
@@ -1817,7 +1818,7 @@ class GranadeLauncher extends Ability {//---------------------------------------
     void action() {
 
     //if (int(random(5))!=0) {
-    Granade b=new Granade(owner, int( owner.cx), int(owner.cy), 60, owner.playerColor, int(random(2000, 3000)), owner.angle, cos(radians(owner.angle))*shootSpeed+owner.vx, sin(radians(owner.angle))*shootSpeed+owner.vy, int(damage+damageMod*.3), true);
+    Granade b=new Granade(owner, int( owner.cx), int(owner.cy), 60, owner.playerColor, int(random(2000, 3000)), owner.angle, cos(radians(owner.angle))*shootSpeed+owner.vx, sin(radians(owner.angle))*shootSpeed+owner.vy, int(damage+damageMod*.8), true);
     owner.pushForce(-12, owner.angle);
     Buff buff=new StickyBomb(owner, 2000, 20);
     buff.type= BuffType.MULTIPLE;
@@ -2146,7 +2147,9 @@ class Stars extends Ability {//-------------------------------------------------
     particles.add(new ShockWave(int(owner.cx), int(owner.cy), 50, 16, 500, owner.playerColor));
     // particles.add( new  Particle(int(owner.cx), int(owner.cy), 0, 0, int(owner.w), 800, color(255, 0, 255)));
     for (int i=0; i<359; i+=40) {
-      projectiles.add( new RCRocket(owner, int( owner.cx+cos(radians(owner.angle+i))*50), int(owner.cy+sin(radians(owner.angle+i))*50), size, owner.playerColor, 1700, owner.angle+i, i, cos(radians(owner.angle+i))*shootSpeed*.02+owner.vx, sin(radians(owner.angle+i))*shootSpeed*.02+owner.vy, damage, false, true));
+      RCRocket s= new RCRocket(owner, int( owner.cx+cos(radians(owner.angle+i))*50), int(owner.cy+sin(radians(owner.angle+i))*50), size, owner.playerColor, 1700, owner.angle+i, i, cos(radians(owner.angle+i))*shootSpeed*.02+owner.vx, sin(radians(owner.angle+i))*shootSpeed*.02+owner.vy, damage, false, true);
+      s.shakeness=2;
+      projectiles.add( s);
     }
     owner.pushForce(5, owner.angle);
     // particles.add(new ShockWave(int(owner.cx), int(owner.cy), 20, 16, 200, owner.playerColor));
@@ -2950,7 +2953,7 @@ class RapidBattery extends Battery {//------------------------------------------
   }
 }
 class AssaultBattery extends Ability {//---------------------------------------------------    Battery   ---------------------------------
-  int  maxInterval=6, damage=20, count=0, maxCount=14, flip=1;
+  int  DEFAULT_MAX_INTERVAL=10, maxInterval=DEFAULT_MAX_INTERVAL, damage=18, count=0, maxCount=14, flip=1;
   float  inAccuracy=90, accuracy=inAccuracy, interval, MODIFIED_ANGLE_FACTOR=0.001, MODIFIED_MAX_ACCEL=0.05; 
 
   AssaultBattery() {
@@ -2962,6 +2965,7 @@ class AssaultBattery extends Ability {//----------------------------------------
     unlockCost=4750;
     critChance=10;
     critDamage=10;
+    maxInterval=int(DEFAULT_MAX_INTERVAL-attackSpeedMod*0.1);
   } 
 
   @Override
@@ -2969,9 +2973,9 @@ class AssaultBattery extends Ability {//----------------------------------------
     strokeWeight(1400);
     stroke(owner.playerColor);
     if (flip==1) {
-      arc(owner.cx, owner.cy, 1800, 1800, radians(owner.angle-inAccuracy*1.0), radians(owner.angle));
+      arc(owner.cx, owner.cy, 1800, 1800, radians(owner.angle-accuracy*1.0), radians(owner.angle));
     } else {
-      arc(owner.cx, owner.cy, 1800, 1800, radians(owner.angle), radians(owner.angle+inAccuracy*1.0));
+      arc(owner.cx, owner.cy, 1800, 1800, radians(owner.angle), radians(owner.angle+accuracy*1.0));
     }
     strokeWeight(1);
     flip*=-1;
@@ -3051,7 +3055,7 @@ class AssaultBattery extends Ability {//----------------------------------------
     inAccuracy-=accuracyMod;
     if (inAccuracy<0)inAccuracy=0;
     accuracy=inAccuracy;
-
+    maxInterval=int(DEFAULT_MAX_INTERVAL-attackSpeedMod*0.1);
     owner.MAX_ACCEL= owner.DEFAULT_MAX_ACCEL;
     owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
   }
@@ -3699,8 +3703,7 @@ class HitScanGun extends SeekGun {
     critDamage=5;
     critChance=20;
     unlockCost=5500;
-    cooldownTimer=100;
-
+    cooldownTimer=80;
     damage=8;
     range=2000;
     minRange=50; 
@@ -3745,19 +3748,25 @@ class HitScanGun extends SeekGun {
         }
       }
 
+      try {
+        for (Player t : targets) {
+          if (!t.dead) {
+            alt++;
+            for (int i=0; i<4; i++) {
+              // particles.add(new Particle(int(x), int(y), vx, vy, int(random(30)+10), 800, projectileColor));
+              particles.add(new Spark( 1000, int(t.cx), int(t.cy), cos(radians((i*90)+(alt%2==0?45:0)))*15, sin(radians((i*90)+(alt%2==0?45:0)))*15, 6, (i*90)+(alt%2==0?45:0), owner.playerColor));
+              particles.add(new Spark( 1000, int(t.x+random(t.w)), int(t.y+random(t.w)), cos(radians(owner.angle))*random(10), sin(radians(owner.angle))*random(10), 6, owner.angle, owner.playerColor));
+            }
+            particles.add( new  Particle(int(t.cx), int(t.cy), cos(radians(owner.angle))*12, sin(radians(owner.angle))*12, 120, 100, color(255, 0, 255)));
 
-      for (Player t : targets) {
-        alt++;
-        for (int i=0; i<4; i++) {
-          // particles.add(new Particle(int(x), int(y), vx, vy, int(random(30)+10), 800, projectileColor));
-          particles.add(new Spark( 1000, int(t.cx), int(t.cy), cos(radians((i*90)+(alt%2==0?45:0)))*15, sin(radians((i*90)+(alt%2==0?45:0)))*15, 6, (i*90)+(alt%2==0?45:0), owner.playerColor));
-          particles.add(new Spark( 1000, int(t.x+random(t.w)), int(t.y+random(t.w)), cos(radians(owner.angle))*random(10), sin(radians(owner.angle))*random(10), 6, owner.angle, owner.playerColor));
+            // targetVarning(t);
+            t.hit(int(damage+damageMod*.1)+crit(owner.playerColor, t, critChance+criticalChanceMod, (critDamage+criticalDamageMod)));
+            t.pushForce(3, calcAngleBetween( t, owner));
+          }
         }
-        particles.add( new  Particle(int(t.cx), int(t.cy), cos(radians(owner.angle))*12, sin(radians(owner.angle))*12, 120, 100, color(255, 0, 255)));
-
-        // targetVarning(t);
-        t.hit(int(damage+damageMod*.1)+crit(owner.playerColor, t, critChance+criticalChanceMod, (critDamage+criticalDamageMod)));
-        t.pushForce(3, calcAngleBetween( t, owner));
+      }
+      catch(Exception e) {
+        println(e+"seekgun target");
       }
       targets.clear();
       particles.add(new LineWave(int(owner.cx+cos(radians(owner.angle))*owner.w*2.5), int(owner.cy+sin(radians(owner.angle))*owner.w*2.5), 60, 200, owner.playerColor, owner.angle));
@@ -4197,7 +4206,15 @@ class DeployShield extends Ability {//------------------------------------------
       particles.add(new ShockWave(int(owner.cx), int(owner.cy), 300, 16, 90, WHITE));
 
       for (int i=0; i<360; i+=30) {
-        projectiles.add( new Shield( owner, int( owner.cx+cos(radians(i))*195), int(owner.cy+sin(radians(i))*195), owner.playerColor, 2200, i+90, damage ));
+        Container s = new Shield( owner, int( owner.cx+cos(radians(i))*195), int(owner.cy+sin(radians(i))*195), owner.playerColor, 2200, i+90, damage );
+        Containable payload[]={   
+          new IceDagger(owner, int( owner.cx), int(owner.cy), 25, owner.playerColor, 300, i-15, cos(radians(i-15))*50, sin(radians(i-15))*50, int(damage+damageMod*.5)).parent(s), 
+          new IceDagger(owner, int( owner.cx), int(owner.cy), 25, owner.playerColor, 300, i, cos(radians(i))*50, sin(radians(i))*50, int(damage+damageMod*.5)).parent(s), 
+          new IceDagger(owner, int( owner.cx), int(owner.cy), 25, owner.playerColor, 300, i+15, cos(radians(i+15))*50, sin(radians(i+15))*50, int(damage+damageMod*.5)).parent(s)
+
+        };
+        s.contains(payload);
+        projectiles.add((Projectile)s);
       }
     } else {
       // particles.add(new Particle(int(owner.cx), int(owner.cy), 0, 0, 120, 500, WHITE));
@@ -5230,7 +5247,7 @@ class SummonIlluminati extends Ability {//--------------------------------------
 class SneakBall extends Ability {//---------------------------------------------------    SneakBall  ---------------------------------
 
   int shootSpeed=65;
-  int damage=15;
+  int damage=18;
   ArrayList<HomingMissile> missileList= new   ArrayList<HomingMissile> ();
   float MODIFIED_ANGLE_FACTOR = 0.04;   
   long timer;
@@ -5263,7 +5280,7 @@ class SneakBall extends Ability {//---------------------------------------------
     Containable[] payload=new Containable[9];
 
     for (int i=0; i<8; i++) {
-      payload[i]= new HomingMissile(owner, int( cos(radians(i*45))*100), int(sin(radians(i*45))*100), 60, owner.playerColor, 4000, owner.angle, cos(radians(owner.angle))*shootSpeed*.1, sin(radians(owner.angle))*shootSpeed*.1, int(damage+damageMod*.4)).parent(ball); 
+      payload[i]= new HomingMissile(owner, int( cos(radians(i*45))*100), int(sin(radians(i*45))*100), 65, owner.playerColor, 4000, owner.angle, cos(radians(owner.angle))*shootSpeed*.1, sin(radians(owner.angle))*shootSpeed*.1, int(damage+damageMod*.4)).parent(ball); 
       ((HomingMissile)payload[i]).locking();
       ((HomingMissile)payload[i]).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod)));
       missileList.add((HomingMissile)payload[i]);
@@ -5456,10 +5473,12 @@ class Artilery extends Ability {//----------------------------------------------
         particles.add(  new  Particle(int(owner.cx), int(owner.cy), cos(radians(i))*7, sin(radians(i))*7, int(random(50)+10), 500, WHITE));
       }
       first=false;
-      shakeTimer+=12;
+      shakeTimer+=14;
     }
     particles.add(new ShockWave(int(owner.cx-cos(radians(owner.angle+15*alt))*75), int(owner.cy-sin(radians(owner.angle+15*alt))*75), 30, 42, 55, WHITE));
-    projectiles.add( new ForceBall(owner, int( owner.cx+cos(radians(owner.angle+15*alt))*owner.w), int(owner.cy+sin(radians(owner.angle+15*alt))*owner.w), shootSpeed, 35, owner.playerColor, 1200, owner.angle, int(damage+damageMod*.8)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod))).addBuff(new ArmorPiercing(owner, 3000, 10)));
+    ForceBall f=(ForceBall) new ForceBall(owner, int( owner.cx+cos(radians(owner.angle+15*alt))*owner.w), int(owner.cy+sin(radians(owner.angle+15*alt))*owner.w), shootSpeed, 35, owner.playerColor, 1200, owner.angle, int(damage+damageMod*.8)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod))).addBuff(new ArmorPiercing(owner, 3000, 12));
+    f.shakeness=10;
+    projectiles.add( f);
     particles.add(new ShockWave(int( owner.cx+cos(radians(owner.angle+15*alt))*owner.w), int(owner.cy+sin(radians(owner.angle+15*alt))*owner.w), 35, 30, 100, owner.playerColor));
     //  projectiles.add( new Slug(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*36, sin(radians(owner.angle))*36, int(damage*0.8)));
   }

@@ -730,13 +730,18 @@ class FollowDrone extends Drone {
   void display() {
     if (!stealth) {
       //stroke((freeze && !freezeImmunity)?255:0);
-      stroke(0);
-      strokeWeight(2);
-      // fill(255, 0, 255-deColor*0.5, 50+deColor);
-      fill(255, 0, 200);
 
-      ellipse(cx, cy, w, h);
-      if (type!=10) {
+      if (type==10) {
+        stroke(0);
+        strokeWeight(8);
+        fill(255, 0, 200);
+        ellipse(cx, cy, w, h);
+      } else {
+
+        stroke(0);
+        strokeWeight(2);
+        fill(255, 0, 200);
+        ellipse(cx, cy, w, h);
         pushMatrix();
         translate(cx, cy);
         rotate(radians(angle+90));
@@ -872,7 +877,7 @@ class FollowDrone extends Drone {
         if (target!=null) {
           angle=angleAgainst(int(x), int(y), int(target.x), int(target.y));
           // keyAngle=angle;
-          pushForce(0.15, angle);
+          pushForce(0.12, angle);
         }
         //control(2);
         /* if (wait>130) {
@@ -902,29 +907,231 @@ class FollowDrone extends Drone {
       }
     }
   }
-  /*  void control(int dir) {
-   }*/
-  /* void pushForce(float amount, float angle) {
-   //if (!stationary) super.pushForce( amount, angle);
-   }
-   void pushForce(float _vx, float _vy, float _angle) {
-   //if (!stationary) super.pushForce( _vx, _vy, _angle);
-   }*/
+  void control(int dir) {
+  }
+  void hit(float damage) {
+    //stamps.add( new StateStamp(index, int(x), int(y), state, health, dead));
+    damage=damage-armor;
+    if (damage>0) {
+      health-=damage;
+      // deColor=255;
+      //state=2;
+      hit=true;
+    }
+    for (Ability a : this.abilityList) {
+      a.onHit();
+    }
+    // for (int i=0; i<2; i++) {
+    // particles.add(new Particle(int(cx), int(cy), random(-10, 10)+vx*0.5, random(-10, 10)+vy*0.5, int(random(5, 20)), 500, playerColor));
+    // }
+    // invisStampTime=stampTime+invinsTime;
+    //invis=true;
+    if (health<=0) {
+      death();
+    }
+  }
+
+  void heal(float _health) {
+    if (health<maxHealth) {
+      health+=_health;
+      // deColor=255;
+      state=2;
+      particles.add(new Particle(int(cx), int(cy), random(-10, 10)+vx*0.5, random(-10, 10)+vy*0.5, int(random(5, 20)), 500, playerColor));
+    }
+  }
+  void wallHit(int _damage) {
+    //deColor=255;
+    hit=true;
+    for (Ability a : this.abilityList) {
+      a.wallHit();
+    }
+  }
+  void pushForce(float amount, float angle) {
+    vx+=cos(radians(angle))*amount;
+    vy+=sin(radians(angle))*amount;
+  }
   void death() {
     //ability.onDeath();
-          dead=true;
+    dead=true;
 
-    if (type!=10) {  
-      for (Ability a : this.abilityList) {
-        a.onDeath();
-        a.reset();
-      }
-      for (Buff b : this.buffList) {
-        b.onOwnerDeath();
-      }
-      buffList.clear();
+
+    for (Ability a : this.abilityList) {
+      a.onDeath();
+      a.reset();
     }
-particles.add(new Particle(int(cx), int(cy), 0, 0, w, 2000, playerColor));
+    for (Buff b : this.buffList) {
+      b.onOwnerDeath();
+    }
+    buffList.clear();
+
+    particles.add(new Particle(int(cx), int(cy), vx, vy, w, 2000, playerColor));
+    particles.add(new ShockWave(int(cx), int(cy), int(random(40)+10), 16, 400, playerColor));
+    state=0;
+    //stamps.add( new StateStamp(index, int(x), int(y), state, health,dead));
+  }
+  void displayName() {
+    //pushStyle();
+    fill(playerColor);
+    textAlign(CENTER, CENTER);
+    textSize(26);
+    text(abilityShortName, cx, cy);
+    //popStyle();
+  }
+}
+class Zombie extends Drone { 
+
+  Player target;
+  boolean degenerate=true;
+  Zombie(int _index, Player _owner, int _x, int _y, int _w, int _h, int speed, int _health, int _type, Ability ..._ability) {
+    super( _index, _owner, _x, _y, _w, _h, speed, _health, _ability) ;
+    owner=_owner;
+    type=_type;
+    armor=-10;
+    allyCollision=true;
+    degenerate=false;
+    damage=2;
+  }
+  //angle=owner.angle;
+
+  Zombie(int _index, int _x, int _y, int _w, int _h, int speed, int _health, int _type, Ability ..._ability) {
+    super( _index, _x, _y, _w, _h, speed, _health, _ability) ;
+    type=_type;
+    allyCollision=true;
+    degenerate=false;
+    damage=2;
+    armor=-10;
+  }
+  void displayAbilityEnergy() {
+  }
+  void display() {
+    if (!stealth) {
+      stroke(0);
+      strokeWeight(8);
+      fill(255, 0, 200);
+      ellipse(cx, cy, w, h);
+    } else { //stealth
+      stroke(255, 40);
+      noFill();
+      strokeWeight(1);
+      ellipse(cx, cy, w, h);
+    }
+
+    if (freezeImmunity || reverseImmunity || fastforwardImmunity || slowImmunity) {
+      noFill();
+      ellipse(cx, cy, w*1.1, h*1.1);
+    }
+  }
+  void update() {
+    if (!freeze || freezeImmunity) {
+
+      if (reverse && !reverseImmunity) {
+        if (  degenerate )  health++;
+        x-=vx;
+        y-=vy;
+        vx/=1-FRICTION_FACTOR*.5;
+        vy/=1-FRICTION_FACTOR*.5;
+        if (!stationary) {
+          cx=x+radius;
+          cy=y+radius;
+        }
+        //angle+=1*timeBend;
+        keyAngle+=1*timeBend;
+        for (int i=buffList.size()-1; i>=0; i--) {
+          buffList.get(i).update(); 
+          if ( buffList.get(i).dead)   buffList.remove( buffList.get(i));
+        }
+      } else {
+        for (int i=buffList.size()-1; i>=0; i--) {
+          buffList.get(i).update(); 
+          if ( buffList.get(i).dead)   buffList.remove( buffList.get(i));
+        }
+        if (  degenerate )health--;
+        if (health<=0)death();
+        x+=vx;
+        y+=vy;
+        vx*=1-FRICTION_FACTOR*.5;
+        vy*=1-FRICTION_FACTOR*.5;
+        cx=x+radius;
+        cy=y+radius;
+        if (owner!=null) { 
+          x+=(owner.cx-cx)*.03;
+          y+=(owner.cy-cy)*.03;
+        }
+        //angle-=1*timeBend;
+        // keyAngle-=1*timeBend;
+      }
+    }
+
+    for (Ability a : this.abilityList) {
+      a.passive();
+      a.regen();
+    }
+    if (!gameOver) {
+
+      target = seek(this, 1800);
+      if (target!=null) {
+        angle=angleAgainst(int(x), int(y), int(target.x), int(target.y));
+        // keyAngle=angle;
+        pushForce(0.1, angle);
+      }
+    }
+  }
+  void control(int dir) {
+  }
+  void hit(float damage) {
+    //stamps.add( new StateStamp(index, int(x), int(y), state, health, dead));
+    damage=damage-armor;
+    if (damage>0) {
+      health-=damage;
+      // deColor=255;
+      //state=2;
+      hit=true;
+    }
+    for (Ability a : this.abilityList) {
+      a.onHit();
+    }
+    // for (int i=0; i<2; i++) {
+    // particles.add(new Particle(int(cx), int(cy), random(-10, 10)+vx*0.5, random(-10, 10)+vy*0.5, int(random(5, 20)), 500, playerColor));
+    // }
+    // invisStampTime=stampTime+invinsTime;
+    //invis=true;
+    if (health<=0) {
+      death();
+    }
+  }
+
+  void heal(float _health) {
+    if (health<maxHealth) {
+      health+=_health;
+      // deColor=255;
+      state=2;
+      particles.add(new Particle(int(cx), int(cy), random(-10, 10)+vx*0.5, random(-10, 10)+vy*0.5, int(random(5, 20)), 500, playerColor));
+    }
+  }
+  void wallHit(int _damage) {
+    //deColor=255;
+    hit=true;
+    for (Ability a : this.abilityList) {
+      a.wallHit();
+    }
+  }
+  void pushForce(float amount, float angle) {
+    vx+=cos(radians(angle))*amount;
+    vy+=sin(radians(angle))*amount;
+  }
+  void death() {
+    //ability.onDeath();
+    dead=true;
+    for (Ability a : this.abilityList) {
+      a.onDeath();
+      a.reset();
+    }
+    for (Buff b : this.buffList) {
+      b.onOwnerDeath();
+    }
+    buffList.clear();
+
+    particles.add(new Particle(int(cx), int(cy), vx, vy, w, 2000, playerColor));
     particles.add(new ShockWave(int(cx), int(cy), int(random(40)+10), 16, 400, playerColor));
     state=0;
     //stamps.add( new StateStamp(index, int(x), int(y), state, health,dead));

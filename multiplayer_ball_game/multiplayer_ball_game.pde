@@ -16,6 +16,10 @@ import processing.opengl.*;
 import beads.*;
 import java.util.Arrays; 
 import processing.serial.*;
+import net.java.games.input.*;
+import net.java.games.input.EventQueue;
+import net.java.games.input.Event;
+
 
 AudioContext  ac = new AudioContext();
 AudioContext an= new AudioContext();
@@ -34,7 +38,7 @@ int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight, coins, mouseScroll;
 //int gameMode=0;
 GameType gameMode=GameType.MENU;
-final int AmountOfPlayers=6,AmountOfModes=7; // start players
+final int AmountOfPlayers=6, AmountOfModes=7; // start players
 final float DIFFICULTY_LEVEL=1.2;
 
 final int WHITE=color(255), GREY=color(172), BLACK=color(0), GOLD=color(255, 220, 0);
@@ -47,8 +51,8 @@ final static float DEFAULT_FRICTION=0.1;
 final int startBalls=0;
 final int  ballSize=100;
 final int playerSize=100;
-static int playersAlive,playerAliveIndex; // amount of players alive
-      float GUIpercent;
+static int playersAlive, playerAliveIndex; // amount of players alive
+float GUIpercent;
 
 static Player AI;
 final int offsetX=1250, offsetY=-50;//final int offsetX=950, offsetY=100;
@@ -56,7 +60,7 @@ static int shakeTimer, shakeX=0, shakeY=0, maxShake=80;
 final float DEFAULT_ZOOMRATE=0.02;
 static float F=1, S=1, timeBend=1, zoom=0.7, tempZoom=1.0, tempOffsetX=0, tempOffsetY=0, zoomX, zoomY, zoomXAim, zoomYAim, zoomAim=1, zoomRate=0.02;
 final int keyResponseDelay=30;  // eventhe refreashrate equal to arduino devices
-final char keyRewind='r', keyFreeze='v', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='7';
+final char keyRewind='§', keyFreeze='x', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='7';
 final int ICON_AMOUNT=60;
 final PImage[] icons=new PImage[ICON_AMOUNT];
 Serial port[]=new Serial[AmountOfPlayers];  // Create object from Serial class
@@ -209,7 +213,8 @@ void setup() {
     new SnakeShield(), 
     new Stalker(), 
     new Scatter(), 
-    new Tumble()
+    new Tumble(), 
+    new Revenge()
     //new Redemption(), // buggy on survival
     // new Undo() // buggy on survival
   };
@@ -255,14 +260,14 @@ void setup() {
   abilityList[0].unlocked=true; // noActive
   passiveList[0].unlocked=true; // noPassive
   int menuBtnWidth=275, menuBtnHeight=500;
-    colorMode(HSB);
+  colorMode(HSB);
 
-  mList.add( new ModeButton(GameType.BRAWL   , width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
-  mList.add( new ModeButton(GameType.HORDE   , width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
+  mList.add( new ModeButton(GameType.BRAWL, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
+  mList.add( new ModeButton(GameType.HORDE, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
   mList.add( new ModeButton(GameType.SURVIVAL, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
   mList.add( new ModeButton(GameType.WILDWEST, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
   mList.add( new ModeButton(GameType.BOSSRUSH, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
-  mList.add( new ModeButton(GameType.SHOP    , width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
+  mList.add( new ModeButton(GameType.SHOP, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
   mList.add( new ModeButton(GameType.SETTINGS, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
 
   println("loaded save ... abilities!");
@@ -372,10 +377,11 @@ void setup() {
     pSBList.add( new StatButton(icons[54], 8, "AttSp", 450, settingSkillYOffset+50+200*j, 50, players.get(j)) );
     pSBList.add( new StatButton(icons[54], 9, "CDR", 500, settingSkillYOffset+50+200*j, 50, players.get(j)) );
   }
- /*   String[] args = {"Rename player"};
-  PApplet sa = new PApplet();
-  PApplet.runSketch(args, sa);
-*/
+  /*   String[] args = {"Rename player"};
+   PApplet sa = new PApplet();
+   PApplet.runSketch(args, sa);
+   */
+  xBoxSetup();
 }
 void stop() {
   musicPlayer.pause(true);
@@ -383,6 +389,7 @@ void stop() {
 }
 
 void draw() {
+  getXboxInput() ;
   /*if (cheatEnabled && (gameMode!=GameType.MENU || gameMode!=GameType.SHOP ) && stampTime>500) {    
    //tempOffsetX=(tempZoom*zoom)*(width)-(tempZoom*zoom)*players.get(0).cx-(tempZoom*zoom)*(width*.75);
    //tempOffsetY=(tempZoom*zoom)*(height)-(tempZoom*zoom)*players.get(0).cy-(tempZoom*zoom)*(height*.75);
@@ -521,7 +528,7 @@ void draw() {
       // }
     } 
     //image(GUILayer, 0, 0);
-    if(cheatEnabled)mouseDot();
+    if (cheatEnabled)mouseDot();
     checkKeyHold();
     for (int i=stamps.size ()-1; i>= 0; i--) { // checkStamps
       // stamps.get(i).display(); // hid this when not DEBUGGING
@@ -534,6 +541,9 @@ void draw() {
       if (!p.dead) {
         p.state=0;
         p.hit=false;
+      } else     if (gradualCleaning &&!reverse &&  p.index>AmountOfPlayers ) { 
+        players.remove(p);
+        break;
       }
     }
     popMatrix();
@@ -545,7 +555,7 @@ void draw() {
     textSize(12);
     strokeWeight(20);
     for (Player p : players) {
-      if (p.index>-1 && p.index<5 &&!p.clone) {
+      if (!p.dead && p.index>-1 && p.index<=AmountOfPlayers &&!p.clone) {
         noStroke();
         for (Ability a : p.abilityList) {
           if (a.type==AbilityType.ACTIVE) {
@@ -559,7 +569,7 @@ void draw() {
         stroke(BLACK);
         line(100+300*p.index, height-20, 230+300*p.index, height-20);
         stroke((p.playerColor==BLACK)?WHITE:p.playerColor);
-         GUIpercent = ((float)p.health/p.maxHealth)*130;
+        GUIpercent = ((float)p.health/p.maxHealth)*130;
         if (p.health>0)line(100+300*p.index, height-20, 100+GUIpercent+300*p.index, height-20);
       }
     }

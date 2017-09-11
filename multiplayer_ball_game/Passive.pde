@@ -98,12 +98,14 @@ class Reward extends Ability {//------------------------------------------------
   //int damage=50;
   int bonus=1;
   boolean drop;
-  Reward(int _bonus, boolean  drop) {
+  Reward(int _bonus, boolean  _drop) {
     super();
+    drop=_drop;
     bonus=_bonus;
     type=AbilityType.NATIVE;
     name=getClassName(this);
     unlockCost=500;
+    println("reward "+bonus);
   } 
   /*@Override
    void action() {
@@ -122,10 +124,14 @@ class Reward extends Ability {//------------------------------------------------
     void onDeath() {
     if ((!reverse || owner.reverseImmunity)&&  owner.health<=0 && (!freeze || owner.freezeImmunity)) {
       // projectiles.add( new Bomb(owner, int( owner.cx), int(owner.cy), 160, owner.playerColor, 1000, owner.angle, owner.vx, owner.vy, damage, false));
-      //if (drop) projectiles.add(new CoinBall(AI, owner.cx, owner.cy, 60, GOLD, 10000, 0, 0, 0, 50, true));
-      //else coins+=bonus;
-      particles.add( new Text("+"+bonus, int( owner.cx), int(owner.cy), 0, 0, 100, 0, 2000, WHITE, 1));
-      particles.add( new Text("+"+bonus, int( owner.cx), int(owner.cy), 0, 0, 140, 0, 2000, color(50, 255, 255), 0));
+      if (drop) projectiles.add(new CoinBall(AI, int(owner.cx),int( owner.cy), 60, GOLD, 20000, 0, 0, 0, bonus, true));
+       // CoinBall(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _amount, boolean _friendlyFire) {
+
+      else {
+        coins+=bonus;
+        particles.add( new Text("+"+bonus, int( owner.cx), int(owner.cy), 0, 0, 100, 0, 2000, WHITE, 1));
+        particles.add( new Text("+"+bonus, int( owner.cx), int(owner.cy), 0, 0, 140, 0, 2000, color(50, 255, 255), 0));
+      }
     }
   }
 }
@@ -164,7 +170,7 @@ class MpRegen extends Ability {//-----------------------------------------------
 
 class Armor extends Ability {//---------------------------------------------------    HpRegen   ---------------------------------
   // float regenRate = 1;
-  int armorAmount=3, stillBonusArmor=1;
+  int armorAmount=2, stillBonusArmor=1;
   Armor() {
     super();
     type=AbilityType.PASSIVE;
@@ -744,6 +750,55 @@ class PainPulse extends Ability {//---------------------------------------------
         stroke(cooldown%4<2?255:owner.playerColor);
         strokeWeight(8);
         ellipse(owner.cx, owner.cy, 120, 120);
+      }
+      /*beginShape();
+       for (int i=0; i<360; i+=10) {
+       vertex(owner.cx+sin(radians(i))*100, owner.cy+cos(radians(i))*100);
+       }
+       endShape(CLOSE);*/
+      cooldown++;
+    }
+  }
+  @Override
+    void reset() {
+    owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+  }
+}
+class Revenge extends Ability {//---------------------------------------------------    bullet   ---------------------------------
+  int count, cooldown;
+  Revenge() {
+    super();
+    type=AbilityType.PASSIVE;
+    name=getClassName(this);
+    unlockCost=500;
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void onHit() {
+    if (cooldown>1000) {
+      cooldown=0;
+      owner.addBuff(new DamageBuff(owner,3500,20).apply(BuffType.ONCE));
+      owner.addBuff(new Burn(owner,3500,.1,200));
+        projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 15, 40, owner.playerColor, 350, 0, 2, 0, 12));
+      
+    }
+  }
+  @Override
+    void hold() {
+  }
+  @Override
+    void release() {
+  }
+  @Override
+    void passive() {
+    if (!owner.stealth) {
+      if (cooldown>1000) { 
+        noFill();
+        stroke(cooldown%4<2?255:owner.playerColor);
+        strokeWeight(8);
+        rect(owner.cx-60, owner.cy-60, 120, 120);
       }
       /*beginShape();
        for (int i=0; i<360; i+=10) {
