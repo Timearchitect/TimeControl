@@ -338,7 +338,7 @@ class ArmorPiercing extends Buff {
     count += 0.1*timeBend;
     stroke(enemy.playerColor);
     for (int i=0; i< 360; i+=36) {
-      line(owner.cx+cos(radians(i+count))*(70*sin(count+i)+70), owner.cy+sin(radians(i+count))*(70*sin(count+i)+70), owner.cx+cos(radians(i+count))*150, owner.cy+sin(radians(i+count))*150);
+      line(owner.cx+cos(radians(i+count))*(50*sin(count+i)+70), owner.cy+sin(radians(i+count))*(50*sin(count+i)+70), owner.cx+cos(radians(i+count))*100, owner.cy+sin(radians(i+count))*100);
     }
   }
   void kill() {
@@ -743,11 +743,12 @@ class SpeedBuff extends Buff {
   }
   void update() {
     super.update();
-    if (owner.textParticle!=null)particles.remove( owner.textParticle );
-    owner.textParticle = new Text(owner, "SPEED+", 0, -75, 30, 0, 100, owner.playerColor, 0);
-    particles.add( owner.textParticle );
-          particles.add(new Particle(int(owner.cx), int(owner.cy), owner.vx*.2, owner.vy*.2, 100, 100, owner.playerColor));
-
+    if (!owner.stealth) {
+      if (owner.textParticle!=null)particles.remove( owner.textParticle );
+      owner.textParticle = new Text(owner, "SPEED+", 0, -75, 30, 0, 100, owner.playerColor, 0);
+      particles.add( owner.textParticle );
+      particles.add(new Particle(int(owner.cx), int(owner.cy), owner.vx*.2, owner.vy*.2, 100, 100, owner.playerColor));
+    }
   }
   void kill() {
     dead=true;

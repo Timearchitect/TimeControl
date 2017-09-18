@@ -46,7 +46,7 @@ void checkPlayerVSPlayerColloision() {
   if (!freeze &&!reverse) {
     for (Player p1 : players) {       
       for (Player p2 : players) {       
-        if (   p1!=p2 &&  !p1.dead && !p2.dead ) { //  && p1!=p2
+        if (   p1!=p2 &&  !p1.dead && !p2.dead  &&!p1.phase &&!p2.phase) { //  && p1!=p2
           //    if (dist(p1.x, p1.y, p2.x, p2.y)<playerSize) { // old collision
           if (dist(p1.cx, p1.cy, p2.cx, p2.cy)<p1.radius+p2.radius) {
             if (p1.allyCollision || p1.ally!=p2.ally) {  
@@ -69,7 +69,7 @@ void checkPlayerVSProjectileColloision() {
     try {
       for (Projectile o : projectiles) {    
         for (Player p : players) {      
-          if ( !p.dead && !o.dead &&p.ally!=o.ally  ) { // && o.playerIndex!=p.ally
+          if ( !p.dead && !o.dead &&p.ally!=o.ally &&!p.phase ) { // && o.playerIndex!=p.ally
             //if (dist(o.x, o.y, p.cx, p.cy)<playerSize) { //old collision
             if (dist(o.x, o.y, p.cx, p.cy)<p.radius+o.size*.5) {
               //  players.get(j).hit(projectiles.get(i).damage);
@@ -446,6 +446,9 @@ void shopUpdate() {
     b.update();
     b.display();
   }
+  for (Button b : bList) {
+    b.displayTooltips();
+  }
 
   if (selectedAbility!=null) { 
     image(selectedAbility.icon, width-200, height-200, 300, 300);
@@ -460,7 +463,7 @@ void shopUpdate() {
         text("cant be sold", halfWidth, height-150);
       } else if (selectedAbility.unlocked) {  
         textSize(70);
-        text("SELL -50%", halfWidth, height-150);
+        text(selectedAbility.sellText+" -50%", halfWidth, height-150);
         if (mousePressed && !pMousePressed) {
           selectedAbility.unlocked=false;
           coins+=int(selectedAbility.unlockCost*.5);
@@ -469,7 +472,7 @@ void shopUpdate() {
           background(255);
         }
       } else if ( coins>=selectedAbility.unlockCost) {
-        text("BUY", halfWidth, height-150);
+        text(selectedAbility.buyText, halfWidth, height-150);
         if (mousePressed && !pMousePressed) {
           selectedAbility.unlocked=true;
           coins-=selectedAbility.unlockCost;
@@ -565,6 +568,8 @@ void loadProgress() throws Exception {
     }
     i++;
   }
+  bList.add(new Button(new SkillPoint(), int(shopXEdgePadding+(i*shopXInterval)%(width-shopXEdgePadding*2)), int(shopYEdgePadding+int(i*shopXInterval/(width-shopXEdgePadding*2))*shopYInterval), 70));
+
   coins=parseInt(s[i]);
 }
 

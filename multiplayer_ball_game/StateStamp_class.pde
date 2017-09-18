@@ -110,7 +110,11 @@ class StateStamp extends TimeStamp {  // save player
     playerState=_state;
     playerHealth=_health;
     playerDead=_dead;
-    stealth=players.get(_player).stealth;
+    try {
+      stealth=players.get(_player).stealth;
+    }
+    catch(Exception e) {
+    }
   }
   StateStamp(int _player, PVector _coord, int _state, int _health, boolean _dead) {
     super(_player);
@@ -165,16 +169,16 @@ class AbilityStamp extends TimeStamp { //save player ability
     ammo=ability.ammo;
   }
   /*AbilityStamp(int _player, int _x, int _y, float _energy, boolean _active, boolean _channeling, boolean _cooling, boolean _regen, boolean _hold) {
-    super(_player);
-    x=_x;
-    y=_y;
-    energy= _energy;
-    active=_active; 
-    channeling=_channeling;
-    cooling=_cooling; 
-    regen=_regen;
-    hold=_hold;
-  }*/
+   super(_player);
+   x=_x;
+   y=_y;
+   energy= _energy;
+   active=_active; 
+   channeling=_channeling;
+   cooling=_cooling; 
+   regen=_regen;
+   hold=_hold;
+   }*/
 
   void display() {
     super.display();

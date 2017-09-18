@@ -8,6 +8,8 @@ class NoPassive extends Ability {//---------------------------------------------
     unlocked=true;
     sellable=false;
     // deactivatable=false;
+        assambleTooltip("No");
+
   } 
   /* @Override
    void action() {
@@ -30,6 +32,7 @@ class HpRegen extends Ability {//-----------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=1500;
+    assambleTooltip("Automatic");
   } 
   HpRegen(float _rate, int _interval) {
     super();
@@ -73,6 +76,7 @@ class Suicide extends Ability {//-----------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=250;
+    assambleTooltip("onDeath trigger");
   } 
   /*@Override
    void action() {
@@ -106,6 +110,7 @@ class Reward extends Ability {//------------------------------------------------
     name=getClassName(this);
     unlockCost=500;
     println("reward "+bonus);
+    assambleTooltip("onDeath trigger");
   } 
   /*@Override
    void action() {
@@ -124,8 +129,8 @@ class Reward extends Ability {//------------------------------------------------
     void onDeath() {
     if ((!reverse || owner.reverseImmunity)&&  owner.health<=0 && (!freeze || owner.freezeImmunity)) {
       // projectiles.add( new Bomb(owner, int( owner.cx), int(owner.cy), 160, owner.playerColor, 1000, owner.angle, owner.vx, owner.vy, damage, false));
-      if (drop) projectiles.add(new CoinBall(AI, int(owner.cx),int( owner.cy), 60, GOLD, 20000, 0, 0, 0, bonus, true));
-       // CoinBall(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _amount, boolean _friendlyFire) {
+      if (drop) projectiles.add(new CoinBall(AI, int(owner.cx), int( owner.cy), 60, GOLD, 20000, 0, 0, 0, bonus, true));
+      // CoinBall(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _amount, boolean _friendlyFire) {
 
       else {
         coins+=bonus;
@@ -144,6 +149,7 @@ class MpRegen extends Ability {//-----------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=1500;
+    assambleTooltip("Automatic");
   } 
   @Override
     void action() {
@@ -176,6 +182,7 @@ class Armor extends Ability {//-------------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=1500;
+    assambleTooltip("Automatic");
   } 
   @Override
     void action() {
@@ -224,6 +231,7 @@ class Speed extends Ability {//-------------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=1000;
+    assambleTooltip("Automatic");
   } 
   @Override
     void action() {
@@ -257,6 +265,7 @@ class Gravitation extends Ability {//-------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=500;
+    assambleTooltip("Automatic");
   } 
   Gravitation(int _range, float _force) {
     super();
@@ -306,6 +315,7 @@ class Repel extends Ability {//-------------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=500;
+    assambleTooltip("Automatic");
   } 
   Repel(int _range, float _force) {
     super();
@@ -363,6 +373,7 @@ class Static extends Ability {//------------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=1500;
+    assambleTooltip("Automatic");
   } 
   @Override
     void action() {
@@ -401,6 +412,7 @@ class SuppressFire extends Ability {//------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=1750;
+    assambleTooltip("On tap trigger");
   } 
   @Override
     void action() {
@@ -451,6 +463,7 @@ class Tumble extends Ability {//------------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=1750;
+    assambleTooltip("On tap trigger");
   } 
   @Override
     void action() {
@@ -530,6 +543,7 @@ class Gloss extends Ability {//-------------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=2000;
+    assambleTooltip("Automatic");
   } 
   @Override
     void action() {
@@ -567,6 +581,7 @@ class SnakeShield extends Ability {//-------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=2000;
+    assambleTooltip("Automatic");
   } 
   @Override
     void action() {
@@ -614,6 +629,7 @@ class BackShield extends Ability {//--------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=2000;
+    assambleTooltip("Automatic");
   } 
   @Override
     void action() {
@@ -679,6 +695,7 @@ class Trail extends Ability {//-------------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=500;
+    assambleTooltip("Automatic");
   } 
   @Override
     void action() {
@@ -723,6 +740,7 @@ class PainPulse extends Ability {//---------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=500;
+    assambleTooltip("On hit trigger");
   } 
   @Override
     void action() {
@@ -731,6 +749,7 @@ class PainPulse extends Ability {//---------------------------------------------
     void onHit() {
     if (cooldown>200) {
       cooldown=0;
+      shakeTimer+=10;
       for (int i=0; i<360; i+=45) {
         projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 15, 40, owner.playerColor, 350, i, 2, 30, 12));
       }
@@ -764,13 +783,15 @@ class PainPulse extends Ability {//---------------------------------------------
     owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
   }
 }
-class Revenge extends Ability {//---------------------------------------------------    bullet   ---------------------------------
-  int count, cooldown;
-  Revenge() {
+class Rage extends Ability {//---------------------------------------------------    Rage   ---------------------------------
+  int count;
+  float cooldown;
+  Rage() {
     super();
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=500;
+    assambleTooltip("On hit trigger");
   } 
   @Override
     void action() {
@@ -778,11 +799,11 @@ class Revenge extends Ability {//-----------------------------------------------
   @Override
     void onHit() {
     if (cooldown>1000) {
+      shakeTimer+=20;
       cooldown=0;
-      owner.addBuff(new DamageBuff(owner,3500,20).apply(BuffType.ONCE));
-      owner.addBuff(new Burn(owner,3500,.1,200));
-        projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 15, 40, owner.playerColor, 350, 0, 2, 0, 12));
-      
+      owner.addBuff(new DamageBuff(owner, 3800, 20).apply(BuffType.ONCE));
+      owner.addBuff(new Burn(owner, 3800, .1, 200));
+      projectiles.add( new Blast(owner, int(owner.x+random(owner.w)), int(owner.y+random(owner.h)), 0, owner.w, owner.playerColor, 800, 0, 0, 10, 15));
     }
   }
   @Override
@@ -800,12 +821,7 @@ class Revenge extends Ability {//-----------------------------------------------
         strokeWeight(8);
         rect(owner.cx-60, owner.cy-60, 120, 120);
       }
-      /*beginShape();
-       for (int i=0; i<360; i+=10) {
-       vertex(owner.cx+sin(radians(i))*100, owner.cy+cos(radians(i))*100);
-       }
-       endShape(CLOSE);*/
-      cooldown++;
+      cooldown += 1*timeBend;
     }
   }
   @Override
@@ -820,6 +836,7 @@ class PanicBlink extends Ability {//--------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=500;
+    assambleTooltip("On hit trigger");
   } 
   @Override
     void action() {
@@ -873,6 +890,7 @@ class Nova extends Ability {//--------------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=1250;
+    assambleTooltip("On release trigger");
   } 
   @Override
     void action() {
@@ -927,6 +945,7 @@ class BulletCutter extends Ability {//------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=2250;
+    assambleTooltip("Hold");
   } 
   @Override
     void action() {
@@ -1009,6 +1028,7 @@ class Boost extends Ability {//-------------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=2000;
+    assambleTooltip("Charge");
   } 
   @Override
     void action() {
@@ -1065,6 +1085,7 @@ class Glide extends Ability {//-------------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=1000;
+    assambleTooltip("Hold");
   } 
   @Override
     void action() {
@@ -1106,6 +1127,7 @@ class Guardian extends Ability {//----------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=1500;
+    assambleTooltip("Automatic");
   } 
   @Override
     void action() {
@@ -1130,7 +1152,7 @@ class Guardian extends Ability {//----------------------------------------------
         ellipse(owner.cx, owner.cy, range, range);
       }
       for (Projectile p : projectiles) {
-        if (!p.dead && p.ally!=owner.ally&&!(p instanceof AbilityPack) && !(p instanceof Shield)&& !(p instanceof Boomerang) && p.damage<30&& dist(owner.cx, owner.cy, p.x, p.y)<range*.5) {
+        if (!p.dead && p.ally!=owner.ally&&!(p instanceof AbilityPack)&&!(p instanceof CoinBall) && !(p instanceof Shield)&& !(p instanceof Boomerang) && p.damage<30&& dist(owner.cx, owner.cy, p.x, p.y)<range*.5) {
           trigger=true;
           break;
         }
@@ -1174,6 +1196,7 @@ class BulletTime extends Ability {//--------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=2500;
+    assambleTooltip("In range trigger");
   } 
   @Override
     void action() {
@@ -1223,6 +1246,7 @@ class Adrenaline extends Ability {//--------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=2500;
+    assambleTooltip("In Range trigger");
   } 
   @Override
     void action() {
@@ -1286,6 +1310,7 @@ class Emergency extends Ability {//---------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=2750;
+    assambleTooltip("On Low life hit trigger");
   } 
   @Override
     void action() {
@@ -1346,6 +1371,7 @@ class Redemption extends Ability {//--------------------------------------------
     super();
     name=getClassName(this);
     unlockCost=2750;
+    assambleTooltip("On Low life range trigger");
   } 
   @Override
     void action() {
@@ -1405,6 +1431,7 @@ class Undo extends Ability {//--------------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=2750;
+    assambleTooltip("On low life hit trigger");
   } 
   @Override
     void action() {
@@ -1471,6 +1498,7 @@ class Dash extends Ability {//--------------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=2000;
+    assambleTooltip("Charge");
   } 
   @Override
     void action() {
@@ -1548,7 +1576,7 @@ class Dash extends Ability {//--------------------------------------------------
   }
 }
 
-class Stalker extends Ability {//---------------------------------------------------    bullet   ---------------------------------
+class Stalker extends Ability {//---------------------------------------------------   Stalker Passive   ---------------------------------
   int count, cooldown, interval=200;
   float behindRangeMultiplyer=2.4;
   Player target;
@@ -1558,6 +1586,7 @@ class Stalker extends Ability {//-----------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=500;
+    assambleTooltip("Automatic on hit trigger");
   } 
   @Override
     void action() {
@@ -1567,7 +1596,7 @@ class Stalker extends Ability {//-----------------------------------------------
     if (cooldown>interval) {
       cooldown=0;
       particles.add(new Flash(300, 8, BLACK));  
-      particles.add( new TempFreeze(400));
+      // particles.add( new TempFreeze(400));
       particles.add(new ShockWave(int(owner.cx), int(owner.cy), 20, 16, 200, owner.playerColor));
       particles.add( new  Particle(int(owner.cx), int(owner.cy), 0, 0, int(owner.w), 800, color(255, 0, 255)));
       owner.stop();
@@ -1578,6 +1607,7 @@ class Stalker extends Ability {//-----------------------------------------------
       if (target!=null) {
         stroke(owner.playerColor);
         strokeWeight(100);
+        target.addBuff(new Cold(owner, 1500, .8));
         line(owner.cx, owner.cy, target.cx+cos(radians(owner.angle))*owner.radius*behindRangeMultiplyer, target.cy+sin(radians(owner.angle))*owner.radius*behindRangeMultiplyer);
         owner.x=target.x+cos(radians(owner.angle))*owner.radius*behindRangeMultiplyer;
         owner.y=target.y+sin(radians(owner.angle))*owner.radius*behindRangeMultiplyer;
@@ -1633,6 +1663,7 @@ class Scatter extends Ability {//-----------------------------------------------
     type=AbilityType.PASSIVE;
     name=getClassName(this);
     unlockCost=500;
+    assambleTooltip("On hit trigger");
   } 
   @Override
     void action() {
@@ -1668,9 +1699,138 @@ class Scatter extends Ability {//-----------------------------------------------
       cooldown++;
     }
   }
+
+
+
   @Override
     void reset() {
     owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+  }
+}
+class Phase extends Ability {//---------------------------------------------------    SuppressFire   ---------------------------------
+  int count, duration=1450;
+  float cooldown, forcedAngle, staticAngle, cooldownDuration=250;
+  boolean phase;
+  long timer;
+  Phase() {
+    super();
+    type=AbilityType.PASSIVE;
+    name=getClassName(this);
+    unlockCost=1750;
+    assambleTooltip("Tap");
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void press() {
+    if (cooldown>cooldownDuration) {
+      for (int i=0; i<360; i +=60)
+        particles.add(new   AfterImage(int(owner.cx), int( owner.cy), cos(radians(i))*8, sin(radians(i))*8, owner.angle +i, 5, 0, 300, duration, 1, owner)); 
+      owner.stealth=true;
+      owner.phase=true;
+      timer=stampTime;
+      cooldown=0;
+    }
+  }
+  @Override
+    void hold() {
+  }
+  @Override
+    void passive() {
+    if (timer+duration<stampTime) {
+      owner.stealth=false;
+      owner.phase=false;
+    }
+    cooldown+=1*timeBend;
+
+    if (!owner.stealth) {
+      if (cooldown>cooldownDuration) {
+        beginShape();
+        noFill();
+        stroke(owner.playerColor);
+        strokeWeight(4);
+        for (int i=0; i<720; i+=60*2) {
+          vertex(owner.cx+sin(radians(i))*150, owner.cy+cos(radians(i))*150);
+        }
+        endShape(CLOSE);
+      }
+    }
+  }
+  @Override
+    void reset() {
+    owner.stealth=false;
+    owner.phase=false;
+  }
+}
+class Dodge extends Ability {//---------------------------------------------------    SuppressFire   ---------------------------------
+  int count, duration=260;
+  float cooldown, forcedAngle, staticAngle, cooldownDuration=35;
+  boolean phase;
+  long timer;
+  Dodge() {
+    super();
+    type=AbilityType.PASSIVE;
+    name=getClassName(this);
+    unlockCost=1750;
+    assambleTooltip("Charge");
+  } 
+  @Override
+    void action() {
+  }
+  @Override
+    void press() {
+  }
+  @Override
+    void hold() {
+    if (cooldown<=cooldownDuration)cooldown+=1*timeBend;
+  }
+  @Override
+    void release() {
+    if (cooldown>cooldownDuration) {
+      //for (int i=0; i<360; i +=120)
+      owner.halt();
+      particles.add(new   AfterImage(int(owner.cx), int( owner.cy), cos(radians(owner.angle-90))*8, sin(radians(owner.angle-90))*8, owner.angle-90, 15, 0, 200, duration, 2, owner)); 
+      particles.add(new   AfterImage(int(owner.cx), int( owner.cy), cos(radians(owner.angle+90))*8, sin(radians(owner.angle+90))*8, owner.angle+90, 15, 0, 200, duration, 2, owner)); 
+      particles.add(new   AfterImage(int(owner.cx), int( owner.cy), cos(radians(owner.angle-90))*8, sin(radians(owner.angle-90))*8, owner.angle-90, 15, 0, 100, duration, 2, owner)); 
+      particles.add(new   AfterImage(int(owner.cx), int( owner.cy), cos(radians(owner.angle+90))*8, sin(radians(owner.angle+90))*8, owner.angle+90, 15, 0, 100, duration, 2, owner)); 
+      owner.stealth=true;
+      owner.phase=true;
+      timer=stampTime;
+    }
+    cooldown=0;
+  }
+  @Override
+    void passive() {
+    if (timer+duration<stampTime) {
+      owner.stealth=false;
+      owner.phase=false;
+    }
+    //    cooldown+=1*timeBend;
+
+    if (!owner.stealth) {
+      noFill();
+      strokeWeight(1);
+      stroke(owner.playerColor);
+      ellipse(owner.cx+cos(radians(owner.angle+90))*(cooldownDuration-cooldown), owner.cy+sin(radians(owner.angle+90))*(cooldownDuration-cooldown), owner.w, owner.h);
+      ellipse(owner.cx+cos(radians(owner.angle-90))*(cooldownDuration-cooldown), owner.cy+sin(radians(owner.angle-90))*(cooldownDuration-cooldown), owner.w, owner.h);
+
+
+      if (cooldown>cooldownDuration) {
+        beginShape();
+        noFill();
+        strokeWeight(4);
+        for (int i=0; i<720; i+=60) {
+          vertex(owner.cx+sin(radians(i))*150, owner.cy+cos(radians(i))*150);
+        }
+        endShape(CLOSE);
+      }
+    }
+  }
+  @Override
+    void reset() {
+    owner.stealth=false;
+    owner.phase=false;
   }
 }
 /*class RandomPassive extends Ability {//---------------------------------------------------    RandomPassive   ---------------------------------

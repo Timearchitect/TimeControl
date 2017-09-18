@@ -2,7 +2,7 @@
 /**------------------------------------------------------------//
  //                                                            //
  //  Coding dojo  - Prototype of a timecontrol game            //
- //  av: Alrik He    v.0.7.14                                  //
+ //  av: Alrik He    v.0.7.15                                  //
  //  Arduino verstad Malmö                                     //
  //                                                            //
  //      2014-09-21    -     2017-09-09                        //
@@ -38,13 +38,13 @@ int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight, coins, mouseScroll;
 //int gameMode=0;
 GameType gameMode=GameType.MENU;
-final int AmountOfPlayers=6, AmountOfModes=7; // start players
+final int AmountOfPlayers=3, AmountOfModes=7; // start players
 final float DIFFICULTY_LEVEL=1.2;
 
 final int WHITE=color(255), GREY=color(172), BLACK=color(0), GOLD=color(255, 220, 0);
 final int speedFactor= 2;
 final float slowFactor= 0.3;
-final String version="0.7.14";
+final String version="0.7.15";
 static long prevMillis, addMillis, forwardTime, reversedTime, freezeTime, stampTime, fallenTime;
 final int baudRate= 19200;
 final static float DEFAULT_FRICTION=0.1;
@@ -52,7 +52,7 @@ final int startBalls=0;
 final int  ballSize=100;
 final int playerSize=100;
 static int playersAlive, playerAliveIndex; // amount of players alive
-float GUIpercent;
+static float GUIpercent;
 
 static Player AI;
 final int offsetX=1250, offsetY=-50;//final int offsetX=950, offsetY=100;
@@ -184,7 +184,8 @@ void setup() {
     new RapidBattery(), 
     new Chivalry(), 
     new HitScanGun(), 
-    new HanzoMain()
+    new HanzoMain(),
+    new Ravine()
   };
 
   passiveList = new Ability[]{
@@ -214,7 +215,9 @@ void setup() {
     new Stalker(), 
     new Scatter(), 
     new Tumble(), 
-    new Revenge()
+    new Rage(),
+    new Phase(),
+    new Dodge()
     //new Redemption(), // buggy on survival
     // new Undo() // buggy on survival
   };
@@ -262,13 +265,13 @@ void setup() {
   int menuBtnWidth=275, menuBtnHeight=500;
   colorMode(HSB);
 
-  mList.add( new ModeButton(GameType.BRAWL, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
-  mList.add( new ModeButton(GameType.HORDE, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
-  mList.add( new ModeButton(GameType.SURVIVAL, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
-  mList.add( new ModeButton(GameType.WILDWEST, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
-  mList.add( new ModeButton(GameType.BOSSRUSH, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
-  mList.add( new ModeButton(GameType.SHOP, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
-  mList.add( new ModeButton(GameType.SETTINGS, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255)));
+  mList.add( new ModeButton(GameType.BRAWL, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255),icons[1]));
+  mList.add( new ModeButton(GameType.HORDE, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255),icons[2]));
+  mList.add( new ModeButton(GameType.SURVIVAL, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255),icons[12]));
+  mList.add( new ModeButton(GameType.WILDWEST, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255),icons[23]));
+  mList.add( new ModeButton(GameType.BOSSRUSH, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255),icons[34]));
+  mList.add( new ModeButton(GameType.SHOP, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255),icons[45]));
+  mList.add( new ModeButton(GameType.SETTINGS, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255),icons[55]));
 
   println("loaded save ... abilities!");
   abilities= new Ability[][]{ 
@@ -541,7 +544,7 @@ void draw() {
       if (!p.dead) {
         p.state=0;
         p.hit=false;
-      } else     if (gradualCleaning &&!reverse &&  p.index>AmountOfPlayers ) { 
+      } else     if (gradualCleaning &&!reverse &&  p.index>AmountOfPlayers ) { //
         players.remove(p);
         break;
       }

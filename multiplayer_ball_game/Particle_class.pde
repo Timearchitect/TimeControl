@@ -1052,7 +1052,7 @@ class Star extends Particle {
   boolean follow;
   float shrinkRate, size=100, scale=1;
   PShape form= createShape();
-  Star(int _time, int _x, int _y, float _vx, float _vy, int _size,float _shrinkRate, color _particleColor) {
+  Star(int _time, int _x, int _y, float _vx, float _vy, int _size, float _shrinkRate, color _particleColor) {
     super( _x, _y, _vx, _vy, 100, _time, _particleColor);
     size = _size;
     shrinkRate=_shrinkRate;
@@ -1061,9 +1061,9 @@ class Star extends Particle {
     // fill(WHITE, opacity);
     form.disableStyle();
     form.beginShape();
-   // form.stroke(_particleColor, opacity);
-   // form.fill(WHITE, opacity);
-   // form.strokeWeight(size/10); 
+    // form.stroke(_particleColor, opacity);
+    // form.fill(WHITE, opacity);
+    // form.strokeWeight(size/10); 
     form.vertex(0, -size );
     form.vertex(size*.5 -size/4, - size*.5+size/4);
     form.vertex(size, 0);
@@ -1073,14 +1073,13 @@ class Star extends Particle {
     form.vertex(-size, 0);
     form.vertex(-size*.5+size/4, -size*.5+size/4);
     form.endShape(CLOSE);
-       // form.translate(form.width*.5, form.height*.5);
-     form.translate(size, size);
+    // form.translate(form.width*.5, form.height*.5);
+    form.translate(size, size);
     //form.setVisible(false);
     opacity=255;
-
   }
   void update() {
-      
+
 
     if (!dead && !freeze) { 
       //f =(fastForward)?speedFactor:1;
@@ -1105,22 +1104,144 @@ class Star extends Particle {
   void display() {
 
     if (!dead ) {
-     // super.display();
+      // super.display();
       // form.setStroke(color(particleColorparticleColor),blue(particleColor)));  
       strokeWeight(size/10*scale); 
-      stroke(particleColor,opacity);
-      fill(WHITE,opacity);
-      
+      stroke(particleColor, opacity);
+      fill(WHITE, opacity);
+
       //tint(particleColor, opacity);
       pushMatrix();
       translate(x, y);
       rotate(radians(angle));
       //tint(255,opacity);
-       scale(scale*random(0.5,1));
-     // shape(form, form.width*.5, form.height*.5);
-       shape(form);
+      scale(scale*random(0.5, 1));
+      // shape(form, form.width*.5, form.height*.5);
+      shape(form);
       //strokeWeight(opacity*0.1);
       popMatrix();
+    }
+  }
+}
+
+
+class AfterImage extends Particle {
+  PGraphics afterImage;
+  float angle, angleV,percent;
+  int type, count, range=300, xOffset, yOffset;
+  Player owner;
+  AfterImage(int _x, int _y, float _vx, float _vy, float _angle, float _angleV, int _minSize, int _maxSize, int _time, int  _type, Player _player) {
+    super( _x, _y, _vx, _vy, _minSize, _time, _player.playerColor);
+    range=_maxSize;
+    owner=_player;
+    angle=_angle;
+    angleV=_angleV;
+    xOffset=int(x);
+    yOffset=int(y);
+    type=_type;
+    afterImage = createGraphics(200, 200);
+    afterImage.beginDraw();
+    afterImage.textFont(font);
+    afterImage.shapeMode(CENTER);
+    afterImage.ellipseMode(CENTER);
+    afterImage.textAlign(CENTER, CENTER);
+    afterImage.colorMode(HSB);
+
+    afterImage.stroke((freeze && !(_player.freezeImmunity))?255:0);
+    afterImage. strokeWeight(2);
+    afterImage.fill(255, 0, 255, 50);
+    afterImage.ellipse(afterImage.width*0.5, afterImage.height*0.5, _player.w, _player.h);
+
+    afterImage.pushMatrix();
+    afterImage.translate(afterImage.width*0.5, afterImage.height*0.5);
+    afterImage.rotate(radians(_player.angle+90));
+    afterImage.fill(hue(_player.playerColor), saturation(_player.playerColor)*_player.s, brightness(_player.playerColor)*_player.s, 50+_player.deColor);
+    afterImage.shape(_player.arrowSVG, -_player.arrowSVG.width*0.5+30, -30-_player.radius, _player.arrowSVG.width, _player.arrowSVG.height);
+    afterImage.popMatrix();
+
+
+
+    afterImage.fill(255);
+    afterImage.arc(afterImage.width*0.5, afterImage.height*0.5, _player.barDiameter, _player.barDiameter, PI_HALF-_player.barFraction, PI_HALF);
+    afterImage.fill(hue(_player.playerColor), saturation(_player.playerColor)*_player.s, brightness(_player.playerColor)*_player.s);
+    afterImage.textSize(20);
+    afterImage.text(_player.label, afterImage.width*0.5, afterImage.height*0.5);
+
+
+    afterImage.strokeWeight(_player.barSize);
+    //strokeCap(SQUARE);
+    afterImage.noFill();
+    afterImage.stroke(hue(_player.playerColor), 80*S, (80-_player.deColor)*S);
+    afterImage.ellipse(afterImage.width*0.5, afterImage.height*0.5, _player.barDiameter, _player.barDiameter);
+    afterImage.stroke(hue(_player.playerColor), (255-_player.deColor*0.5)*S, _player.ally==-1?0:255*S);
+    // arc(cx, cy, barDiameter, barDiameter, -HALF_PI +(TAU)-fraction, PI+HALF_PI);
+    afterImage.arc(afterImage.width*0.5, afterImage.height*0.5, _player.barDiameter, _player.barDiameter, PI_HALF-_player.fraction, PI_HALF);
+
+
+
+    afterImage.endDraw();
+  }
+
+  void update() {
+    switch(type) {
+
+    case 1:
+      if (!dead && !freeze) { 
+        if (reverse) {
+          opacity=int(sin(radians(count+90))*255);
+          x=cos(radians(angle))*range*percent+owner.cx;
+          y=sin(radians(angle))*range*percent+owner.cy;
+          angle+=angleV*timeBend;
+          count-=4*timeBend;
+          percent=sin(radians(count));
+        } else {
+         percent=sin(radians(count));
+          count+=4*timeBend;
+          angle+=angleV*timeBend;
+          x=cos(radians(angle))*range*percent+owner.cx;
+          y=sin(radians(angle))*range*percent+owner.cy;
+          opacity=int(sin(radians(count+90))*255);
+        }
+      }
+      break;
+                case 2:
+      if (!dead && !freeze) { 
+        if (reverse) {
+          opacity=int(sin(radians(count+90))*255);
+          x=cos(radians(angle))*range*sin(radians(count*3))+owner.cx;
+          y=sin(radians(angle))*range*sin(radians(count*3))+owner.cy;
+          //angle+=angleV*timeBend;
+          count-=4*timeBend;
+          percent=sin(radians(count));
+        } else {
+         percent=sin(radians(count));
+          count+=4*timeBend;
+          //angle+=angleV*timeBend;
+          x=cos(radians(angle))*range*sin(radians(count*3))+owner.cx;
+          y=sin(radians(angle))*range*sin(radians(count*3))+owner.cy;
+          opacity=int(sin(radians(count+90))*255);
+        }
+      }
+      break;
+    default:
+      if (!dead && !freeze) { 
+        if (reverse) {
+          opacity+=6*timeBend;
+          x-=vx*timeBend;
+          y-=vy*timeBend;
+        } else {
+          x+=vx*timeBend;
+          y+=vy*timeBend;
+          opacity-=6*timeBend;
+        }
+      }
+    }
+  }
+  void display() {
+    if (!dead ) {  
+      tint(255, opacity);
+      image(afterImage, x, y);
+      noTint();
     }
   }
 }

@@ -14,8 +14,8 @@ class Player implements Cloneable {
   boolean holdTrigg, holdUp, holdDown, holdLeft, holdRight, dead, hit, arduino, arduinoHold, mouse, clone, turret;
   PVector coord, speed, accel, arrow;
   float DEFAULT_DAMAGE=1, DEFAULT_RADIUS, DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR, DEFAULT_FRICTION_FACTOR=0.1, DEFAULT_ARMOR=0; 
-  long invisStampTime;
-  boolean allyCollision, invis, freezeImmunity=false, reverseImmunity, fastforwardImmunity, slowImmunity, stationary, stunned, stealth, targetable=true;
+  long invinsStampTime, invinsAltStampTime;
+  boolean allyCollision, invins, invinsAlt=true, freezeImmunity=false, reverseImmunity, fastforwardImmunity, slowImmunity, stationary, stunned, stealth, phase, targetable=true;
   //Ability ability;  
   ArrayList<Ability> abilityList= new ArrayList<Ability>();
   ArrayList<Buff> buffList= new ArrayList<Buff>();
@@ -138,14 +138,10 @@ class Player implements Cloneable {
 
   void display() {
     //println(index+" "+health);
-    if (!stealth) {
+    if (!stealth && invinsAlt) {
       stroke((freeze && !freezeImmunity)?255:0);
       strokeWeight(2);
       fill(255, 0, 255-deColor*0.5, 50+deColor);
-      //textAlign(CENTER, CENTER);
-
-      //textMode(CENTER);
-      //rect(x, y, w, h);
       ellipse(cx, cy, w, h);
 
       pushMatrix();
@@ -168,10 +164,12 @@ class Player implements Cloneable {
 
       if (deColor>0)deColor-=int(10*s*f);
     } else { //stealth
-      stroke(255, 40);
-      noFill();
-      strokeWeight(1);
-      ellipse(cx, cy, w, h);
+      if (!phase) {    
+        stroke(255, 40);
+        noFill();
+        strokeWeight(1);
+        ellipse(cx, cy, w, h);
+      }
     }
     if (freezeImmunity || reverseImmunity || fastforwardImmunity || slowImmunity) {
       noFill();
@@ -188,6 +186,7 @@ class Player implements Cloneable {
       if (!freeze || freezeImmunity) {
         calcAngle() ;
         if (reverse && !reverseImmunity) {
+          if (invins) invinsAlt=!invinsAlt;
 
           vy/=1-FRICTION_FACTOR*bend;
           vx/=1-FRICTION_FACTOR*bend;
@@ -228,7 +227,15 @@ class Player implements Cloneable {
           y+=vy*bend;
           cx=x+radius;
           cy=y+radius;
-
+          if (invins && invinsStampTime+invinsTime>stampTime) {
+            if (invinsAltStampTime+40<stampTime) {
+              invinsAlt=!invinsAlt;
+              invinsAltStampTime=stampTime;
+            }
+          } else {
+            invinsAlt=true;
+            invins=false;
+          }
           // calcAngle() ;
         }
       }
@@ -396,24 +403,28 @@ class Player implements Cloneable {
 
 
   void hit(float damage) {
-    stamps.add( new StateStamp(index, int(x), int(y), state, health, dead));
-    damage=damage-armor;
-    if (damage>0) {
-      health-=damage;
-      deColor=255;
-      state=2;
-      hit=true;
-    }
-    for (Ability a : this.abilityList) {
-      a.onHit();
-    }
-    // for (int i=0; i<2; i++) {
-    particles.add(new Particle(int(cx), int(cy), random(-10, 10)+vx*0.5, random(-10, 10)+vy*0.5, int(random(5, 20)), 500, playerColor));
-    // }
-    invisStampTime=stampTime+invinsTime;
-    invis=true;
-    if (health<=0) {
-      death();
+    if (!phase) {
+      damage=damage-armor;
+      stamps.add( new StateStamp(index, int(x), int(y), state, health, dead));
+      if (damage>0) {
+        health-=damage;
+        deColor=255;
+        state=2;
+        hit=true;
+      }
+      for (Ability a : this.abilityList) {
+        a.onHit();
+      }
+      // for (int i=0; i<2; i++) {
+      particles.add(new Particle(int(cx), int(cy), random(-10, 10)+vx*0.5, random(-10, 10)+vy*0.5, int(random(5, 20)), 500, playerColor));
+      // }
+      // if (damage<10) {
+      invinsStampTime=stampTime;
+      invins=true;
+      // }
+      if (health<=0) {
+        death();
+      }
     }
   }
   void heal(float _health) {
@@ -423,19 +434,19 @@ class Player implements Cloneable {
       deColor=255;
       state=2;
       particles.add(new Particle(int(cx), int(cy), random(-10, 10)+vx*0.5, random(-10, 10)+vy*0.5, int(random(5, 20)), 500, playerColor));
-      invisStampTime=stampTime+invinsTime;
-      invis=true;
+      invinsStampTime=stampTime+invinsTime;
+      invins=true;
     }
   }
   void wallHit(int _damage) {
-    stamps.add( new StateStamp(index, int(x), int(y), state, health, dead));
+   stamps.add( new StateStamp(index, int(x), int(y), state, health, dead));
     deColor=255;
     state=2;
     hit=true;
     for (Ability a : this.abilityList) {
       a.wallHit();
     }
-    particles.add(new Particle(int(cx), int(cy), random(-10, 10)+vx*0.5, random(-10, 10)+vy*0.5, int(random(5, 20)), 500, playerColor));
+    if(!stealth) particles.add(new Particle(int(cx), int(cy), random(-10, 10)+vx*0.5, random(-10, 10)+vy*0.5, int(random(5, 20)), 500, playerColor));
   }
   void death() {
     //ability.onDeath();
@@ -501,10 +512,12 @@ class Player implements Cloneable {
     // strokeWeight(1);
   }
   void pushForce(float amount, float angle) {
-    stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
-    vx+=cos(radians(angle))*amount;
-    vy+=sin(radians(angle))*amount;
-    stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
+    if (!phase) {
+      stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
+      vx+=cos(radians(angle))*amount;
+      vy+=sin(radians(angle))*amount;
+      stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
+    }
   }
   /*void pushForce(float _vx, float _vy, float _angle) {
    stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
@@ -519,14 +532,14 @@ class Player implements Cloneable {
   }
   void addBuff(Buff buff) {
     if (buffList.size()>0) {
-     // for (Buff b : buffList) {
-        // Buff clone = buff;
+      // for (Buff b : buffList) {
+      // Buff clone = buff;
 
-        if (buff.type==BuffType.ONCE  &&   existInList(buffList, buff.getClass())) {
-        } else {  
-          buffList.add(buff);
-          buff.transfer(this, this);
-        }
+      if (buff.type==BuffType.ONCE  &&   existInList(buffList, buff.getClass())) {
+      } else {  
+        buffList.add(buff);
+        buff.transfer(this, this);
+      }
       //}
     } else {
       buff.transfer(this, this);
@@ -561,6 +574,9 @@ class Player implements Cloneable {
     w=diameter;
     h=diameter;
     dead=false;
+    invinsAlt=true;
+    invinsAltStampTime=stampTime;
+    invins=false;
     //ability.reset();
     for (Ability a : this.abilityList) a.reset();
     for (Buff b : this.buffList) b.kill();

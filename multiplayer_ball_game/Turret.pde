@@ -167,6 +167,7 @@ class Block extends Player implements Containable {
     health=maxHealth;
     stationary=true;
     targetable=false;
+    allyCollision=true;
   }
   Block(int _index, int _x, int _y, int _w, int _h, int _health, Ability ..._ability) { // nseutral
     super( _index, BLACK, _x, _y, _w, _h, 999, 999, 999, 999, 999, _ability) ;
@@ -180,6 +181,7 @@ class Block extends Player implements Containable {
     health=maxHealth;
     stationary=true;
     targetable=false;
+    allyCollision=true;
   }
 
   void displayAbilityEnergy() {
@@ -200,10 +202,7 @@ class Block extends Player implements Containable {
       stroke((freeze && !freezeImmunity)?255:0);
       strokeWeight(2);
       fill(255, 0, 255-deColor*0.5, 50+deColor);
-
-
       rect(x, y, w, h);
-
       //displayHealth();
       displayName();
 
@@ -274,6 +273,28 @@ class Block extends Player implements Containable {
   Containable parent(Container _parent) {
     parent=(Projectile)_parent;
     return this;
+  }
+  void death() {
+    //ability.onDeath();
+    for (Ability a : this.abilityList) {
+      a.onDeath();
+      a.reset();
+    }
+    dead=true;
+    for (Buff b : this.buffList) {
+      b.onOwnerDeath();
+    }
+    buffList.clear();
+    // ability.reset();
+    //shakeTimer+=10;
+    for (int i=0; i<10; i++) {
+      particles.add(new Particle(int(cx), int(cy), random(50)-25, random(50)-25, int(random(40)+30), 1500, playerColor));
+    }
+    particles.add(new ShockWave(int(cx), int(cy), int(random(40)+10), 16, 400, playerColor));
+    //particles.add(new LineWave(int(cx), int(cy), int(random(40)+10), 400, playerColor, random(360)));
+    //particles.add(new Flash(900, 8, playerColor));  
+    state=0;
+    //stamps.add( new StateStamp(index, int(x), int(y), state, health,dead));
   }
   void unWrap() {
     //resetDuration();
@@ -704,11 +725,6 @@ class FollowDrone extends Drone {
     //health=maxHealth;
     damage=5;
     armor=-10;
-    if (type>=10) {
-      allyCollision=true;
-      degenerate=false;
-      damage=2;
-    }
     angle=owner.angle;
     //println(abilityList.get(0).name);
     if (type==2)wait=-30;
@@ -717,11 +733,6 @@ class FollowDrone extends Drone {
     super( _index, _x, _y, _w, _h, speed, _health, _ability) ;
     type=_type;
     damage=5;
-    if (type>=10) {
-      allyCollision=true;
-      degenerate=false;
-      damage=2;
-    }
     armor=-10;
     if (type==2)wait=-30;
   }
@@ -872,25 +883,6 @@ class FollowDrone extends Drone {
             for (Ability a : this.abilityList)a.release();
         } else wait++;
         break;
-      case 10:  // slow no degen allyCollide
-        target = seek(this, 1800);
-        if (target!=null) {
-          angle=angleAgainst(int(x), int(y), int(target.x), int(target.y));
-          // keyAngle=angle;
-          pushForce(0.12, angle);
-        }
-        //control(2);
-        /* if (wait>130) {
-         for (Ability a : this.abilityList) { 
-         a.press();
-         a.hold();
-         wait=1;
-         }
-         wait+=int(random(35));
-         if (random(100)<1)
-         for (Ability a : this.abilityList)a.release();
-         } else wait++;*/
-        break;
       default:
         target = seek(this, 2000);
         if (target!=null) {
@@ -910,7 +902,7 @@ class FollowDrone extends Drone {
   void control(int dir) {
   }
   void hit(float damage) {
-    //stamps.add( new StateStamp(index, int(x), int(y), state, health, dead));
+    stamps.add( new StateStamp(index, int(x), int(y), state, health, dead));
     damage=damage-armor;
     if (damage>0) {
       health-=damage;
@@ -967,7 +959,7 @@ class FollowDrone extends Drone {
     particles.add(new Particle(int(cx), int(cy), vx, vy, w, 2000, playerColor));
     particles.add(new ShockWave(int(cx), int(cy), int(random(40)+10), 16, 400, playerColor));
     state=0;
-    //stamps.add( new StateStamp(index, int(x), int(y), state, health,dead));
+    stamps.add( new StateStamp(index, int(x), int(y), state, health,dead));
   }
   void displayName() {
     //pushStyle();

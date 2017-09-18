@@ -108,7 +108,7 @@ Player seek(Player m, int senseRange, int attributeIndex) {
           }
           break;
         case 2: //INVIS
-          if (p.invis && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
+          if (p.invins && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
             return p;
           }
           break;
@@ -141,7 +141,7 @@ Player seek(Projectile m, int senseRange, int attributeIndex) {
             }
             break;
           case 2:
-            if (p.invis && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
+            if (p.invins && dist(p.x, p.y, m.x, m.y)<sense*0.5) {  
               return p;
             }
             break;
@@ -232,3 +232,11 @@ public static <C, L> boolean existInList(ArrayList<L> list, Class<C> genericType
   }
   return false;
 }
+
+ Projectile mergePayload( Projectile p,Containable[] c){
+      Container s = (Container)p;
+      Containable[] payload = c;
+      for(Containable pay : payload)pay.parent((Container)p);
+      s.contains(payload);
+      return (Projectile)s;
+ }
