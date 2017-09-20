@@ -1,4 +1,4 @@
-final float PI_QUARTER=PI+QUARTER_PI,PI_HALF=PI+HALF_PI;
+final float PI_QUARTER=PI+QUARTER_PI, PI_HALF=PI+HALF_PI;
 
 enum BuffType {
   ONCE, MULTIPLE
@@ -7,7 +7,7 @@ enum AbilityType {
   ACTIVE, PASSIVE, NATIVE, GLOBAL
 }
 enum GameType {
-  BRAWL,HORDE, SURVIVAL, PUZZLE, WILDWEST, SHOP, MENU, BOSSRUSH, SETTINGS
+  BRAWL, HORDE, SURVIVAL, PUZZLE, WILDWEST, SHOP, MENU, BOSSRUSH, SETTINGS
 }
 static String getClassName(Object o) {
   return o.getClass().getSimpleName();
@@ -22,7 +22,10 @@ void targetHommingVarning(Player target) {
   line(tcx+r, tcy, tcx-r, tcy);
   line(tcx, tcy+r, tcx, tcy-r);
 }
-
+void titleDisplay(GameType _gameMode) {
+  particles.add(new Text(_gameMode.toString(), 200, halfHeight, 10, 0, 100, 0, 3000, BLACK, 0) );
+  particles.add(new Gradient(8000, -400, 500, 0, 0, 500, 0.5, 0, GREY));
+}
 float  crit(Player owner, float precent, float damage) {
   if (precent>random(100)) {
     particles.add(new Flash(5, 32, WHITE));  
@@ -35,7 +38,7 @@ float  crit(Player owner, float precent, float damage) {
   }
   return 0;
 }
-float  crit(color c,Player target, float precent, float damage) {
+float  crit(color c, Player target, float precent, float damage) {
   if (precent>random(100)) {
     particles.add(new Flash(5, 32, WHITE));  
     fill(WHITE);
@@ -172,11 +175,11 @@ static float  calcAngleBetween(Projectile target, Player from) {
 static float  calcAngleBetween(Player target, Projectile from) {
   return degrees(atan2((target.cy-from.y), (target.cx-from.x)))%360;
 }
- static float calcAngleFromBlastZone(float x, float y, float px, float py) {
-//    double deltaY = py - y;
- //   double deltaX = px - x;
-    return (float)Math.atan2(py - y, px - x) * 180 / PI;
-  }
+static float calcAngleFromBlastZone(float x, float y, float px, float py) {
+  //    double deltaY = py - y;
+  //   double deltaX = px - x;
+  return (float)Math.atan2(py - y, px - x) * 180 / PI;
+}
 
 
 void generateRandomAbilities(int index, Ability[] list, boolean noEmpty) {
@@ -233,10 +236,10 @@ public static <C, L> boolean existInList(ArrayList<L> list, Class<C> genericType
   return false;
 }
 
- Projectile mergePayload( Projectile p,Containable[] c){
-      Container s = (Container)p;
-      Containable[] payload = c;
-      for(Containable pay : payload)pay.parent((Container)p);
-      s.contains(payload);
-      return (Projectile)s;
- }
+Projectile mergePayload( Projectile p, Containable[] c) {
+  Container s = (Container)p;
+  Containable[] payload = c;
+  for (Containable pay : payload)pay.parent((Container)p);
+  s.contains(payload);
+  return (Projectile)s;
+}

@@ -2806,8 +2806,6 @@ class Slice extends Projectile implements Destroyer {//-------------------------
         for (int i=1; traceAmount>i; i++) {
           traceAngle[i]=traceAngle[i-1];
         }
-
-
       } else {
 
         //pCX=players.get(playerIndex).x+players.get(playerIndex).w*0.5;
@@ -2899,7 +2897,163 @@ class Slice extends Projectile implements Destroyer {//-------------------------
     particles.add(new Fragment(int(destroyedP.x), int(destroyedP.y), 0, 0, 40, 10, 500, 100, owner.playerColor) );
   }
 }
+class Stab extends Projectile implements Destroyer {//----------------------------------------- Slash objects ----------------------------------------------------
+  int traceAmount=8;
+  float  angleV=24, range, rangeV, lowRange, traceLowRange[]=new float[traceAmount];
+  float pCX, pCY, traceAngle[]=new float[traceAmount], traceRange[]=new float[traceAmount];
+  boolean follow;
 
+  Stab(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _angleV, float _range, float _rangeV, float _vx, float _vy, int _damage, boolean _follow) {
+    super(_owner, _x, _y, _size, _projectileColor, _time);
+    follow=_follow;
+    angle=_angle;
+    angleV=_angleV;
+    damage=_damage;
+    force=-2;
+    vx= _vx;
+    vy= _vy;
+    rangeV=_rangeV;
+    range= _range;
+    pCX=_x;
+    pCY=_y;
+    if (freeze)follow=false;
+    melee=true;
+    for (int i=0; i<3; i++) {
+      particles.add(new Particle(int(x), int(y), vx/(2-0.12*i), vy/(2-0.12*i), 10+i*4, _time, _projectileColor));
+    }
+    for (int i=0; i<2; i++) {
+      particles.add(new Particle(int(x), int(y), random(10)-5+vx*0.5, random(10)-5+vy*0.5, int(random(20)+5), 800, 255));
+    }
+  }
+  void update() {
+    if (!dead && !freeze) { 
+
+      if (reverse) {
+
+        //pCX=players.get(playerIndex).x+players.get(playerIndex).w*0.5;
+        // pCY= players.get(playerIndex).y+players.get(playerIndex).w*0.5;
+        if (follow) {
+          pCX=owner.cx;
+          pCY= owner.cy;
+        }else{
+          pCX+=cos(radians(angle))*rangeV*timeBend;
+          pCY+=sin(radians(angle))*rangeV*timeBend;
+        }
+        
+        traceRange[0]=range;
+        for (int i=1; traceAmount>i; i++) {
+          traceRange[i]=traceRange[i-1];
+        }
+        range-=rangeV*timeBend;
+
+        x=pCX-cos(radians(angle))*range;
+        y=pCY-sin(radians(angle))*range;
+        pCX-=vx*timeBend;
+        pCY-=vy*timeBend;
+
+        traceAngle[0]=angle;
+        for (int i=1; traceAmount>i; i++) {
+          traceAngle[i]=traceAngle[i-1];
+        }
+        angle-=angleV*timeBend;
+        traceLowRange[0]=lowRange;
+        for (int i=1; traceAmount>i; i++) {
+          traceLowRange[i]=traceLowRange[i-1];
+        }
+        lowRange=sin(radians((180*(deathTime-stampTime)/time)))*range*0.9;
+      } else {
+
+        //pCX=players.get(playerIndex).x+players.get(playerIndex).w*0.5;
+        //pCY= players.get(playerIndex).y+players.get(playerIndex).w*0.5;
+        if (follow) {
+          pCX=owner.cx;
+          pCY= owner.cy;
+        }else{
+          pCX-=cos(radians(angle))*rangeV*timeBend;
+          pCY-=sin(radians(angle))*rangeV*timeBend;
+        }
+        range+=rangeV*timeBend;
+        for (int i = traceAmount-1; i >= 1; i--) {                
+          traceRange[i]=traceRange[i-1];
+        }
+        traceRange[0]=range;
+
+        x=pCX-cos(radians(angle))*range;
+        y=pCY-sin(radians(angle))*range;
+        pCX+=vx*timeBend;
+        pCY+=vy*timeBend;
+        traceLowRange[0]=lowRange;
+        /* for (int i=1; traceAmount>i; i++) {
+         traceLowRange[i]=traceLowRange[i-1];
+         } */
+        for (int i = traceAmount-1; i >= 1; i--) {                
+          traceLowRange[i]=traceLowRange[i-1];
+        }
+        lowRange=sin(radians(180*(deathTime-stampTime)/time))*range*0.9;
+        //   println((range*(deathTime-stampTime)/time)-range);
+        traceAngle[0]=angle;
+        angle+=angleV*timeBend;
+        /*  for (int i=0; traceAmount-1>i; i++) {
+         //traceAngle[i]=traceAngle[i-1];
+         traceAngle[i+1]=traceAngle[i];
+         println(traceAngle[i]);
+         }*/
+
+        for (int i = traceAmount-1; i >= 1; i--) {                
+          traceAngle[i]=traceAngle[i-1];
+        }
+
+        //    int numElts = traceAmount.length - ( remIndex + 1 ) ;
+        //  System.arraycopy( traceAmount, remIndex + 1, traceAmount, remIndex, numElts ) ;
+
+        if (lowRange<0) fizzle();
+      }
+    }
+  }
+  void display() {
+    if (!dead) { 
+      super.display();
+      // strokeWeight(84);
+      strokeWeight(int(range*(angleV*0.02)));
+      for (int i=0; traceAmount>i; i++) {
+        stroke(projectileColor, (traceAmount-i)*(255/traceAmount));
+        // stroke(random(360), random(360), random(360));
+        // line(pCX-cos(radians(angle))*(range-lowRange), pCY-sin(radians(angle))*(range-lowRange), pCX-cos(radians(angle))*range, pCY-sin(radians(angle))*range);
+        line(pCX -cos(radians(traceAngle[i]))*(traceRange[i]-traceLowRange[i]), pCY-sin(radians(traceAngle[i]))*(traceRange[i]-traceLowRange[i]), pCX-cos(radians(traceAngle[i]))*traceRange[i], pCY-sin(radians(traceAngle[i]))*traceRange[i]);
+      }
+
+      stroke(255);
+      line(pCX -cos(radians(angle))*(range-lowRange), pCY-sin(radians(angle))*(range-lowRange), pCX-cos(radians(angle))*range, pCY-sin(radians(angle))*range);
+    }
+  }
+  @Override
+    void fizzle() {    // when fizzle
+    if ( !dead) {         
+      for (int i=0; i<3; i++) {
+        particles.add(new Particle(int(x), int(y), cos(radians(random(-15, 15)+angle))*10, sin(radians(random(-15, 15)+angle))*10, int(random(30)+5), 800, 255));
+      }
+      //particles.add(new LineWave(int(x+cos(radians(angle-45+angleV))*-0), int(y+sin(radians(angle-45+angleV))*-0), 10, 100, WHITE, angle));
+    }
+    dead=true;
+  }
+  @Override
+    void hit(Player enemy) {
+    super.hit(enemy);
+    enemy.hit(damage);
+    for (int i=0; i<3; i++)particles.add(new Particle(int(x), int(y), random(20)-10, random(20)-10, int(random(20)+5), 800, 255));
+    for (int i=0; i<2; i++)particles.add(new Particle(int(x), int(y), random(40)-20, random(40)-20, int(random(30)+10), 800, projectileColor));
+    //particles.add(new LineWave(int(enemy.cx), int(enemy.cy), 15, 300, projectileColor, angle+90));
+    particles.add(new LineWave(int(enemy.cx), int(enemy.cy), 10, 100, WHITE, angle+90));
+  }
+
+  void destroying(Projectile destroyedP) {
+    fill(WHITE);
+    stroke(owner.playerColor);
+    strokeWeight(8);
+    triangle(x+random(50)-150, y+random(50)-25, x+random(50)+100, y+random(50)-25, x+random(50)-50, y+random(50)+75);
+    particles.add(new Fragment(int(destroyedP.x), int(destroyedP.y), 0, 0, 40, 10, 500, 100, owner.playerColor) );
+  }
+}
 class Boomerang extends Projectile implements Reflectable {//----------------------------------------- Boomerang objects ----------------------------------------------------
   float v, spray=16, pCX, pCY, graceTime=500, displayAngle, selfHitAngle=80, recoverEnergy, angleSpeed=20;
   Boomerang(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, float _damage, float _recoverEnergy, float _angleSpeed) {

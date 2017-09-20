@@ -38,7 +38,7 @@ int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight, coins, mouseScroll;
 //int gameMode=0;
 GameType gameMode=GameType.MENU;
-final int AmountOfPlayers=3, AmountOfModes=7; // start players
+final int AmountOfPlayers=4, AmountOfModes=7; // start players
 final float DIFFICULTY_LEVEL=1.2;
 
 final int WHITE=color(255), GREY=color(172), BLACK=color(0), GOLD=color(255, 220, 0);
@@ -103,7 +103,9 @@ int playerControl[][]= {
  }
  */
 void setup() {
-
+ // hint(DISABLE_OPENGL_ERROR_REPORT);
+  hint(DISABLE_DEPTH_TEST);
+  hint(DISABLE_ASYNC_SAVEFRAME);
   fullScreen(P3D);
   imageMode(CENTER);
   textAlign(CENTER, CENTER);
@@ -262,7 +264,7 @@ void setup() {
   }
   abilityList[0].unlocked=true; // noActive
   passiveList[0].unlocked=true; // noPassive
-  int menuBtnWidth=275, menuBtnHeight=500;
+  final int menuBtnWidth=260, menuBtnHeight=500;
   colorMode(HSB);
 
   mList.add( new ModeButton(GameType.BRAWL, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255),icons[1]));

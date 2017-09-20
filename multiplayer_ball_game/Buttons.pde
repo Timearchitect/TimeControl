@@ -95,17 +95,22 @@ class Button {
     text(a.name, x, y+nameYMargin);
     rectMode(CORNER);
   }
-  void displayTooltips() { 
+  void displayTooltips() {  // tooltips box in shop
     if ( hover && timer+tooltipDelay<stampTime) {
       pushStyle();
-      int mode, mouseXOffset=mouseX+20, mouseYOffset=mouseY+20, frameWidth=(a.tooltip.length()>50)? 400:int(a.tooltip.length()*10)+40, frameHeight=int(a.tooltip.length()*.4)+20;
-      if (mouseXOffset<width-frameWidth)mode=LEFT;
-      else   mode=RIGHT; 
+      //blendMode(MULTIPLY);
+      int mode, mouseXOffset=mouseX+20, mouseYOffset=mouseY+20, frameWidth=(a.tooltip.length()>50)? 400:int(a.tooltip.length()*10)+40, frameHeight=int(a.tooltip.length()*.45)+20;
       stroke(BLACK);
-      textAlign(mode);
       fill(WHITE);
-      rectMode(NORMAL);
-      rect(mouseX, mouseY, mouseX+frameWidth, mouseY+frameHeight);
+      if (mouseXOffset<width-frameWidth) {
+        textAlign(LEFT);
+       rect(mouseX, mouseY, frameWidth, frameHeight,10);
+      } else {
+        textAlign(RIGHT); 
+        mouseXOffset=mouseX-20;
+        rect(mouseX, mouseY, -frameWidth,frameHeight,10);
+      }
+
 
       fill(BLACK);
       textSize(10);
@@ -254,10 +259,10 @@ class ModeButton extends Button {
   }
 
   void display() {
-    textSize(defaultTextSize+int(offset*.5));
+    textSize(defaultTextSize+int(offset*.4));
     fill(pcolor, (hover)?255:150);
     stroke(pcolor);
-    strokeWeight(int(offset*.7));
+    strokeWeight(int(offset*.3));
     rect(x-offset*.5, y-offset*.5, w+offset, h+offset);
     tint(pcolor, 100);
     //image(a.icon, x, y, size, size);

@@ -1764,8 +1764,8 @@ class Phase extends Ability {//-------------------------------------------------
   }
 }
 class Dodge extends Ability {//---------------------------------------------------    SuppressFire   ---------------------------------
-  int count, duration=260;
-  float cooldown, forcedAngle, staticAngle, cooldownDuration=35;
+  int count, duration=265;
+  float cooldown, forcedAngle, staticAngle, cooldownDuration=30;
   boolean phase;
   long timer;
   Dodge() {

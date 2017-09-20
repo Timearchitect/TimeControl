@@ -10,6 +10,7 @@ void dispose() {
 
 void displayInfo() {
   fill(0);
+  textSize(18);
   text("add Time: "+addMillis+" freezeTime: " + freezeTime+" reversed: " + reversedTime+" forward: " + forwardTime+ " current: "+  stampTime +" fallenTime: "+fallenTime, halfWidth, 50);
   text("version: "+version, halfWidth, 20);
   text("players: "+players.size()+" projectiles: "+projectiles.size()+" particles: "+particles.size()+" stamps: "+stamps.size(), halfWidth, 75);
@@ -262,10 +263,7 @@ void resetGame() {
   }
   switch(gameMode) {
   case BRAWL:
-
-    particles.add(new Text("Brawl", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
-    particles.add(new Gradient(8000, 0, 500, 0, 0, 500, 0.5, 0, GREY));
-
+    titleDisplay(gameMode);
     for (Player p : players) {    
       if (p!=AI&&!p.clone &&  !p.turret) {  // no turret or clone respawn
         p.reset();
@@ -303,12 +301,12 @@ void resetGame() {
 
     break;
   case PUZZLE:
-    particles.add(new Text("Puzzle", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
-    particles.add(new Gradient(8000, 0, 500, 0, 0, 500, 0.5, 0, GREY));
+    titleDisplay(gameMode);
+
     break;
   case WILDWEST:
-    particles.add(new Text("WILD WILD WEST !!!", 200, halfHeight, 5, 0, 100, 0, 10000, BLACK, 0) );
-    particles.add(new Gradient(8000, 0, 500, 0, 0, 500, 0.5, 0, GREY));
+    titleDisplay(gameMode);
+
     players.add(AI);
     for (Player p : players) {
       if (p!=AI) {
@@ -318,19 +316,19 @@ void resetGame() {
       }
     }
 
-    if (players.get(0)!=null) { 
+    if (players.size()>0 &&players.get(0)!=null) { 
       players.get(0).x=75;
       players.get(0).y=75;
     }
-    if (players.get(1)!=null) { 
+    if (players.size()>1 &&players.get(1)!=null) { 
       players.get(1).x=width-150;
       players.get(1).y=75;
     }
-    if (players.get(2)!=null) { 
+    if (players.size()>2 &&players.get(2)!=null) { 
       players.get(2).x=width-150;
       players.get(2).y=height-150;
     }
-    if (players.get(3)!=null) { 
+    if (players.size()>3 && players.get(3)!=null) { 
       players.get(3).x=75;
       players.get(3).y=height-150;
     }
@@ -466,6 +464,7 @@ void shopUpdate() {
         text(selectedAbility.sellText+" -50%", halfWidth, height-150);
         if (mousePressed && !pMousePressed) {
           selectedAbility.unlocked=false;
+          selectedAbility.sell();
           coins+=int(selectedAbility.unlockCost*.5);
           selectedAbility=null;
           saveProgress();
@@ -475,6 +474,7 @@ void shopUpdate() {
         text(selectedAbility.buyText, halfWidth, height-150);
         if (mousePressed && !pMousePressed) {
           selectedAbility.unlocked=true;
+          selectedAbility.buy();
           coins-=selectedAbility.unlockCost;
           selectedAbility=null;
           saveProgress();

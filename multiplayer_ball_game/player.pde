@@ -439,14 +439,14 @@ class Player implements Cloneable {
     }
   }
   void wallHit(int _damage) {
-   stamps.add( new StateStamp(index, int(x), int(y), state, health, dead));
+    stamps.add( new StateStamp(index, int(x), int(y), state, health, dead));
     deColor=255;
     state=2;
     hit=true;
     for (Ability a : this.abilityList) {
       a.wallHit();
     }
-    if(!stealth) particles.add(new Particle(int(cx), int(cy), random(-10, 10)+vx*0.5, random(-10, 10)+vy*0.5, int(random(5, 20)), 500, playerColor));
+    if (!stealth) particles.add(new Particle(int(cx), int(cy), random(-10, 10)+vx*0.5, random(-10, 10)+vy*0.5, int(random(5, 20)), 500, playerColor));
   }
   void death() {
     //ability.onDeath();
@@ -518,6 +518,10 @@ class Player implements Cloneable {
       vy+=sin(radians(angle))*amount;
       stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
     }
+  }
+  void teleport(float _angle, float _amount) {
+    x+=cos(radians(_angle))*_amount;
+    y+=sin(radians(_angle))*_amount;
   }
   /*void pushForce(float _vx, float _vy, float _angle) {
    stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
