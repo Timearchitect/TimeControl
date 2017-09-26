@@ -1,7 +1,9 @@
 class Buff implements Cloneable {
   long spawnTime, deathTime, duration, timer;
   boolean dead, effectAll;
-  String name="??";
+ // String name="??";
+    String name;
+
   BuffType type= BuffType.MULTIPLE;
   Player OGowner, owner, enemy;
   Projectile parent;

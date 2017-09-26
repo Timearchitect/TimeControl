@@ -161,6 +161,7 @@ Player seek(Projectile m, int senseRange, int attributeIndex) {
   }
   return null;
 }  
+
 static float  calcAngleBetween(Player target, Player from) {
   return degrees(atan2((target.cy-from.cy), (target.cx-from.cx)))%360;
 }
@@ -168,6 +169,9 @@ static float  calcAngleBetween(Projectile target, Projectile from) {
   return degrees(atan2((target.y-from.y), (target.x-from.x)))%360;
 }
 
+static float  calcAngleBetween(float x,float y,float x2,float y2) {
+  return degrees(atan2((y-y2), (x-x2)))%360;
+}
 static float  calcAngleBetween(Projectile target, Player from) {
   return degrees(atan2((target.y-from.cy), (target.x-from.cx)))%360;
 }

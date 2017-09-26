@@ -1,7 +1,6 @@
 class Turret extends Player implements Containable { 
   Projectile parent;
   long deathTime, spawnTime, duration=100000;
-
   int lvl;
   float angleSpeed=2;
   Player owner;
@@ -18,6 +17,7 @@ class Turret extends Player implements Containable {
     health=maxHealth;
     abilityShortName=abilityList.get(0).name.substring(0, 1).toUpperCase();
     stationary=true;
+    allyCollision=true;
   }
   Turret(int _index, int _x, int _y, int _w, int _h, int _health, Ability ..._ability) { // nseutral
     super( _index, BLACK, _x, _y, _w, _h, 999, 999, 999, 999, 999, _ability) ;
@@ -30,6 +30,8 @@ class Turret extends Player implements Containable {
     health=maxHealth;
     abilityShortName=abilityList.get(0).name.substring(0, 1).toUpperCase();
     stationary=true;
+    allyCollision=true;
+
   }
 
   void displayAbilityEnergy() {

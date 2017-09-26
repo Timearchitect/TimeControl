@@ -100,10 +100,10 @@ class CheckPoint extends TimeStamp {  // save states
 }
 
 class StateStamp extends TimeStamp {  // save player 
-  int playerState=0;
+  byte playerState=0;
   int playerHealth=0;
   boolean playerDead, stealth;
-  StateStamp(int _player, int _x, int _y, int _state, int _health, boolean _dead) {
+  StateStamp(int _player, int _x, int _y, byte _state, int _health, boolean _dead) {
     super(_player);
     x=_x;
     y=_y;
@@ -116,7 +116,7 @@ class StateStamp extends TimeStamp {  // save player
     catch(Exception e) {
     }
   }
-  StateStamp(int _player, PVector _coord, int _state, int _health, boolean _dead) {
+  StateStamp(int _player, PVector _coord, byte _state, int _health, boolean _dead) {
     super(_player);
     coord=_coord;
     playerState=_state;

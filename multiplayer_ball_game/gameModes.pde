@@ -250,7 +250,7 @@ void bossRushSetup() {
   bossList.add(new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1.75), int(playerSize*1.75), 15, int(600*DIFFICULTY_LEVEL), 1, new MarbleLauncher(), new Torpedo(), new  Reward(25, false))); //, new MissleLauncher()
   bossList.add(new FollowDrone(players.size(), halfWidth, halfHeight, int(playerSize*1.5), int(playerSize*1.5), 15, int(700*DIFFICULTY_LEVEL), 3, new SemiAuto(), new Pistol(), new HpRegen(10, 10), new  Reward(30, false)));
   Sniper  sA= new  Sniper();
-  sA.projectileDamage=45;
+  sA.damage=45;
   sA.activeCost=0;
   sA.channelCost=0;
   sA.deactiveCost=0;

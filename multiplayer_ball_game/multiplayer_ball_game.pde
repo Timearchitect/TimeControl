@@ -2,10 +2,10 @@
 /**------------------------------------------------------------//
  //                                                            //
  //  Coding dojo  - Prototype of a timecontrol game            //
- //  av: Alrik He    v.0.7.15                                  //
+ //  av: Alrik He    v.0.7.16                                  //
  //  Arduino verstad Malmö                                     //
  //                                                            //
- //      2014-09-21    -     2017-09-09                        //
+ //      2014-09-21    -     2017-09-20                        //
  //                                                            //
  //                                                            //
  //         Used for weapon test & prototyping timebending     //
@@ -27,24 +27,25 @@ Noise n = new Noise(an);
 SamplePlayer musicPlayer;
 Envelope speedControl;
 Gain   g = new Gain(ac, 1, 0.05); //volume
+Gain  g3 = new Gain(an, 1, 0.0);
 final color BGcolor=color(100);
 PFont font;
 PGraphics GUILayer;
 PShader  Blur;
-boolean hitBox=false, cleanStart=true, preSelectedSkills=true, RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true, inGame;
+boolean hitBox=false, cleanStart=true, preSelectedSkills=true, RandomSkillsOnDeath=false, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true, inGame;
 boolean gradualCleaning=true;
 final float flashAmount=0.5, shakeAmount=0.8;
 int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight, coins, mouseScroll;
 //int gameMode=0;
 GameType gameMode=GameType.MENU;
-final int AmountOfPlayers=4, AmountOfModes=7; // start players
+final byte AmountOfPlayers=4, AmountOfModes=7; // start players
 final float DIFFICULTY_LEVEL=1.2;
 
 final int WHITE=color(255), GREY=color(172), BLACK=color(0), GOLD=color(255, 220, 0);
 final int speedFactor= 2;
 final float slowFactor= 0.3;
-final String version="0.7.15";
+final String version="0.7.16";
 static long prevMillis, addMillis, forwardTime, reversedTime, freezeTime, stampTime, fallenTime;
 final int baudRate= 19200;
 final static float DEFAULT_FRICTION=0.1;
@@ -58,7 +59,7 @@ static Player AI;
 final int offsetX=1250, offsetY=-50;//final int offsetX=950, offsetY=100;
 static int shakeTimer, shakeX=0, shakeY=0, maxShake=80;
 final float DEFAULT_ZOOMRATE=0.02;
-static float F=1, S=1, timeBend=1, zoom=0.7, tempZoom=1.0, tempOffsetX=0, tempOffsetY=0, zoomX, zoomY, zoomXAim, zoomYAim, zoomAim=1, zoomRate=0.02;
+static float F=1, S=1, timeBend=1, zoom=0.8, tempZoom=1.0,actualPercentScale, tempOffsetX=0, tempOffsetY=0, zoomX, zoomY, zoomXAim, zoomYAim, zoomAim=1, zoomRate=0.02;
 final int keyResponseDelay=30;  // eventhe refreashrate equal to arduino devices
 final char keyRewind='§', keyFreeze='x', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='7';
 final int ICON_AMOUNT=60;
@@ -103,13 +104,14 @@ int playerControl[][]= {
  }
  */
 void setup() {
- // hint(DISABLE_OPENGL_ERROR_REPORT);
+  // hint(DISABLE_OPENGL_ERROR_REPORT);
   hint(DISABLE_DEPTH_TEST);
   hint(DISABLE_ASYNC_SAVEFRAME);
   fullScreen(P3D);
+  //size(displayWidth, displayHeight, P3D);
+
   imageMode(CENTER);
   textAlign(CENTER, CENTER);
-  //size(displayWidth, displayHeight, P3D);
   font= loadFont("PressStart2P-Regular-28.vlw");
   Blur= loadShader("blur.glsl");
   textFont(font, 18);
@@ -186,8 +188,9 @@ void setup() {
     new RapidBattery(), 
     new Chivalry(), 
     new HitScanGun(), 
-    new HanzoMain(),
-    new Ravine()
+    new HanzoMain(), 
+    new Ravine(),
+    new CutThroat()
   };
 
   passiveList = new Ability[]{
@@ -217,8 +220,8 @@ void setup() {
     new Stalker(), 
     new Scatter(), 
     new Tumble(), 
-    new Rage(),
-    new Phase(),
+    new Rage(), 
+    new Phase(), 
     new Dodge()
     //new Redemption(), // buggy on survival
     // new Undo() // buggy on survival
@@ -267,18 +270,18 @@ void setup() {
   final int menuBtnWidth=260, menuBtnHeight=500;
   colorMode(HSB);
 
-  mList.add( new ModeButton(GameType.BRAWL, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255),icons[1]));
-  mList.add( new ModeButton(GameType.HORDE, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255),icons[2]));
-  mList.add( new ModeButton(GameType.SURVIVAL, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255),icons[12]));
-  mList.add( new ModeButton(GameType.WILDWEST, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255),icons[23]));
-  mList.add( new ModeButton(GameType.BOSSRUSH, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255),icons[34]));
-  mList.add( new ModeButton(GameType.SHOP, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255),icons[45]));
-  mList.add( new ModeButton(GameType.SETTINGS, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255),icons[55]));
+  mList.add( new ModeButton(GameType.BRAWL, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255), icons[1]));
+  mList.add( new ModeButton(GameType.HORDE, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255), icons[2]));
+  mList.add( new ModeButton(GameType.SURVIVAL, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255), icons[12]));
+  mList.add( new ModeButton(GameType.WILDWEST, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255), icons[23]));
+  mList.add( new ModeButton(GameType.BOSSRUSH, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255), icons[34]));
+  mList.add( new ModeButton(GameType.SHOP, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255), icons[45]));
+  mList.add( new ModeButton(GameType.SETTINGS, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255), icons[55]));
 
   println("loaded save ... abilities!");
   abilities= new Ability[][]{ 
-  /* player 1 */    new Ability[]{new RapidBattery(), new Tumble()}, 
-  /* player 2 */    new Ability[]{new RapidBattery(), new Random().randomize(passiveList)}, 
+  /* player 1 */    new Ability[]{new CutThroat(), new Tumble()}, 
+  /* player 2 */    new Ability[]{new CutThroat(), new Random().randomize(passiveList)}, 
   /* player 3 mouse */    new Ability[]{new  Random().randomize(abilityList), new  Random().randomize(passiveList)}, 
   /* player 4 */    new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
     new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
@@ -407,10 +410,11 @@ void draw() {
   //tempZoom=1;
   // zoom=.8;
   tempZoom+=(zoomAim-tempZoom)*zoomRate;
+  actualPercentScale=tempZoom*zoom;
   zoomX+=(zoomXAim-zoomX)*zoomRate;
   zoomY+=(zoomYAim-zoomY)*zoomRate;
-  tempOffsetX=-tempZoom*zoom*zoomX+tempZoom*zoom*width*(.5/(tempZoom*zoom));//
-  tempOffsetY=-tempZoom*zoom*zoomY+tempZoom*zoom*height*(.5/(tempZoom*zoom));//
+  tempOffsetX=-actualPercentScale*zoomX+actualPercentScale*width*(.5/actualPercentScale);//
+  tempOffsetY=-actualPercentScale*zoomY+actualPercentScale*height*(.5/actualPercentScale);//
   //}
   background(BGcolor);
 
@@ -424,20 +428,20 @@ void draw() {
     screenShake();
 
     fill(BGcolor);
-
-    if (fastForward&& !noFlash) {
-      fill(240, 100*F, 100, 50*flashAmount);
-    }
-    if (slow&& !noFlash) {
-      fill(240, 10*F, 250, 20*flashAmount);
+    if (!noFlash) {
+      if (fastForward) {
+        fill(240, 100*F, 100, 50*flashAmount);
+      }
+      if (slow) {
+        fill(240, 10*F, 250, 20*flashAmount);
+      }
     }
     if (freeze ) {
       if (!noFlash)fill(150, 200, 255, flashAmount*255);
       freezeTime+=addMillis;
     } else {
       if (reverse) {
-        if (stampTime<6000) {
-          Gain g3 = new Gain(an, 1, 0.0);
+        if (stampTime<6000) {      
           g3.setGain((6000-stampTime)*0.0000001);
           if (!noisy)g3.addInput(n);
           an.out.addInput(g3);
@@ -465,12 +469,13 @@ void draw() {
     // translate(width*(1-zoom)*.5+tempOffsetX, height*(1-zoom)*.5+tempOffsetY);
     translate(tempOffsetX, tempOffsetY);
 
-    scale(zoom*tempZoom, zoom*tempZoom);
+    scale(actualPercentScale, actualPercentScale);
 
     //noStroke()
     stroke(BLACK);
     strokeWeight(10);
-    rect(-10, -10, width+20, height+20); // background
+    //rect(-10, -10, width+20, height+20); // background
+    rect(0,0, width, height); // background
 
 
     //--------------------- projectiles-----------------------
@@ -560,7 +565,7 @@ void draw() {
     textSize(12);
     strokeWeight(20);
     for (Player p : players) {
-      if (!p.dead && p.index>-1 && p.index<=AmountOfPlayers &&!p.clone) {
+      if (!p.dead && p.index>-1 && p.index<=AmountOfPlayers &&!p.clone&&!p.turret) {
         noStroke();
         for (Ability a : p.abilityList) {
           if (a.type==AbilityType.ACTIVE) {
@@ -574,7 +579,7 @@ void draw() {
         stroke(BLACK);
         line(100+300*p.index, height-20, 230+300*p.index, height-20);
         stroke((p.playerColor==BLACK)?WHITE:p.playerColor);
-        GUIpercent = ((float)p.health/p.maxHealth)*130;
+        GUIpercent = (float(p.health)/p.maxHealth)*130;
         if (p.health>0)line(100+300*p.index, height-20, 100+GUIpercent+300*p.index, height-20);
       }
     }

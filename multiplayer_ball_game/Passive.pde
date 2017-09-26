@@ -8,8 +8,7 @@ class NoPassive extends Ability {//---------------------------------------------
     unlocked=true;
     sellable=false;
     // deactivatable=false;
-        assambleTooltip("No");
-
+    assambleTooltip("No");
   } 
   /* @Override
    void action() {
@@ -775,7 +774,7 @@ class PainPulse extends Ability {//---------------------------------------------
        vertex(owner.cx+sin(radians(i))*100, owner.cy+cos(radians(i))*100);
        }
        endShape(CLOSE);*/
-      cooldown++;
+      if (owner.freezeImmunity ||!freeze)cooldown+= 1*timeBend;
     }
   }
   @Override
@@ -785,7 +784,7 @@ class PainPulse extends Ability {//---------------------------------------------
 }
 class Rage extends Ability {//---------------------------------------------------    Rage   ---------------------------------
   int count;
-  float cooldown;
+  float cooldown, rand;
   Rage() {
     super();
     type=AbilityType.PASSIVE;
@@ -821,7 +820,7 @@ class Rage extends Ability {//--------------------------------------------------
         strokeWeight(8);
         rect(owner.cx-60, owner.cy-60, 120, 120);
       }
-      cooldown += 1*timeBend;
+      if (owner.freezeImmunity ||!freeze)cooldown += 1*timeBend;
     }
   }
   @Override
@@ -1049,9 +1048,9 @@ class Boost extends Ability {//-------------------------------------------------
       cooldown=0;
       charge=0;
       projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 0, 60, owner.playerColor, 350, 0, 1, 60, 12));
-
       owner.pushForce(force, owner.keyAngle);
       projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 10, 20, owner.playerColor, 450, owner.keyAngle, 1, 30, 10));
+      projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 17, 10, owner.playerColor, 350, owner.keyAngle, 1, 16, 8));
     }
     charge=int(charge*.5);
   }
@@ -1724,7 +1723,7 @@ class Phase extends Ability {//-------------------------------------------------
   }
   @Override
     void press() {
-    if (cooldown>cooldownDuration) {
+    if (!owner.dead && cooldown>cooldownDuration) {
       for (int i=0; i<360; i +=60)
         particles.add(new   AfterImage(int(owner.cx), int( owner.cy), cos(radians(i))*8, sin(radians(i))*8, owner.angle +i, 5, 0, 300, duration, 1, owner)); 
       owner.stealth=true;
@@ -1787,14 +1786,14 @@ class Dodge extends Ability {//-------------------------------------------------
   }
   @Override
     void release() {
-    if (cooldown>cooldownDuration) {
+    if (!owner.dead && cooldown>cooldownDuration) {
       //for (int i=0; i<360; i +=120)
-      owner.halt();
+      //owner.halt(0.9);
       particles.add(new   AfterImage(int(owner.cx), int( owner.cy), cos(radians(owner.angle-90))*8, sin(radians(owner.angle-90))*8, owner.angle-90, 15, 0, 200, duration, 2, owner)); 
       particles.add(new   AfterImage(int(owner.cx), int( owner.cy), cos(radians(owner.angle+90))*8, sin(radians(owner.angle+90))*8, owner.angle+90, 15, 0, 200, duration, 2, owner)); 
       particles.add(new   AfterImage(int(owner.cx), int( owner.cy), cos(radians(owner.angle-90))*8, sin(radians(owner.angle-90))*8, owner.angle-90, 15, 0, 100, duration, 2, owner)); 
       particles.add(new   AfterImage(int(owner.cx), int( owner.cy), cos(radians(owner.angle+90))*8, sin(radians(owner.angle+90))*8, owner.angle+90, 15, 0, 100, duration, 2, owner)); 
-      owner.stealth=true;
+      //owner.stealth=true;
       owner.phase=true;
       timer=stampTime;
     }
@@ -1803,7 +1802,7 @@ class Dodge extends Ability {//-------------------------------------------------
   @Override
     void passive() {
     if (timer+duration<stampTime) {
-      owner.stealth=false;
+     // owner.stealth=false;
       owner.phase=false;
     }
     //    cooldown+=1*timeBend;
@@ -1829,7 +1828,7 @@ class Dodge extends Ability {//-------------------------------------------------
   }
   @Override
     void reset() {
-    owner.stealth=false;
+    //owner.stealth=false;
     owner.phase=false;
   }
 }

@@ -3,11 +3,11 @@ final int TARGETABLE=0, STATIONARY=1, INVIS=2, STEALTH=3;
 class Player implements Cloneable {
   PShape arrowSVG = loadShape("arrow.svg");
   int  index, ally, radius, diameter, outlineDiameter, w, h, up, down, left, right, DEFAULT_UP, DEFAULT_DOWN, DEFAULT_LEFT, DEFAULT_RIGHT, triggKey, deColor;
-  int state=1, maxHealth=200, health=maxHealth, damage=1;
-  int holdTime;
+  int  maxHealth=200, health=maxHealth, damage=1, holdTime;
+  byte state=1;
   final int  invinsTime=400, buttonHoldTime=300;
   final byte barSize=12, barDiameter=75;
-  final int mouseMargin=60;
+  final byte mouseMargin=60;
   //float MAX_MOUSE_ACCEL=0.0035;
   final float mouseMaxAccel=1.4;
   float  x, y, vx, vy, ax, ay, cx, cy, angle, keyAngle, f, s, bend, barFraction, fraction, armor, weaponDamage=0, weaponEnergy, weaponSpeed, weaponAttackSpeed, weaponRange, weaponCost, weaponRegen, weaponAccuracy=0, weaponCritChance, weaponCritDamage;
@@ -15,7 +15,7 @@ class Player implements Cloneable {
   PVector coord, speed, accel, arrow;
   float DEFAULT_DAMAGE=1, DEFAULT_RADIUS, DEFAULT_MAX_ACCEL=0.15, MAX_ACCEL=DEFAULT_MAX_ACCEL, DEFAULT_ANGLE_FACTOR=0.3, ANGLE_FACTOR=DEFAULT_ANGLE_FACTOR, FRICTION_FACTOR, DEFAULT_FRICTION_FACTOR=0.1, DEFAULT_ARMOR=0; 
   long invinsStampTime, invinsAltStampTime;
-  boolean allyCollision, invins, invinsAlt=true, freezeImmunity=false, reverseImmunity, fastforwardImmunity, slowImmunity, stationary, stunned, stealth, phase, targetable=true;
+  boolean allyCollision=false, invins, invinsAlt=true, freezeImmunity=false, reverseImmunity, fastforwardImmunity, slowImmunity, stationary, stunned, stealth, phase, targetable=true;
   //Ability ability;  
   ArrayList<Ability> abilityList= new ArrayList<Ability>();
   ArrayList<Buff> buffList= new ArrayList<Buff>();
@@ -138,7 +138,7 @@ class Player implements Cloneable {
 
   void display() {
     //println(index+" "+health);
-    if (!stealth && invinsAlt) {
+    if (!stealth && !phase && invinsAlt) {
       stroke((freeze && !freezeImmunity)?255:0);
       strokeWeight(2);
       fill(255, 0, 255-deColor*0.5, 50+deColor);
@@ -163,6 +163,10 @@ class Player implements Cloneable {
       }
 
       if (deColor>0)deColor-=int(10*s*f);
+      if (freezeImmunity || reverseImmunity || fastforwardImmunity || slowImmunity) {
+        noFill();
+        ellipse(cx, cy, outlineDiameter, outlineDiameter);
+      }
     } else { //stealth
       if (!phase) {    
         stroke(255, 40);
@@ -170,10 +174,6 @@ class Player implements Cloneable {
         strokeWeight(1);
         ellipse(cx, cy, w, h);
       }
-    }
-    if (freezeImmunity || reverseImmunity || fastforwardImmunity || slowImmunity) {
-      noFill();
-      ellipse(cx, cy, outlineDiameter, outlineDiameter);
     }
   }
 
@@ -559,6 +559,10 @@ class Player implements Cloneable {
   void halt() {
     vx=0;
     vy=0;
+  }
+    void halt(float _percent) {
+    vx*=_percent;
+    vy*=_percent;
   }
   void reset() {
     vx=0;

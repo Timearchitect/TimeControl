@@ -2935,11 +2935,11 @@ class Stab extends Projectile implements Destroyer {//--------------------------
         if (follow) {
           pCX=owner.cx;
           pCY= owner.cy;
-        }else{
+        } else {
           pCX+=cos(radians(angle))*rangeV*timeBend;
           pCY+=sin(radians(angle))*rangeV*timeBend;
         }
-        
+
         traceRange[0]=range;
         for (int i=1; traceAmount>i; i++) {
           traceRange[i]=traceRange[i-1];
@@ -2968,7 +2968,7 @@ class Stab extends Projectile implements Destroyer {//--------------------------
         if (follow) {
           pCX=owner.cx;
           pCY= owner.cy;
-        }else{
+        } else {
           pCX-=cos(radians(angle))*rangeV*timeBend;
           pCY-=sin(radians(angle))*rangeV*timeBend;
         }
@@ -3094,7 +3094,7 @@ class Boomerang extends Projectile implements Reflectable {//-------------------
         particles.add(new Particle(int(x), int(y), cos(radians(displayAngle*2))*(abs(vy)+abs(vx))*0.5, sin(radians(displayAngle*2))*(abs(vy)+abs(vx))*0.5, int(random(10)+5), 150, BLACK));
 
         // particles.add(new Particle(int(x), int(y),0, 0, 60, 1000, owner.playerColor));
-        particles.add(new Particle(int(x), int(y), 0, 0, 100-int(abs(vx)+abs(vy)), 1000, BLACK));
+        //particles.add(new Particle(int(x), int(y), 0, 0, 100-int(abs(vx)+abs(vy)), 1000, BLACK));
         if (dist(x, y, pCX, pCY)<50 && (stampTime-spawnTime)>graceTime) retrieve();
       }
     }
@@ -3121,24 +3121,24 @@ class Boomerang extends Projectile implements Reflectable {//-------------------
   }
 
   void retrieve() {
-    if (!owner.dead&&owner.angle-selfHitAngle<angle && owner.angle+selfHitAngle>angle) { 
-      owner.hit(int(damage*.4*(abs(vx)+abs(vy))));
-      particles.add( new TempFreeze(int((abs(vx)+abs(vy))*2)));
-      //owner.pushForce(vx, vy, angle);
-      owner.pushForce(vx, vy);
-      for (int i=0; i<16; i++) {
-        particles.add(new Spark( 1000, int(x), int(y), (vx+random(-spray, spray))*random(0, 0.8), (vy+random(-spray, spray))*random(0, 0.8), 6, angle, projectileColor));
+    if (!owner.phase) {
+      if (!owner.dead  &&owner.angle-selfHitAngle<angle && owner.angle+selfHitAngle>angle) { 
+        owner.hit(int(damage*.3*(abs(vx)+abs(vy))));
+        particles.add( new TempFreeze(int((abs(vx)+abs(vy))*2)));
+        //owner.pushForce(vx, vy, angle);
+        owner.pushForce(vx, vy);
+        for (int i=0; i<16; i++) {
+          particles.add(new Spark( 1000, int(x), int(y), (vx+random(-spray, spray))*random(0, 0.8), (vy+random(-spray, spray))*random(0, 0.8), 6, angle, projectileColor));
+        }
+      } else {
+        owner.pushForce(vx*0.2, vy*0.2);
+        owner.abilityList.get(0).energy+=recoverEnergy;
+        particles.add(new RShockWave(int(owner.cx), int(owner.cy), 350, 32, 300, WHITE));
+        // particles.add(new ShockWave(int(players.get(playerIndex).x+players.get(playerIndex).w*0.5), int(players.get(playerIndex).y+players.get(playerIndex).h*0.5), 20, 100, projectileColor));
       }
-    } else {
-
-      // owner.pushForce(vx*0.2, vy*0.2, angle);
-      owner.pushForce(vx*0.2, vy*0.2);
-      owner.abilityList.get(0).energy+=recoverEnergy;
-      particles.add(new RShockWave(int(owner.cx), int(owner.cy), 350, 32, 300, WHITE));
-      // particles.add(new ShockWave(int(players.get(playerIndex).x+players.get(playerIndex).w*0.5), int(players.get(playerIndex).y+players.get(playerIndex).h*0.5), 20, 100, projectileColor));
+      deathTime=stampTime;   // dead on collision with owner
+      dead=true;
     }
-    deathTime=stampTime;   // dead on collision with owner
-    dead=true;
   }
 
   @Override
@@ -3205,6 +3205,7 @@ class HomingMissile extends Projectile implements Reflectable, Destroyable, Cont
     sh = createShape();
     c = createShape();
     sh.beginShape();
+     sh.strokeWeight(2);
     sh.fill(255);
     sh.stroke(255, 50);
     sh.vertex(int (-size*0.25), int (-size*0.25) );

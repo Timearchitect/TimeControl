@@ -883,6 +883,8 @@ class Text extends Particle {
     offsetX=_offsetX;
     offsetY=_offsetY;
     owner=_owner;
+    x=owner.cx+offsetX;
+    y=owner.cy+offsetY;
   }
   void update() {
     if (!dead && !freeze) { 
@@ -944,6 +946,8 @@ class Pic extends Particle {
     owner=_owner;
     if (_type==1)follow=true;
     opacity=255;
+    x=owner.cx+offsetX;
+    y=owner.cy+offsetY;
   }
 
   void update() {
@@ -1050,7 +1054,7 @@ class Fragment extends Particle {
 
 class Star extends Particle {
   boolean follow;
-  float shrinkRate, size=100, scale=1;
+  float shrinkRate, size=100, scale=1,shimmer;
   PShape form= createShape();
   Star(int _time, int _x, int _y, float _vx, float _vy, int _size, float _shrinkRate, color _particleColor) {
     super( _x, _y, _vx, _vy, 100, _time, _particleColor);
@@ -1097,6 +1101,7 @@ class Star extends Particle {
         opacity-=6*timeBend;
         x+=vx*timeBend;
         y+=vy*timeBend;
+        shimmer=random(0.5, 1);
       }
     }
   }
@@ -1115,7 +1120,7 @@ class Star extends Particle {
       translate(x, y);
       rotate(radians(angle));
       //tint(255,opacity);
-      scale(scale*random(0.5, 1));
+      scale(scale*shimmer);
       // shape(form, form.width*.5, form.height*.5);
       shape(form);
       //strokeWeight(opacity*0.1);
@@ -1127,7 +1132,7 @@ class Star extends Particle {
 
 class AfterImage extends Particle {
   PGraphics afterImage;
-  float angle, angleV,percent;
+  float angle, angleV, percent;
   int type, count, range=300, xOffset, yOffset;
   Player owner;
   AfterImage(int _x, int _y, float _vx, float _vy, float _angle, float _angleV, int _minSize, int _maxSize, int _time, int  _type, Player _player) {
@@ -1195,7 +1200,7 @@ class AfterImage extends Particle {
           count-=4*timeBend;
           percent=sin(radians(count));
         } else {
-         percent=sin(radians(count));
+          percent=sin(radians(count));
           count+=4*timeBend;
           angle+=angleV*timeBend;
           x=cos(radians(angle))*range*percent+owner.cx;
@@ -1204,7 +1209,7 @@ class AfterImage extends Particle {
         }
       }
       break;
-                case 2:
+    case 2:
       if (!dead && !freeze) { 
         if (reverse) {
           opacity=int(sin(radians(count+90))*255);
@@ -1214,7 +1219,7 @@ class AfterImage extends Particle {
           count-=4*timeBend;
           percent=sin(radians(count));
         } else {
-         percent=sin(radians(count));
+          percent=sin(radians(count));
           count+=4*timeBend;
           //angle+=angleV*timeBend;
           x=cos(radians(angle))*range*sin(radians(count*3))+owner.cx;

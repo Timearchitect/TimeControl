@@ -50,9 +50,10 @@ void checkPlayerVSPlayerColloision() {
         if (   p1!=p2 &&  !p1.dead && !p2.dead  &&!p1.phase &&!p2.phase) { //  && p1!=p2
           //    if (dist(p1.x, p1.y, p2.x, p2.y)<playerSize) { // old collision
           if (dist(p1.cx, p1.cy, p2.cx, p2.cy)<p1.radius+p2.radius) {
-            if (p1.allyCollision || p1.ally!=p2.ally) {  
+            if (p1.allyCollision || p2.allyCollision|| p1.ally!=p2.ally) {  
               p1.collide(p2);
-              if (!p1.allyCollision)p1.hit(p2.damage);
+              //if (!p1.allyCollision || !p1.allyCollision)p1.hit(p2.damage);
+              if(p1.ally!=p2.ally)p1.hit(p2.damage);
               //float  deltaX = p1.cx -  p2.cx , deltaY =  p1.cy -  p2.cy;
               //p1.pushForce( (p1.radius+p2.radius-dist(p2.cx, p2.cy, p1.cx, p1.cy)), atan2(p1.cy -  p2.cy, p1.cx -  p2.cx) * 180 / PI);
               p1.pushForce( (p1.radius+p2.radius-dist(p2.cx, p2.cy, p1.cx, p1.cy)), degrees(atan2(p1.cy -  p2.cy, p1.cx -  p2.cx)) );
