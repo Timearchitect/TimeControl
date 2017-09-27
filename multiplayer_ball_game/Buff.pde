@@ -194,7 +194,7 @@ class Stun extends Buff {
     if (owner.textParticle!=null) particles.remove( owner.textParticle );
     owner.textParticle = new Text(owner, "STUNNED", 0, -75, 30, 0, 100, enemy.playerColor, 0);
     particles.add( owner.textParticle );
-    if (!freeze || owner.freezeImmunity) count+=.4;
+    if (!freeze || owner.freezeImmunity) count+=.4*timeBend;
     strokeWeight(30);
     stroke(enemy.playerColor);
     noFill();

@@ -3692,8 +3692,8 @@ class SeekGun extends Ability {//-----------------------------------------------
       stroke(owner.playerColor, 50);
       arc(owner.cx, owner.cy, range+minRange, range+minRange, radians(owner.angle-spanAngle*.5), radians(owner.angle+spanAngle*.5));
       strokeWeight(1);
-      ellipse(owner.cx, owner.cy, range*2, range*2);
-      ellipse(owner.cx, owner.cy, minRange*2, minRange*2);
+      //ellipse(owner.cx, owner.cy, range*2, range*2);
+      //ellipse(owner.cx, owner.cy, minRange*2, minRange*2);
     }
   }
   @Override
@@ -3789,24 +3789,25 @@ class SeekGun extends Ability {//-----------------------------------------------
 }
 
 class CutThroat extends SeekGun { 
-  int originX, originY, pcx, pcy, targetTurnIndex, maxRange=1800;
+  float expandRate=0.05;
+  int originX, originY, pcx, pcy, targetTurnIndex, maxRange=1800,DEFAULT_MIN_RANGE=30,rangeDiff=3;
   boolean slaughter;
   CutThroat() {
     super();
     icon=icons[23];
     name=getClassName(this);
-    activeCost=40;
-    channelCost=0.05;
-    regenRate=0.4;
-    damage=8;
+    activeCost=5;
+    channelCost=0.4;
+    regenRate=0.3;
+    damage=9;
     critDamage=10;
     critChance=20;
     unlockCost=5500;
-    range=150;
-    minRange=150;
-    minAngle=40;
+    range=DEFAULT_MIN_RANGE+rangeDiff;
+    minRange=DEFAULT_MIN_RANGE;
+    minAngle=100;
     spanAngle=minAngle;
- MODIFIED_ANGLE_FACTOR=0.01;
+    MODIFIED_ANGLE_FACTOR=0.01;
     assambleTooltip("Hold Release");
   } 
   @Override
@@ -3853,7 +3854,9 @@ class CutThroat extends SeekGun {
         }
       }
       //if (maxSpanAngle>spanAngle)spanAngle*=1.1;
-      if (maxRange>range)range*=1+0.01*timeBend;
+      if (maxRange>range)range*=1+expandRate*timeBend;
+            if (maxRange>minRange)minRange*=1+expandRate*timeBend;
+
       if (debug) {
         //  fill(owner.playerColor);
         //text(int(calcAngleBetween(p, owner)), owner.cx+ cos(radians(owner.angle))*400, owner.cy+sin(radians(owner.angle))*400);
@@ -3877,7 +3880,7 @@ class CutThroat extends SeekGun {
         pcx=int(owner.cx);
         pcy=int(owner.cy);
         // owner.freezeImmunity=true;
-        particles.add( new TempFreeze(100));
+        //particles.add( new TempFreeze(100));
         targetTurnIndex=0;
         //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
 
@@ -3907,7 +3910,9 @@ class CutThroat extends SeekGun {
         owner.stop();
         //targets.clear();
         spanAngle=minAngle;
-        range=minRange;
+         minRange=DEFAULT_MIN_RANGE;
+        range=minRange+rangeDiff;
+        
         regen=true;
         action();
         deChannel();
@@ -3942,9 +3947,10 @@ class CutThroat extends SeekGun {
         owner.cy= owner.y+owner.radius;
         owner.keyAngle=target.keyAngle;
         owner.angle=target.angle;
+        if(owner.armor<4)owner.armor=4;
         particles.add(new   AfterImage(int(owner.cx), int( owner.cy), 0, 0, owner.angle, 0, 0, 300, 150*targetTurnIndex+200, owner.playerColor, owner)); 
-        particles.add(new  Gradient(  1000, int(owner.cx), int(owner.cy), 0, 0, dist(owner.x, owner.y, pcx, pcy)*1, int(owner.radius*2), 8, calcAngleBetween(pcx, pcy, owner.cx, owner.cy), owner.playerColor));
-        projectiles.add( new Slash(owner, int( owner.cx+cos(radians(owner.angle))*65), int(owner.cy+sin(radians(owner.angle))*65), 32, owner.playerColor, 130, owner.angle+100, 24, 140, sin(owner.keyAngle)*5, cos(owner.keyAngle)*5, int((damage+damageMod*0.1)*0.9), false));
+        particles.add(new  Gradient(  1000, int(owner.cx), int(owner.cy), 0, 0, dist(owner.x, owner.y, pcx, pcy)+owner.radius, int(owner.radius*2), 8, calcAngleBetween(pcx, pcy, owner.cx, owner.cy), owner.playerColor));
+        projectiles.add( new Slash(owner, int( owner.cx+cos(radians(owner.angle))*65), int(owner.cy+sin(radians(owner.angle))*65), 32, owner.playerColor, 130, owner.angle+100, 24, 140, sin(owner.keyAngle)*5, cos(owner.keyAngle)*5, int((damage+damageMod*0.1)*(2.5-targets.size()*.07)), false).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod))));
         // particles.add(new TempSlow(300, 0.1, 1.05));
 
         targetTurnIndex++;
@@ -3955,16 +3961,16 @@ class CutThroat extends SeekGun {
         targetTurnIndex=0;
         slaughter=false;
         owner.addBuff(new Stun(owner, 250*targets.size()));
-
+        owner.stop();
         targets.clear();
-        particles.add(new  Gradient(  1000, int(owner.cx), int(owner.cy), 0, 0, dist(originX, originY, pcx, pcy)*1, int(owner.radius*2), 8, calcAngleBetween(originX+owner.radius, originY+owner.radius, owner.cx, owner.cy), owner.playerColor));
-        owner.pushForce(12,calcAngleBetween(originX+owner.radius, originY+owner.radius, owner.cx, owner.cy));
-
+        particles.add(new  Gradient(  1200, int(owner.cx), int(owner.cy), 0, 0, dist(originX, originY, pcx, pcy)+owner.radius, int(owner.radius*2), 7, calcAngleBetween(originX+owner.radius, originY+owner.radius, owner.cx, owner.cy), owner.playerColor));
+        owner.pushForce(14, calcAngleBetween(originX+owner.radius, originY+owner.radius, owner.cx, owner.cy));
+        owner.armor=owner.DEFAULT_ARMOR;
         owner.x=originX;
         owner.y=originY;
         //owner.stop();
       }
-      particles.add( new TempFreeze(200-(10*targets.size()) ));
+      if(targets.size()>1)particles.add( new TempFreeze(180-(6*targets.size()) ));
     } else {
       for (Player t : targets) {
         if (debug) {
