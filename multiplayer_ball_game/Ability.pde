@@ -3,7 +3,7 @@
 abstract class Ability implements Cloneable {
   AbilityType type=AbilityType.ACTIVE;
 
-  String name="???", useType, tooltip, sellText="sell", buyText="BUY";
+  String name, useType, tooltip, sellText="sell", buyText="BUY";
   Player owner;  
   PImage icon;
   long cooldown;
@@ -15,6 +15,8 @@ abstract class Ability implements Cloneable {
   Ability() { 
     icon=icons[8];
     setAllMod();
+   //name= this.getClass().getName();
+   name=getClassName(this);
     //useType="No";
     //name=this.getClass().getSimpleName();
     //name=this.getClass().getCanonicalName();
@@ -39,6 +41,9 @@ abstract class Ability implements Cloneable {
     tooltip=temp.toString();
     useType=_toolTip[0];
     //tooltip=useType+" ability";
+  }
+  void updateTooltips(){
+  
   }
   void buy() {
   }
@@ -108,6 +113,9 @@ abstract class Ability implements Cloneable {
   void passive() {
   }
   void onDeath() {
+  }
+  void onNoEnergy() {
+    particles.add(new Text(owner, "-NO ENERGY-", 0, -owner.h, 14, -1, 400, owner.playerColor, 2));
   }
   void reset() {
     active=false;
@@ -190,6 +198,7 @@ abstract class Ability implements Cloneable {
     for (Buff b : bA) buffList.add(b);
     return this;
   }
+  int getLevel(){return 0;}
 }
 
 class NoActive extends Ability {//---------------------------------------------------    HpRegen   ---------------------------------
@@ -199,7 +208,7 @@ class NoActive extends Ability {//----------------------------------------------
     icon=icons[31];
     sellable=false;
     // deactivatable=false;
-    name=getClassName(this);
+    //name=getClassName(this);
     unlocked=true;
     assambleTooltip("No");
   } 
@@ -221,7 +230,7 @@ class FastForward extends Ability { //------------------------------------------
 
   FastForward() {
     super();
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=8;
     channelCost=0.03;
     deactiveCost=8;
@@ -248,7 +257,7 @@ class FastForward extends Ability { //------------------------------------------
     if (!active) {
       if (energy>0+activeCost) {
         activate();
-      }
+      } else onNoEnergy();
     } else {
       deactivate();
     }
@@ -302,7 +311,7 @@ class Freeze extends Ability { //-----------------------------------------------
   Freeze() {
     super();
     icon=icons[3];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=16;
     energy=50;
     channelCost=0.08;
@@ -342,7 +351,7 @@ class Freeze extends Ability { //-----------------------------------------------
     if (!active) {
       if (energy>0+activeCost) {
         activate();
-      }
+      } else  onNoEnergy();
     } else {
       deactivate();
     }
@@ -401,7 +410,7 @@ class Reverse extends Ability { //----------------------------------------------
 
   Reverse() {
     super();
-    name=getClassName(this);
+    //name=getClassName(this);
     energy=0;
     activeCost=16;
     channelCost=0.04;
@@ -425,7 +434,7 @@ class Reverse extends Ability { //----------------------------------------------
     if (!active) {
       if (energy>0+activeCost) {
         activate();
-      }
+      } else  onNoEnergy();
     } else {
       deactivate();
     }
@@ -468,7 +477,7 @@ class Slow extends Ability { //-------------------------------------------------
 
   Slow() {
     super();
-    name=this.toString();
+    //name=this.toString();
     activeCost=4;
     deactiveCost=4;
     active=false;
@@ -493,7 +502,7 @@ class Slow extends Ability { //-------------------------------------------------
       if (energy>0+activeCost) {
         activate();
         action();
-      }
+      } else  onNoEnergy();
     } else {
       deactivate();
       action();
@@ -535,7 +544,7 @@ class SaveState extends Ability { //--------------------------------------------
   ArrayList<Ball> balls= new  ArrayList<Ball>();
   SaveState() {
     super();
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=60;
     deactiveCost=40;
     active=false;
@@ -573,7 +582,7 @@ class SaveState extends Ability { //--------------------------------------------
       if (energy>0+activeCost && !owner.dead) {
         activate();
         action();
-      }
+      } else  onNoEnergy();
     } else {
       deactivate();
     }
@@ -650,7 +659,7 @@ class ThrowDagger extends Ability {//-------------------------------------------
   ThrowDagger() {
     super();
     icon=icons[0];
-    name=getClassName(this);
+   // name=getClassName(this);
     activeCost=8;
     cooldownTimer=80;
     regenRate=0.16;
@@ -719,8 +728,7 @@ class Torpedo extends Ability implements AmmoBased {//--------------------------
   Torpedo() {
     super();
     icon=icons[57];
-
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=maxEnergy;
     maxAmmo=2;
     cooldownTimer=400;
@@ -758,7 +766,8 @@ class Torpedo extends Ability implements AmmoBased {//--------------------------
         reload();
         activate();
         regen=true;
-      }
+      } 
+      onNoEnergy();
     }
   }
   @Override
@@ -800,13 +809,13 @@ class Torpedo extends Ability implements AmmoBased {//--------------------------
     cooldownTimer=int(400-attackSpeedMod*3); //100
   }
 }
-class Pistol extends Ability {//---------------------------------------------------    Pistol   ---------------------------------
+class Pistol extends Ability implements AmmoBased {//---------------------------------------------------    Pistol   ---------------------------------
   final int damage=16, angleRecoil=45;
   int r;
   float accuracy=1, MODIFIED_ANGLE_FACTOR=0.2;
   Pistol() {
     super();
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=maxEnergy;
     cooldownTimer=200;
     maxAmmo=12;
@@ -846,11 +855,15 @@ class Pistol extends Ability {//------------------------------------------------
       action();
       enableCooldown();
     } else {
-      if (energy>=0+activeCost  && ammo<=0) {
-        reload();
-
-        activate();
-        regen=true;
+      if (ammo<=0) {
+        if (energy>=0+activeCost) {
+          reload();
+          activate();
+          regen=true;
+        } else { 
+          r=70;
+          onNoEnergy();
+        }
       } else {
         r=70;
       }
@@ -871,25 +884,26 @@ class Pistol extends Ability {//------------------------------------------------
     owner.halt(0.5);
     owner.ax*=.5;
     owner.ay*=.5;
-
-
     particles.add(new ShockWave(int(owner.cx), int(owner.cy), 20, 24, 200, owner.playerColor));
     particles.add( new  Particle(int(owner.cx), int(owner.cy), 0, 0, int(owner.w), 800, color(255, 0, 255)));
     ammo=maxAmmo;
+    particles.add(new Text(owner, "-Reload-", 0, -owner.h, 14, -2, 300, owner.playerColor, 2));
+  }
+  void reloadCancel() {
   }
   void reset() {
     super.reset();
     cooldownTimer=int(170-attackSpeedMod*1.7); //100
   }
 }
-class Revolver extends Ability {//---------------------------------------------------    Revolver   ---------------------------------
+class Revolver extends Ability implements AmmoBased {//---------------------------------------------------    Revolver   ---------------------------------
   final int damage=45, angleRecoil=180;
   int r;
   float accuracy=1, MODIFIED_ANGLE_FACTOR=0.18;
   Revolver() {
     super();
     icon=icons[9];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=maxEnergy;
     maxAmmo=6;
     ammo=0;
@@ -925,10 +939,15 @@ class Revolver extends Ability {//----------------------------------------------
       action();
       enableCooldown();
     } else {
-      if (energy>=0+activeCost  && ammo<=0) {
-        reload();
-        activate();
-        regen=true;
+      if ( ammo<=0) {
+        if (energy>=0+activeCost) {
+          reload();
+          activate();
+          regen=true;
+        } else { 
+          r=70;
+          onNoEnergy();
+        }
       } else {
         r=70;
       }
@@ -958,7 +977,8 @@ class Revolver extends Ability {//----------------------------------------------
     particles.add( new  Particle(int(owner.cx), int(owner.cy), 0, 0, int(owner.w), 800, color(255, 0, 255)));
     ammo=maxAmmo;
   }
-
+  void reloadCancel() {
+  }
   void reset() {
     super.reset();
     regen=true;
@@ -979,7 +999,7 @@ class ForceShoot extends Ability {//--------------------------------------------
   ForceShoot() {
     super();
     icon=icons[1];
-    name=getClassName(this);
+    //name=getClassName(this);
     regenRate=0.2;
     activeCost=8;
     channelCost=0.1;
@@ -1017,8 +1037,9 @@ class ForceShoot extends Ability {//--------------------------------------------
       owner.ANGLE_FACTOR=MODIFIED_ANGLE_FACTOR;
       if (MAX_FORCE>forceAmount) { 
         channel();
-        if (!active || energy<0 ) {
+        if (!active || energy<=0 ) {
           release();
+          onNoEnergy();
         }
         maxed=false;
         restForce = MAX_FORCE-forceAmount;
@@ -1083,7 +1104,7 @@ class Blink extends Ability {//-------------------------------------------------
   Blink() {
     super();
     icon=icons[7];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=10;
     energy=40;
     unlockCost=2000;
@@ -1146,7 +1167,7 @@ class Multiply extends Ability {//----------------------------------------------
   Multiply() {
     super();
     icon=icons[33];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=70;
     unlockCost=3500;
     assambleTooltip("Tap");
@@ -1237,7 +1258,7 @@ class Multiply extends Ability {//----------------------------------------------
  int damage=50;
  CloneMultiply() {
  super();
- name=getClassName(this);
+ //name=getClassName(this);
  }
  @Override
  void action() {
@@ -1283,7 +1304,7 @@ class Stealth extends Ability {//-----------------------------------------------
     super();
     icon=icons[4];
     active=false;
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=25;
     energy=25;
     unlockCost=2500;
@@ -1363,7 +1384,7 @@ class Combo extends Ability {//-------------------------------------------------
 
     icon=icons[15];
     active=false;
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=stepActivateCost[1];
     energy=110;
     regenRate=0.16;
@@ -1500,7 +1521,7 @@ class Laser extends Ability {//-------------------------------------------------
   Laser() {
     super();
     icon=icons[2];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=24;
     unlockCost=4500;
     assambleTooltip("Buttonmash");
@@ -1580,7 +1601,7 @@ class DoubleTap extends Laser {//-----------------------------------------------
     delay=170;
     damage=30;
     icon=icons[2];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=15;
     regenRate=0.2;
     unlockCost=4500;
@@ -1665,7 +1686,7 @@ class Shotgun extends Ability {//-----------------------------------------------
   Shotgun() {
     super();
     icon=icons[10];
-    name=getClassName(this);
+    //name=getClassName(this);
     inAccuracy=35;
     activeCost=30;
     critDamage=2;
@@ -1742,7 +1763,7 @@ class Sluggun extends Ability {//-----------------------------------------------
   Sluggun() {
     super();
     icon=icons[17];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=30;
     regenRate=0.25;
     unlockCost=3500;
@@ -1780,9 +1801,9 @@ class Sluggun extends Ability {//-----------------------------------------------
       println(InAccurateAngle);
       //particles.add(new ShockWave(int(owner.cx), int(owner.cy), 200*chargelevel, 16, 500, owner.playerColor));
       //particles.add(new Flash(50, 6, WHITE)); 
-      projectiles.add( new Bomb(owner, int( owner.cx), int(owner.cy), 40, owner.playerColor, 1, owner.angle, cos(radians(owner.angle))*20, sin(radians(owner.angle))*20, damage, false));
-      projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 30, 100, owner.playerColor, 200, owner.angle, damage));
-      projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 10, 200, owner.playerColor, 200, owner.angle, damage));
+      projectiles.add( new Bomb(owner, int( owner.cx), int(owner.cy), 40, owner.playerColor, 1, owner.angle, cos(radians(owner.angle))*20, sin(radians(owner.angle))*20, int(damage*.5), false));
+      projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 30, 100, owner.playerColor, 200, owner.angle, damage*.2));
+      projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 10, 200, owner.playerColor, 200, owner.angle, damage*.2));
       projectiles.add( new Slug(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 70, owner.playerColor, 1500, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*36, sin(radians(owner.angle+InAccurateAngle))*36, int(damage+damageMod)));
       owner.pushForce(-40, owner.angle);
       charging=false;
@@ -1813,7 +1834,7 @@ class TimeBomb extends Ability {//----------------------------------------------
   TimeBomb() {
     super();
     icon=icons[6];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=12;
     regenRate=0.32;
     energy=maxEnergy*0.5;
@@ -1867,7 +1888,7 @@ class GranadeLauncher extends Ability {//---------------------------------------
   GranadeLauncher() {
     super();
     icon=icons[6];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=22;
     regenRate=0.32;
     cooldownTimer=300;
@@ -1931,7 +1952,7 @@ class ElemetalLauncher extends Ability {//--------------------------------------
     super();
     icon=icons[11];
     cooldownTimer=800;
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=30;
     regenRate=0.2;
     energy=130;
@@ -2082,7 +2103,7 @@ class Bazooka extends Ability {//-----------------------------------------------
     super();
     icon=icons[11];
     cooldownTimer=1000;
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=22;
     regenRate=0.13;
     energy=130;
@@ -2206,7 +2227,7 @@ class Stars extends Ability {//-------------------------------------------------
     super();
     icon=icons[22];
     cooldownTimer=1000;
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=32;
     regenRate=0.17;
     energy=130;
@@ -2269,7 +2290,7 @@ class RapidFire extends Ability {//---------------------------------------------
   RapidFire() {
     super();
     icon=icons[32];
-    name=getClassName(this);
+    //name=getClassName(this);
     deactiveCost=6;
     regenRate=0.15;
     critDamage=5;
@@ -2302,6 +2323,7 @@ class RapidFire extends Ability {//---------------------------------------------
       channel();
       if (!active || energy<0 ) {
         release();
+        onNoEnergy();
       }
       PastTime=stampTime;
     } else if ((!freeze || owner.freezeImmunity) &&  active && !owner.dead &&(stampTime+freezeTime-PastTime) >= Interval) {
@@ -2368,7 +2390,7 @@ class SerpentFire extends Ability {//-------------------------------------------
   SerpentFire() {
     super();
     icon=icons[28];
-    name=getClassName(this);
+    //name=getClassName(this);
     deactiveCost=0;
     channelCost=5;
     damage=3;
@@ -2420,6 +2442,7 @@ class SerpentFire extends Ability {//-------------------------------------------
       interval+=30;
       if (!active || energy<0 ) {
         release();
+        onNoEnergy();
       }
       PastTime=stampTime;
     } else if ((!freeze || owner.freezeImmunity) &&  active && !owner.dead &&(stampTime+freezeTime-PastTime) >= interval) {
@@ -2431,6 +2454,7 @@ class SerpentFire extends Ability {//-------------------------------------------
       channel();
       if (!active || energy<0 ) {
         release();
+        onNoEnergy();
       }
       PastTime=freezeTime+stampTime;
     }
@@ -2483,7 +2507,7 @@ class MachineGun extends RapidFire {//------------------------------------------
   MachineGun() {
     super();
     icon=icons[5];
-    name=getClassName(this);
+    //name=getClassName(this);
     deactiveCost=5;
     channelCost=0.2;
     accuracy = 0;
@@ -2509,6 +2533,7 @@ class MachineGun extends RapidFire {//------------------------------------------
       channel();
       if (!active || energy<0 ) {
         release();
+        onNoEnergy();
         //if(sutainCount>10)sutainCount-=10;
       }
       PastTime=stampTime;
@@ -2532,6 +2557,7 @@ class MachineGun extends RapidFire {//------------------------------------------
       channel();
       if (!active || energy<0 ) {
         release();
+        onNoEnergy();
         //    if(sutainCount>10)sutainCount-=10;
       }
       PastTime=freezeTime+stampTime;
@@ -2546,7 +2572,7 @@ class MachineGun extends RapidFire {//------------------------------------------
     if (cooldown<stampTime) {
       action();
       // if (!active)press(); // cancel
-      if (owner.hit)        if (sutainCount>10)sutainCount-=10;
+      if (owner.hit && sutainCount>10)sutainCount-=10;
       //release(); // cancel
 
       sutainCount+=0.4*timeBend;
@@ -2614,7 +2640,7 @@ class Sniper extends RapidFire {//----------------------------------------------
   Sniper() {
     super();
     icon=icons[13];
-    name=getClassName(this);
+    //name=getClassName(this);
     deactiveCost=6;
     activeCost=4;
     channelCost=0.1;
@@ -2639,6 +2665,7 @@ class Sniper extends RapidFire {//----------------------------------------------
         channel();
         if (!active || energy<0 ) {
           release();
+          onNoEnergy();
         }
         PastTime=stampTime;
         //if (inAccurateAngle>0)inAccurateAngle *=0.96;
@@ -2649,6 +2676,7 @@ class Sniper extends RapidFire {//----------------------------------------------
         channel();
         if (!active || energy<0 ) {
           release();
+          onNoEnergy();
         }
         PastTime=freezeTime+stampTime;
         if (inAccurateAngle>0)inAccurateAngle *=1-(0.04*timeBend);
@@ -2753,7 +2781,7 @@ class HanzoMain extends Sniper {//----------------------------------------------
     super();
 
     icon=icons[41];
-    name=getClassName(this);
+    //name=getClassName(this);
     deactiveCost=6;
     activeCost=4;
     channelCost=0.2;
@@ -2786,6 +2814,7 @@ class HanzoMain extends Sniper {//----------------------------------------------
         // channeling=true;
         if (!active || energy<0 ) {
           release();
+          onNoEnergy();
         }
         PastTime=stampTime;
         //if (inAccurateAngle>0)inAccurateAngle *=0.96;
@@ -2797,6 +2826,7 @@ class HanzoMain extends Sniper {//----------------------------------------------
         //channeling=true;
         if (!active || energy<0 ) {
           release();
+          onNoEnergy();
         }
         PastTime=freezeTime+stampTime;
         if (inAccurateAngle>0)inAccurateAngle *=1-(aimRate*timeBend);
@@ -2887,7 +2917,7 @@ class Battery extends Ability {//-----------------------------------------------
 
   Battery() {
     super();
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=24;
     critDamage=7;
     critChance=50;
@@ -2978,7 +3008,7 @@ class RapidBattery extends Battery {//------------------------------------------
 
   RapidBattery() {
     super();
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=25;
     regenRate=0.3;
     critDamage=5;
@@ -3043,7 +3073,7 @@ class AssaultBattery extends Ability {//----------------------------------------
   AssaultBattery() {
     super();
     icon=icons[20];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=45;
     regenRate=0.19;
     unlockCost=4750;
@@ -3153,7 +3183,7 @@ class SemiAuto extends Battery implements AmmoBased {//-------------------------
   SemiAuto() {
     super();
     icon=icons[14];
-    name=getClassName(this);
+    //name=getClassName(this);
     maxInterval=4; 
     damage=10;  
     critDamage=5;
@@ -3217,12 +3247,17 @@ class SemiAuto extends Battery implements AmmoBased {//-------------------------
       particles.add( new  Particle(int(owner.cx), int(owner.cy), 0, 0, int(owner.w), 800, color(255, 0, 255)));
     } else {
       reloading=false;
-      if (ammo>0&& (!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && !active&& (!freeze || owner.freezeImmunity)) {
-        //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
-        stamps.add( new AbilityStamp(this));
-        regen=true;
-        activate();
-        // action();
+      if (ammo>0&& (!reverse || owner.reverseImmunity)&& !owner.dead && !active&& (!freeze || owner.freezeImmunity)) {
+        if (energy>=0+activeCost) {
+          reload();
+          activate();
+          regen=true;
+        } else { 
+          deactivate();
+          count=0;
+          owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
+          onNoEnergy();
+        }
       } else {
         deactivate();
         count=0;
@@ -3283,7 +3318,7 @@ class MarbleLauncher extends Ability {//----------------------------------------
     super();
     icon=icons[29];
     cooldownTimer=1200;
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=35;
     critDamage=5;
     critChance=10;
@@ -3388,7 +3423,7 @@ class MissleLauncher extends Ability {//----------------------------------------
     super();
     icon=icons[11];
     cooldownTimer=2200;
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=35;
     regenRate=0.12;
     critDamage=5;
@@ -3503,7 +3538,7 @@ class AutoGun extends Ability {//-----------------------------------------------
   AutoGun() {
     super();
     icon=icons[30];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=12;
     channelCost=0.1;
     regenRate=0.18;
@@ -3529,6 +3564,7 @@ class AutoGun extends Ability {//-----------------------------------------------
       owner.MAX_ACCEL=MODIFIED_MAX_ACCEL;
       if (!active || energy<0 ) {
         release();
+        onNoEnergy();
       }
       if (count>12) {
         count=0;
@@ -3605,7 +3641,7 @@ class SeekGun extends Ability {//-----------------------------------------------
   SeekGun() {
     super();
     icon=icons[23];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=40;
     channelCost=0.05;
     regenRate=0.4;
@@ -3634,6 +3670,7 @@ class SeekGun extends Ability {//-----------------------------------------------
       owner.MAX_ACCEL=MODIFIED_MAX_ACCEL;
       if (!active || energy<0 ) {
         release();
+        onNoEnergy();
       }
 
       for (Player p : players) {
@@ -3790,12 +3827,12 @@ class SeekGun extends Ability {//-----------------------------------------------
 
 class CutThroat extends SeekGun { 
   float expandRate=0.05;
-  int originX, originY, pcx, pcy, targetTurnIndex, maxRange=1800,DEFAULT_MIN_RANGE=30,rangeDiff=3;
+  int originX, originY, pcx, pcy, targetTurnIndex, maxRange=1800, DEFAULT_MIN_RANGE=40, rangeDiff=10;
   boolean slaughter;
   CutThroat() {
     super();
     icon=icons[23];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=5;
     channelCost=0.4;
     regenRate=0.3;
@@ -3817,6 +3854,7 @@ class CutThroat extends SeekGun {
       owner.MAX_ACCEL=MODIFIED_MAX_ACCEL;
       if (!active || energy<0 ) {
         release();
+        onNoEnergy();
       }
       // owner.angle%=360;
       for (Player p : players) {
@@ -3854,8 +3892,10 @@ class CutThroat extends SeekGun {
         }
       }
       //if (maxSpanAngle>spanAngle)spanAngle*=1.1;
-      if (maxRange>range)range*=1+expandRate*timeBend;
-            if (maxRange>minRange)minRange*=1+expandRate*timeBend;
+
+      if (maxRange>minRange)minRange*=1+expandRate*timeBend;
+      range=minRange+rangeDiff;
+      //if (maxRange>range)range*=1+expandRate*timeBend;
 
       if (debug) {
         //  fill(owner.playerColor);
@@ -3910,9 +3950,9 @@ class CutThroat extends SeekGun {
         owner.stop();
         //targets.clear();
         spanAngle=minAngle;
-         minRange=DEFAULT_MIN_RANGE;
+        minRange=DEFAULT_MIN_RANGE;
         range=minRange+rangeDiff;
-        
+
         regen=true;
         action();
         deChannel();
@@ -3947,7 +3987,7 @@ class CutThroat extends SeekGun {
         owner.cy= owner.y+owner.radius;
         owner.keyAngle=target.keyAngle;
         owner.angle=target.angle;
-        if(owner.armor<4)owner.armor=4;
+        if (owner.armor<4)owner.armor=4;
         particles.add(new   AfterImage(int(owner.cx), int( owner.cy), 0, 0, owner.angle, 0, 0, 300, 150*targetTurnIndex+200, owner.playerColor, owner)); 
         particles.add(new  Gradient(  1000, int(owner.cx), int(owner.cy), 0, 0, dist(owner.x, owner.y, pcx, pcy)+owner.radius, int(owner.radius*2), 8, calcAngleBetween(pcx, pcy, owner.cx, owner.cy), owner.playerColor));
         projectiles.add( new Slash(owner, int( owner.cx+cos(radians(owner.angle))*65), int(owner.cy+sin(radians(owner.angle))*65), 32, owner.playerColor, 130, owner.angle+100, 24, 140, sin(owner.keyAngle)*5, cos(owner.keyAngle)*5, int((damage+damageMod*0.1)*(2.5-targets.size()*.07)), false).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod))));
@@ -3960,17 +4000,20 @@ class CutThroat extends SeekGun {
         // println(targetTurnIndex, " ended target index");
         targetTurnIndex=0;
         slaughter=false;
-        owner.addBuff(new Stun(owner, 250*targets.size()));
         owner.stop();
+
+        if (targets.size()>0) {
+          owner.addBuff(new Stun(owner, 250*targets.size()));
+          particles.add(new  Gradient(  1200, int(owner.cx), int(owner.cy), 0, 0, dist(originX, originY, pcx, pcy)+owner.radius, int(owner.radius*2), 7, calcAngleBetween(originX+owner.radius, originY+owner.radius, owner.cx, owner.cy), owner.playerColor));
+          owner.pushForce(14, calcAngleBetween(originX+owner.radius, originY+owner.radius, owner.cx, owner.cy));
+        }
         targets.clear();
-        particles.add(new  Gradient(  1200, int(owner.cx), int(owner.cy), 0, 0, dist(originX, originY, pcx, pcy)+owner.radius, int(owner.radius*2), 7, calcAngleBetween(originX+owner.radius, originY+owner.radius, owner.cx, owner.cy), owner.playerColor));
-        owner.pushForce(14, calcAngleBetween(originX+owner.radius, originY+owner.radius, owner.cx, owner.cy));
         owner.armor=owner.DEFAULT_ARMOR;
         owner.x=originX;
         owner.y=originY;
         //owner.stop();
       }
-      if(targets.size()>1)particles.add( new TempFreeze(180-(6*targets.size()) ));
+      if (targets.size()>1)particles.add( new TempFreeze(180-(6*targets.size()) ));
     } else {
       for (Player t : targets) {
         if (debug) {
@@ -3995,7 +4038,7 @@ class HitScanGun extends SeekGun {
   HitScanGun() {
     super();
     icon=icons[43];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=2;
     channelCost=0.05;
     regenRate=0.5;
@@ -4024,7 +4067,10 @@ class HitScanGun extends SeekGun {
       owner.ANGLE_FACTOR=MODIFIED_ANGLE_FACTOR;
 
       stamps.add( new AbilityStamp(this));
-
+      if (!active || energy<0 ) {
+        release();
+        onNoEnergy();
+      }
       for (Player p : players) {
         if (p.targetable) {
           if (!p.dead && p.ally!=owner.ally && (dist(owner.cx, owner.cy, p.cx, p.cy)<range+p.radius && dist(owner.cx, owner.cy, p.cx, p.cy)>minRange-p.radius
@@ -4082,6 +4128,7 @@ class HitScanGun extends SeekGun {
 
     void release() {
     regen=true;
+    targets.clear();
   }
 
   @Override
@@ -4105,7 +4152,7 @@ class ThrowBoomerang extends Ability {//----------------------------------------
   ThrowBoomerang() {
     super();
     icon=icons[18];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=15;
     channelCost=0.1;
     critChance=5;
@@ -4136,6 +4183,7 @@ class ThrowBoomerang extends Ability {//----------------------------------------
         channel();
         if (!active || energy<0 ) {
           release();
+          onNoEnergy();
         }
         restForce = MAX_FORCE-forceAmount;
         forceAmount+=ChargeRate*timeBend; 
@@ -4243,7 +4291,7 @@ class PhotonicWall extends Ability {//------------------------------------------
   PhotonicWall() {
     super();
     icon=icons[19];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=5;
     regenRate=0.3;
     critDamage=15;
@@ -4349,7 +4397,7 @@ class PhotonicPursuit extends Ability {//---------------------------------------
   PhotonicPursuit() {
     super();
     icon=icons[59];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=15;
     energy=85;
     critDamage=8;
@@ -4422,7 +4470,7 @@ class DeployThunder extends TimeBomb {//----------------------------------------
     damage=120;
     shootSpeed=0;
     regenRate=0.45;
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=40;
     unlockCost=2000;
     assambleTooltip("Tap");
@@ -4471,7 +4519,7 @@ class DeployShield extends Ability {//------------------------------------------
   DeployShield() {
     super();
     icon=icons[35];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=35;
     cooldownTimer=2750;
     unlockCost=2000;
@@ -4580,7 +4628,7 @@ class DeployElectron extends Ability {//----------------------------------------
   DeployElectron() {
     super();
     icon=icons[25];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=12;
     unlockCost=1500;
     assambleTooltip("Tap");
@@ -4644,7 +4692,7 @@ class Gravity extends Ability {//-----------------------------------------------
   Gravity() {
     super();
     icon=icons[24];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=25;
     regenRate=.15;
     cooldownTimer=1000;
@@ -4707,7 +4755,7 @@ class Ram extends Ability {//---------------------------------------------------
   Ram() {
     super();
     icon=icons[26];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=10;
     channelCost=0.23;
     energy=50;
@@ -4753,6 +4801,7 @@ class Ram extends Ability {//---------------------------------------------------
         release();
         deactivate();
         active=false;
+        onNoEnergy();
       }
       channel();
       owner.pushForce(sustainSpeed, owner.keyAngle);
@@ -4797,7 +4846,7 @@ class DeployTurret extends Ability {//------------------------------------------
     super();
     icon=icons[37];
     cooldownTimer=2000;
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=25;
     energy=20;
     regenRate=0.15;
@@ -4898,7 +4947,7 @@ class DeployDrone extends Ability {//-------------------------------------------
     //icon=icons[39];
     icon=icons[44];
     cooldownTimer=2000;
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=50;
     energy=25;
     regenRate=0.18;
@@ -4951,7 +5000,7 @@ class DeployBodyguard extends DeployDrone {//-----------------------------------
     super();
     icon=icons[45];
     cooldownTimer=2000;
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=80;
     energy=40;
     speed=10;
@@ -5009,7 +5058,7 @@ class CloudStrike extends Ability {//-------------------------------------------
   CloudStrike() {
     super();
     icon=icons[16];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=22;
     cooldownTimer=1400;
     channelCost=0;
@@ -5050,6 +5099,7 @@ class CloudStrike extends Ability {//-------------------------------------------
         channel();
         if (!active || energy<0 ) {
           release();
+          onNoEnergy();
         }
 
         restForce = MAX_FORCE-forceAmount;
@@ -5107,7 +5157,7 @@ class Detonator extends Ability {//---------------------------------------------
   boolean detonated;
   Detonator() {
     super();
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=35;
     critChance=20;
     critDamage=15;
@@ -5152,7 +5202,7 @@ class TeslaShock extends TimeBomb {//-------------------------------------------
     damage=1;
     shootSpeed=0;
     regenRate=0.4;
-    name=getClassName(this);
+    //name=getClassName(this);
     energy=20;
     activeCost=10;
     unlockCost=2250;
@@ -5205,7 +5255,7 @@ class RandoGun extends Ability {//----------------------------------------------
   final String description[]={"dagger", "tesla", "force", "shotgun", "revolver", "Homing missile", "electron", "laser", "bomb", "RC", "Boomerang", "Sniper", "thunder", "cluster", "mine", "missles", "rocket", "torpedo", "slice"};
   RandoGun() {
     super();
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=18;
     regenRate=0.21;
     energy=maxEnergy*0.5;
@@ -5347,7 +5397,7 @@ class FlameThrower extends Ability {//------------------------------------------
     super();
     icon=icons[55];
 
-    name=getClassName(this);
+    //name=getClassName(this);
     deactiveCost=0;
     activeCost=0;
     channelCost=0.23;
@@ -5435,7 +5485,7 @@ class SummonEvil extends Ability {//--------------------------------------------
   SummonEvil() {
     super();
     regenRate=0.22;
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=60;
     energy=80;
     unlockCost=6500;
@@ -5500,7 +5550,7 @@ class SummonIlluminati extends Ability {//--------------------------------------
     super();
     icon=icons[34];
     regenRate=0.22;
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=60;
     energy=100;
     unlockCost=10000;
@@ -5568,7 +5618,7 @@ class SneakBall extends Ability {//---------------------------------------------
   SneakBall() {
     super();
     cooldownTimer=100;
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=30;
     energy=25;
     critDamage=10;
@@ -5644,7 +5694,7 @@ class SneakBall extends Ability {//---------------------------------------------
 
 class TripleShot extends Ability {//---------------------------------------------------    TripleShot  ---------------------------------
 
-  int shootSpeed=65, minSpead=5, maxSpread=60;
+  int shootSpeed=62, minSpead=5, maxSpread=60;
   int damage=20, duration=600;
   float MODIFIED_ANGLE_FACTOR = 0.04, shrinkRate=0.5, spread=16, spreadAngle=20;   
   long timer;
@@ -5653,7 +5703,7 @@ class TripleShot extends Ability {//--------------------------------------------
     inAccuracy=50;
     icon=icons[21];
     cooldownTimer=100;
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=10;
     energy=45;
     critDamage=10;
@@ -5716,7 +5766,7 @@ class PoisonDart extends Ability {//--------------------------------------------
   PoisonDart() {
     super();
     icon=icons[42];
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=40;
     cooldownTimer=250;
     regenRate=0.6;
@@ -5769,7 +5819,7 @@ class Ravine extends Ability {//------------------------------------------------
   Ravine() {
     super();
     icon=icons[10];
-    name=getClassName(this);
+    //name=getClassName(this);
     inAccuracy=35;
     activeCost=30;
     critDamage=2;
@@ -5857,7 +5907,7 @@ class Artilery extends Ability {//----------------------------------------------
     super();
     icon=icons[36];
     cooldownTimer=100;
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=5;
     energy=45;
     regenRate=0.5;
@@ -5905,6 +5955,7 @@ class Artilery extends Ability {//----------------------------------------------
       owner.stationary=transformed;
       regen=true;
       deactivate();
+      onNoEnergy();
     } else regen=false;
   }
   void press() {
@@ -5975,7 +6026,7 @@ class LaserSword extends Ability {//--------------------------------------------
     super();
     icon=icons[36];
     cooldownTimer=100;
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=20;
     energy=65;
     regenRate=0.9;
@@ -6004,6 +6055,7 @@ class LaserSword extends Ability {//--------------------------------------------
       l.angleV=-(owner.angle-owner.keyAngle);
       l=null;
       deactivate();
+      onNoEnergy();
     } else {
       l.x = owner.cx+cos(radians(owner.angle))*100;
       l.y = owner.cy+sin(radians(owner.angle))*100;
@@ -6058,7 +6110,7 @@ class StunGun extends Ability {//-----------------------------------------------
   float accuracy=1, MODIFIED_ANGLE_FACTOR=0.2;
   StunGun() {
     super();
-    name=getClassName(this);
+    //name=getClassName(this);
     activeCost=50;
     cooldownTimer=180;
     regenRate=0.8;
@@ -6123,7 +6175,7 @@ class Chivalry extends Ability {
   Chivalry() {
     super();
     icon=icons[58];
-    name=getClassName(this);
+    //name=getClassName(this);
     regenRate=0.35;
     activeCost=15;
     cooldownTimer=1000;
@@ -6171,6 +6223,7 @@ class Chivalry extends Ability {
       channel();
       if (!active || energy<0 ) {
         release();
+        onNoEnergy();
       }
       if (shields.size()<3) {
         if (!freeze ) {
@@ -6257,7 +6310,7 @@ class ChargeSlash extends Ability {//-------------------------------------------
   ChargeSlash() {
     super();
     icon=icons[40];
-    name=getClassName(this);
+    //name=getClassName(this);
     regenRate=0.35;
     activeCost=20;
     channelCost=0.1;
@@ -6298,6 +6351,7 @@ class ChargeSlash extends Ability {//-------------------------------------------
         channel();
         if (!active || energy<0 ) {
           release();
+          onNoEnergy();
         }
         maxed=false;
         restForce = MAX_FORCE-forceAmount;
@@ -6365,123 +6419,37 @@ class SkillPoint extends Ability {//--------------------------------------------
    float forceAmount=0, MODIFIED_MAX_ACCEL=0.003, MODIFIED_ANGLE_FACTOR=0.1;
    float ChargeRate=0.85, restForce;
    boolean maxed;*/
-  public int level;
+  public int level,minLevel=1,maxLevel=100;
 
   SkillPoint() {
     super();
     icon=icons[56];
-    name=getClassName(this);
+    //name=getClassName(this);
     regenRate=0.35;
     activeCost=20;
     channelCost=0.1;
     unlockCost=100*(level+1);
     buyText="Upgrade";
     sellText="downgrade";
-    tooltip="Increase skillpoints to "+(level+1)+"\n for all players. \n(assign points in the settings menu)";
+    tooltip="Increase skillpoints from "+(level)+" to "+(level+1)+"\n for all players. \n(assign points in the settings menu)";
   } 
+  void updateTooltips(){
+      tooltip="Increase skillpoints from "+(level)+" to "+(level+1)+"\n for all players. \n(assign points in the settings menu)";
+  }
   SkillPoint(int _level) {
     this();
     level=_level;
   }
   void buy() {
-    level++;
+    if(maxLevel>level && unlocked)level++;
   }
   void sell() {
     level--;
+    if(minLevel>level)unlocked=false;
   }
-  /*@Override
-   void action() {
-   if (forceAmount>=MAX_FORCE) { 
-   particles.add(new Flash(100, 6, WHITE)); 
-   particles.add(new Gradient(1000, int(owner.cx), int(owner.cy), 0, 0, 4, 100, owner.angle, owner.playerColor));
-   shakeTimer+=10;
-   }
-   particles.add(new  Gradient(  1000, int(owner.cx +cos(radians(owner.angle))*owner.radius), int(owner.cy+sin(radians(owner.angle))*owner.radius), 0, 0, int(forceAmount*11), int(owner.radius*2), 8, owner.angle, owner.playerColor));
-   projectiles.add(new Slash(owner, int(owner.cx), int(owner.cy), 150, WHITE, int(3.3*forceAmount), owner.angle, 50, 1.5*forceAmount+50, cos(radians(owner.angle))*forceAmount*.5, sin(radians(owner.angle))*forceAmount*.3, int(forceAmount*damageFactor)+int(damageMod*.2), true));
-   projectiles.add(new Slash(owner, int(owner.cx), int(owner.cy), 150, WHITE, 280, owner.angle, -20, 70, cos(radians(owner.angle))*forceAmount, sin(radians(owner.angle))*forceAmount, int(forceAmount*damageFactor*2)+int(damageMod*2), false));
-   owner.x+=cos(radians(owner.angle))*forceAmount*11;
-   owner.y+=sin(radians(owner.angle))*forceAmount*11;
-   }
-   @Override
-   void press() {
-   if (cooldown<stampTime&&(!reverse || owner.reverseImmunity)&&(!freeze || owner.freezeImmunity) && energy>(0+activeCost)&& !hold && !active && !channeling && !owner.dead) {
-   projectiles.add(new Slice(owner, int(owner.cx-cos(radians(owner.angle))*250), int(owner.cy-sin(radians(owner.angle))*250), 350, owner.playerColor, 180, owner.angle+145, 6, 130, cos(radians(owner.angle))*forceAmount*.5, sin(radians(owner.angle))*forceAmount*.5, int(30*damageFactor+damageMod*.1), false));
-   activate();
-   forceAmount=5;
-   //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
-   stamps.add( new AbilityStamp(this));
-   regen=false;
-   }
-   }
-   @Override
-   void hold() {
-   if ((!reverse || owner.reverseImmunity)&&(!freeze || owner.freezeImmunity) &&  active && !owner.dead) {
-   owner.MAX_ACCEL=MODIFIED_MAX_ACCEL;
-   owner.ANGLE_FACTOR=MODIFIED_ANGLE_FACTOR;
-   if (MAX_FORCE>forceAmount) { 
-   channel();
-   if (!active || energy<0 ) {
-   release();
-   }
-   maxed=false;
-   restForce = MAX_FORCE-forceAmount;
-   forceAmount+=ChargeRate*timeBend; 
-   if (!owner.stealth) particles.add(new RParticles(int(owner.cx+cos(radians(owner.angle))), int(owner.cy+sin(radians(owner.angle))), random(-restForce*0.5, restForce*0.5), random(-restForce*0.5, restForce*0.5), int(random(30)+10), 200, owner.playerColor));
-   //particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle))), int(owner.cy+sin(radians(owner.angle))), int(forceAmount*.5), 16, int(forceAmount*.5), owner.playerColor));
-   // particles.add( new  Particle(int(owner.cx+cos(radians(owner.angle))*forceAmount*12), int(owner.cy+sin(radians(owner.angle))*forceAmount*11), 0, 0, int(MAX_FORCE*1.5), 30, color(255, 0, 255)));
-   } else {
-   if (!maxed) {
-   particles.add( new Star(2000, int(owner.cx), int( owner.cy), 0, 0, 350, 0.9, WHITE) );
-   maxed=true;
-   }
-   }
-   }
-   if (!active)press(); // cancel
-   //if (owner.hit)release(); // cancel
-   }
-   @Override
-   void release() {
-   if ((!reverse || owner.reverseImmunity ) ) {
-   if (!owner.dead && (!freeze || owner.freezeImmunity)&& active && channeling) {
-   //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
-   stamps.add( new AbilityStamp(this));
-   particles.add(new ShockWave(int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 25, 20, 400, owner.playerColor));
-   
-   owner.pushForce(forceAmount*.4, owner.angle);
-   regen=true;
-   action();
-   enableCooldown();
-   
-   deChannel();
-   deactivate();
-   owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
-   owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
-   forceAmount=0;
-   }
-   }
-   }
-   void reset() {
-   super.reset();
-   forceAmount=0;
-   cooldownTimer=int(400-attackSpeedMod*3);
-   maxed=false;
-   regen=true;
-   deChannel();
-   release();
-   }
-   @Override
-   void passive() {
-   if (!owner.stealth) {
-   noStroke();
-   if (maxed) fill(WHITE);
-   else fill(owner.playerColor);
-   pushMatrix();
-   translate(int(owner.cx), int(owner.cy));
-   rotate(radians(owner.angle-90));
-   rect(-5, 0, 10, forceAmount*11);
-   popMatrix();
-   }
-   }*/
+  int getLevel(){
+  return level;
+  }
 }
 
 class Random extends Ability {//---------------------------------------------------    Random   ---------------------------------

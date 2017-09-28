@@ -2,10 +2,10 @@
 /**------------------------------------------------------------//
  //                                                            //
  //  Coding dojo  - Prototype of a timecontrol game            //
- //  av: Alrik He    v.0.7.16                                  //
+ //  av: Alrik He    v.0.7.17                                  //
  //  Arduino verstad Malmö                                     //
  //                                                            //
- //      2014-09-21    -     2017-09-20                        //
+ //      2014-09-21    -     2017-09-29                        //
  //                                                            //
  //                                                            //
  //         Used for weapon test & prototyping timebending     //
@@ -42,10 +42,10 @@ GameType gameMode=GameType.MENU;
 final byte AmountOfPlayers=4, AmountOfModes=7; // start players
 final float DIFFICULTY_LEVEL=1.2;
 
-final int WHITE=color(255), GREY=color(172), BLACK=color(0), GOLD=color(255, 220, 0);
+final int WHITE=color(255), GREY=color(172), BLACK=color(0), GOLD=color(255, 220, 0),RED=color(255, 0, 0),GREEN=color(0, 255, 0);
 final int speedFactor= 2;
 final float slowFactor= 0.3;
-final String version="0.7.16";
+final String version="0.7.17";
 static long prevMillis, addMillis, forwardTime, reversedTime, freezeTime, stampTime, fallenTime;
 final int baudRate= 19200;
 final static float DEFAULT_FRICTION=0.1;

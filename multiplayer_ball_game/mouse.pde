@@ -4,7 +4,7 @@ void mousePressed() {
   else coins+=100;
   try {
     for (Player p : players) {
-      if (p.mouse && !p.stunned&&(!reverse || p.reverseImmunity || p.abilityList.get(0).meta)) { 
+      if (p.mouse && !p.dead && !p.stunned&&(!reverse || p.reverseImmunity || p.abilityList.get(0).meta)) { 
         if (mouseButton==LEFT) {
           //p.ability.press();
           for (Ability a : p.abilityList)  a.press();

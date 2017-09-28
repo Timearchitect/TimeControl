@@ -476,6 +476,7 @@ void shopUpdate() {
         if (mousePressed && !pMousePressed) {
           selectedAbility.unlocked=true;
           selectedAbility.buy();
+          selectedAbility.updateTooltips();
           coins-=selectedAbility.unlockCost;
           selectedAbility=null;
           saveProgress();
@@ -569,7 +570,7 @@ void loadProgress() throws Exception {
     }
     i++;
   }
-  bList.add(new Button(new SkillPoint(), int(shopXEdgePadding+(i*shopXInterval)%(width-shopXEdgePadding*2)), int(shopYEdgePadding+int(i*shopXInterval/(width-shopXEdgePadding*2))*shopYInterval), 70));
+  bList.add(new UpgradebleButton(new SkillPoint(), int(shopXEdgePadding+(i*shopXInterval)%(width-shopXEdgePadding*2)), int(shopYEdgePadding+int(i*shopXInterval/(width-shopXEdgePadding*2))*shopYInterval), 70));
 
   coins=parseInt(s[i]);
 }

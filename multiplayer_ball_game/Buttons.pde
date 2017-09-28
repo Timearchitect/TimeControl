@@ -2,7 +2,7 @@ class Button {
   Ability a;
   int x, y, size, minSize=70, maxSize=90, textYMargin=65, nameYMargin=55, tooltipDelay=500;
   color pcolor=  color(255);
-  Boolean selected=false, hover;
+  Boolean selected=false, hover, strokeless=false, deactivatable=true, resizeable=true;
   long timer;
   Button(Ability _ability, int _x, int _y, int _size) {
     a= _ability;
@@ -30,7 +30,7 @@ class Button {
         selected=true;
         selectedAbility=a;
         if (a.unlocked && a.deactivatable) {
-          a.deactivated=!a.deactivated;
+          if (deactivatable)a.deactivated=!a.deactivated;
           int active=0;
           for (Ability as : abilityList) {
             if (!as.deactivated && as.unlocked )active++;
@@ -56,7 +56,8 @@ class Button {
     if (selected) {
       pcolor=color( 170, 255, 255);
     }
-    if (hover) {
+
+    if (hover && resizeable) {
       if (size<maxSize)size+=10;
     } else {
       if (size>minSize)size-=5;
@@ -65,7 +66,10 @@ class Button {
 
   void display() {
     rectMode(CENTER);      
-    strokeWeight(4);
+
+    if (strokeless)  strokeWeight(0);
+    else   strokeWeight(4);
+
     if (!a.unlocked) {
       fill(pcolor);
       stroke(pcolor);
@@ -104,11 +108,11 @@ class Button {
       fill(WHITE);
       if (mouseXOffset<width-frameWidth) {
         textAlign(LEFT);
-       rect(mouseX, mouseY, frameWidth, frameHeight,10);
+        rect(mouseX, mouseY, frameWidth, frameHeight, 10);
       } else {
         textAlign(RIGHT); 
         mouseXOffset=mouseX-20;
-        rect(mouseX, mouseY, -frameWidth,frameHeight,10);
+        rect(mouseX, mouseY, -frameWidth, frameHeight, 10);
       }
 
 
@@ -119,7 +123,85 @@ class Button {
     }
   }
 }
-
+class UpgradebleButton extends Button {
+  boolean plusHover, minusHover;
+  float minPlusSize, plusSize, maxPlusSize, minMinusSize, minusSize, maxMinusSize;
+  color plusColor, minusColor;
+  UpgradebleButton(Ability _ability, int _x, int _y, int _size) {
+    super(_ability, _x, _y, _size);
+    strokeless=true;
+    deactivatable=false;
+    resizeable=false;
+    minSize=70; 
+    maxSize=90;
+    plusSize=minSize;
+    minusSize=minSize;
+    minPlusSize=plusSize;
+    minMinusSize=minusSize;
+    maxPlusSize=plusSize+20;
+    maxMinusSize=minusSize+20;
+  }
+  void update() {
+    super.update();
+    if (a.unlocked ) {
+      if ( mouseX>x-size*.5&&x+size*.5>mouseX&&mouseY>y-size*.5-plusSize*.2*.5&&y-size*.5+plusSize*.2*.5>mouseY) { // plus
+        //background(WHITE);
+        plusHover=true;
+        plusColor=GREEN;
+        if (mousePressed && !pMousePressed) {
+          a.buy();
+          a.updateTooltips();
+        }
+      } else {
+        plusHover=false;
+        plusColor=WHITE;
+      }
+      if (mouseX>x-size*.5&&x+size*.5>mouseX&&mouseY>y+size*.5-minusSize*.2*.5&&y+size*.5+minusSize*.2*.5>mouseY) { // minus
+        //background(WHITE);
+        minusHover=true;
+        minusColor=RED;
+        if (mousePressed && !pMousePressed) {
+          a.sell();
+          a.updateTooltips();
+        }
+      } else {
+        minusHover=false;
+        minusColor=WHITE;
+      }
+    }
+    if (plusHover ) {
+      if (plusSize<maxPlusSize)plusSize+=5;
+    } else {
+      if (plusSize>minPlusSize)plusSize-=1;
+    }
+    if (minusHover ) {
+      if (minusSize<maxMinusSize)minusSize+=5;
+    } else {
+      if (minusSize>minMinusSize)minusSize-=1;
+    }
+  }
+  void display() {
+    super.display();
+    if (a.unlocked) { 
+      resizeable=false;
+      textSize(20);
+      rectMode(CENTER);
+      stroke(0);
+      strokeWeight(4);
+      fill(plusColor);
+      rect(x, y-size*.5, plusSize, plusSize*.25);
+      fill(minusColor);
+      rect(x, y+size*.5, minusSize, minusSize*.25);
+      fill(BLACK);
+      text("+", x, y-size*.48);
+      text("-", x, y+size*.52);
+      textSize(24);
+      if(!hover) fill(BLACK,100);
+      text(a.getLevel(), x, y);
+      rectMode(CORNER);
+    }else    resizeable=true;
+  }
+}
 /*class StatButton extends Button {
  Ability a;
  int x, y, size, minSize=70, maxSize=90, textYMargin=65, nameYMargin=55;

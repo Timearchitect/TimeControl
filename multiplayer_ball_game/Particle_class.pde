@@ -860,7 +860,7 @@ class Tesla extends Particle {
     }
   }
 }
-class Text extends Particle {
+class Text extends Particle {                 //   TextParticle
   float shrinkRate, brightness=255;
   String text="";
   int  offsetX, offsetY, type, count;
@@ -890,7 +890,7 @@ class Text extends Particle {
     if (!dead && !freeze) { 
       if (reverse) {       
         size+=shrinkRate*timeBend;
-        count++;
+        count-=1*timeBend;
         if (follow) {
           x=owner.cx+offsetX;
           y=owner.cy+offsetY;
@@ -899,7 +899,7 @@ class Text extends Particle {
           y-=vy*timeBend;
         }
       } else {
-        count++;
+        count+=1*timeBend;
         size-=shrinkRate*timeBend;
         if (follow) {
           x=owner.cx+offsetX;
@@ -917,7 +917,11 @@ class Text extends Particle {
       noStroke();
       switch(type) {
       case 1:
-        if (count%2==0)fill(particleColor);
+        if (count%2<1)fill(particleColor);
+        else fill(255);
+        break;
+      case 2:
+        if (count%4<2)fill(particleColor);
         else fill(255);
         break;
       default:
@@ -1054,7 +1058,7 @@ class Fragment extends Particle {
 
 class Star extends Particle {
   boolean follow;
-  float shrinkRate, size=100, scale=1,shimmer;
+  float shrinkRate, size=100, scale=1, shimmer;
   PShape form= createShape();
   Star(int _time, int _x, int _y, float _vx, float _vy, int _size, float _shrinkRate, color _particleColor) {
     super( _x, _y, _vx, _vy, 100, _time, _particleColor);

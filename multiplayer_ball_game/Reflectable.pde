@@ -36,6 +36,7 @@ interface Containable {
 }
 
 interface AmmoBased { 
+
   void reload();
   void reloadCancel();
 }

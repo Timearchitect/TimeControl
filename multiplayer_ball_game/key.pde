@@ -112,6 +112,12 @@ void keyPressed() {
        }
        }*/
     }
+    if (key=='/') {
+      for(Button b:bList)b.a.unlocked=true;
+    }
+    if (key=='*') {
+      for(Button b:bList)if(b.a.sellable)b.a.unlocked=false;
+    }
     if (key==DELETE) {
       clearGame();
     }
