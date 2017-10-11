@@ -1895,7 +1895,7 @@ class Rocket extends Bomb implements Reflectable, Destroyable, Container {//----
   @Override
     void hit(Player enemy) {    // when hit
     super.hit(enemy);
-    particles.add( new TempSlow(10, 0.15, 1.05));
+    particles.add( new TempSlow(10, 0.15, 1.05).setSoundTweek(false));
     super.fizzle();
     // fizzle();
     deathTime=stampTime;   // projectile is dead on collision

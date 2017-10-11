@@ -235,6 +235,8 @@ class LineWave extends Particle {
 
 class TempSlow extends Particle {
   float  decay;
+  boolean soundTweek=true;
+
   TempSlow(int _time, float _rate, float _decayRate) {
     super( 0, 0, 0, 0, 0, _time, 255);
     S=_rate;
@@ -243,6 +245,8 @@ class TempSlow extends Particle {
     timeBend=S*F;
     slow=true;
     drawTimeSymbol();
+    speedControl.clear();
+    if (soundTweek)speedControl.addSegment((reverse)?-1*timeBend:1*timeBend, 800); //now slow
   }
   void update() {
     if (!dead && !freeze) { 
@@ -255,7 +259,8 @@ class TempSlow extends Particle {
           S=1; 
           timeBend=S*F;
           slow=false;
-
+          speedControl.clear();
+          if (soundTweek)speedControl.addSegment((reverse)?-1*timeBend:1*timeBend, 500*decay); //now slow
           // println( "dead");
         }
         if (S<0) {
@@ -276,6 +281,8 @@ class TempSlow extends Particle {
           S=1; 
           timeBend=S*F;
           slow=false;
+          speedControl.clear();
+          if (soundTweek)speedControl.addSegment((reverse)?-1*timeBend:1*timeBend, 500*decay); //now slow
           // println( "dead");
         }
         if (S<0) {
@@ -299,6 +306,8 @@ class TempSlow extends Particle {
       S=1; 
       timeBend=S*F; 
       slow=false;
+      speedControl.clear();
+      if (soundTweek)speedControl.addSegment((reverse)?-1*timeBend:1*timeBend, 500*decay); //now slow
       drawTimeSymbol();
     } else if (stampTime<deathTime) {
       dead=false;
@@ -311,16 +320,26 @@ class TempSlow extends Particle {
      rect(0-shakeTimer, 0-shakeTimer, width+shakeTimer, height+shakeTimer);
      }*/
   }
+  Particle setSoundTweek(boolean _b) {
+    soundTweek=_b;
+    speedControl.clear();
+    if (soundTweek)speedControl.addSegment((reverse)?-1*timeBend:1*timeBend, 800); //now slow
+    return this;
+  }
 }
 //-------------------------------------------------------------//    TempReverse   //-------------------------------------------------------------------------
 
 class TempReverse extends Particle {
   float  decay;
+  boolean soundTweek=true;
+
   TempReverse(int _time) {
     super( 0, 0, 0, 0, 0, _time, 255);
     if (stampTime<_time)_time=int(stampTime);
     deathTime= millis()+_time;
     reverse=true;
+    speedControl.clear();
+    if (soundTweek)speedControl.addSegment((reverse)?-1*timeBend:1*timeBend, 600); //now rewind
     drawTimeSymbol();
     meta=true;
   }
@@ -340,6 +359,8 @@ class TempReverse extends Particle {
     if (reverse && deathTime<millis()) {
       dead=true;
       reverse=false;
+      speedControl.clear();
+      if (soundTweek)speedControl.addSegment((reverse)?-1*timeBend:1*timeBend, 600); //now rewind
       drawTimeSymbol();
       particles.remove(this);
     }
@@ -361,16 +382,23 @@ class TempReverse extends Particle {
      rect(0-shakeTimer, 0-shakeTimer, width+shakeTimer, height+shakeTimer);
      }*/
   }
+  Particle setSoundTweek(boolean _b) {
+    soundTweek=_b;
+    return this;
+  }
 }
 
 //-------------------------------------------------------------//    TempFreeze   //-------------------------------------------------------------------------
 
 class TempFreeze extends Particle {
   float  decay;
+  boolean soundTweek=true;
   TempFreeze(int _time) {
     super( 0, 0, 0, 0, 0, _time, 255);
     deathTime= millis()+_time;
     freeze=true;
+    speedControl.clear();
+    if (soundTweek)speedControl.addSegment((freeze)?0:1, 150); //now stop
     drawTimeSymbol();
   }
   void update() {
@@ -390,6 +418,8 @@ class TempFreeze extends Particle {
           // println(deathTime+" : "+stampTime);
           dead=true;
           freeze=false;
+          speedControl.clear();
+          if (soundTweek)speedControl.addSegment((freeze)?0:1, 150); //now stop
         }
       }
     }
@@ -400,6 +430,8 @@ class TempFreeze extends Particle {
     } else if (millis()>deathTime && !dead) {
       dead=true;
       freeze=false;
+      speedControl.clear();
+      if (soundTweek)speedControl.addSegment((freeze)?0:1, 150); //now stop
       drawTimeSymbol();
     } else if (millis()<deathTime) {
       dead=false;
@@ -412,12 +444,20 @@ class TempFreeze extends Particle {
      rect(0-shakeTimer, 0-shakeTimer, width+shakeTimer, height+shakeTimer);
      }*/
   }
+  Particle setSoundTweek(boolean _b) {
+    soundTweek=_b;
+    speedControl.clear();
+    if (soundTweek)speedControl.addSegment((freeze)?0:1, 150); //now stop
+    return this;
+  }
 }
 
 //-------------------------------------------------------------//    TempFast   //-------------------------------------------------------------------------
 
 class TempFast extends Particle {
   float  decay, maxSpeed;
+  boolean soundTweek=true;
+
   TempFast(int _time, float _rate, float _decayRate) {
     super( 0, 0, 0, 0, 0, _time, 255);
     F=_rate;
@@ -439,7 +479,8 @@ class TempFast extends Particle {
           F=1; 
           timeBend=S*F;
           fastForward=false;
-
+          speedControl.clear();
+          if (soundTweek)speedControl.addSegment((reverse)?-1*timeBend:1*timeBend, 400*decay); //now fastforward
           // println( "dead");
         }
         if (F<1) {
@@ -460,6 +501,8 @@ class TempFast extends Particle {
           F=1; 
           timeBend=S*F;
           fastForward=false;
+          speedControl.clear();
+          if (soundTweek)speedControl.addSegment((reverse)?-1*timeBend:1*timeBend, 400*decay); //now fastforward
           // println( "dead");
         }
         if (F<1) {
@@ -483,6 +526,8 @@ class TempFast extends Particle {
       F=1; 
       timeBend=S*F; 
       fastForward=false;
+      speedControl.clear();
+      if (soundTweek)speedControl.addSegment((reverse)?-1*timeBend:1*timeBend, 400*decay); //now fastforward
       drawTimeSymbol();
     } else if (stampTime<deathTime) {
       dead=false;
@@ -494,6 +539,12 @@ class TempFast extends Particle {
      fill(particleColor, opacity);
      rect(0-shakeTimer, 0-shakeTimer, width+shakeTimer, height+shakeTimer);
      }*/
+  }
+  Particle setSoundTweek(boolean _b) {
+    soundTweek=_b;
+    speedControl.clear();
+    if (soundTweek)speedControl.addSegment((reverse)?-1*timeBend:1*timeBend, 400*decay); //now fastforward
+    return this;
   }
 }
 //-------------------------------------------------------------//    TempZoom   //-------------------------------------------------------------------------

@@ -9,7 +9,7 @@
  //                                                            //
  //                                                            //
  //         Used for weapon test & prototyping timebending     //
- //                                                            //
+ //   link:  www.github.com/timearchitect/timecontrol          //
  //                                                            //
  --------------------------------------------------------------*/
 import processing.opengl.*;
@@ -32,7 +32,7 @@ final color BGcolor=color(100);
 PFont font;
 PGraphics GUILayer;
 PShader  Blur;
-boolean hitBox=false, cleanStart=true, preSelectedSkills=true, RandomSkillsOnDeath=false, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=true, inGame;
+boolean hitBox=false, cleanStart=true, preSelectedSkills=true, RandomSkillsOnDeath=false, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=false, inGame;
 boolean gradualCleaning=true;
 final float flashAmount=0.5, shakeAmount=0.8;
 int mouseSelectedPlayerIndex=0;
@@ -109,7 +109,7 @@ void setup() {
   hint(DISABLE_ASYNC_SAVEFRAME);
   fullScreen(P3D);
   //size(displayWidth, displayHeight, P3D);
-
+  draw();
   imageMode(CENTER);
   textAlign(CENTER, CENTER);
   font= loadFont("PressStart2P-Regular-28.vlw");
@@ -224,7 +224,7 @@ void setup() {
     new Phase(), 
     new Dodge()
     //new Redemption(), // buggy on survival
-    // new Undo() // buggy on survival
+    //new Undo() // buggy on survival
   };
 
   westAbilityList= new Ability[]{
@@ -327,12 +327,12 @@ void setup() {
   try {  
     // initialize the SamplePlayer
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/TooManyCooksAdultSwim.mp3"));
-    musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
+     musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Branching time.mp3")); 
-    //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/orange caramel -aing.mp3"));
-    //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/goodbye.mp3"));
-    // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/wierd.mp3"));
+    // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/orange caramel -aing.mp3"));
+    // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/goodbye.mp3"));
+   //  musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/wierd.mp3"));
   }
   catch(Exception e) {
     println("Exception while attempting to load sample!");

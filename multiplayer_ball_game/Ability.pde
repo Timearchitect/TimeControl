@@ -15,8 +15,8 @@ abstract class Ability implements Cloneable {
   Ability() { 
     icon=icons[8];
     setAllMod();
-   //name= this.getClass().getName();
-   name=getClassName(this);
+    //name= this.getClass().getName();
+    name=getClassName(this);
     //useType="No";
     //name=this.getClass().getSimpleName();
     //name=this.getClass().getCanonicalName();
@@ -42,8 +42,7 @@ abstract class Ability implements Cloneable {
     useType=_toolTip[0];
     //tooltip=useType+" ability";
   }
-  void updateTooltips(){
-  
+  void updateTooltips() {
   }
   void buy() {
   }
@@ -198,7 +197,9 @@ abstract class Ability implements Cloneable {
     for (Buff b : bA) buffList.add(b);
     return this;
   }
-  int getLevel(){return 0;}
+  int getLevel() {
+    return 0;
+  }
 }
 
 class NoActive extends Ability {//---------------------------------------------------    HpRegen   ---------------------------------
@@ -306,7 +307,7 @@ class FastForward extends Ability { //------------------------------------------
 
 
 
-class Freeze extends Ability { //---------------------------------------------------    Freeze   ---------------------------------
+class Freeze extends Ability { //---------------------------------------------------    Freeze Ability  ---------------------------------
 
   Freeze() {
     super();
@@ -659,7 +660,7 @@ class ThrowDagger extends Ability {//-------------------------------------------
   ThrowDagger() {
     super();
     icon=icons[0];
-   // name=getClassName(this);
+    // name=getClassName(this);
     activeCost=8;
     cooldownTimer=80;
     regenRate=0.16;
@@ -987,6 +988,7 @@ class Revolver extends Ability implements AmmoBased {//-------------------------
     energy=50;
     ammo=0;
     cooldown=0;
+    cooldownTimer=int(250-attackSpeedMod*2.5); //100
   }
 }
 class ForceShoot extends Ability {//---------------------------------------------------    forceShoot   ---------------------------------
@@ -1599,7 +1601,7 @@ class DoubleTap extends Laser {//-----------------------------------------------
     super();
     duration=180;
     delay=170;
-    damage=30;
+    damage=20;
     icon=icons[2];
     //name=getClassName(this);
     activeCost=15;
@@ -1635,11 +1637,17 @@ class DoubleTap extends Laser {//-----------------------------------------------
 
       switch(chargelevel) {
       case 1:
+        projectiles.add( new Slug(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 40, owner.playerColor, 1200, owner.angle, cos(radians(owner.angle))*26, sin(radians(owner.angle))*26, int(damage+damageMod)));
         projectiles.add( new Slug(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 1200, owner.angle, cos(radians(owner.angle))*36, sin(radians(owner.angle))*36, int(damage+damageMod)));
+        projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 20, 200, owner.playerColor, 200, owner.angle, damage*0.1));
         break;
       case 2:
-        projectiles.add( new Slug(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 160, owner.playerColor, 10000, owner.angle, cos(radians(owner.angle))*10, sin(radians(owner.angle))*10, int(damage*3+damageMod*2)));
+        projectiles.add( new Slug(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 160, owner.playerColor, 10000, owner.angle, cos(radians(owner.angle))*12, sin(radians(owner.angle))*12, int(damage*3+damageMod*4)));
+        // projectiles.add( new Slug(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 160, owner.playerColor, 10000, owner.angle, cos(radians(owner.angle))*11, sin(radians(owner.angle))*11, int(damage*3+damageMod*2)));
+        //projectiles.add( new Slug(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 160, owner.playerColor, 10000, owner.angle, cos(radians(owner.angle))*12, sin(radians(owner.angle))*12, int(damage*3+damageMod*2)));
+
         particles.add(new Flash(50, 6, WHITE)); 
+        projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 20, 300, owner.playerColor, 200, owner.angle, damage*0.1));
         break;
       }    
       particles.add(new ShockWave(int(owner.cx), int(owner.cy), 100*chargelevel, 16*chargelevel, 400, owner.playerColor));
@@ -1755,7 +1763,7 @@ class Shotgun extends Ability {//-----------------------------------------------
   }
 }
 class Sluggun extends Ability {//---------------------------------------------------    Shotgun   ---------------------------------
-  int damage=45, duration=900, delay=300, laserWidth=75, chargelevel;
+  int damage=48, duration=900, delay=300, laserWidth=75, chargelevel;
   long timer;
   float MODIFIED_ANGLE_FACTOR=0.5, MODIFIED_MAX_ACCEL=0.006, InAccurateAngle; 
   long startTime;
@@ -1801,9 +1809,9 @@ class Sluggun extends Ability {//-----------------------------------------------
       println(InAccurateAngle);
       //particles.add(new ShockWave(int(owner.cx), int(owner.cy), 200*chargelevel, 16, 500, owner.playerColor));
       //particles.add(new Flash(50, 6, WHITE)); 
-      projectiles.add( new Bomb(owner, int( owner.cx), int(owner.cy), 40, owner.playerColor, 1, owner.angle, cos(radians(owner.angle))*20, sin(radians(owner.angle))*20, int(damage*.5), false));
-      projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 30, 100, owner.playerColor, 200, owner.angle, damage*.2));
-      projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 10, 200, owner.playerColor, 200, owner.angle, damage*.2));
+      projectiles.add( new Bomb(owner, int( owner.cx), int(owner.cy), 40, owner.playerColor, 1, owner.angle, cos(radians(owner.angle))*20, sin(radians(owner.angle))*20, int(damage*.2), false));
+      projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 30, 100, owner.playerColor, 200, owner.angle, damage*.05));
+      projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 10, 200, owner.playerColor, 200, owner.angle, damage*.05));
       projectiles.add( new Slug(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 70, owner.playerColor, 1500, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*36, sin(radians(owner.angle+InAccurateAngle))*36, int(damage+damageMod)));
       owner.pushForce(-40, owner.angle);
       charging=false;
@@ -2090,6 +2098,7 @@ class ElemetalLauncher extends Ability {//--------------------------------------
     active=false;
     cooldown=stampTime;
     owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+    cooldownTimer=int(800-attackSpeedMod*8); //100
   }
 }
 
@@ -2217,6 +2226,7 @@ class Bazooka extends Ability {//-----------------------------------------------
     deactivate();
     deChannel();
     regen=true;
+    cooldownTimer=int(1000-attackSpeedMod*10); //100
   }
 }
 
@@ -2274,7 +2284,6 @@ class Stars extends Ability {//-------------------------------------------------
     super.reset();
     energy=90;
     release();
-
     deactivate();
     deChannel();
     regen=true;
@@ -2644,7 +2653,7 @@ class Sniper extends RapidFire {//----------------------------------------------
     deactiveCost=6;
     activeCost=4;
     channelCost=0.1;
-    cooldownTimer=700;
+    cooldownTimer=800;
     damage=210;
     critDamage=210;
     critChance=40;
@@ -2773,6 +2782,7 @@ class Sniper extends RapidFire {//----------------------------------------------
     regen=true;
     deChannel();
     deactivate();
+    cooldownTimer=int(800-attackSpeedMod*8); //100
   }
 }
 class HanzoMain extends Sniper {//---------------------------------------------------    Sniper   ---------------------------------
@@ -3317,7 +3327,7 @@ class MarbleLauncher extends Ability {//----------------------------------------
   MarbleLauncher() {
     super();
     icon=icons[29];
-    cooldownTimer=1200;
+    cooldownTimer=1300;
     //name=getClassName(this);
     activeCost=35;
     critDamage=5;
@@ -3413,6 +3423,7 @@ class MarbleLauncher extends Ability {//----------------------------------------
     count=0;
     owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
     owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+    cooldownTimer=int(1300-attackSpeedMod*13); //100
   }
 }
 class MissleLauncher extends Ability {//---------------------------------------------------    MissleLauncher   ---------------------------------
@@ -3422,7 +3433,7 @@ class MissleLauncher extends Ability {//----------------------------------------
   MissleLauncher() {
     super();
     icon=icons[11];
-    cooldownTimer=2200;
+    cooldownTimer=2300;
     //name=getClassName(this);
     activeCost=35;
     regenRate=0.12;
@@ -3526,6 +3537,7 @@ class MissleLauncher extends Ability {//----------------------------------------
     count=0;
     owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
     owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+    cooldownTimer=int(2300-attackSpeedMod*20); //100
   }
 }
 
@@ -4045,7 +4057,7 @@ class HitScanGun extends SeekGun {
     critDamage=5;
     critChance=20;
     unlockCost=5500;
-    cooldownTimer=80;
+    cooldownTimer=100;
     damage=8;
     range=2000;
     minRange=50; 
@@ -4138,6 +4150,10 @@ class HitScanGun extends SeekGun {
     stroke(owner.playerColor);
     line(owner.cx, owner.cy, owner.cx+cos(radians(owner.angle+spanAngle)*range), owner.cy+sin(radians(owner.angle+spanAngle)*range));
     line(owner.cx, owner.cy, owner.cx+cos(radians(owner.angle-spanAngle)*range), owner.cy+sin(radians(owner.angle-spanAngle)*range));
+  }
+  void reset() {
+    super.reset();
+    cooldownTimer=int(100-attackSpeedMod*1); //100
   }
 }
 
@@ -4521,7 +4537,7 @@ class DeployShield extends Ability {//------------------------------------------
     icon=icons[35];
     //name=getClassName(this);
     activeCost=35;
-    cooldownTimer=2750;
+    cooldownTimer=2800;
     unlockCost=2000;
     assambleTooltip("Tap");
   } 
@@ -4618,6 +4634,7 @@ class DeployShield extends Ability {//------------------------------------------
   void reset() {
     super.reset();
     owner.armor=0;
+    cooldownTimer=int(2800-attackSpeedMod*28); //100
   }
 }
 
@@ -4695,7 +4712,7 @@ class Gravity extends Ability {//-----------------------------------------------
     //name=getClassName(this);
     activeCost=25;
     regenRate=.15;
-    cooldownTimer=1000;
+    cooldownTimer=1200;
     unlockCost=3000;
     assambleTooltip("Tap");
   } 
@@ -4734,6 +4751,7 @@ class Gravity extends Ability {//-----------------------------------------------
       g.dead=true;
     }
     gravitonList.clear();
+    cooldownTimer=int(1200-attackSpeedMod*10); //100
   }
   void passive() {
     if (!owner.stealth) {
@@ -4845,7 +4863,7 @@ class DeployTurret extends Ability {//------------------------------------------
   DeployTurret() {
     super();
     icon=icons[37];
-    cooldownTimer=2000;
+    cooldownTimer=3000;
     //name=getClassName(this);
     activeCost=25;
     energy=20;
@@ -4935,6 +4953,7 @@ class DeployTurret extends Ability {//------------------------------------------
     energy=20;
 
     players.remove(turretList);
+    cooldownTimer=int(3000-attackSpeedMod*25); //100
   }
 }
 class DeployDrone extends Ability {//---------------------------------------------------    DeployDrone  ---------------------------------
@@ -4992,6 +5011,7 @@ class DeployDrone extends Ability {//-------------------------------------------
     deChannel();
     release();
     players.remove(droneList);
+    cooldownTimer=int(2000-attackSpeedMod*20); //100
   }
 }
 class DeployBodyguard extends DeployDrone {//---------------------------------------------------    DeployDrone  ---------------------------------
@@ -4999,7 +5019,7 @@ class DeployBodyguard extends DeployDrone {//-----------------------------------
   DeployBodyguard() {
     super();
     icon=icons[45];
-    cooldownTimer=2000;
+    cooldownTimer=2500;
     //name=getClassName(this);
     activeCost=80;
     energy=40;
@@ -5045,6 +5065,7 @@ class DeployBodyguard extends DeployDrone {//-----------------------------------
     void reset() {
     super.reset();
     players.remove(droneList);
+    cooldownTimer=int(2500-attackSpeedMod*20); //100
   }
 }
 
@@ -5060,7 +5081,7 @@ class CloudStrike extends Ability {//-------------------------------------------
     icon=icons[16];
     //name=getClassName(this);
     activeCost=22;
-    cooldownTimer=1400;
+    cooldownTimer=1500;
     channelCost=0;
     unlockCost=3750;
     assambleTooltip("Hold Release");
@@ -5144,6 +5165,7 @@ class CloudStrike extends Ability {//-------------------------------------------
     deChannel();
     release();
     forceAmount=0;
+    cooldownTimer=int(1500-attackSpeedMod*10); //100
   }
   @Override
     void passive() {
@@ -6112,7 +6134,7 @@ class StunGun extends Ability {//-----------------------------------------------
     super();
     //name=getClassName(this);
     activeCost=50;
-    cooldownTimer=180;
+    cooldownTimer=190;
     regenRate=0.8;
     unlockCost=2750;
     assambleTooltip("Tap");
@@ -6164,6 +6186,10 @@ class StunGun extends Ability {//-----------------------------------------------
     if (!owner.stealth) {
     }
     owner.ANGLE_FACTOR=MODIFIED_ANGLE_FACTOR;
+  }
+  void reset() {
+    super.reset();
+    cooldownTimer=int(190-attackSpeedMod*1.9); //100
   }
 }
 
@@ -6419,7 +6445,7 @@ class SkillPoint extends Ability {//--------------------------------------------
    float forceAmount=0, MODIFIED_MAX_ACCEL=0.003, MODIFIED_ANGLE_FACTOR=0.1;
    float ChargeRate=0.85, restForce;
    boolean maxed;*/
-  public int level,minLevel=1,maxLevel=100;
+  public int level, minLevel=1, maxLevel=100;
 
   SkillPoint() {
     super();
@@ -6433,22 +6459,22 @@ class SkillPoint extends Ability {//--------------------------------------------
     sellText="downgrade";
     tooltip="Increase skillpoints from "+(level)+" to "+(level+1)+"\n for all players. \n(assign points in the settings menu)";
   } 
-  void updateTooltips(){
-      tooltip="Increase skillpoints from "+(level)+" to "+(level+1)+"\n for all players. \n(assign points in the settings menu)";
+  void updateTooltips() {
+    tooltip="Increase skillpoints from "+(level)+" to "+(level+1)+"\n for all players. \n(assign points in the settings menu)";
   }
   SkillPoint(int _level) {
     this();
     level=_level;
   }
   void buy() {
-    if(maxLevel>level && unlocked)level++;
+    if (maxLevel>level && unlocked)level++;
   }
   void sell() {
     level--;
-    if(minLevel>level)unlocked=false;
+    if (minLevel>level)unlocked=false;
   }
-  int getLevel(){
-  return level;
+  int getLevel() {
+    return level;
   }
 }
 

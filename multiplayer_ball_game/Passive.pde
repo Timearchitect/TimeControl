@@ -557,7 +557,7 @@ class Gloss extends Ability {//-------------------------------------------------
     void passive() {
     if (!owner.stealth) {
 
-      cooldown+=1;
+      cooldown+=1*timeBend;
       for (int i=0; i<360; i+=30) {
         if (cooldown%360==i) {
           projectiles.add( new Shield( owner, int( owner.cx+cos(radians(i))*180), int(owner.cy+sin(radians(i))*180), owner.playerColor, 1000, i+90, 1, int( cos(radians(i))*180), int(sin(radians(i))*180)));
@@ -908,8 +908,8 @@ class Nova extends Ability {//--------------------------------------------------
     if (cooldown>50) {
       cooldown=0;
 
-      projectiles.add( new Slash(owner, int( owner.cx+sin(owner.keyAngle)*60), int(owner.cy+cos(owner.keyAngle)*60), 40, owner.playerColor, 180, owner.angle-100, -24, 110, sin(owner.keyAngle)*10, cos(owner.keyAngle)*10, 4, true));
-      projectiles.add( new Slash(owner, int( owner.cx+sin(owner.keyAngle)*60), int(owner.cy+cos(owner.keyAngle)*60), 40, owner.playerColor, 180, owner.angle-280, -24, 110, sin(owner.keyAngle)*10, cos(owner.keyAngle)*10, 4, true));
+      projectiles.add( new Slash(owner, int( owner.cx+sin(owner.keyAngle)*60), int(owner.cy+cos(owner.keyAngle)*60), 40, owner.playerColor, 200, owner.angle-100, -24, 150, sin(owner.keyAngle)*10, cos(owner.keyAngle)*10, 4, true));
+      projectiles.add( new Slash(owner, int( owner.cx+sin(owner.keyAngle)*60), int(owner.cy+cos(owner.keyAngle)*60), 40, owner.playerColor, 200, owner.angle-280, -24, 150, sin(owner.keyAngle)*10, cos(owner.keyAngle)*10, 4, true));
     }
   }
   @Override
@@ -1019,7 +1019,7 @@ class BulletCutter extends Ability {//------------------------------------------
     owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
   }
 }
-class Boost extends Ability {//---------------------------------------------------    bullet   ---------------------------------
+class Boost extends Ability {//---------------------------------------------------    Boost   ---------------------------------
   int count, charge, cooldown, force=60;
   final int radius= 145, maxCharge=50; 
   Boost() {
@@ -1214,7 +1214,7 @@ class BulletTime extends Ability {//--------------------------------------------
 
     if (cooldown>interval) {
       for (Projectile p : projectiles) {
-        if (!p.dead && p.ally!=owner.ally && !(p instanceof Shield) && dist(owner.cx, owner.cy, p.x, p.y)<distance) {
+        if (!p.dead && p.ally!=owner.ally && !(p instanceof Shield) && !(p instanceof CoinBall) && !(p instanceof HealBall)&& !(p instanceof AbilityPack)  && dist(owner.cx, owner.cy, p.x, p.y)<distance) {
           trigger=true;
           break;
         }
@@ -1224,7 +1224,7 @@ class BulletTime extends Ability {//--------------------------------------------
         noStroke();
         ellipse(owner.cx, owner.cy, distance*1.5, distance*1.5);
         owner.slowImmunity=true;
-        particles.add(new TempSlow(1500, 0.03, 1.05));
+        particles.add(new TempSlow(1200, 0.025, 1.05));
         trigger=false;
         cooldown=0;
       }
@@ -1236,7 +1236,7 @@ class BulletTime extends Ability {//--------------------------------------------
     owner.slowImmunity=false;
   }
 }
-class Adrenaline extends Ability {//---------------------------------------------------    bullet   ---------------------------------
+class Adrenaline extends Ability {//---------------------------------------------------    Adrenaline Passive   ---------------------------------
   int cooldown;
   final int interval=300;
   boolean trigger;
@@ -1347,7 +1347,7 @@ class Emergency extends Ability {//---------------------------------------------
         for (int i =0; i<3; i++) {
           particles.add( new Feather(300, int(owner.cx), int(owner.cy), random(-2, 2), random(-2, 2), 25, owner.playerColor));
         }
-        particles.add( new TempFreeze(4500));
+        particles.add( new TempFreeze(3000));
         trigger=false;
         cooldown=0;
       }
