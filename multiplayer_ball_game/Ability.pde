@@ -654,7 +654,7 @@ class SaveState extends Ability { //--------------------------------------------
 
 
 class ThrowDagger extends Ability {//---------------------------------------------------    ThrowDagger   ---------------------------------
-  int damage=18, slashdamage2=2, threashold =2;
+  int damage=20, slashdamage2=2, threashold =2;
   final int slashDuration=190, slashRange=100, slashdamage=4;
   boolean alternate;
   ThrowDagger() {
@@ -662,7 +662,7 @@ class ThrowDagger extends Ability {//-------------------------------------------
     icon=icons[0];
     // name=getClassName(this);
     activeCost=8;
-    cooldownTimer=80;
+    cooldownTimer=160;
     regenRate=0.16;
     unlockCost=1500;
     assambleTooltip("Tap");
@@ -721,6 +721,11 @@ class ThrowDagger extends Ability {//-------------------------------------------
       action();
       deactivate();
     }
+  }
+  void reset(){
+  super.reset();
+      cooldownTimer = int(cooldownTimer-attackSpeedMod*1.8);
+
   }
 }
 class Torpedo extends Ability implements AmmoBased {//---------------------------------------------------    Torpedo   ---------------------------------
@@ -908,7 +913,7 @@ class Revolver extends Ability implements AmmoBased {//-------------------------
     activeCost=maxEnergy;
     maxAmmo=6;
     ammo=0;
-    cooldownTimer=250;
+    cooldownTimer=260;
     regenRate=0.24;
     critDamage=20;
     critChance=20;
@@ -988,7 +993,7 @@ class Revolver extends Ability implements AmmoBased {//-------------------------
     energy=50;
     ammo=0;
     cooldown=0;
-    cooldownTimer=int(250-attackSpeedMod*2.5); //100
+    cooldownTimer=int(250-attackSpeedMod*2.6); //100
   }
 }
 class ForceShoot extends Ability {//---------------------------------------------------    forceShoot   ---------------------------------
@@ -1085,6 +1090,7 @@ class ForceShoot extends Ability {//--------------------------------------------
     //  active=false;
     regen=true;
     //  channeling=false;
+    cooldownTimer=int(250-attackSpeedMod*2.6); //100
     deChannel();
     release();
   }
@@ -1099,6 +1105,7 @@ class ForceShoot extends Ability {//--------------------------------------------
       popMatrix();
     }
   }
+  
 }
 
 class Blink extends Ability {//---------------------------------------------------    Blink   ---------------------------------
@@ -2287,12 +2294,15 @@ class Stars extends Ability {//-------------------------------------------------
     deactivate();
     deChannel();
     regen=true;
+    cooldownTimer=int(1000-attackSpeedMod*10);
+
   }
 }
 
 class RapidFire extends Ability {//---------------------------------------------------    RapidFire   ---------------------------------
   float accuracy = 1, MODIFIED_ANGLE_FACTOR=-0.0008, r=50, maxR=100, damage;  
-  int Interval=100;
+  final int DEFAULT_INTERVAL=100;
+  int Interval=DEFAULT_INTERVAL;
   long  PastTime;
   //int projectileDamage=5;
 
@@ -2379,6 +2389,111 @@ class RapidFire extends Ability {//---------------------------------------------
   void reset() {
     super.reset();
     PastTime=stampTime;
+    Interval = int(DEFAULT_INTERVAL-attackSpeedMod);
+    // channeling=false;
+    // active=false;
+    // hold=false;
+    // deactivate();
+    // deChannel();
+    // regen=true;
+    //release();
+  }
+}
+class CrossFire extends RapidFire {//---------------------------------------------------    CrossFire   ---------------------------------
+  float accuracy = 1, MODIFIED_ANGLE_FACTOR=-0.0008, r=50, maxR=100, damage, crossAngle;  
+  int Interval=140;
+  long  PastTime;
+  //int projectileDamage=5;
+
+  CrossFire() {
+    super();
+    icon=icons[32];
+    //name=getClassName(this);
+    deactiveCost=6;
+    regenRate=0.15;
+    critDamage=4;
+    critChance=5;
+    damage=2;
+    channelCost=0.17;
+    unlockCost=1700;
+    assambleTooltip("Hold");
+  } 
+
+  @Override
+    void press() {
+    if ((!reverse || owner.reverseImmunity) && energy>(0+activeCost) && !active && !channeling && !owner.dead) {
+      activate();
+
+      //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+      stamps.add( new AbilityStamp(this));
+      regen=false;
+    }
+  }
+  @Override
+    void hold() {
+    println(critChance+criticalChanceMod);
+    if ((!reverse || owner.reverseImmunity) &&  active && !owner.dead &&(stampTime-PastTime) >= Interval) {
+      float InAccurateAngle=random(-accuracy, accuracy);
+      projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle+90))*owner.w), int(owner.cy+sin(radians(owner.angle+90))*owner.w), 60, owner.playerColor, 800, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle+crossAngle))*36, sin(radians(owner.angle+InAccurateAngle+crossAngle))*36, int(damage)).addBuff(new Burn(owner, 150, 1, 50)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod))));
+      projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle-90))*owner.w), int(owner.cy+sin(radians(owner.angle)-90)*owner.w), 60, owner.playerColor, 800, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle-crossAngle))*36, sin(radians(owner.angle+InAccurateAngle-crossAngle))*36, int(damage)).addBuff(new Burn(owner, 150, 1, 50)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod))));
+      crossAngle-=1;
+      particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle+90))*owner.w), int(owner.cy+sin(radians(owner.angle)+90)*owner.w), 5, 22, 20, WHITE));
+      particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle-90))*owner.w), int(owner.cy+sin(radians(owner.angle)-90)*owner.w), 5, 22, 20, WHITE));
+      owner.ANGLE_FACTOR=MODIFIED_ANGLE_FACTOR;
+      r=50;
+      channel();
+      if (!active || energy<0 ) {
+        release();
+        onNoEnergy();
+      }
+      PastTime=stampTime;
+    } else if ((!freeze || owner.freezeImmunity) &&  active && !owner.dead &&(stampTime+freezeTime-PastTime) >= Interval) {
+      float InAccurateAngle=random(-accuracy, accuracy);
+      projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*36, sin(radians(owner.angle+InAccurateAngle))*36, int(damage)).addBuff(new Enlarge(owner, 3000, 4)).addBuff(new Burn(owner, 200, 1, 50)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod))));
+      particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle))*85), int(owner.cy+sin(radians(owner.angle))*85), 5, 22, 20, WHITE));
+      owner.ANGLE_FACTOR=MODIFIED_ANGLE_FACTOR;
+      r=50;
+      channel();
+      if (!active || energy<0 ) {
+        release();
+      }
+      PastTime=freezeTime+stampTime;
+    }
+    // if (!active)press(); // cancel
+    if (owner.hit) {
+      release(); // cancel
+    }
+  }
+  @Override
+    void release() {
+    if ((!reverse || owner.reverseImmunity ) ) {
+      if (!owner.dead && (!freeze || owner.freezeImmunity)&& active && channeling) {
+        //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+        stamps.add( new AbilityStamp(this));
+        crossAngle=0;
+
+        regen=true;
+        hold=false;
+        deChannel();
+        deactivate();
+        owner.MAX_ACCEL=owner.DEFAULT_MAX_ACCEL;
+        owner.ANGLE_FACTOR=owner.DEFAULT_ANGLE_FACTOR;
+      }
+    }
+  }
+  @Override
+    void passive() {
+    if (!owner.stealth) {
+      stroke(owner.playerColor);
+      strokeWeight(12);
+      if (r<maxR)r*=1.1;
+      line(owner.cx, owner.cy, owner.cx+cos(radians(owner.angle))*r, owner.cy+sin(radians(owner.angle))*r);
+    }
+  }
+  void reset() {
+    super.reset();
+    PastTime=stampTime;
+    Interval=int(140-attackSpeedMod*1.4); //100
 
     // channeling=false;
     // active=false;
@@ -2389,7 +2504,6 @@ class RapidFire extends Ability {//---------------------------------------------
     //release();
   }
 }
-
 class SerpentFire extends Ability {//---------------------------------------------------    SerpentFire   ---------------------------------
   float interval, accuracy = 5, MODIFIED_ANGLE_FACTOR=-0.0008, r=50, shootSpeed=60 ;
   int  minInterval=80, recoil =5 ;
@@ -3096,11 +3210,12 @@ class AssaultBattery extends Ability {//----------------------------------------
   @Override
     void action() {
     strokeWeight(1400);
+    fill(WHITE);
     stroke(owner.playerColor);
     if (flip==1) {
-      arc(owner.cx, owner.cy, 1800, 1800, radians(owner.angle-accuracy*1.0), radians(owner.angle));
+      arc(owner.cx, owner.cy, 2000, 2000, radians(owner.angle-accuracy*1.0), radians(owner.angle));
     } else {
-      arc(owner.cx, owner.cy, 1800, 1800, radians(owner.angle), radians(owner.angle+accuracy*1.0));
+      arc(owner.cx, owner.cy, 2000, 2000, radians(owner.angle), radians(owner.angle+accuracy*1.0));
     }
     strokeWeight(1);
     flip*=-1;
@@ -3848,7 +3963,7 @@ class CutThroat extends SeekGun {
     activeCost=5;
     channelCost=0.4;
     regenRate=0.3;
-    damage=9;
+    damage=13;
     critDamage=10;
     critChance=20;
     unlockCost=5500;
@@ -4002,7 +4117,7 @@ class CutThroat extends SeekGun {
         if (owner.armor<4)owner.armor=4;
         particles.add(new   AfterImage(int(owner.cx), int( owner.cy), 0, 0, owner.angle, 0, 0, 300, 150*targetTurnIndex+200, owner.playerColor, owner)); 
         particles.add(new  Gradient(  1000, int(owner.cx), int(owner.cy), 0, 0, dist(owner.x, owner.y, pcx, pcy)+owner.radius, int(owner.radius*2), 8, calcAngleBetween(pcx, pcy, owner.cx, owner.cy), owner.playerColor));
-        projectiles.add( new Slash(owner, int( owner.cx+cos(radians(owner.angle))*65), int(owner.cy+sin(radians(owner.angle))*65), 32, owner.playerColor, 130, owner.angle+100, 24, 140, sin(owner.keyAngle)*5, cos(owner.keyAngle)*5, int((damage+damageMod*0.1)*(2.5-targets.size()*.07)), false).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod))));
+        projectiles.add( new Slash(owner, int( owner.cx+cos(radians(owner.angle))*65), int(owner.cy+sin(radians(owner.angle))*65), 32, owner.playerColor, 130, owner.angle+100, 24, 140, sin(owner.keyAngle)*5, cos(owner.keyAngle)*5, int((damage+damageMod*0.1)*(2.5-targets.size()*.07)), false).hitOnce(true).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod))));
         // particles.add(new TempSlow(300, 0.1, 1.05));
 
         targetTurnIndex++;
@@ -6329,7 +6444,7 @@ class Chivalry extends Ability {
 
 class ChargeSlash extends Ability {//---------------------------------------------------    ChargeSlash   ---------------------------------
   //boolean charging;
-  final float MAX_FORCE=85, damageFactor=0.2;
+  final float MAX_FORCE=85, damageFactor=0.3;
   float forceAmount=0, MODIFIED_MAX_ACCEL=0.003, MODIFIED_ANGLE_FACTOR=0.1;
   float ChargeRate=0.85, restForce;
   boolean maxed;
@@ -6351,8 +6466,8 @@ class ChargeSlash extends Ability {//-------------------------------------------
       shakeTimer+=10;
     }
     particles.add(new  Gradient(  1000, int(owner.cx +cos(radians(owner.angle))*owner.radius), int(owner.cy+sin(radians(owner.angle))*owner.radius), 0, 0, int(forceAmount*11), int(owner.radius*2), 8, owner.angle, owner.playerColor));
-    projectiles.add(new Slash(owner, int(owner.cx), int(owner.cy), 150, WHITE, int(3.3*forceAmount), owner.angle, 50, 1.5*forceAmount+50, cos(radians(owner.angle))*forceAmount*.5, sin(radians(owner.angle))*forceAmount*.3, int(forceAmount*damageFactor)+int(damageMod*.2), true));
-    projectiles.add(new Slash(owner, int(owner.cx), int(owner.cy), 150, WHITE, 280, owner.angle, -20, 70, cos(radians(owner.angle))*forceAmount, sin(radians(owner.angle))*forceAmount, int(forceAmount*damageFactor*2)+int(damageMod*2), false));
+    projectiles.add(new Slash(owner, int(owner.cx), int(owner.cy), 150, WHITE, int(3.3*forceAmount), owner.angle, 50, 1.5*forceAmount+50, cos(radians(owner.angle))*forceAmount*.5, sin(radians(owner.angle))*forceAmount*.3, int(forceAmount*damageFactor)+int(damageMod*.4), true).hitOnce(true));
+    projectiles.add(new Slash(owner, int(owner.cx), int(owner.cy), 150, WHITE, 280, owner.angle, -20, 70, cos(radians(owner.angle))*forceAmount, sin(radians(owner.angle))*forceAmount, int(forceAmount*damageFactor*2)+int(damageMod*4), false).hitOnce(true));
     owner.teleport(owner.angle, forceAmount*11);
     //owner.x+=cos(radians(owner.angle))*forceAmount*11;
     //owner.y+=sin(radians(owner.angle))*forceAmount*11;
@@ -6360,7 +6475,7 @@ class ChargeSlash extends Ability {//-------------------------------------------
   @Override
     void press() {
     if (cooldown<stampTime&&(!reverse || owner.reverseImmunity)&&(!freeze || owner.freezeImmunity) && energy>(0+activeCost)&& !hold && !active && !channeling && !owner.dead) {
-      projectiles.add(new Slice(owner, int(owner.cx-cos(radians(owner.angle))*250), int(owner.cy-sin(radians(owner.angle))*250), 350, owner.playerColor, 180, owner.angle+145, 6, 130, cos(radians(owner.angle))*forceAmount*.5, sin(radians(owner.angle))*forceAmount*.5, int(30*damageFactor+damageMod*.1), false));
+      projectiles.add(new Slice(owner, int(owner.cx-cos(radians(owner.angle))*250), int(owner.cy-sin(radians(owner.angle))*250), 350, owner.playerColor, 180, owner.angle+145, 6, 130, cos(radians(owner.angle))*forceAmount*.5, sin(radians(owner.angle))*forceAmount*.5, int(20*damageFactor+damageMod*.1), false));
       activate();
       forceAmount=5;
       //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));

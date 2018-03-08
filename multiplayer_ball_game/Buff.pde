@@ -670,7 +670,7 @@ class CriticalHit extends Buff {
     super.transfer(formerOwner, formerEnemy);
     if (precent>random(100)) {
       owner.hit(damage);
-      particles.add(new Flash(5, 32, WHITE));  
+     // particles.add(new Flash(5, 32, WHITE));  
 
       fill(WHITE);
       stroke(enemy.playerColor);

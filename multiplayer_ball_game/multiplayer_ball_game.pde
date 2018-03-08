@@ -34,18 +34,18 @@ PGraphics GUILayer;
 PShader  Blur;
 boolean hitBox=false, cleanStart=true, preSelectedSkills=true, RandomSkillsOnDeath=false, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=false, inGame;
 boolean gradualCleaning=true;
-final float flashAmount=0.5, shakeAmount=0.8;
+final float flashAmount=0.3, shakeAmount=0.2;
 int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight, coins, mouseScroll;
 //int gameMode=0;
 GameType gameMode=GameType.MENU;
-final byte AmountOfPlayers=4, AmountOfModes=7; // start players
+final byte AmountOfPlayers=3, AmountOfModes=7; // start players
 final float DIFFICULTY_LEVEL=1.2;
 
 final int WHITE=color(255), GREY=color(172), BLACK=color(0), GOLD=color(255, 220, 0),RED=color(255, 0, 0),GREEN=color(0, 255, 0);
 final int speedFactor= 2;
 final float slowFactor= 0.3;
-final String version="0.7.17";
+final String version="0.7.19";
 static long prevMillis, addMillis, forwardTime, reversedTime, freezeTime, stampTime, fallenTime;
 final int baudRate= 19200;
 final static float DEFAULT_FRICTION=0.1;
@@ -56,6 +56,7 @@ static int playersAlive, playerAliveIndex; // amount of players alive
 static float GUIpercent;
 
 static Player AI;
+final  boolean xBox=false;
 final int offsetX=1250, offsetY=-50;//final int offsetX=950, offsetY=100;
 static int shakeTimer, shakeX=0, shakeY=0, maxShake=80;
 final float DEFAULT_ZOOMRATE=0.02;
@@ -190,7 +191,8 @@ void setup() {
     new HitScanGun(), 
     new HanzoMain(), 
     new Ravine(),
-    new CutThroat()
+    new CutThroat(),
+    new CrossFire()
   };
 
   passiveList = new Ability[]{
@@ -280,7 +282,7 @@ void setup() {
 
   println("loaded save ... abilities!");
   abilities= new Ability[][]{ 
-  /* player 1 */    new Ability[]{new CutThroat(), new Tumble()}, 
+  /* player 1 */    new Ability[]{new Torpedo(), new MpRegen()}, 
   /* player 2 */    new Ability[]{new CutThroat(), new Random().randomize(passiveList)}, 
   /* player 3 mouse */    new Ability[]{new  Random().randomize(abilityList), new  Random().randomize(passiveList)}, 
   /* player 4 */    new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
@@ -389,7 +391,7 @@ void setup() {
    PApplet sa = new PApplet();
    PApplet.runSketch(args, sa);
    */
-  xBoxSetup();
+  if(xBox)xBoxSetup();
 }
 void stop() {
   musicPlayer.pause(true);
@@ -397,7 +399,7 @@ void stop() {
 }
 
 void draw() {
-  getXboxInput() ;
+ if(xBox)  getXboxInput() ;
   /*if (cheatEnabled && (gameMode!=GameType.MENU || gameMode!=GameType.SHOP ) && stampTime>500) {    
    //tempOffsetX=(tempZoom*zoom)*(width)-(tempZoom*zoom)*players.get(0).cx-(tempZoom*zoom)*(width*.75);
    //tempOffsetY=(tempZoom*zoom)*(height)-(tempZoom*zoom)*players.get(0).cy-(tempZoom*zoom)*(height*.75);
@@ -513,7 +515,20 @@ void draw() {
     checkPlayerVSProjectileColloision();
 
     try {
-      for (Player p : players) {       
+      for (int i =0; i <players.size();i++) {       
+        if (!players.get(i).dead) {
+          if (!freeze ||  players.get(i).freezeImmunity) {
+            players.get(i).mouseControl() ;
+            //p.update();
+            if (!reverse || players.get(i).reverseImmunity) {
+              players.get(i).checkBounds();
+            }
+          }
+          players.get(i).update();
+          players.get(i).display();
+        }
+      }
+      /*for (Player p : players) {       
         if (!p.dead) {
           if (!freeze ||  p.freezeImmunity) {
             p.mouseControl() ;
@@ -525,7 +540,7 @@ void draw() {
           p.update(); // !!!
           p.display();
         }
-      }
+      }*/
     }
     catch(Exception e) {
       println(e +" player update");
@@ -551,7 +566,7 @@ void draw() {
       if (!p.dead) {
         p.state=0;
         p.hit=false;
-      } else     if (gradualCleaning &&!reverse &&  p.index>AmountOfPlayers ) { //
+      } else if (gradualCleaning &&!reverse &&  p.index>AmountOfPlayers ) { //
         players.remove(p);
         break;
       }

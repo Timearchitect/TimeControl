@@ -36,6 +36,7 @@ class Turret extends Player implements Containable {
 
   void displayAbilityEnergy() {
   }
+  
   void display() {
     if (!stealth) {
       stroke((freeze && !freezeImmunity)?255:0);
