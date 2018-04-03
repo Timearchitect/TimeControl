@@ -1642,6 +1642,167 @@ class Bomb extends Projectile implements Reflectable, Containable, Container {//
   }
 }
 
+class FlashBang extends Projectile implements Reflectable, Containable, Container {//----------------------------------------- Bomb objects ----------------------------------------------------
+
+  float  friction=0.98, shakeness;
+  int blastForce=30, flick;
+  boolean friendlyFire;
+  Projectile parent;
+  Containable[] payload;
+  FlashBang(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage, boolean _friendlyFire) {
+    super(_owner, _x, _y, _size, _projectileColor, _time);
+    angle=_angle;
+    damage=_damage;
+    blastRadius=800;
+    vx= _vx;
+    vy= _vy;
+    friendlyFire=false;
+    /*  for (int i=0; i<2; i++) {
+     particles.add(new Particle(int(x), int(y), random(10)-5+vx*0.5, random(10)-5+vy*0.5, int(random(20)+5), 800, WHITE));
+     }*/
+    shakeness=damage*.1;
+  }
+
+  void update() {
+    if (!dead && !freeze) { 
+      flick=int(random(255));
+      if (reverse) {  // inverse function
+        vx/=1-((1-friction)*timeBend);
+        vy/=1-((1-friction)*timeBend);
+        x-=vx*timeBend;
+        y-=vy*timeBend;
+      } else {
+        x+=vx*timeBend;
+        y+=vy*timeBend;
+        vx*=1-((1-friction)*timeBend);
+        vy*=1-((1-friction)*timeBend);
+      }
+    }
+  }
+
+  void display() {
+    if (!dead) { 
+      super.display();
+      displayHitBox(blastRadius);
+      strokeWeight(5);
+      stroke((friendlyFire)? BLACK:color(owner.playerColor));
+      fill((friendlyFire)? BLACK:color(owner.playerColor));
+      ellipse(x, y, (size*(deathTime-stampTime)/time)-size, (size*(deathTime-stampTime)/time)-size );
+      noFill();
+      stroke(flick);
+      ellipse(x, y, size, size);
+      /*if ((deathTime-stampTime)<=100)size=400;
+       else size=50;*/
+    }
+  }
+
+  void hitPlayersInRadius(int range, boolean _friendlyFire) {
+    if (!freeze &&!reverse) { 
+
+      for (Player p : players) { 
+        if ( !p.dead && (p.ally !=owner.ally || _friendlyFire)) { //players.get(i).index!= playerIndex && 
+          if (dist(x, y, p.cx, p.cy)<range) {
+            super.hit(p);
+            p.hit(damage);
+            p.pushForce(blastForce, calcAngleFromBlastZone(x, y, p.cx, p.cy));
+          }
+        }
+      }
+    }
+  }
+
+
+  @Override
+    void fizzle() {    // when fizzle
+    if ( !dead) {         
+      super.fizzle();
+      for (int i=0; i<5; i++) {
+        particles.add(new Particle(int(x), int(y), random(-80, 80), random(-80, 80), int(random(30)+10), 800, 255));
+      }
+      if (payload!=null) {
+        for (Containable p : payload) {
+          if (p!=null) {
+            if (p instanceof Particle )particles.add((Particle)p);
+            if (p instanceof Player )players.add((Player)p);
+            if (p instanceof Projectile ) projectiles.add((Projectile)p);
+            p.unWrap();
+          }
+        }
+      } else {
+        //   particles.add(new ShockWave(int(x), int(y), int(blastRadius*0.5), 16, 200, WHITE));
+        //   particles.add(new ShockWave(int(x), int(y), int(blastRadius*0.4), 32, 150, (friendlyFire)? BLACK:color(owner.playerColor)));
+        particles.add(new ShockWave(int(x), int(y), int(blastRadius*1), 16, 200, WHITE));
+        particles.add(new ShockWave(int(x), int(y), int(blastRadius*1), 36, 200, WHITE));
+
+        particles.add(new ShockWave(int(x), int(y), int(blastRadius*0.8), 32, 150, (friendlyFire)? BLACK:color(owner.playerColor)));
+        particles.add(new Flash(3000, 1, WHITE));
+        particles.add(new TempSlow(200, 0.5, 1.05));
+
+        hitPlayersInRadius(blastRadius, friendlyFire);
+        shakeTimer+=shakeness;
+      }
+    }
+  }
+
+  public void reflect(float _angle, Player _player) {
+    //angle=_angle;
+    playerIndex=_player.index;
+    owner=_player;
+    projectileColor=owner.playerColor;
+    ally=owner.ally;
+    if (payload!=null) {
+      for (Containable p : payload) {
+        if (p!=null) {
+
+          if (p instanceof Particle )particles.add((Particle)p);
+          if (p instanceof Player )players.add((Player)p);
+          if (p instanceof Projectile ) {         
+            projectiles.add((Projectile)p);
+            ((Projectile)p).owner=owner;
+            ((Projectile)p).ally=ally;
+            ((Projectile)p).projectileColor=projectileColor;
+          }
+
+          p.unWrap();
+        }
+      }
+    } 
+    particles.add(new Spark( 1000, int(x), int(y), -cos(radians(angle))*5, -sin(radians(angle))*5, 6, angle, projectileColor));
+
+    float diff=_angle;
+
+    angle-=diff;
+    // angle=angle%360;
+
+    angle=-angle;
+    angle+=diff;
+
+    particles.add(new Spark( 1000, int(x), int(y), -cos(radians(angle))*5, -sin(radians(angle))*5, 6, angle, projectileColor));
+    vx= cos(radians(angle))*(abs(vx)+abs(vy));
+    vy= sin(radians(angle))*(abs(vx)+abs(vy));
+  }
+  Containable parent(Container _parent) {
+    parent=(Projectile)_parent;
+    return this;
+  }
+  void unWrap() {
+    resetDuration();
+    x+=parent.x;
+    y+=parent.y;
+    PVector vel=new PVector(vx, vy);
+    PVector pVel=new PVector(parent.vx, parent.vy);
+    vel.rotate(parent.angle);
+    vel.add(pVel);
+    vx=vel.x;
+    vy=vel.y;
+  }
+  Container contains(Containable[] _payload) {
+    payload=_payload;
+    return this;
+  }
+}
+
+
 class Granade extends Bomb {
   float count;
   Granade(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage, boolean _friendlyFire) {
@@ -3066,7 +3227,7 @@ class Stab extends Projectile implements Destroyer {//--------------------------
     particles.add(new Fragment(int(destroyedP.x), int(destroyedP.y), 0, 0, 40, 10, 500, 100, owner.playerColor) );
   }
 }
-class Boomerang extends Projectile implements Reflectable {//----------------------------------------- Boomerang objects ----------------------------------------------------
+class Boomerang extends Projectile implements Reflectable,Destroyer {//----------------------------------------- Boomerang objects ----------------------------------------------------
   float v, spray=16, pCX, pCY, graceTime=500, displayAngle, selfHitAngle=80, recoverEnergy, angleSpeed=20;
   Boomerang(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, float _damage, float _recoverEnergy, float _angleSpeed) {
     super(_owner, _x, _y, _size, _projectileColor, _time);
@@ -3191,6 +3352,12 @@ class Boomerang extends Projectile implements Reflectable {//-------------------
     //vx=-vx*1.5;
     //vy=-vy*1.5;
   }
+   public void destroying(Projectile destroyerP){
+    for (int i=0; i<2; i++) {
+      particles.add(new Particle(int(x), int(y), random(10)-5-vx, random(10)-5-vy, int(random(20)+5), 800, destroyerP.owner.playerColor));
+    }
+   }
+
 }
 
 class HomingMissile extends Projectile implements Reflectable, Destroyable, Containable {//----------------------------------------- HomingMissile objects ----------------------------------------------------

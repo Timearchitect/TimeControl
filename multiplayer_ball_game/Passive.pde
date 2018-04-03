@@ -108,7 +108,7 @@ class Reward extends Ability {//------------------------------------------------
     type=AbilityType.NATIVE;
     name=getClassName(this);
     unlockCost=500;
-    println("reward "+bonus);
+    //println("reward "+bonus);
     assambleTooltip("onDeath trigger");
   } 
   /*@Override
@@ -905,7 +905,7 @@ class Nova extends Ability {//--------------------------------------------------
   }
   @Override
     void release() {
-    if (cooldown>50) {
+    if (cooldown>50 && !owner.dead) {
       cooldown=0;
 
       projectiles.add( new Slash(owner, int( owner.cx+sin(owner.keyAngle)*60), int(owner.cy+cos(owner.keyAngle)*60), 40, owner.playerColor, 200, owner.angle-100, -24, 150, sin(owner.keyAngle)*10, cos(owner.keyAngle)*10, 4, true));
@@ -1117,9 +1117,9 @@ class Glide extends Ability {//-------------------------------------------------
 }
 
 class Guardian extends Ability {//---------------------------------------------------    bullet   ---------------------------------
-  int cooldown, maxRange=600;
+  int cooldown, maxRange=400;
   float range;
-  final int interval=5;
+  final int interval=7;
   boolean trigger;
   Guardian() {
     super();

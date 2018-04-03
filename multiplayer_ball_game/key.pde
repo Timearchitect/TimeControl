@@ -28,7 +28,18 @@ void keyPressed() {
     musicPlayer.pause(mute);
     particles.add(new Flash(3000, 3, 0));
   }
-
+  if(key=='½'){
+     //random weapon
+    for (Player p : players) {    
+      if (p!=AI&&!p.clone &&  !p.turret) {  // no turret or clone respawn
+        p.reset();
+        announceAbility( p, 1);
+      } else {
+        p.dead=true;
+        p.state=0;
+      }
+    }
+  }
   if ((cheatEnabled||playersAlive<=1 ) && key==ResetKey) {
 
     if (!noFlash) background(255);

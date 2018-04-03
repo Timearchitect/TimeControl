@@ -32,9 +32,9 @@ final color BGcolor=color(100);
 PFont font;
 PGraphics GUILayer;
 PShader  Blur;
-boolean hitBox=false, cleanStart=true, preSelectedSkills=true, RandomSkillsOnDeath=false, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=false, inGame;
+boolean hitBox=false, cleanStart=true, preSelectedSkills=true, RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=false, inGame;
 boolean gradualCleaning=true;
-final float flashAmount=0.3, shakeAmount=0.2;
+final float flashAmount=0.8, shakeAmount=0.2;
 int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight, coins, mouseScroll;
 //int gameMode=0;
@@ -92,7 +92,7 @@ Ability westAbilityList[], westPassiveList[];
 Ability[][] abilities= new Ability[AmountOfPlayers][];
 int playerControl[][]= {
   { UP, DOWN, LEFT, RIGHT, int(',') }
-  , { int('w')-32, int('s')-32, int('a')-32, int('d')-32, int('t')-32 }
+  , { int('w')-32, int('s')-32, int('a')-32, int('d')-32, int('e')-32 }
   , { 888, 888, 888, 888, 888 }// mouse 
   , { int('i')-32, int('k')-32, int('j')-32, int('l')-32, int('ö')-32 }
   , { int('g')-32, int('b')-32, int('v')-32, int('n')-32, int('m')-32}
@@ -192,7 +192,8 @@ void setup() {
     new HanzoMain(), 
     new Ravine(),
     new CutThroat(),
-    new CrossFire()
+    new CrossFire(),
+    new FlashBomb()
   };
 
   passiveList = new Ability[]{

@@ -88,6 +88,7 @@ class Player implements Cloneable {
   }
   void checkBounds() {
     //if (!reverse && reverseImmunity) {
+    
     if (x<0) {
       stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
       x=0;

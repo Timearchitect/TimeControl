@@ -1,7 +1,7 @@
 boolean pMousePressed;
 void mousePressed() {
-  if (cheatEnabled)if (mouseButton==RIGHT)coins-=100;
-  else coins+=100;
+
+ 
   try {
     for (Player p : players) {
       if (p.mouse && !p.dead && !p.stunned&&(!reverse || p.reverseImmunity || p.abilityList.get(0).meta)) { 
@@ -17,6 +17,8 @@ void mousePressed() {
     println(e +" mouse");
   }
   if (cheatEnabled) {
+    if (mouseButton==RIGHT)coins-=100;
+    else  coins+=100;
     // if (mouseButton==LEFT) particles.add(new TempZoom(mouseX, mouseY, 2000, 1,DEFAULT_ZOOMRATE,false));
     // if (mouseButton==RIGHT)particles.add(new TempZoom(mouseX, mouseY, 2000, 0.5,DEFAULT_ZOOMRATE,false));
     //spawn(new HomingMissile(AI, mouseX, mouseY, 70, BLACK, 5000, 0, 0, 0, 10));
@@ -63,9 +65,8 @@ void mouseReleased() {
 }
 
 void mouseWheel(MouseEvent event) {
-  float e = event.getCount();
     mouseScroll=0;
-  if (e>0) {
+  if (event.getCount()>0) {
     mouseScroll=1;
   } else {
       mouseScroll=-1;

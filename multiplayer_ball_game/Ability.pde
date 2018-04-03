@@ -1897,6 +1897,62 @@ class TimeBomb extends Ability {//----------------------------------------------
     }
   }
 }
+class FlashBomb extends Ability {//---------------------------------------------------    TimeBomb   ---------------------------------
+  int damage=10;
+  int shootSpeed=12;
+  FlashBomb() {
+    super();
+    icon=icons[6];
+    //name=getClassName(this);
+    activeCost=12;
+    regenRate=0.32;
+    energy=maxEnergy*0.5;
+    unlockCost=2500;
+    assambleTooltip("Tap");
+  } 
+  @Override
+    void action() {
+    owner.pushForce(-8, owner.angle);
+    //if (int(random(5))!=0) {
+    /*if (energy<maxEnergy-activeCost) {
+      projectiles.add( new FlashBang(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, int(random(500, 2200)), owner.angle, cos(radians(owner.angle))*shootSpeed, sin(radians(owner.angle))*shootSpeed, int(damage+damageMod), true));
+    } else {
+      projectiles.add( new Mine(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 80000, owner.angle, cos(radians(owner.angle))*shootSpeed*0.5, sin(radians(owner.angle))*shootSpeed*0.5, int(damage+damageMod), true));
+      particles.add(new Particle(int(owner.cx+cos(radians(owner.angle))*325), int(owner.cy+sin(radians(owner.angle))*325), 0, 0, 100, 300, BLACK));
+    }*/
+     projectiles.add( new FlashBang(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, int(random(500, 2200)), owner.angle, cos(radians(owner.angle))*shootSpeed, sin(radians(owner.angle))*shootSpeed, int(damage+damageMod), true));
+
+    owner.angle+=random(-30, 30);
+  }
+  @Override
+    void passive() {
+    if (energy>=maxEnergy) {
+      noFill();
+      strokeWeight(4);
+      stroke(owner.playerColor);
+      rect(owner.cx+cos(radians(owner.angle))*325-25, owner.cy+sin(radians(owner.angle))*325-25, 50, 50);
+      stroke(color(random(255)));
+      rect(owner.cx+cos(radians(owner.angle))*325-35, owner.cy+sin(radians(owner.angle))*325-35, 70, 70);
+      for (int i = 0; i <= 7; i++) {
+        float x = lerp(owner.cx, owner.cx+cos(radians(owner.angle))*325, i/10.0) + 10;
+        float y = lerp(owner.cy, owner.cy+sin(radians(owner.angle))*325, i/10.0);
+        point(x, y);
+      }
+    }
+  }
+
+  @Override
+    void press() {
+    if ((!reverse || owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)) {
+      //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
+      stamps.add( new AbilityStamp(this));
+      regen=true;
+      activate();
+      action();
+      deactivate();
+    }
+  }
+}
 class GranadeLauncher extends Ability {//---------------------------------------------------    TimeBomb   ---------------------------------
   int damage=40;
   int shootSpeed=42;
@@ -4651,9 +4707,9 @@ class DeployShield extends Ability {//------------------------------------------
     super();
     icon=icons[35];
     //name=getClassName(this);
-    activeCost=35;
-    cooldownTimer=2800;
-    unlockCost=2000;
+    activeCost=40;
+    cooldownTimer=3200;
+    unlockCost=2200;
     assambleTooltip("Tap");
   } 
   @Override
