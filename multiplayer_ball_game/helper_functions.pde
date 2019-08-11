@@ -169,7 +169,7 @@ static float  calcAngleBetween(Projectile target, Projectile from) {
   return degrees(atan2((target.y-from.y), (target.x-from.x)))%360;
 }
 
-static float  calcAngleBetween(float x,float y,float x2,float y2) {
+static float  calcAngleBetween(float x, float y, float x2, float y2) {
   return degrees(atan2((y-y2), (x-x2)))%360;
 }
 static float  calcAngleBetween(Projectile target, Player from) {
@@ -246,4 +246,39 @@ Projectile mergePayload( Projectile p, Containable[] c) {
   for (Containable pay : payload)pay.parent((Container)p);
   s.contains(payload);
   return (Projectile)s;
+}
+
+
+class QuadTree {
+  int x, y, w, h;
+  byte capacity;
+  PVector[] points;
+  boolean divided;
+  QuadTree northWest, northEast, southWest, southEast;
+
+  QuadTree(int _x, int _y, int _w, int _h) {
+    x=_x;
+    y=_y;
+    w=_w;
+    h=_h;
+  }
+void show(){
+  noFill();
+  rect(x,y,w,h);
+
+}
+  void subdivide() {
+    int hw=int(w*0.5f),hh=int(h*0.5f);
+    northWest= new QuadTree(0,0,hw,hh);
+    northEast= new QuadTree(hw,0,hw,hh);
+    southWest= new QuadTree(0,hh,hw,hh);
+    southEast= new QuadTree(hw,hh,hw,hh);
+  }
+  void insert( PVector p){
+     if(p.x>x  && p.x< x+w &&p.y > y&& p.y < y+h ){
+       if(points.length > capacity){
+         subdivide();
+       }
+     }
+  }
 }

@@ -28,8 +28,8 @@ void keyPressed() {
     musicPlayer.pause(mute);
     particles.add(new Flash(3000, 3, 0));
   }
-  if(key=='½'){
-     //random weapon
+  if (key=='½') {
+    //random weapon
     for (Player p : players) {    
       if (p!=AI&&!p.clone &&  !p.turret) {  // no turret or clone respawn
         p.reset();
@@ -124,10 +124,10 @@ void keyPressed() {
        }*/
     }
     if (key=='/') {
-      for(Button b:bList)b.a.unlocked=true;
+      for (Button b : bList)b.a.unlocked=true;
     }
     if (key=='*') {
-      for(Button b:bList)if(b.a.sellable)b.a.unlocked=false;
+      for (Button b : bList)if (b.a.sellable)b.a.unlocked=false;
     }
     if (key==DELETE) {
       clearGame();
@@ -327,10 +327,13 @@ void keyPressed() {
   if (gameMode==GameType.SETTINGS) {
     try {
       for (int i=0; i< players.size()-1; i++) {
+  
+        
         if (key==Character.toLowerCase(players.get(i).triggKey)) {// ability trigg key
-                    if(abilities[i][abilitySettingsIndex[i]].type==AbilityType.ACTIVE){
-                      abilities[i][abilitySettingsIndex[i]]=new NoPassive();
-                    }else abilities[i][abilitySettingsIndex[i]]=new NoActive();
+
+          if (abilities[i][abilitySettingsIndex[i]].type==AbilityType.ACTIVE) {
+            abilities[i][abilitySettingsIndex[i]]=new NoPassive();
+          } else abilities[i][abilitySettingsIndex[i]]=new NoActive();
         }
 
         if (keyCode==players.get(i).down) {//down
@@ -338,7 +341,7 @@ void keyPressed() {
             if (abilities[i][abilitySettingsIndex[i]].getClass()==abilityList[j].getClass()) {
               while ( j==0 || !abilityList[j-1].unlocked ) {
                 j--;
-               if (j<=0)j=abilityList.length;
+                if (j<=0)j=abilityList.length;
               }    
               try {
                 abilities[i][abilitySettingsIndex[i]]= abilityList[j-1].clone();
@@ -348,7 +351,7 @@ void keyPressed() {
               }
             }
           }
-           for (  int j=0; j<passiveList.length; j++) {
+          for (  int j=0; j<passiveList.length; j++) {
             if (abilities[i][abilitySettingsIndex[i]].getClass()==passiveList[j].getClass()) {
               while ( j==0 ||!passiveList[j-1].unlocked) {
                 if (j<=0)j=passiveList.length;
@@ -372,7 +375,7 @@ void keyPressed() {
                 if (j>=abilityList.length-1)j=-2;
                 j++;
               }
-     
+
               try {
                 abilities[i][abilitySettingsIndex[i]]= abilityList[j+1].clone();
               }
@@ -401,6 +404,7 @@ void keyPressed() {
           }
         }
         if (keyCode==players.get(i).left) {//left
+
           if (abilitySettingsIndex[i]>0) abilitySettingsIndex[i]--;
         }
         if (keyCode==players.get(i).right) {//right

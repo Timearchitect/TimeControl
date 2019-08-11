@@ -2,7 +2,7 @@ class Button {
   Ability a;
   int x, y, size, minSize=70, maxSize=90, textYMargin=65, nameYMargin=55, tooltipDelay=500;
   color pcolor=  color(255);
-  Boolean selected=false, hover, strokeless=false, deactivatable=true, resizeable=true;
+  Boolean selected=false, hover, strokeless=false, deactivatable=true, resizeable=true, active, pActive;
   long timer;
   Button(Ability _ability, int _x, int _y, int _size) {
     a= _ability;
@@ -30,7 +30,8 @@ class Button {
         selected=true;
         selectedAbility=a;
         if (a.unlocked && a.deactivatable) {
-          if (deactivatable)a.deactivated=!a.deactivated;
+          if (deactivatable)  a.deactivated=!a.deactivated;
+          
           int active=0;
           for (Ability as : abilityList) {
             if (!as.deactivated && as.unlocked )active++;
@@ -141,6 +142,7 @@ class UpgradebleButton extends Button {
     maxPlusSize=plusSize+20;
     maxMinusSize=minusSize+20;
   }
+
   void update() {
     super.update();
     if (a.unlocked ) {
@@ -149,8 +151,10 @@ class UpgradebleButton extends Button {
         plusHover=true;
         plusColor=GREEN;
         if (mousePressed && !pMousePressed) {
-          a.buy();
+          //a.buy();
+          a.upgrade();
           a.updateTooltips();
+          updateSkillPoints();
         }
       } else {
         plusHover=false;
@@ -161,8 +165,10 @@ class UpgradebleButton extends Button {
         minusHover=true;
         minusColor=RED;
         if (mousePressed && !pMousePressed) {
-          a.sell();
+         a.downgrade();
+         // a.sell();
           a.updateTooltips();
+          updateSkillPoints();
         }
       } else {
         minusHover=false;
@@ -196,10 +202,10 @@ class UpgradebleButton extends Button {
       text("+", x, y-size*.48);
       text("-", x, y+size*.52);
       textSize(24);
-      if(!hover) fill(BLACK,100);
+      if (!hover) fill(BLACK, 60);
       text(a.getLevel(), x, y);
       rectMode(CORNER);
-    }else    resizeable=true;
+    } else    resizeable=true;
   }
 }
 /*class StatButton extends Button {
@@ -356,7 +362,6 @@ class ModeButton extends Button {
     text(type.toString(), x+halfW, y+halfH);
   }
 }
-
 
 class SettingButton extends Button {
   Player player;
@@ -568,13 +573,22 @@ class StatButton extends Button {
 
       if (mouseScroll<0) {
         if (level<100) {
-          level++;
+          println("currentTotalSkillAmount[playerIndex]  " + currentTotalSkillAmount[playerIndex]);
+          println("skillMaxAmount[playerIndex]  " + skillMaxAmount[playerIndex]);
+
+          if ( currentTotalSkillAmount[playerIndex]<skillMaxAmount[playerIndex]) {
+            currentTotalSkillAmount[playerIndex]++;
+            level++;
+          }
           // change(1);
         }
       }
       if (mouseScroll>0) {
         if (level>0) {
-          level--;
+          if ( 0<currentTotalSkillAmount[playerIndex]) {
+            currentTotalSkillAmount[playerIndex]--;
+            level--;
+          }
           // change(-1);
         }
       }

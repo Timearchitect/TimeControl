@@ -600,7 +600,7 @@ class SnakeShield extends Ability {//-------------------------------------------
       //if (cooldown%360==i) {
       if (dist(owner.cx, owner.cy, x, y)>60) {
         float ang=degrees(atan2(y-owner.cy, x-owner.cx));
-        Shield s=new Shield( owner, int( owner.cx+cos(radians(ang))*60), int(owner.cy+sin(radians(ang))*60), owner.playerColor, 1500, ang, 0);
+        Shield s=new Shield( owner, int( owner.cx+cos(radians(ang))*60), int(owner.cy+sin(radians(ang))*60), owner.playerColor, 1400, ang, 0);
         s.size=45;
         projectiles.add( s);
         x=int(owner.cx);
@@ -1169,7 +1169,7 @@ class Guardian extends Ability {//----------------------------------------------
             p.deathTime=stampTime;   // dead on collision
             p.dead=true;
             particles.add(new ShockWave(int(p.x), int(p.y), 20, 80, 20, owner.playerColor));
-            range-=p.damage*8;
+            range-=p.damage*9;
             projectiles.remove(p);
             break;
           }
@@ -1656,7 +1656,7 @@ class Stalker extends Ability {//-----------------------------------------------
   }
 }
 class Scatter extends Ability {//---------------------------------------------------    bullet   ---------------------------------
-  int count, cooldown, damage=10;
+  int count, cooldown, damage=12;
   Scatter() {
     super();
     type=AbilityType.PASSIVE;

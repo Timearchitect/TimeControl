@@ -12,6 +12,7 @@
  //   link:  www.github.com/timearchitect/timecontrol          //
  //                                                            //
  --------------------------------------------------------------*/
+
 import processing.opengl.*;
 import beads.*;
 import java.util.Arrays; 
@@ -32,18 +33,22 @@ final color BGcolor=color(100);
 PFont font;
 PGraphics GUILayer;
 PShader  Blur;
-boolean hitBox=false, cleanStart=true, preSelectedSkills=true, RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=false, inGame;
+int MaxSkillAmount= 100;
+int[] skillMaxAmount,currentTotalSkillAmount;
+boolean hitBox=false,fixedSkillpoint=false, cleanStart=true, preSelectedSkills=true, RandomSkillsOnDeath=false, noFlash=true, noShake=true, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=false, inGame;
 boolean gradualCleaning=true;
-final float flashAmount=0.8, shakeAmount=0.2;
+final float flashAmount=0.2, shakeAmount=0.1;
 int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight, coins, mouseScroll;
+UpgradebleButton skillpointsButton;
 //int gameMode=0;
 GameType gameMode=GameType.MENU;
-final byte AmountOfPlayers=3, AmountOfModes=7; // start players
+final byte AmountOfPlayers=4, AmountOfModes=7; // start players
 final float DIFFICULTY_LEVEL=1.2;
 
-final int WHITE=color(255), GREY=color(172), BLACK=color(0), GOLD=color(255, 220, 0),RED=color(255, 0, 0),GREEN=color(0, 255, 0);
+final int WHITE=color(255), GREY=color(172), BLACK=color(0), GOLD=color(255, 220, 0), RED=color(255, 0, 0), GREEN=color(0, 255, 0);
 final int speedFactor= 2;
+final float MIN_DAMAGE=0.02;
 final float slowFactor= 0.3;
 final String version="0.7.19";
 static long prevMillis, addMillis, forwardTime, reversedTime, freezeTime, stampTime, fallenTime;
@@ -56,11 +61,11 @@ static int playersAlive, playerAliveIndex; // amount of players alive
 static float GUIpercent;
 
 static Player AI;
-final  boolean xBox=false;
+final  boolean xBox=true;
 final int offsetX=1250, offsetY=-50;//final int offsetX=950, offsetY=100;
 static int shakeTimer, shakeX=0, shakeY=0, maxShake=80;
 final float DEFAULT_ZOOMRATE=0.02;
-static float F=1, S=1, timeBend=1, zoom=0.8, tempZoom=1.0,actualPercentScale, tempOffsetX=0, tempOffsetY=0, zoomX, zoomY, zoomXAim, zoomYAim, zoomAim=1, zoomRate=0.02;
+static float F=1, S=1, timeBend=1, zoom=0.8, tempZoom=1.0, actualPercentScale, tempOffsetX=0, tempOffsetY=0, zoomX, zoomY, zoomXAim, zoomYAim, zoomAim=1, zoomRate=0.02;
 final int keyResponseDelay=30;  // eventhe refreashrate equal to arduino devices
 final char keyRewind='§', keyFreeze='x', keyFastForward='f', keySlow='z', keyIceDagger='p', ResetKey='0', RandomKey='7';
 final int ICON_AMOUNT=60;
@@ -190,10 +195,11 @@ void setup() {
     new Chivalry(), 
     new HitScanGun(), 
     new HanzoMain(), 
-    new Ravine(),
-    new CutThroat(),
-    new CrossFire(),
-    new FlashBomb()
+    new Ravine(), 
+    new CutThroat(), 
+    new CrossFire(), 
+    new FlashBomb(), 
+    new Explosion()
   };
 
   passiveList = new Ability[]{
@@ -290,7 +296,10 @@ void setup() {
     new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
     new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}
   };
-
+  currentTotalSkillAmount= new int[AmountOfPlayers];
+  skillMaxAmount= new int[AmountOfPlayers];
+  updateSkillPoints();
+  
   //ChloeSet = new Ability[]{new ForceShoot(),new RapidFire(), new Dash(), new Tumble(),new Emergency()};
   //abilities[1]=ChloeSet;
 
@@ -330,12 +339,12 @@ void setup() {
   try {  
     // initialize the SamplePlayer
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/TooManyCooksAdultSwim.mp3"));
-     musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
+    musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Branching time.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/orange caramel -aing.mp3"));
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/goodbye.mp3"));
-   //  musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/wierd.mp3"));
+    //  musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/wierd.mp3"));
   }
   catch(Exception e) {
     println("Exception while attempting to load sample!");
@@ -392,7 +401,7 @@ void setup() {
    PApplet sa = new PApplet();
    PApplet.runSketch(args, sa);
    */
-  if(xBox)xBoxSetup();
+  if (xBox)xBoxSetup();
 }
 void stop() {
   musicPlayer.pause(true);
@@ -400,7 +409,7 @@ void stop() {
 }
 
 void draw() {
- if(xBox)  getXboxInput() ;
+  if (xBox)  getXboxInput() ;
   /*if (cheatEnabled && (gameMode!=GameType.MENU || gameMode!=GameType.SHOP ) && stampTime>500) {    
    //tempOffsetX=(tempZoom*zoom)*(width)-(tempZoom*zoom)*players.get(0).cx-(tempZoom*zoom)*(width*.75);
    //tempOffsetY=(tempZoom*zoom)*(height)-(tempZoom*zoom)*players.get(0).cy-(tempZoom*zoom)*(height*.75);
@@ -478,7 +487,7 @@ void draw() {
     stroke(BLACK);
     strokeWeight(10);
     //rect(-10, -10, width+20, height+20); // background
-    rect(0,0, width, height); // background
+    rect(0, 0, width, height); // background
 
 
     //--------------------- projectiles-----------------------
@@ -516,7 +525,7 @@ void draw() {
     checkPlayerVSProjectileColloision();
 
     try {
-      for (int i =0; i <players.size();i++) {       
+      for (int i =0; i <players.size(); i++) {       
         if (!players.get(i).dead) {
           if (!freeze ||  players.get(i).freezeImmunity) {
             players.get(i).mouseControl() ;
@@ -530,18 +539,18 @@ void draw() {
         }
       }
       /*for (Player p : players) {       
-        if (!p.dead) {
-          if (!freeze ||  p.freezeImmunity) {
-            p.mouseControl() ;
-            //p.update();
-            if (!reverse || p.reverseImmunity) {
-              p.checkBounds();
-            }
-          }
-          p.update(); // !!!
-          p.display();
-        }
-      }*/
+       if (!p.dead) {
+       if (!freeze ||  p.freezeImmunity) {
+       p.mouseControl() ;
+       //p.update();
+       if (!reverse || p.reverseImmunity) {
+       p.checkBounds();
+       }
+       }
+       p.update(); // !!!
+       p.display();
+       }
+       }*/
     }
     catch(Exception e) {
       println(e +" player update");
@@ -630,7 +639,7 @@ void draw() {
       settingsUpdate();
       break;
     default:
-    
+
       break;
     }
   }

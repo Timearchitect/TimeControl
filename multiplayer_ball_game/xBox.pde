@@ -43,7 +43,7 @@ void getXboxInput() {
     controller.poll();
    xBoxPlayer=players.get(xboxIndex);
     while (queue.getNextEvent(event)) {
-      println(event.getComponent().getName());
+      //println(event.getComponent().getName());
       //if(queue.getNextEvent(event)){
       // println(event.getComponent().getName(), event.getValue());
       switch(event.getComponent().getName()) {
@@ -232,6 +232,7 @@ void getXboxInput() {
         println("rumble");
       }
     }
+  settingsInput();
 
     if (xBoxInput[4] && !xBoxPlayer.holdTrigg) {// ability trigg key
       //p.ability.press();
@@ -247,24 +248,123 @@ void getXboxInput() {
       if ((!reverse || xBoxPlayer.reverseImmunity))xBoxPlayer.control(1);
       xBoxPlayer.holdUp=true;
     }
+    else  xBoxPlayer.holdUp=false;
+    
     if (xBoxInput[2]) {//down
       if ((!reverse || xBoxPlayer.reverseImmunity)) xBoxPlayer.control(0);
       xBoxPlayer.holdDown=true;
-    }
+    }    else  xBoxPlayer.holdDown=false;
+
     if (xBoxInput[0]) {//left
       if ((!reverse || xBoxPlayer.reverseImmunity)) xBoxPlayer.control(4);
       xBoxPlayer.holdLeft=true;
-    }
+    }    else  xBoxPlayer.holdLeft=false;
+
     if (xBoxInput[1]) {//right
       if ((!reverse || xBoxPlayer.reverseImmunity)) xBoxPlayer.control(5);
       xBoxPlayer.holdRight=true;
-    }
+    }    else  xBoxPlayer.holdRight=false;
 
 
 
 
 
 
-  
+
   }
+}
+
+
+void settingsInput(){
+ if (gameMode==GameType.SETTINGS) {
+    try {
+      for (int i=0; i< players.size()-1; i++) {
+      
+        if (xBoxInput[4]&&!xBoxPlayer.holdTrigg) {// ability trigg key
+
+          if (abilities[xboxIndex][abilitySettingsIndex[xboxIndex]].type==AbilityType.ACTIVE) {
+            abilities[xboxIndex][abilitySettingsIndex[xboxIndex]]=new NoPassive();
+          } else abilities[xboxIndex][abilitySettingsIndex[xboxIndex]]=new NoActive();
+        }
+
+        if (xBoxInput[2]&&!xBoxPlayer.holdDown) {//down
+          for (  int j=0; j<abilityList.length; j++) {
+            if (abilities[xboxIndex][abilitySettingsIndex[xboxIndex]].getClass()==abilityList[j].getClass()) {
+              while ( j==0 || !abilityList[j-1].unlocked ) {
+                j--;
+                if (j<=0)j=abilityList.length;
+              }    
+              try {
+                abilities[xboxIndex][abilitySettingsIndex[xboxIndex]]= abilityList[j-1].clone();
+              }
+              catch(CloneNotSupportedException e) {
+                println("not cloned from Random");
+              }
+            }
+          }
+          for (  int j=0; j<passiveList.length; j++) {
+            if (abilities[xboxIndex][abilitySettingsIndex[xboxIndex]].getClass()==passiveList[j].getClass()) {
+              while ( j==0 ||!passiveList[j-1].unlocked) {
+                if (j<=0)j=passiveList.length;
+                j--;
+              }
+              try {
+                abilities[xboxIndex][abilitySettingsIndex[xboxIndex]]= passiveList[j-1].clone();
+              }
+              catch(CloneNotSupportedException e) {
+                println("not cloned from Random");
+              }
+            }
+          }
+        }
+        if (xBoxInput[3]&&!xBoxPlayer.holdUp) {//up
+          // print("change Ability down ");
+          for (  int j=0; j<abilityList.length; j++) {
+            if (abilities[xboxIndex][abilitySettingsIndex[xboxIndex]].getClass()==abilityList[j].getClass()) {
+
+              while ( j>=abilityList.length-1 ||!abilityList[j+1].unlocked) {
+                if (j>=abilityList.length-1)j=-2;
+                j++;
+              }
+
+              try {
+                abilities[xboxIndex][abilitySettingsIndex[xboxIndex]]= abilityList[j+1].clone();
+              }
+              catch(CloneNotSupportedException e) {
+                println("not cloned from Random");
+              }
+
+              break;
+            }
+          }
+          for (  int j=0; j<passiveList.length; j++) {
+            if (abilities[xboxIndex][abilitySettingsIndex[xboxIndex]].getClass()==passiveList[j].getClass()) {
+              while (j>=passiveList.length-1 ||!passiveList[j+1].unlocked) {
+                if (j>=passiveList.length-1)j=-2;
+                j++;
+              }
+              try {
+                abilities[xboxIndex][abilitySettingsIndex[xboxIndex]]= passiveList[j+1].clone();
+              }
+              catch(CloneNotSupportedException e) {
+                println("not cloned from Random");
+              }
+
+              break;
+            }
+          }
+        }
+        if ( xBoxInput[0]&&!xBoxPlayer.holdLeft) {//left
+
+          if (abilitySettingsIndex[xboxIndex]>0) abilitySettingsIndex[xboxIndex]--;
+        }
+        if ( xBoxInput[1]&&!xBoxPlayer.holdRight) {//right
+          if (abilitySettingsIndex[xboxIndex]<players.get(i).abilityList.size()-1) abilitySettingsIndex[xboxIndex]++;
+        }
+      }
+    } 
+    catch(Exception e) {
+      println(e +" keyboard");
+    }
+}
 }

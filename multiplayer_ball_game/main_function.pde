@@ -53,7 +53,7 @@ void checkPlayerVSPlayerColloision() {
             if (p1.allyCollision || p2.allyCollision|| p1.ally!=p2.ally) {  
               p1.collide(p2);
               //if (!p1.allyCollision || !p1.allyCollision)p1.hit(p2.damage);
-              if(p1.ally!=p2.ally)p1.hit(p2.damage);
+              if (p1.ally!=p2.ally)p1.hit(p2.damage);
               //float  deltaX = p1.cx -  p2.cx , deltaY =  p1.cy -  p2.cy;
               //p1.pushForce( (p1.radius+p2.radius-dist(p2.cx, p2.cy, p1.cx, p1.cy)), atan2(p1.cy -  p2.cy, p1.cx -  p2.cx) * 180 / PI);
               p1.pushForce( (p1.radius+p2.radius-dist(p2.cx, p2.cy, p1.cx, p1.cy)), degrees(atan2(p1.cy -  p2.cy, p1.cx -  p2.cx)) );
@@ -497,7 +497,6 @@ void shopUpdate() {
       fill(BLACK);
       text("["+selectedAbility.type.toString().toLowerCase() +"]\n"+selectedAbility.name+"\n"+selectedAbility.unlockCost+" coins", halfWidth, height-150);
     }
-
     rectMode(CORNER);
   }
 }
@@ -519,6 +518,11 @@ void settingsUpdate() { //----------------------------------------------------  
   for (Player p : players) {
     fill(p.playerColor, 150);
     text("player "+(p.index+1), 250, p.index*200+settingSkillYOffset);
+  }
+  textSize(14);
+  for (Player p : players) {
+    fill(p.playerColor, 150);
+    text("SP "+ (skillMaxAmount[p.index]-currentTotalSkillAmount[p.index])+"/"+skillMaxAmount[p.index], 450, p.index*200+50);
   }
 
   fill(WHITE);
@@ -570,11 +574,23 @@ void loadProgress() throws Exception {
     }
     i++;
   }
-  bList.add(new UpgradebleButton(new SkillPoint(), int(shopXEdgePadding+(i*shopXInterval)%(width-shopXEdgePadding*2)), int(shopYEdgePadding+int(i*shopXInterval/(width-shopXEdgePadding*2))*shopYInterval), 70));
-
+  skillpointsButton=new UpgradebleButton(new SkillPoint(), int(shopXEdgePadding+(i*shopXInterval)%(width-shopXEdgePadding*2)), int(shopYEdgePadding+int(i*shopXInterval/(width-shopXEdgePadding*2))*shopYInterval), 70);
+  bList.add(skillpointsButton);
   coins=parseInt(s[i]);
 }
 
+void updateSkillPoints() {
+  for (int i=0; i< AmountOfPlayers; i++ ) {
+    if (fixedSkillpoint) skillMaxAmount[i]=MaxSkillAmount;
+    else skillMaxAmount[i]=skillpointsButton.a.getLevel();
+  }
+  for (int i=0; i< AmountOfPlayers; i++ ) {
+    currentTotalSkillAmount[i]=0;
+  }
+  for (StatButton sp : pSBList) {
+    sp.level=0;
+  }
+}
 void saveProgress() {
   save.clear();
   for (Ability a : abilityList) {

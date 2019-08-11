@@ -84,11 +84,17 @@ class Player implements Cloneable {
     shape(arrowSVG, -arrowSVG.width*0.5+30, -arrowSVG.height, arrowSVG.width, arrowSVG.height);
     //if(!clone) buffList.add(new Stun(this, AI, 2000));
     label="P"+(index+1);
+  }
+
+  Player setClone(boolean b) {
+    clone=b;
     if (clone)  label="P"+ (ally+1);
+    else      label="P"+(index+1);
+    return this;
   }
   void checkBounds() {
     //if (!reverse && reverseImmunity) {
-    
+
     if (x<0) {
       stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
       x=0;
@@ -406,6 +412,7 @@ class Player implements Cloneable {
   void hit(float damage) {
     if (!phase) {
       damage=damage-armor;
+      if(damage<=0) damage = MIN_DAMAGE;
       stamps.add( new StateStamp(index, int(x), int(y), state, health, dead));
       if (damage>0) {
         health-=damage;
@@ -561,7 +568,7 @@ class Player implements Cloneable {
     vx=0;
     vy=0;
   }
-    void halt(float _percent) {
+  void halt(float _percent) {
     vx*=_percent;
     vy*=_percent;
   }

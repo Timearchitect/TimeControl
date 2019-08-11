@@ -2771,8 +2771,8 @@ class Slash extends Projectile implements Destroyer {//-------------------------
   int traceAmount=8;
   float  angleV=24, range, lowRange, traceLowRange[]=new float[traceAmount];
   float pCX, pCY, traceAngle[]=new float[traceAmount];
-  boolean follow,hitOnce,hit;
-  
+  boolean follow, hitOnce, hit;
+
   Slash(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _angleV, float _range, float _vx, float _vy, int _damage, boolean _follow) {
     super(_owner, _x, _y, _size, _projectileColor, _time);
     follow=_follow;
@@ -2794,12 +2794,12 @@ class Slash extends Projectile implements Destroyer {//-------------------------
       particles.add(new Particle(int(x), int(y), random(10)-5+vx*0.5, random(10)-5+vy*0.5, int(random(20)+5), 800, 255));
     }
   }
-  
-  Projectile hitOnce(boolean _hitOnce){
+
+  Projectile hitOnce(boolean _hitOnce) {
     hitOnce=_hitOnce;
     return this;
   }
-  
+
   void update() {
     if (!dead && !freeze) { 
 
@@ -2892,15 +2892,15 @@ class Slash extends Projectile implements Destroyer {//-------------------------
   }
   @Override
     void hit(Player enemy) {
-      if(!hit){
-        super.hit(enemy);
-        enemy.hit(damage);
-        if(hitOnce)hit=true;
-        for (int i=0; i<3; i++)particles.add(new Particle(int(x), int(y), random(20)-10, random(20)-10, int(random(20)+5), 800, 255));
-        for (int i=0; i<2; i++)particles.add(new Particle(int(x), int(y), random(40)-20, random(40)-20, int(random(30)+10), 800, projectileColor));
-        particles.add(new LineWave(int(enemy.cx), int(enemy.cy), 15, 300, projectileColor, angle+90));
-        particles.add(new LineWave(int(enemy.cx), int(enemy.cy), 10, 200, WHITE, angle+90));
-      }
+    if (!hit) {
+      super.hit(enemy);
+      enemy.hit(damage);
+      if (hitOnce)hit=true;
+      for (int i=0; i<3; i++)particles.add(new Particle(int(x), int(y), random(20)-10, random(20)-10, int(random(20)+5), 800, 255));
+      for (int i=0; i<2; i++)particles.add(new Particle(int(x), int(y), random(40)-20, random(40)-20, int(random(30)+10), 800, projectileColor));
+      particles.add(new LineWave(int(enemy.cx), int(enemy.cy), 15, 300, projectileColor, angle+90));
+      particles.add(new LineWave(int(enemy.cx), int(enemy.cy), 10, 200, WHITE, angle+90));
+    }
   }
 
   void destroying(Projectile destroyedP) {
@@ -2915,11 +2915,11 @@ class Slice extends Slash implements Destroyer {//------------------------------
 
   float  angleV=24, range, lowRange, traceLowRange[]=new float[traceAmount];
   float pCX, pCY, traceAngle[]=new float[traceAmount];
-  float xOffset[]=new float[traceAmount], yOffset[]=new float[traceAmount],defaultSize;
+  float xOffset[]=new float[traceAmount], yOffset[]=new float[traceAmount], defaultSize;
   //boolean follow;
 
   Slice(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _angleV, float _range, float _vx, float _vy, int _damage, boolean _follow) {
-     super( _owner,  _x,  _y,  _size,  _projectileColor,   _time,  _angle,  _angleV,  _range,  _vx,  _vy,  _damage,  _follow);
+    super( _owner, _x, _y, _size, _projectileColor, _time, _angle, _angleV, _range, _vx, _vy, _damage, _follow);
 
     //super(_owner, _x, _y, _size, _projectileColor, _time);
     follow=_follow;
@@ -3053,22 +3053,22 @@ class Slice extends Slash implements Destroyer {//------------------------------
     dead=true;
   }
   /*@Override
-    void hit(Player enemy) {
-    super.hit(enemy);
-    enemy.hit(damage);
-    for (int i=0; i<3; i++)particles.add(new Particle(int(x), int(y), random(20)-10, random(20)-10, int(random(20)+5), 800, 255));
-    for (int i=0; i<2; i++)particles.add(new Particle(int(x), int(y), random(40)-20, random(40)-20, int(random(30)+10), 800, projectileColor));
-    particles.add(new LineWave(int(enemy.cx), int(enemy.cy), 15, 300, projectileColor, angle+90));
-    particles.add(new LineWave(int(enemy.cx), int(enemy.cy), 10, 200, WHITE, angle+90));
-  }
-
-  void destroying(Projectile destroyedP) {
-    fill(WHITE);
-    stroke(owner.playerColor);
-    strokeWeight(8);
-    triangle(x+random(50)-150, y+random(50)-25, x+random(50)+100, y+random(50)-25, x+random(50)-50, y+random(50)+75);
-    particles.add(new Fragment(int(destroyedP.x), int(destroyedP.y), 0, 0, 40, 10, 500, 100, owner.playerColor) );
-  }*/
+   void hit(Player enemy) {
+   super.hit(enemy);
+   enemy.hit(damage);
+   for (int i=0; i<3; i++)particles.add(new Particle(int(x), int(y), random(20)-10, random(20)-10, int(random(20)+5), 800, 255));
+   for (int i=0; i<2; i++)particles.add(new Particle(int(x), int(y), random(40)-20, random(40)-20, int(random(30)+10), 800, projectileColor));
+   particles.add(new LineWave(int(enemy.cx), int(enemy.cy), 15, 300, projectileColor, angle+90));
+   particles.add(new LineWave(int(enemy.cx), int(enemy.cy), 10, 200, WHITE, angle+90));
+   }
+   
+   void destroying(Projectile destroyedP) {
+   fill(WHITE);
+   stroke(owner.playerColor);
+   strokeWeight(8);
+   triangle(x+random(50)-150, y+random(50)-25, x+random(50)+100, y+random(50)-25, x+random(50)-50, y+random(50)+75);
+   particles.add(new Fragment(int(destroyedP.x), int(destroyedP.y), 0, 0, 40, 10, 500, 100, owner.playerColor) );
+   }*/
 }
 class Stab extends Projectile implements Destroyer {//----------------------------------------- Slash objects ----------------------------------------------------
   int traceAmount=8;
@@ -3227,7 +3227,7 @@ class Stab extends Projectile implements Destroyer {//--------------------------
     particles.add(new Fragment(int(destroyedP.x), int(destroyedP.y), 0, 0, 40, 10, 500, 100, owner.playerColor) );
   }
 }
-class Boomerang extends Projectile implements Reflectable,Destroyer {//----------------------------------------- Boomerang objects ----------------------------------------------------
+class Boomerang extends Projectile implements Reflectable, Destroyer {//----------------------------------------- Boomerang objects ----------------------------------------------------
   float v, spray=16, pCX, pCY, graceTime=500, displayAngle, selfHitAngle=80, recoverEnergy, angleSpeed=20;
   Boomerang(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, float _damage, float _recoverEnergy, float _angleSpeed) {
     super(_owner, _x, _y, _size, _projectileColor, _time);
@@ -3352,12 +3352,11 @@ class Boomerang extends Projectile implements Reflectable,Destroyer {//---------
     //vx=-vx*1.5;
     //vy=-vy*1.5;
   }
-   public void destroying(Projectile destroyerP){
+  public void destroying(Projectile destroyerP) {
     for (int i=0; i<2; i++) {
       particles.add(new Particle(int(x), int(y), random(10)-5-vx, random(10)-5-vy, int(random(20)+5), 800, destroyerP.owner.playerColor));
     }
-   }
-
+  }
 }
 
 class HomingMissile extends Projectile implements Reflectable, Destroyable, Containable {//----------------------------------------- HomingMissile objects ----------------------------------------------------
@@ -3384,7 +3383,7 @@ class HomingMissile extends Projectile implements Reflectable, Destroyable, Cont
     sh = createShape();
     c = createShape();
     sh.beginShape();
-     sh.strokeWeight(2);
+    sh.strokeWeight(2);
     sh.fill(255);
     sh.stroke(255, 50);
     sh.vertex(int (-size*0.25), int (-size*0.25) );
@@ -3821,6 +3820,11 @@ class Shield extends Projectile implements Reflector, Container { //------------
   public void reflecting() {
     brightness=500;
     particles.add(new ShockWave(int(x), int(y), size, 16, 100, WHITE));
+  }
+
+  public Projectile setSize(int s) {
+    size=s;
+    return this;
   }
 }
 
