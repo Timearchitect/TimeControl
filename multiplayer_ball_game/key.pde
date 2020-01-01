@@ -325,6 +325,7 @@ void keyPressed() {
   }
 
   if (gameMode==GameType.SETTINGS) {
+    println(players.get(1).statList.size());
     try {
       for (int i=0; i< players.size()-1; i++) {
   
@@ -337,6 +338,8 @@ void keyPressed() {
         }
 
         if (keyCode==players.get(i).down) {//down
+                
+        
           for (  int j=0; j<abilityList.length; j++) {
             if (abilities[i][abilitySettingsIndex[i]].getClass()==abilityList[j].getClass()) {
               while ( j==0 || !abilityList[j-1].unlocked ) {
@@ -367,6 +370,7 @@ void keyPressed() {
           }
         }
         if (keyCode==players.get(i).up) {//up
+ 
           // print("change Ability down ");
           for (  int j=0; j<abilityList.length; j++) {
             if (abilities[i][abilitySettingsIndex[i]].getClass()==abilityList[j].getClass()) {
@@ -398,17 +402,17 @@ void keyPressed() {
               catch(CloneNotSupportedException e) {
                 println("not cloned from Random");
               }
-
               break;
             }
           }
         }
         if (keyCode==players.get(i).left) {//left
-
           if (abilitySettingsIndex[i]>0) abilitySettingsIndex[i]--;
+          else abilitySettingsIndex[i]=players.get(i).abilityList.size()-1+10;
         }
         if (keyCode==players.get(i).right) {//right
-          if (abilitySettingsIndex[i]<players.get(i).abilityList.size()-1) abilitySettingsIndex[i]++;
+          if (abilitySettingsIndex[i]<players.get(i).abilityList.size()-1+10) abilitySettingsIndex[i]++;
+          else abilitySettingsIndex[i]=0;
         }
       }
     } 
@@ -422,9 +426,7 @@ void keyPressed() {
      }
      }*/
   }
-
-  //   keyCooldown[i]=keyResponseDelay;
-
+  // keyCooldown[i]=keyResponseDelay;
   // keyCooldown[i]--;
   //  }
 }

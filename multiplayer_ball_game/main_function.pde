@@ -90,25 +90,31 @@ void checkPlayerVSProjectileColloision() {
 }
 void checkProjectileVSProjectileColloision() {
   if (!freeze &&!reverse) {
-    for (Projectile p1 : projectiles) {    
-      for (Projectile p2 : projectiles) {      
-        if ( !p2.dead && !p1.dead &&p2.ally!=p1.ally ) { //  && p1!=p2
-          if (p1 instanceof  Reflectable  && p2 instanceof Reflector) {
-            //if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*.5+p2.size*.5) {
-            if (dist(p1.x, p1.y, p2.x, p2.y)<(p1.size+p2.size)*.5) {
-              ((Reflectable)p1).reflect(p2.angle, p2.owner);
-              ((Reflector)p2).reflecting();
+    try { 
+      for (Projectile p1 : projectiles) {
+
+        for (Projectile p2 : projectiles) {      
+          if ( !p2.dead && !p1.dead &&p2.ally!=p1.ally ) { //  && p1!=p2
+            if (p1 instanceof  Reflectable  && p2 instanceof Reflector) {
+              //if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*.5+p2.size*.5) {
+              if (dist(p1.x, p1.y, p2.x, p2.y)<(p1.size+p2.size)*.5) {
+                ((Reflectable)p1).reflect(p2.angle, p2.owner);
+                ((Reflector)p2).reflecting();
+              }
             }
-          }
-          if (p1 instanceof  Destroyable  && p2 instanceof Destroyer) {
-            // if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*.5+p2.size*.5) {
-            if (dist(p1.x, p1.y, p2.x, p2.y)<(p1.size+p2.size)*.5) {
-              ((Destroyable)p1).destroy(p2);
-              ((Destroyer)p2).destroying(p1);
+            if (p1 instanceof  Destroyable  && p2 instanceof Destroyer) {
+              // if (dist(p1.x, p1.y, p2.x, p2.y)<p1.size*.5+p2.size*.5) {
+              if (dist(p1.x, p1.y, p2.x, p2.y)<(p1.size+p2.size)*.5) {
+                ((Destroyable)p1).destroy(p2);
+                ((Destroyer)p2).destroying(p1);
+              }
             }
           }
         }
       }
+    }
+    catch( Exception e) {
+      println(" concurrent? projectile col ");
     }
   }
 }
@@ -449,7 +455,7 @@ void shopUpdate() {
     b.displayTooltips();
   }
 
-  if (selectedAbility!=null) { 
+  if (selectedAbility!=null) {
     image(selectedAbility.icon, width-200, height-200, 300, 300);
     rectMode(CENTER);
     if (mouseX>halfWidth-900*.5&&halfWidth+900*.5>mouseX&&mouseY>height-150-200*.5&&height-150+200*.5>mouseY) {
@@ -535,14 +541,14 @@ void settingsUpdate() { //----------------------------------------------------  
   for (StatButton s : pSBList) {
     s.update();
     s.display();
-    //s.updateSettings();
+    s.updateSettings();
   }
   noFill();
   strokeWeight(8);//
-  for (int i=0; i< AmountOfPlayers; i++) {//abilitySettingsIndex.length-1
-    stroke(int((255/AmountOfPlayers)*i), 255, 255);
-    rect(  abilitySettingsIndex[i]*settingSkillInterval+settingSkillXOffset-55, i*200+settingSkillYOffset-55, 110, 110);
-  }
+  /*for (int i=0; i< AmountOfPlayers; i++) {//abilitySettingsIndex.length-1
+   stroke(int((255/AmountOfPlayers)*i), 255, 255);
+   rect(  abilitySettingsIndex[i]*settingSkillInterval+settingSkillXOffset-55, i*200+settingSkillYOffset-55, 110, 110);
+   }*/
 }
 
 int shopXEdgePadding=90, shopYEdgePadding=150;

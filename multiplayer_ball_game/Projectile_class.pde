@@ -2166,11 +2166,11 @@ class Rocket extends Bomb implements Reflectable, Destroyable, Container {//----
   }
 }
 
-class Missle extends Rocket implements Reflectable {//----------------------------------------- Missle objects ----------------------------------------------------
+class Missile extends Rocket implements Reflectable {//----------------------------------------- Missile objects ----------------------------------------------------
   int angleSpeed=13, seekRange=1200;
   float turnRate=0.15;
   Player target;
-  Missle(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage, boolean _friendlyFire) {
+  Missile(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage, boolean _friendlyFire) {
     super(_owner, _x, _y, _size, _projectileColor, _time, _angle, _vx, _vy, _damage, _friendlyFire);
     for (int i=0; i<2; i++) {
       particles.add(new Particle(int(x), int(y), random(10)-5+vx*0.5, random(10)-5+vy*0.5, int(random(20)+5), 800, 255));

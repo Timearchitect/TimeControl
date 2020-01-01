@@ -48,7 +48,7 @@ void getXboxInput() {
       // println(event.getComponent().getName(), event.getValue());
       switch(event.getComponent().getName()) {
       case "X-axeln":
-        if (event.getValue()<-threshhold) // left
+        if (event.getValue()<=-threshhold) // left
           xBoxInput[0]=true;
         else xBoxInput[0]=false;
         if (event.getValue()>threshhold) //right
@@ -355,7 +355,6 @@ void settingsInput(){
           }
         }
         if ( xBoxInput[0]&&!xBoxPlayer.holdLeft) {//left
-
           if (abilitySettingsIndex[xboxIndex]>0) abilitySettingsIndex[xboxIndex]--;
         }
         if ( xBoxInput[1]&&!xBoxPlayer.holdRight) {//right

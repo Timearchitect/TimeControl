@@ -18,6 +18,7 @@ class Player implements Cloneable {
   boolean allyCollision=false, invins, invinsAlt=true, freezeImmunity=false, reverseImmunity, fastforwardImmunity, slowImmunity, stationary, stunned, stealth, phase, targetable=true;
   //Ability ability;  
   ArrayList<Ability> abilityList= new ArrayList<Ability>();
+  ArrayList<StatButton> statList= new ArrayList<StatButton>();
   ArrayList<Buff> buffList= new ArrayList<Buff>();
   String label;
   color playerColor;
@@ -150,7 +151,7 @@ class Player implements Cloneable {
       strokeWeight(2);
       fill(255, 0, 255-deColor*0.5, 50+deColor);
       ellipse(cx, cy, w, h);
-
+      
       pushMatrix();
       translate(cx, cy);
       rotate(radians(angle+90));
@@ -194,7 +195,6 @@ class Player implements Cloneable {
         calcAngle() ;
         if (reverse && !reverseImmunity) {
           if (invins) invinsAlt=!invinsAlt;
-
           vy/=1-FRICTION_FACTOR*bend;
           vx/=1-FRICTION_FACTOR*bend;
           //speed.set(speed.x/(1-FRICTION_FACTOR*bend), speed.y/(1-FRICTION_FACTOR*bend));
@@ -306,8 +306,6 @@ class Player implements Cloneable {
 
   void mouseControl() {
     if ((!freeze || freezeImmunity) && !dead && (controlable || reverseImmunity) && mouse && !stunned) {
-
-
       stamps.add( new ControlStamp(index, int(x), int(y), vx, vy, ax, ay));
       //*MAX_ACCEL*0.017*s*f;
       //*MAX_MOUSE_ACCEL*s*f;

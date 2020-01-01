@@ -873,7 +873,7 @@ class PanicBlink extends Ability {//--------------------------------------------
         vertex(owner.cx+sin(radians(i))*100, owner.cy+cos(radians(i))*100);
       }
       endShape(CLOSE);
-      cooldown++;
+      cooldown+=1*timeBend;
     }
   }
   @Override
@@ -924,7 +924,7 @@ class Nova extends Ability {//--------------------------------------------------
       }
 
       endShape(CLOSE);
-      cooldown++;
+      cooldown+=1*timeBend;
       // count++;
       //  if (count%30==0)   projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*46, sin(radians(owner.angle))*46, 3));
     }
@@ -1040,7 +1040,7 @@ class Boost extends Ability {//-------------------------------------------------
   }
   @Override
     void hold() {
-    if (charge<=maxCharge)charge++;
+    if (charge<=maxCharge)charge+=1*timeBend;
   }
   @Override
     void release() {
@@ -1405,7 +1405,8 @@ class Redemption extends Ability {//--------------------------------------------
       if (trigger) {
         particles.add(new Flash(100, 8, WHITE));  
         shakeTimer+=20;
-        particles.add( new TempReverse(2000));
+        //particles.add( new TempFreeze(400));
+        particles.add( new TempReverse(3000));
         trigger=false;
         cooldown=0;
       }
@@ -1763,8 +1764,8 @@ class Phase extends Ability {//-------------------------------------------------
   }
 }
 class Dodge extends Ability {//---------------------------------------------------    SuppressFire   ---------------------------------
-  int count, duration=265;
-  float cooldown, forcedAngle, staticAngle, cooldownDuration=30;
+  int count, duration=275;
+  float cooldown, forcedAngle, staticAngle, cooldownDuration=25;
   boolean phase;
   long timer;
   Dodge() {

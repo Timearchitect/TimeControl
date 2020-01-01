@@ -31,7 +31,7 @@ class Button {
         selectedAbility=a;
         if (a.unlocked && a.deactivatable) {
           if (deactivatable)  a.deactivated=!a.deactivated;
-          
+
           int active=0;
           for (Ability as : abilityList) {
             if (!as.deactivated && as.unlocked )active++;
@@ -165,8 +165,8 @@ class UpgradebleButton extends Button {
         minusHover=true;
         minusColor=RED;
         if (mousePressed && !pMousePressed) {
-         a.downgrade();
-         // a.sell();
+          a.downgrade();
+          // a.sell();
           a.updateTooltips();
           updateSkillPoints();
         }
@@ -206,6 +206,9 @@ class UpgradebleButton extends Button {
       text(a.getLevel(), x, y);
       rectMode(CORNER);
     } else    resizeable=true;
+  }
+
+  void updateSettings() {
   }
 }
 /*class StatButton extends Button {
@@ -366,7 +369,7 @@ class ModeButton extends Button {
 class SettingButton extends Button {
   Player player;
   int order;
-
+  boolean indexHover;
   SettingButton(int _order, int _x, int _y, int _size, Player _player) {
     super( _player.abilityList.get(_order), _x, _y, _size);
     order=_order;
@@ -381,6 +384,14 @@ class SettingButton extends Button {
   void updateSettings() {
     //a = player.abilityList.get(order);
     a= abilities[player.index][order];
+
+    if (order == abilitySettingsIndex[player.index]) {
+      noFill();
+      stroke(BLACK);
+      rect(  x-size*0.5, y-size*0.5, size, size);
+      indexHover=true;
+    } else indexHover=false;
+
     // print(a.getClass().getSimpleName());
   }
 
@@ -500,7 +511,7 @@ class SettingButton extends Button {
     if (selected) {
       pcolor=color( 170, 255, 255);
     }
-    if (hover) {
+    if (hover|| indexHover) {
       if (size<maxSize)size+=10;
     } else {
       if (size>minSize)size-=5;
@@ -551,6 +562,7 @@ class StatButton extends Button {
   String label;
   int level, index, playerIndex;
   float multiplyer=1.1;
+  boolean indexHover;
 
   StatButton(PImage _image, int _index, String _label, int _x, int _y, int _size, Player _player) {
     super( null, _x, _y, _size);
@@ -563,7 +575,21 @@ class StatButton extends Button {
     minSize=40;
     textYMargin=65;
     nameYMargin=40;
+    //owner.statList.add(this);
     //print(a.name+" ");
+  }
+
+  void updateSettings() {
+    //a = player.abilityList.get(order);
+    if (index == abilitySettingsIndex[playerIndex]) {
+      noFill();
+      stroke(BLACK);
+      rect(  x-size*0.5, y-size*0.5, size, size);
+      indexHover=true;
+    } else { 
+      indexHover=false;
+    }
+    // print(a.getClass().getSimpleName());
   }
 
   void update() {
@@ -576,25 +602,18 @@ class StatButton extends Button {
           println("currentTotalSkillAmount[playerIndex]  " + currentTotalSkillAmount[playerIndex]);
           println("skillMaxAmount[playerIndex]  " + skillMaxAmount[playerIndex]);
 
-          if ( currentTotalSkillAmount[playerIndex]<skillMaxAmount[playerIndex]) {
-            currentTotalSkillAmount[playerIndex]++;
-            level++;
-          }
+
+          addPoint();
           // change(1);
         }
       }
+
       if (mouseScroll>0) {
         if (level>0) {
-          if ( 0<currentTotalSkillAmount[playerIndex]) {
-            currentTotalSkillAmount[playerIndex]--;
-            level--;
-          }
+          subtractPoint();
+
           // change(-1);
         }
-      }
-
-
-      if (mousePressed && !pMousePressed) {
       }
     } else {
       hover=false; 
@@ -603,10 +622,24 @@ class StatButton extends Button {
         pcolor=color( hue(owner.playerColor), 255, 255);
       }
     }
-    if (hover) {
+    if (hover|| indexHover) {
       if (size<maxSize)size+=4;
     } else {
       if (size>minSize)size-=2;
+    }
+  }
+
+  void addPoint() {
+    if ( currentTotalSkillAmount[playerIndex]<skillMaxAmount[playerIndex]) {
+      currentTotalSkillAmount[playerIndex]++;
+      level++;
+    }
+  }
+
+  void subtractPoint() {
+    if ( 0<currentTotalSkillAmount[playerIndex]) {
+      currentTotalSkillAmount[playerIndex]--;
+      level--;
     }
   }
 

@@ -1189,6 +1189,7 @@ class AfterImage extends Particle {
   PGraphics afterImage;
   float angle, angleV, percent;
   int type, count, range=300, xOffset, yOffset;
+  float  DEFAULT_FRICTION_FACTOR=0.1,FRICTION_FACTOR=DEFAULT_FRICTION_FACTOR;
   Player owner;
   AfterImage(int _x, int _y, float _vx, float _vy, float _angle, float _angleV, int _minSize, int _maxSize, int _time, int  _type, Player _player) {
     super( _x, _y, _vx, _vy, _minSize, _time, _player.playerColor);
@@ -1280,6 +1281,23 @@ class AfterImage extends Particle {
           x=cos(radians(angle))*range*sin(radians(count*3))+owner.cx;
           y=sin(radians(angle))*range*sin(radians(count*3))+owner.cy;
           opacity=int(sin(radians(count+90))*255);
+        }
+      }
+      break;
+          case 3:
+      if (!dead && !freeze) { 
+       if (reverse) {
+          opacity+=6*timeBend;
+          vy/=1-FRICTION_FACTOR*timeBend;
+          vx/=1-FRICTION_FACTOR*timeBend;
+          x-=vx*timeBend;
+          y-=vy*timeBend;
+        } else {
+          vx*=1-FRICTION_FACTOR*timeBend;
+          vy*=1-FRICTION_FACTOR*timeBend;
+          x+=vx*timeBend;
+          y+=vy*timeBend;
+          opacity-=6*timeBend;
         }
       }
       break;

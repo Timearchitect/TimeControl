@@ -528,6 +528,95 @@ class MindControlled extends Buff {
   }
 }
 
+class Execute extends Buff {
+  // float damage = 2;
+  float count, graceTimer, graceDuration=900;
+  float amount;
+  String type="Projectile";
+  Projectile savedParent;
+  Execute(Player p, int _duration, int _amount) {
+    super(p, _duration);
+    name=getClassName(this);
+    amount=_amount;
+    graceDuration=stampTime;
+  }
+  Execute(Player p, Player e, int _duration, int _amount) {
+    super(p, _duration);
+    name=getClassName(this);
+    enemy=e;
+    amount=_amount;
+    graceDuration=stampTime;
+  }
+  void onCollide(Player o, Player e) {
+    if (graceTimer+graceDuration>stampTime) {
+      transfer(e, o);
+    }
+  }
+  void transfer(Player formerOwner, Player formerEnemy) {
+    if (!dead) {
+
+      super.transfer(formerOwner, formerEnemy);
+      particles.add(new RShockWave(int(owner.cx), int(owner.cy), owner.diameter+300, 30, 500, enemy.playerColor));
+      parent.dead=true;
+      savedParent=parent.clone();
+      type=getClassName(savedParent);
+      //savedParent.spawnTime =stampTime;
+      //savedParent.time=parent.time;
+      parent.deathTime=stampTime;
+      parent.dead=true;
+      parent.deathAnimation=true;
+    }
+    // projectiles.remove(parent);
+  }
+  void display() {
+    // ellipse(owner.cx, owner.cy, 50, 50);
+    if (!freeze)count+=22*timeBend;
+    stroke(enemy.playerColor);
+    strokeWeight(8);
+    noFill();
+    arc(owner.cx, owner.cy, owner.radius*2.8, owner.radius*2.8, radians(count), radians(count+40));
+    arc(owner.cx, owner.cy, owner.radius*2.8, owner.radius*2.8, radians(count+180), radians(count+220));
+    //line(owner.cx+cos(count)*(graceTimer-stampTime)*.01, owner.cy+sin(count)*(graceTimer-stampTime)*.01, owner.cx, owner.cy);
+  }
+  void update() {
+    if (!dead) {
+      super.update();
+      display();
+      if (owner.textParticle!=null)particles.remove( owner.textParticle );
+      owner.textParticle = new Text(owner,"Execute", 0, -75, 30, 0, 100, owner.playerColor, 1);
+      particles.add( owner.textParticle );
+    }
+  }
+  void kill() {
+    if (!dead && savedParent!=null) {
+      dead=true;
+      background(0, 0, 0);
+      savedParent.buffList.clear();
+      savedParent.x=owner.cx;
+      savedParent.y=owner.cy;
+      savedParent.vx=0;
+      savedParent.vy=0;
+      savedParent.dead=false;
+      savedParent.deathAnimation=false;
+      projectiles.add( savedParent);
+    }
+  }
+  void onOwnerDeath() {
+    if (savedParent!=null) {
+      savedParent.buffList.clear();
+      savedParent.x=owner.cx;
+      savedParent.y=owner.cy;
+      savedParent.vx=random(-2, 2);
+      savedParent.vy=random(-2, 2);
+      savedParent.dead=false;
+      savedParent.deathAnimation=false;
+      projectiles.add( savedParent);
+    }
+  }
+  void onFizzle() {
+    this.dead=true;
+  }
+}
 class StickyBomb extends Buff {
   // float damage = 2;
   float count, graceTimer, graceDuration=900;
