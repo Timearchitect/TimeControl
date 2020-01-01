@@ -33,9 +33,9 @@ final color BGcolor=color(100);
 PFont font;
 PGraphics GUILayer;
 PShader  Blur;
-int MaxSkillAmount= 100;
+final int MaxSkillAmount= 100;
 int[] skillMaxAmount, currentTotalSkillAmount;
-boolean hitBox=false, fixedSkillpoint=false, cleanStart=true, preSelectedSkills=true, RandomSkillsOnDeath=false, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=false, inGame;
+boolean hitBox=false, fixedSkillpoint=false, cleanStart=true, preSelectedSkills=false, RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=false, inGame;
 boolean gradualCleaning=false;
 final float flashAmount=0.2, shakeAmount=0.1;
 int mouseSelectedPlayerIndex=0;
@@ -288,7 +288,8 @@ void setup() {
   mList.add( new ModeButton(GameType.BOSSRUSH, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255), icons[34]));
   mList.add( new ModeButton(GameType.SHOP, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255), icons[45]));
   mList.add( new ModeButton(GameType.SETTINGS, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255), icons[55]));
-
+  selectedModeButton=mList.get(0);
+  selectedModeButton.hover=true;
   println("loaded save ... abilities!");
   abilities= new Ability[][]{ 
   /* player 1 */    new Ability[]{new Torpedo(), new Redemption()}, 
@@ -341,11 +342,11 @@ void setup() {
   try {  
     // initialize the SamplePlayer
      // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/TooManyCooksAdultSwim.mp3"));
-    //musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
+    musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Branching time.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/orange caramel -aing.mp3"));
-     musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/goodbye.mp3"));
+    // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/goodbye.mp3"));
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/wierd.mp3"));
   }
   catch(Exception e) {

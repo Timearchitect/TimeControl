@@ -328,8 +328,8 @@ void keyPressed() {
     println(players.get(1).statList.size());
     try {
       for (int i=0; i< players.size()-1; i++) {
-  
-        
+
+
         if (key==Character.toLowerCase(players.get(i).triggKey)) {// ability trigg key
 
           if (abilities[i][abilitySettingsIndex[i]].type==AbilityType.ACTIVE) {
@@ -338,8 +338,8 @@ void keyPressed() {
         }
 
         if (keyCode==players.get(i).down) {//down
-                
-        
+
+
           for (  int j=0; j<abilityList.length; j++) {
             if (abilities[i][abilitySettingsIndex[i]].getClass()==abilityList[j].getClass()) {
               while ( j==0 || !abilityList[j-1].unlocked ) {
@@ -370,7 +370,7 @@ void keyPressed() {
           }
         }
         if (keyCode==players.get(i).up) {//up
- 
+
           // print("change Ability down ");
           for (  int j=0; j<abilityList.length; j++) {
             if (abilities[i][abilitySettingsIndex[i]].getClass()==abilityList[j].getClass()) {
@@ -429,6 +429,45 @@ void keyPressed() {
   // keyCooldown[i]=keyResponseDelay;
   // keyCooldown[i]--;
   //  }
+
+  if (gameMode==GameType.MENU) { //player is not setuped
+
+    try {
+      for (int i=0; i< AmountOfPlayers; i++) {
+        if (key==Character.toLowerCase(playerControl[i][4])) // ability trigg key
+          selectedModeButton.hit();
+
+        if (keyCode==playerControl[i][2]) //left
+          previousModeButton();
+
+        if (keyCode==playerControl[i][3]) //right
+          nextModeButton();
+      }
+    } 
+    catch(Exception e) {
+      println(e +" keyboard");
+    }
+    /* sBList.clear();
+     for (int j=0; j<AmountOfPlayers; j++) {
+     for (int i=0; i<2; i++) {
+     sBList.add( new SettingButton(i, 600+200*i, 200+200*j, 100, players.get(j)) );
+     }
+     }*/
+  }
+}
+void previousModeButton() {
+  selectedModeButton.hover=false;
+  int ModeIndex = mList.indexOf(selectedModeButton)-1;
+  if (ModeIndex<0) ModeIndex= mList.size()-1;
+  selectedModeButton=mList.get( ModeIndex);
+  selectedModeButton.hover=true;
+}
+void nextModeButton() {
+  selectedModeButton.hover=false;
+  int ModeIndex = mList.indexOf(selectedModeButton)+1;
+  if (ModeIndex>mList.size()-1) ModeIndex=0;
+  selectedModeButton=mList.get( ModeIndex);
+  selectedModeButton.hover=true;
 }
 void checkKeyHold() { // hold keys
   /*for (int i=0; i< players.size (); i++) {

@@ -439,6 +439,7 @@ ArrayList<Button> bList= new ArrayList<Button>();
 ArrayList<SettingButton> sList= new ArrayList<SettingButton>();
 ArrayList<ModeButton> mList= new ArrayList<ModeButton>();
 Ability selectedAbility ; 
+ModeButton selectedModeButton;
 
 void shopUpdate() {
   background(255);

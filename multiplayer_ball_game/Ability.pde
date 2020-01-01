@@ -4829,7 +4829,7 @@ class DeployShield extends Ability {//------------------------------------------
     void passive() {
 
     if (owner.health>=owner.maxHealth*.5) {
-      cooldownTimer=2850;
+      cooldownTimer=3850;
       activeCost=35;
       owner.armor=1;
       if (!owner.stealth) { 

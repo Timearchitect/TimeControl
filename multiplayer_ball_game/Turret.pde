@@ -579,7 +579,7 @@ class Drone extends Player {
     maxHealth=_health;
     health=maxHealth;
     damage=5;
-    armor=-10;
+    armor=-15;
     abilityShortName=abilityList.get(0).name.substring(0, 1).toUpperCase();
   }
   Drone(int _index, int _x, int _y, int _w, int _h, int speed, int _health, Ability ..._ability) { // neutral
@@ -592,7 +592,7 @@ class Drone extends Player {
     maxHealth=_health;
     health=maxHealth;
     damage=5;
-    armor=-10;
+    armor=-15;
     abilityShortName=abilityList.get(0).name.substring(0, 1).toUpperCase();
   }
   void displayAbilityEnergy() {
@@ -684,7 +684,7 @@ class Drone extends Player {
       a.regen();
     }
 
-    if (wait>50) {
+    if (wait>70) {
       for (Ability a : this.abilityList) { 
         a.press();
         a.hold();

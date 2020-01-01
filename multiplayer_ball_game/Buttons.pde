@@ -2,7 +2,7 @@ class Button {
   Ability a;
   int x, y, size, minSize=70, maxSize=90, textYMargin=65, nameYMargin=55, tooltipDelay=500;
   color pcolor=  color(255);
-  Boolean selected=false, hover, strokeless=false, deactivatable=true, resizeable=true, active, pActive;
+  Boolean selected=false, hover=false, strokeless=false, deactivatable=true, resizeable=true, active, pActive;
   long timer;
   Button(Ability _ability, int _x, int _y, int _size) {
     a= _ability;
@@ -329,26 +329,28 @@ class ModeButton extends Button {
   void update() {
 
     if (mouseX>x&&x+w>mouseX&&mouseY>y&&y+h>mouseY) {
-      hover=true; 
+     // hover=true; 
       //    for (int i=0; i<6; i++) {
       particles.add( new  Particle(int(x+random(w)), int(y+random(h)), 0, 0, int(random(50)+20), 1000, WHITE));
       // }
       if (offset<30)offset+=5;
       if (mousePressed && !pMousePressed) {
-        gameMode=type;
-        playerSetup();
-        controllerSetup();
-        resetGame();
-        for (int i=0; i<36; i++) {
-          particles.add( new  Particle(int(x+random(w)), int(y+random(h)), 0, 0, int(random(50)+20), 1000, pcolor));
-        }
+        hit();
       }
     } else { 
-      hover=false;    
+    //  hover=false;    
       if (offset>0)offset--;
     }
   }
-
+  void hit() { // when button is pressed()
+    gameMode=type;
+    playerSetup();
+    controllerSetup();
+    resetGame();
+    for (int i=0; i<36; i++) {
+      particles.add( new  Particle(int(x+random(w)), int(y+random(h)), 0, 0, int(random(50)+20), 1000, pcolor));
+    }
+  }
   void display() {
     textSize(defaultTextSize+int(offset*.4));
     fill(pcolor, (hover)?255:150);
