@@ -205,11 +205,11 @@ void playerSetup() {
       if (!preSelectedSkills) {               
         generateRandomAbilities(1, passiveList, true);
         generateRandomAbilities(0, abilityList, true);
-      } else {
-        /* for(int j=0;j<abilityList[i].length; j++){
+      } /*else {
+         for(int j=0;j<abilityList[i].length; j++){
          players.get(j).abilityList.add(abilities[i][j]);
-         }*/
-      }
+         }
+      }*/
       if (players.get(i).mouse)players.get(i).FRICTION_FACTOR=0.11; //mouse
     }
     catch(Exception e ) {

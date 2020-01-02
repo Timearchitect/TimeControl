@@ -561,7 +561,21 @@ void loadProgress() throws Exception {
   // println(s);
   int i=0;
   for (Ability a : abilityList) {
-    a.unlocked=parseBoolean(parseInt(s[i]));   
+    int  loadCode;
+    loadCode=parseInt(s[i]);
+    if (loadCode==1) { 
+      a.unlocked=true;
+      a.deactivated=false;
+    } 
+    if (loadCode==2) { 
+      a.unlocked=true;
+      a.deactivated=true;
+    }
+    if (loadCode==0) {
+      a.unlocked=false;  
+    //  a.deactivated=true;
+    }
+    // a.unlocked=parseBoolean(parseInt(s[i]));   
     try {
       bList.add(new Button(a, int(shopXEdgePadding+(i*shopXInterval)%(width-shopXEdgePadding*2)), int(shopYEdgePadding+int(i*shopXInterval/(width-shopXEdgePadding*2))*shopYInterval), 70));
     }
@@ -572,6 +586,20 @@ void loadProgress() throws Exception {
   }
 
   for (Ability a : passiveList) {
+    int  loadCode;
+    loadCode=parseInt(s[i]);
+    if (loadCode==1) { 
+      a.unlocked=true;
+      a.deactivated=false;
+    } 
+    if (loadCode==2) { 
+      a.unlocked=true;
+      a.deactivated=true;
+    }
+    if (loadCode==0) {
+      a.unlocked=false;  
+     // a.deactivated=true;
+    }
     a.unlocked=parseBoolean(parseInt(s[i]));
     try {
       bList.add(new Button(a, int(shopXEdgePadding+(i*shopXInterval)%(width-shopXEdgePadding*2)), int(shopYEdgePadding+int(i*shopXInterval/(width-shopXEdgePadding*2))*shopYInterval), 70));
@@ -600,11 +628,24 @@ void updateSkillPoints() {
 }
 void saveProgress() {
   save.clear();
+  int saveCode;
   for (Ability a : abilityList) {
-    save.add(String.valueOf(parseInt(a.unlocked)));
+    if (a.unlocked) {
+      if (a.deactivated)  
+        saveCode= 2; 
+      else saveCode =1;
+    } else saveCode=0;
+    save.add(String.valueOf(saveCode));
+    // save.add(String.valueOf(parseInt(a.unlocked)));
   }
   for (Ability a : passiveList) {
-    save.add(String.valueOf(parseInt(a.unlocked)));
+    if (a.unlocked) {
+      if (a.deactivated)  
+        saveCode= 2; 
+      else saveCode =1;
+    } else saveCode=0;
+    save.add(String.valueOf(saveCode));
+    // save.add(String.valueOf(parseInt(a.unlocked)));
   }
   save.add(String.valueOf(coins));
   saveStrings("save", save.toArray(new String[0]));
