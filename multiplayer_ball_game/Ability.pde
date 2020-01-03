@@ -840,7 +840,7 @@ class Pistol extends Ability implements AmmoBased {//---------------------------
   } 
   @Override
     void action() {
-
+    play(pewSound);
     stamps.add( new AbilityStamp(this));
     if (energy>=maxEnergy)
       projectiles.add( new RevolverBullet(owner, int( owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 70, 16, owner.playerColor, 1000, owner.angle, int(damage+damageMod*.6)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod)*1.5)));
@@ -928,6 +928,7 @@ class Revolver extends Ability implements AmmoBased {//-------------------------
   } 
   @Override
     void action() {
+      play(pewSound);
     stamps.add( new AbilityStamp(this));
     if (energy>=maxEnergy)  projectiles.add( new RevolverBullet(owner, int( owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 65, 30, owner.playerColor, 1000, owner.angle, (damage+damageMod)*1.2).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod)*1.2)));
     else projectiles.add( new RevolverBullet(owner, int( owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 60, 25, owner.playerColor, 1000, owner.angle, damage+damageMod).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod))));
@@ -1544,6 +1545,8 @@ class Laser extends Ability {//-------------------------------------------------
   } 
   @Override
     void action() {
+              play(chargeSound);
+
     timer=millis();
     chargelevel++;
     particles.add(new  Gradient(  1000, int(owner.cx +cos(radians(owner.angle))*owner.radius), int(owner.cy+sin(radians(owner.angle))*owner.radius), 0, 0, 2500, 75*chargelevel, 4, owner.angle, owner.playerColor));
@@ -2508,7 +2511,7 @@ class CrossFire extends RapidFire {//-------------------------------------------
         projectiles.add( new Bomb(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 150, BLACK, 400, owner.angle, 0, 0, int(damage*10), true));
         projectiles.add( new ChargeLaser(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 550, BLACK, 150, owner.angle+40, 1, damage )); 
         projectiles.add( new ChargeLaser(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 550, BLACK, 150, owner.angle-40, -1, damage )); 
-    particles.add(new Flash(200, 10, WHITE));   // flash
+        particles.add(new Flash(200, 10, WHITE));   // flash
 
         owner.stop();
         owner.addBuff(new Stun(owner, 300));
@@ -3133,6 +3136,7 @@ class Battery extends Ability {//-----------------------------------------------
 
   @Override
     void action() {
+      play(pewSound);
     //projectiles.add(charge.get(count));
     float inAccuracy;
     inAccuracy =random(-accuracy, accuracy);
@@ -6599,6 +6603,7 @@ class Chivalry extends Ability {
       if (cooldown<stampTime && !maxed ) {
         particles.add( new Star(1000, int(owner.cx), int( owner.cy), 0, 0, 150, 0.9, WHITE) );
         maxed=true;
+        play(shineSound);
       }
     }
     //if (!active)press(); // cancel
@@ -7072,6 +7077,8 @@ class ChargeSlash extends Ability {//-------------------------------------------
     void press() {
     if (cooldown<stampTime&&(!reverse || owner.reverseImmunity)&&(!freeze || owner.freezeImmunity) && energy>(0+activeCost)&& !hold && !active && !channeling && !owner.dead) {
       projectiles.add(new Slice(owner, int(owner.cx-cos(radians(owner.angle))*250), int(owner.cy-sin(radians(owner.angle))*250), 350, owner.playerColor, 180, owner.angle+145, 6, 130, cos(radians(owner.angle))*forceAmount*.5, sin(radians(owner.angle))*forceAmount*.5, int(20*damageFactor+damageMod*.1), false));
+                    play(chargeSound);
+
       activate();
       forceAmount=5;
       //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));

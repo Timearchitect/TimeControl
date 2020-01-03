@@ -573,7 +573,7 @@ void loadProgress() throws Exception {
     }
     if (loadCode==0) {
       a.unlocked=false;  
-    //  a.deactivated=true;
+      a.deactivated=false;
     }
     // a.unlocked=parseBoolean(parseInt(s[i]));   
     try {
@@ -598,7 +598,7 @@ void loadProgress() throws Exception {
     }
     if (loadCode==0) {
       a.unlocked=false;  
-     // a.deactivated=true;
+      a.deactivated=false;
     }
     a.unlocked=parseBoolean(parseInt(s[i]));
     try {

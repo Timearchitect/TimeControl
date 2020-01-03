@@ -353,7 +353,7 @@ class ModeButton extends Button {
   }
   void display() {
     textSize(defaultTextSize+int(offset*.4));
-    fill(pcolor, (hover)?255:150);
+    fill(pcolor, (hover)?255:80);
     stroke(pcolor);
     strokeWeight(int(offset*.3));
     rect(x-offset*.5, y-offset*.5, w+offset, h+offset);

@@ -1,5 +1,5 @@
 
-Controller controller;
+net.java.games.input.Controller controller;
 ControllerListener cl;
 ControllerEnvironment ce;
 Component components[]= new Component[20];
@@ -7,15 +7,15 @@ Event event=new Event();
 EventQueue queue;
 Rumbler[] rumb;
 Player xBoxPlayer; 
-int inputSize=4,xboxIndex=2;
+int inputSize=4,xboxIndex=3;
 float threshhold=0.3;
 boolean xBoxInput[]=new boolean [5];
 void xBoxSetup() {
   try {
     ce= ControllerEnvironment.getEnvironment();
-    for (Controller c : ce.getControllers()) {
+    for (net.java.games.input.Controller c : ce.getControllers()) {
       println(c.getType(),c.getName());
-      if (c.getType()== Controller.Type.GAMEPAD) {
+      if (c.getType()== net.java.games.input.Controller.Type.GAMEPAD) {
         controller=c;
         println(c.getName());
       }

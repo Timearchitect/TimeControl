@@ -1,4 +1,4 @@
-
+  
 /**------------------------------------------------------------//
  //                                                            //
  //  Coding dojo  - Prototype of a timecontrol game            //
@@ -21,14 +21,17 @@ import net.java.games.input.*;
 import net.java.games.input.EventQueue;
 import net.java.games.input.Event;
 
-
 AudioContext  ac = new AudioContext();
+AudioContext  as = new AudioContext();
+
 AudioContext an= new AudioContext();
-Noise n = new Noise(an);
+beads.Noise n = new beads.Noise(an);
 SamplePlayer musicPlayer;
+SamplePlayer chargeSound, pewSound, shineSound, deathSound;
+
 Envelope speedControl;
-Gain   g = new Gain(ac, 1, 0.05); //volume
-Gain  g3 = new Gain(an, 1, 0.0);
+
+
 final color BGcolor=color(100);
 PFont font;
 PGraphics GUILayer;
@@ -37,13 +40,16 @@ final int MaxSkillAmount= 100;
 int[] skillMaxAmount, currentTotalSkillAmount;
 boolean hitBox=false, fixedSkillpoint=false, cleanStart=true, preSelectedSkills=false, RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=false, inGame;
 boolean gradualCleaning=false;
-final float flashAmount=0.2, shakeAmount=0.1;
+final float flashAmount=0.2, shakeAmount=0.1, effectVolume=0.008;
+Gain   g = new Gain(ac, 1, 0.05); //volume
+Gain  g3 = new Gain(an, 1, 0.0);
+Gain  gainSoundeffect = new Gain(as,1, effectVolume);
 int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight, coins, mouseScroll;
 UpgradebleButton skillpointsButton;
 //int gameMode=0;
 GameType gameMode=GameType.MENU;
-final byte AmountOfPlayers=3, AmountOfModes=7; // start players
+final byte AmountOfPlayers=4, AmountOfModes=7; // start players
 final float DIFFICULTY_LEVEL=1.2;
 
 final int WHITE=color(255), GREY=color(172), BLACK=color(0), GOLD=color(255, 220, 0), RED=color(255, 0, 0), GREEN=color(0, 255, 0);
@@ -109,13 +115,27 @@ int playerControl[][]= {
  return false;
  }
  */
+//import processing.sound.*;
+//SoundFile  deathSound, chargeSound, shineSound, pewSound;
+
+
+
 void setup() {
+
   // hint(DISABLE_OPENGL_ERROR_REPORT);
   hint(DISABLE_DEPTH_TEST);
   hint(DISABLE_ASYNC_SAVEFRAME);
   fullScreen(P3D);
   //size(displayWidth, displayHeight, P3D);
   draw();
+  /*deathSound= new SoundFile(this, "death.mp3");
+   deathSound.amp(effectVolume);
+   pewSound= new SoundFile(this, "pew.mp3");
+   pewSound.amp(effectVolume);
+   // chargeSound= new SoundFile(this, "charge.mp3");
+   // chargeSound.amp(effectVolume);
+   shineSound= new SoundFile(this, "shine.mp3");
+   shineSound.amp(effectVolume);*/
   imageMode(CENTER);
   textAlign(CENTER, CENTER);
   font= loadFont("PressStart2P-Regular-28.vlw");
@@ -199,7 +219,7 @@ void setup() {
     new CutThroat(), 
     new CrossFire(), 
     new FlashBomb(), 
-    new Explosion(),
+    new Explosion(), 
     new SplitShot()
     //new Multiply2()
   };
@@ -294,7 +314,7 @@ void setup() {
   abilities= new Ability[][]{ 
   /* player 1 */    new Ability[]{new Torpedo(), new Redemption()}, 
   /* player 2 */    new Ability[]{new Explosion(), new Random().randomize(passiveList)}, 
-  /* player 3 mouse */new Ability[]{new  Random().randomize(abilityList), new  Random().randomize(passiveList)}, 
+  /* player 3 mouse */    new Ability[]{new  Random().randomize(abilityList), new  Random().randomize(passiveList)}, 
   /* player 4 */    new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
     new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
     new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}
@@ -341,7 +361,11 @@ void setup() {
 
   try {  
     // initialize the SamplePlayer
-     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/TooManyCooksAdultSwim.mp3"));
+    pewSound  = new SamplePlayer(as, new Sample(sketchPath("") +"data/pew.mp3")); 
+    chargeSound  = new SamplePlayer(as, new Sample(sketchPath("") +"data/charge.mp3")); 
+    deathSound  = new SamplePlayer(as, new Sample(sketchPath("") +"data/death.mp3")); 
+    shineSound  = new SamplePlayer(as, new Sample(sketchPath("") +"data/shine.mp3")); 
+    // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/TooManyCooksAdultSwim.mp3"));
     musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Branching time.mp3")); 
@@ -354,8 +378,12 @@ void setup() {
     e.printStackTrace(); // then print a technical description of the error
     exit(); // and exit the program
   }
+/*initSound(chargeSound,effectVolume);
+initSound(pewSound,effectVolume);
+initSound(shineSound,effectVolume);
+initSound(deathSound,effectVolume);
 
-  g.addInput(musicPlayer);
+*/
   ac.out.addInput(g);
   speedControl = new Envelope(ac, 1);
   musicPlayer.setPosition(2500);
@@ -363,6 +391,8 @@ void setup() {
   musicPlayer.setLoopType(SamplePlayer.LoopType.LOOP_FORWARDS);
   //  speedControl.addSegment(1, 3000); //now rewind
   if (!mute)ac.start(); //start music
+  as.out.addInput(gainSoundeffect);
+  as.start();
 
   Gain g2 = new Gain(an, 1, 0);
   g2.addInput(n);
@@ -390,7 +420,7 @@ void setup() {
     }
     StatButton s=    new StatButton(icons[46], 0+players.get(j).abilityList.size(), "HP", 50, settingSkillYOffset+50+200*j, 50, players.get(j));
 
-      players.get(j).statList.add(s);
+    players.get(j).statList.add(s);
     pSBList.add( s);
     s=  new StatButton(icons[47], 1+players.get(j).abilityList.size(), "MP", 100, settingSkillYOffset+50+200*j, 50, players.get(j)) ;
     players.get(j).statList.add(s);
@@ -411,7 +441,7 @@ void setup() {
     players.get(j).statList.add(s);
     pSBList.add( s);
     s=  new StatButton(icons[53], 7+players.get(j).abilityList.size(), "Acc", 400, settingSkillYOffset+50+200*j, 50, players.get(j)) ;
-        players.get(j).statList.add(s);
+    players.get(j).statList.add(s);
     pSBList.add( s);
     s=  new StatButton(icons[54], 8+players.get(j).abilityList.size(), "AttSp", 450, settingSkillYOffset+50+200*j, 50, players.get(j)) ;
 
@@ -421,7 +451,6 @@ void setup() {
     players.get(j).statList.add(s);
     pSBList.add( s);
     println( players.get(j).statList.size());
-
   }
   /*   String[] args = {"Rename player"};
    PApplet sa = new PApplet();

@@ -456,6 +456,7 @@ class Player implements Cloneable {
   }
   void death() {
     //ability.onDeath();
+    play(deathSound);
     for (Ability a : this.abilityList) {
       a.onDeath();
       a.reset();
