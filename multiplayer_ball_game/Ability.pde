@@ -928,7 +928,7 @@ class Revolver extends Ability implements AmmoBased {//-------------------------
   } 
   @Override
     void action() {
-      play(pewSound);
+    play(pewSound);
     stamps.add( new AbilityStamp(this));
     if (energy>=maxEnergy)  projectiles.add( new RevolverBullet(owner, int( owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 65, 30, owner.playerColor, 1000, owner.angle, (damage+damageMod)*1.2).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod)*1.2)));
     else projectiles.add( new RevolverBullet(owner, int( owner.cx+cos(radians(owner.angle))*75), int(owner.cy+sin(radians(owner.angle))*75), 60, 25, owner.playerColor, 1000, owner.angle, damage+damageMod).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod))));
@@ -1131,6 +1131,7 @@ class Blink extends Ability {//-------------------------------------------------
   } 
   @Override
     void action() {
+    play(teleportSound);
     stamps.add( new ControlStamp(owner.index, int(owner.x), int(owner.y), owner.vx, owner.vy, owner.ax, owner.ay));
     particles.add(new ShockWave(int(owner.cx), int(owner.cy), 20, 16, 200, owner.playerColor));
     particles.add( new  Particle(int(owner.cx), int(owner.cy), 0, 0, int(owner.w), 800, color(255, 0, 255)));
@@ -1441,6 +1442,7 @@ class Combo extends Ability {//-------------------------------------------------
     regen=true;
   }
   void attack() {
+    play(slashSound);
     switch(step) {
     case 1:
       projectiles.add( new Slash(owner, int( owner.cx+cos(radians(owner.angle))*85), int(owner.cy+sin(radians(owner.angle))*85), 30, owner.playerColor, 130, owner.angle-100, -24, 100, sin(owner.keyAngle)*5, cos(owner.keyAngle)*5, int((damage+damageMod*0.1)*0.4), true));
@@ -1545,7 +1547,7 @@ class Laser extends Ability {//-------------------------------------------------
   } 
   @Override
     void action() {
-              play(chargeSound);
+    play(chargeSound);
 
     timer=millis();
     chargelevel++;
@@ -1651,6 +1653,7 @@ class DoubleTap extends Laser {//-----------------------------------------------
   }
   void passive() {
     if (charging && (timer+delay/S/F)<millis()) {
+      play(thumpSound);
 
       switch(chargelevel) {
       case 1:
@@ -1738,6 +1741,7 @@ class Shotgun extends Ability {//-----------------------------------------------
       stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
+      play(pumpSound);
       owner.ANGLE_FACTOR= MODIFIED_ANGLE_FACTOR;
       owner.MAX_ACCEL=MODIFIED_MAX_ACCEL;
       if (!charging)action();
@@ -1810,6 +1814,8 @@ class Sluggun extends Ability {//-----------------------------------------------
       stamps.add( new AbilityStamp(this));
       regen=true;
       activate();
+            play(pumpSound);
+
       owner.ANGLE_FACTOR= MODIFIED_ANGLE_FACTOR;
       owner.MAX_ACCEL=MODIFIED_MAX_ACCEL;
       if (!charging)action();
@@ -1831,6 +1837,8 @@ class Sluggun extends Ability {//-----------------------------------------------
       projectiles.add( new  Blast(owner, int( owner.cx), int(owner.cy), 10, 200, owner.playerColor, 200, owner.angle, damage*.05));
       projectiles.add( new Slug(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 70, owner.playerColor, 1500, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*36, sin(radians(owner.angle+InAccurateAngle))*36, int(damage+damageMod)));
       owner.pushForce(-40, owner.angle);
+      play(thumpSound);
+
       charging=false;
       // chargelevel=0;
     } else {
@@ -1979,6 +1987,8 @@ class GranadeLauncher extends Ability {//---------------------------------------
   } 
   @Override
     void action() {
+    play(tickSound);
+
     for (int i=0; i<6; i++) {
       // particles.add(new Particle(int(x), int(y), vx, vy, int(random(30)+10), 800, projectileColor));
       float sprayAngle=random(-40, 40)+owner.angle;
@@ -2400,6 +2410,8 @@ class RapidFire extends Ability {//---------------------------------------------
     println(critChance+criticalChanceMod);
     if ((!reverse || owner.reverseImmunity) &&  active && !owner.dead &&(stampTime-PastTime) >= Interval) {
       float InAccurateAngle=random(-accuracy, accuracy);
+      play(sipSound);
+
       projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*36, sin(radians(owner.angle+InAccurateAngle))*36, int(damage)).addBuff(new Enlarge(owner, 3000, 4)).addBuff(new Burn(owner, 200, 1, 50)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod))));
       particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle))*85), int(owner.cy+sin(radians(owner.angle))*85), 5, 22, 20, WHITE));
       owner.ANGLE_FACTOR=MODIFIED_ANGLE_FACTOR;
@@ -2412,6 +2424,9 @@ class RapidFire extends Ability {//---------------------------------------------
       PastTime=stampTime;
     } else if ((!freeze || owner.freezeImmunity) &&  active && !owner.dead &&(stampTime+freezeTime-PastTime) >= Interval) {
       float InAccurateAngle=random(-accuracy, accuracy);
+
+      play(sipSound);
+
       projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*36, sin(radians(owner.angle+InAccurateAngle))*36, int(damage)).addBuff(new Enlarge(owner, 3000, 4)).addBuff(new Burn(owner, 200, 1, 50)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod))));
       particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle))*85), int(owner.cy+sin(radians(owner.angle))*85), 5, 22, 20, WHITE));
       owner.ANGLE_FACTOR=MODIFIED_ANGLE_FACTOR;
@@ -2499,6 +2514,8 @@ class CrossFire extends RapidFire {//-------------------------------------------
     println(critChance+criticalChanceMod);
     if ((!reverse || owner.reverseImmunity) &&  active && !owner.dead &&(stampTime-PastTime) >= Interval) {
       float InAccurateAngle=random(-accuracy, accuracy);
+      play(sipSound);
+
       Projectile p= new Needle(owner, int( owner.cx+cos(radians(owner.angle+90))*owner.w), int(owner.cy+sin(radians(owner.angle+90))*owner.w), 60, owner.playerColor, 800, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle+crossAngle))*56, sin(radians(owner.angle+InAccurateAngle+crossAngle))*56, int(damage)).addBuff(new Burn(owner, 150, 1, 50)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod)));
       Projectile p2= new Needle(owner, int( owner.cx+cos(radians(owner.angle-90))*owner.w), int(owner.cy+sin(radians(owner.angle-90))*owner.w), 60, owner.playerColor, 800, owner.angle+InAccurateAngle, cos(radians(owner.angle-InAccurateAngle-crossAngle))*56, sin(radians(owner.angle-InAccurateAngle-crossAngle))*56, int(damage)).addBuff(new Burn(owner, 150, 1, 50)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod)));
       if (crossAngle<-16) {
@@ -2531,15 +2548,38 @@ class CrossFire extends RapidFire {//-------------------------------------------
       PastTime=stampTime;
     } else if ((!freeze || owner.freezeImmunity) &&  active && !owner.dead &&(stampTime+freezeTime-PastTime) >= Interval) {
       float InAccurateAngle=random(-accuracy, accuracy);
-      projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*36, sin(radians(owner.angle+InAccurateAngle))*36, int(damage)).addBuff(new Enlarge(owner, 3000, 4)).addBuff(new Burn(owner, 200, 1, 50)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod))));
-      particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle))*85), int(owner.cy+sin(radians(owner.angle))*85), 5, 22, 20, WHITE));
+      play(sipSound);
+
+      Projectile p= new Needle(owner, int( owner.cx+cos(radians(owner.angle+90))*owner.w), int(owner.cy+sin(radians(owner.angle+90))*owner.w), 60, owner.playerColor, 800, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle+crossAngle))*56, sin(radians(owner.angle+InAccurateAngle+crossAngle))*56, int(damage)).addBuff(new Burn(owner, 150, 1, 50)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod)));
+      Projectile p2= new Needle(owner, int( owner.cx+cos(radians(owner.angle-90))*owner.w), int(owner.cy+sin(radians(owner.angle-90))*owner.w), 60, owner.playerColor, 800, owner.angle+InAccurateAngle, cos(radians(owner.angle-InAccurateAngle-crossAngle))*56, sin(radians(owner.angle-InAccurateAngle-crossAngle))*56, int(damage)).addBuff(new Burn(owner, 150, 1, 50)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod)));
+      if (crossAngle<-16) {
+        p.ally=-1;
+        p2.ally=-1;
+        p.projectileColor=BLACK;
+        p2.projectileColor=BLACK;
+      }
+      if (crossAngle<-36) {
+        projectiles.add( new Bomb(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 150, BLACK, 400, owner.angle, 0, 0, int(damage*10), true));
+        projectiles.add( new ChargeLaser(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 550, BLACK, 150, owner.angle+40, 1, damage )); 
+        projectiles.add( new ChargeLaser(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 550, BLACK, 150, owner.angle-40, -1, damage )); 
+        particles.add(new Flash(200, 10, WHITE));   // flash
+
+        owner.stop();
+        owner.addBuff(new Stun(owner, 300));
+      }
+      projectiles.add(p);
+      projectiles.add(p2);
+      crossAngle-=1.7;
+      particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle+90))*owner.w), int(owner.cy+sin(radians(owner.angle)+90)*owner.w), 5, 22, 20, WHITE));
+      particles.add(new ShockWave(int(owner.cx+cos(radians(owner.angle-90))*owner.w), int(owner.cy+sin(radians(owner.angle)-90)*owner.w), 5, 22, 20, WHITE));
       owner.ANGLE_FACTOR=MODIFIED_ANGLE_FACTOR;
       r=50;
       channel();
       if (!active || energy<0 ) {
         release();
+        onNoEnergy();
       }
-      PastTime=freezeTime+stampTime;
+      PastTime=stampTime;
     }
     // if (!active)press(); // cancel
     if (owner.hit) {
@@ -2619,7 +2659,7 @@ class SerpentFire extends Ability {//-------------------------------------------
     if ((!reverse || owner.reverseImmunity) &&  active && !owner.dead &&(stampTime-PastTime) >= interval) {
       float InAccurateAngle=random(-accuracy, accuracy);
 
-      SinRocket sr= new SinRocket(owner, int( owner.cx), int(owner.cy), 25, owner.playerColor, 2000, owner.angle, cos(radians(owner.angle))*shootSpeed*.01+owner.vx, sin(radians(owner.angle))*shootSpeed*.01+owner.vy, int(damage*damageMod*.2), false);
+      SinRocket sr= new SinRocket(owner, int( owner.cx-cos(radians(owner.angle))*100), int(owner.cy-sin(radians(owner.angle))*100), 25, owner.playerColor, 2000, owner.angle, cos(radians(owner.angle))*shootSpeed*.01+owner.vx, sin(radians(owner.angle))*shootSpeed*.01+owner.vy, int(damage*damageMod*.2), false);
       Containable[] payload=new Containable[1];
       payload[0]= ((Containable) new Blast(owner, 0, 0, 15, 60, owner.playerColor, 60, owner.angle, 1, 12, 15).addBuff(new Burn( owner, 1500+int(200*damageMod), 0.00001+(damageMod*0.0001), 550))).parent(sr);
       sr.blastRadius=120;
@@ -2628,13 +2668,15 @@ class SerpentFire extends Ability {//-------------------------------------------
       if (alt) { 
         sr.count=100;
         sr.angleSpeed=int(35+InAccurateAngle);
+        projectiles.add( new  Blast(owner, int(owner.cx-cos(radians(owner.angle))*95), int(owner.cy-sin(radians(owner.angle))*95), 4, 50, owner.playerColor, 100, owner.angle+90, 1));
       } else {
         sr.count=280;
         sr.angleSpeed=int(35+InAccurateAngle);
+        projectiles.add( new  Blast(owner, int(owner.cx-cos(radians(owner.angle))*95), int(owner.cy-sin(radians(owner.angle))*95), 4, 50, owner.playerColor, 100, owner.angle-90, 1));
       }
       alt=!alt;
       projectiles.add( sr);
-      projectiles.add( new  Blast(owner, int(owner.cx+cos(radians(owner.angle))*95), int(owner.cy+sin(radians(owner.angle))*95), 0, 50, owner.playerColor, 100, owner.angle, 1));
+      play(peSound);
 
       owner.pushForce(-recoil, owner.keyAngle);
       /* SinRocket sr= new SinRocket(owner, int( owner.cx), int(owner.cy), 50, owner.playerColor, 2500, owner.angle, cos(radians(owner.angle))*shootSpeed*.01+owner.vx, sin(radians(owner.angle))*shootSpeed*.01+owner.vy, damage*2, false);
@@ -2744,6 +2786,8 @@ class MachineGun extends RapidFire {//------------------------------------------
       }
       PastTime=stampTime;
       alt++;
+      play(sipSound);
+
       if (alt%3==0) {
         e=retractLength;
         projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w+cos(radians(owner.angle+90))*17), int(owner.cy+sin(radians(owner.angle))*owner.w+sin(radians(owner.angle+90))*17), 60, owner.playerColor, 600, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*projectileSpeed, sin(radians(owner.angle+InAccurateAngle))*projectileSpeed, int(damage)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod))));
@@ -2759,6 +2803,7 @@ class MachineGun extends RapidFire {//------------------------------------------
       }
     } else if ((!freeze || owner.freezeImmunity) &&  active && !owner.dead &&(stampTime+freezeTime-PastTime) >= Interval) {
       float InAccurateAngle=random(-accuracy, accuracy);
+      play(sipSound);
       projectiles.add( new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle+InAccurateAngle, cos(radians(owner.angle+InAccurateAngle))*projectileSpeed, sin(radians(owner.angle+InAccurateAngle))*projectileSpeed, int(damage)));
       channel();
       if (!active || energy<0 ) {
@@ -2804,6 +2849,7 @@ class MachineGun extends RapidFire {//------------------------------------------
         particles.add( new  Particle(int(owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 0, 0, 100, 50, color(255, 0, 255)));
 
         owner.pushForce(8, owner.angle+180);
+        play(thumpSound);
 
         for (int i=0; sutainCount/10>i; i++) {
           float InAccurateAngle=random(-accuracy*2, accuracy*2);
@@ -2959,6 +3005,8 @@ class Sniper extends RapidFire {//----------------------------------------------
         particles.add(new Gradient(4000, int( owner.cx+cos(radians(tempA+owner.angle))*nullRange), int(owner.cy+sin(radians(tempA+owner.angle))*nullRange), 0, 0, 30, .4, owner.angle+tempA, owner.playerColor));
         particles.add(new Gradient(2000, int( owner.cx+cos(radians(tempA+owner.angle))*nullRange), int(owner.cy+sin(radians(tempA+owner.angle))*nullRange), 0, 0, int(250-inAccurateAngle), 8, owner.angle+tempA, WHITE));
         projectiles.add( new SniperBullet(owner, int( owner.cx+cos(radians(tempA+owner.angle))*nullRange), int(owner.cy+sin(radians(tempA+owner.angle))*nullRange), 50, owner.playerColor, 10, owner.angle+tempA, int(damage-inAccurateAngle*2)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod))));
+        play(sniperSound);
+        play(thunderSound);
         owner.angle=tempA;
         owner.pushForce(-12, owner.angle);
         shakeTimer+=15; 
@@ -3136,7 +3184,8 @@ class Battery extends Ability {//-----------------------------------------------
 
   @Override
     void action() {
-      play(pewSound);
+    play(sipSound);
+
     //projectiles.add(charge.get(count));
     float inAccuracy;
     inAccuracy =random(-accuracy, accuracy);
@@ -3169,6 +3218,7 @@ class Battery extends Ability {//-----------------------------------------------
         projectiles.add(new Needle(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800*maxInterval, owner.angle+inAccuracy, cos(radians(owner.angle+inAccuracy))*40, sin(radians(owner.angle+inAccuracy))*40, int(damage+damageMod*.2)));
       }
       projectiles.add( new  Blast(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 5, 150, owner.playerColor, 75, owner.angle, damage));
+      play(pewSound);
 
       projectiles.add( new RevolverBullet(owner, int( owner.cx+cos(radians(owner.angle))*50), int(owner.cy+sin(radians(owner.angle))*50), 60, 25, owner.playerColor, 1000, owner.angle, int(damage+damageMod*.8)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod))).addBuff(new Stun(owner, 200)));
       shakeTimer+=6;
@@ -3329,7 +3379,7 @@ class AssaultBattery extends Ability {//----------------------------------------
       accuracy*=0.82;
       accuracy--;
     }
-
+    play(zapSound);
     projectiles.add( new SniperBullet(owner, int( owner.cx+cos(radians(owner.angle))*85), int(owner.cy+sin(radians(owner.angle))*85), 50, owner.playerColor, 10, owner.angle, int(damage+damageMod*.4)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod))));
     owner.pushForce(-.5, owner.angle);
 
@@ -3428,6 +3478,7 @@ class SemiAuto extends Battery implements AmmoBased {//-------------------------
     void action() {
     stamps.add( new AbilityStamp(this));
     //projectiles.add(charge.get(count));
+    play(shotSound);
 
 
     inAccuracy =random(-accuracy, accuracy);
@@ -3927,6 +3978,7 @@ class SeekGun extends Ability {//-----------------------------------------------
 
 
             if (!targets.contains(p)) {
+              play(tickSound);
               targets.add(p);
               particles.add( new TempZoom(p, 250, 1.1, DEFAULT_ZOOMRATE, true) );
               zoomRate=0.3;
@@ -4120,6 +4172,7 @@ class CutThroat extends SeekGun {
 
             if (!targets.contains(p)) {
               targets.add(p);
+              play(tickSound);
               //particles.add( new TempZoom(p, 250, 1.1, DEFAULT_ZOOMRATE, true) );
               // zoomRate=0.3;
               particles.add(new ShockWave(int(p.cx), int(p.cy), 50, 32, 200, owner.playerColor));
@@ -4870,7 +4923,8 @@ class DeployShield extends Ability {//------------------------------------------
   }
 }
 class Explosion extends Ability {//---------------------------------------------------    Explosion   ---------------------------------
-  int damage=15, shell=80, pHealth, shootSpeed=70;
+  int damage=16, shell=80, pHealth, shootSpeed=70, delay=300,triggTime;
+  boolean trigg;
   Containable[] payload;
   Explosion() {
     super();
@@ -4883,7 +4937,7 @@ class Explosion extends Ability {//---------------------------------------------
   } 
   @Override
     void action() {
-
+    owner.addBuff(new Burn(AI, 10000, 1, 800));
     /*for (int i=200; i<900; i+=75) {
      projectiles.add( new Shield( owner, int( owner.cx+cos(radians(owner.angle))*i), int(owner.cy+sin(radians(owner.angle))*i), owner.playerColor, 10000, owner.angle, damage ));
      }*/
@@ -4893,6 +4947,9 @@ class Explosion extends Ability {//---------------------------------------------
     payload[1]= new ChargeLaser(owner, 0, 0, 650, owner.playerColor, 150, owner.angle+180, -16, damage*.3 ).parent(waterRocket); 
     ((ChargeLaser)payload[0]).laserLength=250;
     ((ChargeLaser)payload[1]).laserLength=250;
+    ((ChargeLaser)payload[0]).addBuff(new Burn(owner, 10000, 1, 200).apply(BuffType.ONCE));
+    ((ChargeLaser)payload[1]).addBuff(new Burn(owner, 10000, 1, 200).apply(BuffType.ONCE));
+
     waterRocket.contains(payload);
     projectiles.add((Projectile)waterRocket);
     particles.add(new ShockWave(int(owner.cx), int(owner.cy), 300, 16, 90, WHITE));
@@ -4906,16 +4963,25 @@ class Explosion extends Ability {//---------------------------------------------
       //stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
       stamps.add( new AbilityStamp(this));
       regen=true;
-      activate();
-      action();
-      enableCooldown();
-      deactivate();
+      trigg=true;
+      triggTime=int(stampTime+delay);
+      owner.stop();
+          owner.pushForce(-15, owner.angle);
+
+      particles.add(new ShockWave(int(owner.cx), int(owner.cy), 400, 26, 90, owner.playerColor));
+
     }
   }
 
   @Override
     void passive() {
-
+    if (trigg && triggTime<stampTime) {
+      activate();
+      action();
+      enableCooldown();
+      deactivate();
+      trigg=false;
+    }
     if (owner.health>=owner.maxHealth*.5) {
       cooldownTimer=1000;
       activeCost=20;
@@ -4941,7 +5007,8 @@ class Explosion extends Ability {//---------------------------------------------
     owner.halt();
     for (int i=0; i<10; i++) {
       ChargeLaser c= new ChargeLaser(owner, int( owner.cx), int(owner.cy), 650, owner.playerColor, 150, i*36, -16, damage*.1 );
-      c.laserLength=400;
+      c.laserLength=200+(i%2)*300;
+      c.addBuff(new Burn(owner, 20000, 1, 300).apply(BuffType.ONCE));
       projectiles.add(c);
       //projectiles.add( new IceDagger(owner, int( owner.cx), int(owner.cy), 25, owner.playerColor, 500, i*36, cos(radians(i*36))*50, sin(radians(i*36))*50, damage));
     }
@@ -4952,6 +5019,7 @@ class Explosion extends Ability {//---------------------------------------------
   }
   void reset() {
     super.reset();
+    trigg=false;
     owner.armor=0;
     cooldownTimer=int(2800-attackSpeedMod*28); //100
   }
@@ -5492,7 +5560,7 @@ class CloudStrike extends Ability {//-------------------------------------------
 
 
 class Detonator extends Ability {//---------------------------------------------------    Detonator   ---------------------------------
-  int damage=24;
+  int damage=24, detonationDelay=500;
   DetonateBomb bomb;
   boolean detonated;
   Detonator() {
@@ -5513,9 +5581,11 @@ class Detonator extends Ability {//---------------------------------------------
   @Override
     void press() {
     if ( bomb!= null && !bomb.dead && bomb.deathTime>stampTime) {
-      bomb.deathTime=stampTime;
+      bomb.deathTime=stampTime+detonationDelay;
       owner.pushForce(25, degrees(atan2((owner.cy)-bomb.y, (owner.cx)-bomb.x)));
       //bomb.detonate();
+      particles.add(new ShockWave(int(bomb.x), int(bomb.y), 20, 16, 50, owner.playerColor));
+
       particles.add(new ShockWave(int(owner.cx), int(owner.cy), 50, 16, 50, owner.playerColor));
     } else if ((!reverse|| owner.reverseImmunity)&& energy>0+activeCost && !owner.dead && (!freeze || owner.freezeImmunity)   ) {
       // stamps.add( new AbilityStamp(owner.index, int(owner.x), int(owner.y), energy, active, channeling, cooling, regen, hold));
@@ -5533,7 +5603,7 @@ class Detonator extends Ability {//---------------------------------------------
 }
 
 class TeslaShock extends TimeBomb {//---------------------------------------------------    TimeBomb   ---------------------------------
-  int range=400, maxRange=1600, duration=350;
+  int range=350, maxRange=1600, duration=350;
   float MODIFIED_MAX_ACCEL=0.01; 
   long startTime;
   TeslaShock() {
@@ -5913,7 +5983,10 @@ class SummonIlluminati extends Ability {//--------------------------------------
     void action() {
     if ((!reverse || owner.reverseImmunity) &&  active && !owner.dead ) {
       owner.hit(int(owner.health*.1));
-      projectiles.add(new AbilityPack(AI, new Random(true).randomize(passiveList), int( owner.cx+cos(radians(owner.angle))*owner.w*2), int(owner.cy+sin(radians(owner.angle))*owner.w*2), 100, AI.playerColor, 30000, 0, 0, 0, true, true));
+
+      projectiles.add(new CoinBall(AI, int( owner.cx+cos(radians(owner.angle))*owner.w*2), int(owner.cy+sin(radians(owner.angle))*owner.w*2), 60, GOLD, 20000, 0, 0, 0, 50, true));
+
+      //  projectiles.add(new AbilityPack(AI, new Random(true).randomize(passiveList), int( owner.cx+cos(radians(owner.angle))*owner.w*2), int(owner.cy+sin(radians(owner.angle))*owner.w*2), 100, AI.playerColor, 30000, 0, 0, 0, true, true));
 
       //  particles.add(new  Tesla( int(owner.cx), int(owner.cy), 200, 500, owner.playerColor));
       players.add(new Illuminati(players.size(), AI, int(owner.cx+cos(radians(owner.angle))*range), int(owner.cy+sin(radians(owner.angle))*range), 175, 175, 999, new Stealth())) ;
@@ -6281,6 +6354,7 @@ class Artilery extends Ability {//----------------------------------------------
     ForceBall f=(ForceBall) new ForceBall(owner, int( owner.cx+cos(radians(owner.angle+15*alt))*owner.w), int(owner.cy+sin(radians(owner.angle+15*alt))*owner.w), shootSpeed, 35, owner.playerColor, 1200, owner.angle, int(damage+damageMod*.8)).addBuff(new CriticalHit(owner, critChance+criticalChanceMod, (critDamage+criticalDamageMod))).addBuff(new ArmorPiercing(owner, 3000, 12));
     f.shakeness=10;
     projectiles.add( f);
+    play(thumpSound);
     particles.add(new ShockWave(int( owner.cx+cos(radians(owner.angle+15*alt))*owner.w), int(owner.cy+sin(radians(owner.angle+15*alt))*owner.w), 35, 30, 100, owner.playerColor));
     //  projectiles.add( new Slug(owner, int( owner.cx+cos(radians(owner.angle))*owner.w), int(owner.cy+sin(radians(owner.angle))*owner.w), 60, owner.playerColor, 800, owner.angle, cos(radians(owner.angle))*36, sin(radians(owner.angle))*36, int(damage*0.8)));
   }
@@ -6980,22 +7054,32 @@ class SplitShot extends Ability {//---------------------------------------------
     if (timerActive) {
       timer+=2*timeBend;
       if (floor(timer)==2) {
+        play(zapSound);
+
         projectiles.add( new SniperBullet(owner, int( primeImage.x+cos(radians(owner.angle))*100), int(primeImage.y+sin(radians(owner.angle))*100), 10, owner.playerColor, 5, owner.angle, int(damage*0.1)));
         projectiles.add( new SniperBullet(owner, int( owner.cx+cos(radians( owner.angle))*100), int(owner.cy+sin(radians( owner.angle))*100), 20, owner.playerColor, 5, owner.angle, int(damage*0.1)));
       }
       if (floor(timer)==3) {
+        play(zapSound);
+
         projectiles.add( new SniperBullet(owner, int( primeImage.x+cos(radians(owner.angle))*100), int(primeImage.y+sin(radians(owner.angle))*100), 10, owner.playerColor, 5, owner.angle, int(damage*0.1)));
         projectiles.add( new SniperBullet(owner, int( owner.cx+cos(radians( owner.angle))*100), int(owner.cy+sin(radians( owner.angle))*100), 20, owner.playerColor, 5, owner.angle, int(damage*0.1)));
       }
       if (floor(timer)==8) {
+        play(zapSound);
+
         projectiles.add( new SniperBullet(owner, int( primeImage.x+cos(radians(owner.angle))*100), int(primeImage.y+sin(radians(owner.angle))*100), 10, owner.playerColor, 5, owner.angle, int(damage*0.1)));
         projectiles.add( new SniperBullet(owner, int( owner.cx+cos(radians( owner.angle))*100), int(owner.cy+sin(radians( owner.angle))*100), 20, owner.playerColor, 5, owner.angle, int(damage*0.1)));
       }
       if (floor(timer)==20) {
+        play(zapSound);
+
         projectiles.add( new SniperBullet(owner, int( primeImage.x+cos(radians(owner.angle))*100), int(primeImage.y+sin(radians(owner.angle))*100), 10, owner.playerColor, 5, owner.angle, int(damage*0.1)));
         projectiles.add( new SniperBullet(owner, int( owner.cx+cos(radians( owner.angle))*100), int(owner.cy+sin(radians( owner.angle))*100), 20, owner.playerColor, 5, owner.angle, int(damage*0.1)));
       }
       if (timer>60) {
+        play(zapSound);
+
         projectiles.add( new SniperBullet(owner, int( primeImage.x+cos(radians(owner.angle))*100), int(primeImage.y+sin(radians(owner.angle))*100), 50, WHITE, 10, owner.angle, int(damage*0.75)));
         projectiles.add( new SniperBullet(owner, int( owner.cx+cos(radians( owner.angle))*100), int(owner.cy+sin(radians( owner.angle))*100), 50, WHITE, 10, owner.angle, int(damage*0.75)));
         timerActive=false;
@@ -7077,7 +7161,7 @@ class ChargeSlash extends Ability {//-------------------------------------------
     void press() {
     if (cooldown<stampTime&&(!reverse || owner.reverseImmunity)&&(!freeze || owner.freezeImmunity) && energy>(0+activeCost)&& !hold && !active && !channeling && !owner.dead) {
       projectiles.add(new Slice(owner, int(owner.cx-cos(radians(owner.angle))*250), int(owner.cy-sin(radians(owner.angle))*250), 350, owner.playerColor, 180, owner.angle+145, 6, 130, cos(radians(owner.angle))*forceAmount*.5, sin(radians(owner.angle))*forceAmount*.5, int(20*damageFactor+damageMod*.1), false));
-                    play(chargeSound);
+      play(chargeSound);
 
       activate();
       forceAmount=5;

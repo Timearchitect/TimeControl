@@ -1,4 +1,4 @@
-  
+
 /**------------------------------------------------------------//
  //                                                            //
  //  Coding dojo  - Prototype of a timecontrol game            //
@@ -27,7 +27,8 @@ AudioContext  as = new AudioContext();
 AudioContext an= new AudioContext();
 beads.Noise n = new beads.Noise(an);
 SamplePlayer musicPlayer;
-SamplePlayer chargeSound, pewSound, shineSound, deathSound;
+SamplePlayer chargeSound, pewSound, shineSound, deathSound, peSound, thunderSound, zapSound, slashSound, teleportSound, sipSound, thumpSound,
+  shotSound, tickSound, clinkSound, machineSound,reflectSound,tickingSound,pumpSound,sniperSound;
 
 Envelope speedControl;
 
@@ -38,12 +39,12 @@ PGraphics GUILayer;
 PShader  Blur;
 final int MaxSkillAmount= 100;
 int[] skillMaxAmount, currentTotalSkillAmount;
-boolean hitBox=false, fixedSkillpoint=false, cleanStart=true, preSelectedSkills=false, RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=false, inGame;
+boolean hitBox=false, fixedSkillpoint=false, cleanStart=true, preSelectedSkills=true, RandomSkillsOnDeath=false, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=false, inGame;
 boolean gradualCleaning=false;
-final float flashAmount=0.2, shakeAmount=0.1, effectVolume=0.008;
+final float flashAmount=0.2, shakeAmount=0.1, effectVolume=0.012;
 Gain   g = new Gain(ac, 1, 0.05); //volume
 Gain  g3 = new Gain(an, 1, 0.0);
-Gain  gainSoundeffect = new Gain(as,1, effectVolume);
+Gain  gainSoundeffect = new Gain(as, 1, effectVolume);
 int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight, coins, mouseScroll;
 UpgradebleButton skillpointsButton;
@@ -365,9 +366,24 @@ void setup() {
     chargeSound  = new SamplePlayer(as, new Sample(sketchPath("") +"data/charge.mp3")); 
     deathSound  = new SamplePlayer(as, new Sample(sketchPath("") +"data/death.mp3")); 
     shineSound  = new SamplePlayer(as, new Sample(sketchPath("") +"data/shine.mp3")); 
+    thunderSound  = new SamplePlayer(as, new Sample(sketchPath("") +"data/thunder.mp3")); 
+    zapSound  = new SamplePlayer(as, new Sample(sketchPath("") +"data/zap.mp3")); 
+    slashSound  = new SamplePlayer(as, new Sample(sketchPath("") +"data/slash.mp3")); 
+    teleportSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/teleport.mp3")); 
+    peSound = new SamplePlayer(as, new Sample(sketchPath("") +"data/pe.mp3"));
+    thumpSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/thump.mp3")); 
+    sipSound  = new SamplePlayer(as, new Sample(sketchPath("") +"data/sip.mp3")); 
+    shotSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/shot.mp3"));
+    tickSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/tick.mp3")); 
+    clinkSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/clink.mp3")); 
+    machineSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/machine.mp3")); 
+    reflectSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/reflect.mp3")); 
+    tickingSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/ticking.mp3")); 
+    sniperSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/sniper.mp3")); 
+    pumpSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/pump.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/TooManyCooksAdultSwim.mp3"));
-    musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
-    // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
+    // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
+     musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Branching time.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/orange caramel -aing.mp3"));
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/goodbye.mp3"));
@@ -378,12 +394,28 @@ void setup() {
     e.printStackTrace(); // then print a technical description of the error
     exit(); // and exit the program
   }
-/*initSound(chargeSound,effectVolume);
-initSound(pewSound,effectVolume);
-initSound(shineSound,effectVolume);
-initSound(deathSound,effectVolume);
+  initSound(thumpSound);
 
-*/
+  initSound(sipSound);
+  initSound(zapSound);
+  initSound(chargeSound);
+  initSound(pewSound);
+  initSound(peSound);
+  initSound(shineSound);
+  initSound(deathSound);
+  initSound(thunderSound);
+  initSound(slashSound);
+  initSound(teleportSound);
+  initSound(sipSound );
+  initSound(shotSound);
+  initSound(tickSound);
+  initSound(clinkSound);
+  initSound(machineSound);
+    initSound(reflectSound);
+    initSound(tickingSound);
+initSound(pumpSound);
+initSound(sniperSound);
+  g.addInput(musicPlayer);
   ac.out.addInput(g);
   speedControl = new Envelope(ac, 1);
   musicPlayer.setPosition(2500);
@@ -391,6 +423,8 @@ initSound(deathSound,effectVolume);
   musicPlayer.setLoopType(SamplePlayer.LoopType.LOOP_FORWARDS);
   //  speedControl.addSegment(1, 3000); //now rewind
   if (!mute)ac.start(); //start music
+
+
   as.out.addInput(gainSoundeffect);
   as.start();
 

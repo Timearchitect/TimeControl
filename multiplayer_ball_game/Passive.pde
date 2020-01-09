@@ -1342,7 +1342,7 @@ class Emergency extends Ability {//---------------------------------------------
       if (trigger) {
         owner.freezeImmunity=true;
         particles.add(new Flash(100, 8, WHITE));  
-
+        play(tickingSound);
         //particles.add(new TempSlow(1500, 0.03, 1.05));
         for (int i =0; i<3; i++) {
           particles.add( new Feather(300, int(owner.cx), int(owner.cy), random(-2, 2), random(-2, 2), 25, owner.playerColor));
@@ -1605,6 +1605,7 @@ class Stalker extends Ability {//-----------------------------------------------
       }
       target= seek(owner, 2500);
       if (target!=null) {
+        play(teleportSound);
         stroke(owner.playerColor);
         strokeWeight(100);
         target.addBuff(new Cold(owner, 1500, .8));

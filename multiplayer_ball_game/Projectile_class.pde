@@ -585,13 +585,15 @@ class ForceBall extends Projectile implements Reflectable { //------------------
   @Override
     void hit(Player enemy) {
     super.hit(enemy);
-    if (damage>100 && damage<=250) { 
-      particles.add(new TempSlow(700, 0.1, 1.05));
-      particles.add( new TempZoom(enemy, 200, 1.2, DEFAULT_ZOOMRATE, true) );
-    }
-    if (damage>250) {
-      particles.add( new TempFreeze(500));
-      particles.add( new TempZoom(enemy, 500, 2, 1, true) );
+    if (!enemy.turret) {
+      if (damage>100 && damage<=250) { 
+        particles.add(new TempSlow(700, 0.1, 1.05));
+        particles.add( new TempZoom(enemy, 200, 1.2, DEFAULT_ZOOMRATE, true) );
+      }
+      if (damage>250) {
+        particles.add( new TempFreeze(500));
+        particles.add( new TempZoom(enemy, 500, 2, 1, true) );
+      }
     }
     for (int i=0; i<2*v; i++) {
       particles.add(new Particle(int(x), int(y), random(-v, v)+vx, random(-v, v)+vy, int(random(30)+10), 800, 255));
@@ -2445,6 +2447,7 @@ class Thunder extends Bomb {//----------------------------------------- Thunder 
     void fizzle() {    // when fizzle
     if ( !dead ) {         
       super.fizzle();
+      play(thunderSound);
       for (int i=0; i<5; i++) {
         particles.add(new Particle(int(x), int(y), random(-80, 80), random(-80, 80), int(random(30)+10), 800, 255));
       }
@@ -2909,6 +2912,7 @@ class Slash extends Projectile implements Destroyer {//-------------------------
     strokeWeight(8);
     triangle(x+random(50)-150, y+random(50)-25, x+random(50)+100, y+random(50)-25, x+random(50)-50, y+random(50)+75);
     particles.add(new Fragment(int(destroyedP.x), int(destroyedP.y), 0, 0, 40, 10, 500, 100, owner.playerColor) );
+    play(clinkSound);
   }
 }
 class Slice extends Slash implements Destroyer {//----------------------------------------- Slash objects ----------------------------------------------------
@@ -3820,6 +3824,7 @@ class Shield extends Projectile implements Reflector, Container { //------------
   public void reflecting() {
     brightness=500;
     particles.add(new ShockWave(int(x), int(y), size, 16, 100, WHITE));
+    play(reflectSound);
   }
 
   public Projectile setSize(int s) {

@@ -581,6 +581,8 @@ class Drone extends Player {
     damage=5;
     armor=-15;
     abilityShortName=abilityList.get(0).name.substring(0, 1).toUpperCase();
+        play(machineSound);
+
   }
   Drone(int _index, int _x, int _y, int _w, int _h, int speed, int _health, Ability ..._ability) { // neutral
     super( _index, BLACK, _x, _y, _w, _h, 999, 999, 999, 999, 999, _ability) ;
@@ -594,6 +596,7 @@ class Drone extends Player {
     damage=5;
     armor=-15;
     abilityShortName=abilityList.get(0).name.substring(0, 1).toUpperCase();
+    play(machineSound);
   }
   void displayAbilityEnergy() {
   }

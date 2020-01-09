@@ -180,7 +180,7 @@ static float  calcAngleBetween(Player target, Projectile from) {
   return degrees(atan2((target.cy-from.y), (target.cx-from.x)))%360;
 }
 static float calcAngleFromBlastZone(float x, float y, float px, float py) {
-  //    double deltaY = py - y;
+  //   double deltaY = py - y;
   //   double deltaX = px - x;
   return (float)Math.atan2(py - y, px - x) * 180 / PI;
 }
@@ -247,15 +247,16 @@ Projectile mergePayload( Projectile p, Containable[] c) {
   s.contains(payload);
   return (Projectile)s;
 }
-void initSound(SamplePlayer sp,float v){
-  g.addInput(sp);
- // gainSoundeffect.addInput(sp);
+void initSound(SamplePlayer sp) {
+ // g.addInput(sp);
+  gainSoundeffect.addInput(sp);
+  // gainSoundeffect.addInput(sp);
   sp.setLoopType(SamplePlayer.LoopType.NO_LOOP_FORWARDS);
-    sp.setKillOnEnd(false);
+  sp.setKillOnEnd(false);
   sp.pause(true);
 }
 void play(SamplePlayer sp) {
-sp.reTrigger();
+  sp.reTrigger();
   //sp.reset();
   //sp.setPosition(0);
   sp.start(0);
