@@ -21,6 +21,7 @@ class Player implements Cloneable {
   ArrayList<Buff> buffList= new ArrayList<Buff>();
   String label;
   color playerColor;
+  float mouseFactor=0.038;
   Particle textParticle, iconParticle;
 
   Player(int _index, color _playerColor, int _x, int _y, int _w, int _h, int _up, int _down, int _left, int _right, int _triggKey, Ability ..._ability) {
@@ -312,7 +313,7 @@ class Player implements Cloneable {
       //*MAX_ACCEL*0.017*s*f;
       //*MAX_MOUSE_ACCEL*s*f;
       if (pmouseX-1<mouseX) {
-        ax-=(pmouseX-mouseX)*MAX_ACCEL*0.028*bend;
+        ax-=(pmouseX-mouseX)*MAX_ACCEL*mouseFactor*bend;
         if (ax<-mouseMaxAccel) {
           ax=-mouseMaxAccel;
         }
@@ -323,7 +324,7 @@ class Player implements Cloneable {
         }
       }
       if (pmouseX+1>mouseX) {
-        ax-=(pmouseX-mouseX)*MAX_ACCEL*0.028*bend;
+        ax-=(pmouseX-mouseX)*MAX_ACCEL*mouseFactor*bend;
         if (players.get(0).ax>mouseMaxAccel) {
           players.get(0).ax=mouseMaxAccel;
         }
@@ -334,7 +335,7 @@ class Player implements Cloneable {
         }
       }
       if (pmouseY-1<mouseY) {
-        ay-=(pmouseY-mouseY)*MAX_ACCEL*0.028*bend;
+        ay-=(pmouseY-mouseY)*MAX_ACCEL*mouseFactor*bend;
         if (ay<-mouseMaxAccel) {
           ay=-mouseMaxAccel;
         }
@@ -345,7 +346,7 @@ class Player implements Cloneable {
         }
       }
       if (pmouseY+1>mouseY) {
-        ay-=(pmouseY-mouseY)*MAX_ACCEL*0.028*bend;
+        ay-=(pmouseY-mouseY)*MAX_ACCEL*mouseFactor*bend;
         if (ay>mouseMaxAccel) {
           ay=mouseMaxAccel;
         }

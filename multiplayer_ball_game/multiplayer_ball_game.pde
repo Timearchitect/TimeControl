@@ -37,13 +37,13 @@ int MaxSkillAmount= 100;
 int[] skillMaxAmount,currentTotalSkillAmount;
 boolean hitBox=false,fixedSkillpoint=false, cleanStart=true, preSelectedSkills=true, RandomSkillsOnDeath=false, noFlash=true, noShake=true, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=false, inGame;
 boolean gradualCleaning=true;
-final float flashAmount=0.2, shakeAmount=0.1;
+final float flashAmount=0.3, shakeAmount=0.4;
 int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight, coins, mouseScroll;
 UpgradebleButton skillpointsButton;
 //int gameMode=0;
 GameType gameMode=GameType.MENU;
-final byte AmountOfPlayers=4, AmountOfModes=7; // start players
+final byte AmountOfPlayers=3, AmountOfModes=7; // start players
 final float DIFFICULTY_LEVEL=1.2;
 
 final int WHITE=color(255), GREY=color(172), BLACK=color(0), GOLD=color(255, 220, 0), RED=color(255, 0, 0), GREEN=color(0, 255, 0);
@@ -339,7 +339,7 @@ void setup() {
   try {  
     // initialize the SamplePlayer
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/TooManyCooksAdultSwim.mp3"));
-    musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
+     musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Branching time.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/orange caramel -aing.mp3"));
