@@ -180,7 +180,7 @@ static float  calcAngleBetween(Player target, Projectile from) {
   return degrees(atan2((target.cy-from.y), (target.cx-from.x)))%360;
 }
 static float calcAngleFromBlastZone(float x, float y, float px, float py) {
-  //    double deltaY = py - y;
+  //   double deltaY = py - y;
   //   double deltaX = px - x;
   return (float)Math.atan2(py - y, px - x) * 180 / PI;
 }
@@ -205,11 +205,11 @@ void playerSetup() {
       if (!preSelectedSkills) {               
         generateRandomAbilities(1, passiveList, true);
         generateRandomAbilities(0, abilityList, true);
-      } else {
-        /* for(int j=0;j<abilityList[i].length; j++){
-         players.get(j).abilityList.add(abilities[i][j]);
-         }*/
-      }
+      } /*else {
+       for(int j=0;j<abilityList[i].length; j++){
+       players.get(j).abilityList.add(abilities[i][j]);
+       }
+       }*/
       if (players.get(i).mouse)players.get(i).FRICTION_FACTOR=0.11; //mouse
     }
     catch(Exception e ) {
@@ -247,6 +247,20 @@ Projectile mergePayload( Projectile p, Containable[] c) {
   s.contains(payload);
   return (Projectile)s;
 }
+void initSound(SamplePlayer sp) {
+ // g.addInput(sp);
+  gainSoundeffect.addInput(sp);
+  // gainSoundeffect.addInput(sp);
+  sp.setLoopType(SamplePlayer.LoopType.NO_LOOP_FORWARDS);
+  sp.setKillOnEnd(false);
+  sp.pause(true);
+}
+void play(SamplePlayer sp) {
+  sp.reTrigger();
+  //sp.reset();
+  //sp.setPosition(0);
+  sp.start(0);
+}
 
 
 class QuadTree {
@@ -262,23 +276,22 @@ class QuadTree {
     w=_w;
     h=_h;
   }
-void show(){
-  noFill();
-  rect(x,y,w,h);
-
-}
-  void subdivide() {
-    int hw=int(w*0.5f),hh=int(h*0.5f);
-    northWest= new QuadTree(0,0,hw,hh);
-    northEast= new QuadTree(hw,0,hw,hh);
-    southWest= new QuadTree(0,hh,hw,hh);
-    southEast= new QuadTree(hw,hh,hw,hh);
+  void show() {
+    noFill();
+    rect(x, y, w, h);
   }
-  void insert( PVector p){
-     if(p.x>x  && p.x< x+w &&p.y > y&& p.y < y+h ){
-       if(points.length > capacity){
-         subdivide();
-       }
-     }
+  void subdivide() {
+    int hw=int(w*0.5f), hh=int(h*0.5f);
+    northWest= new QuadTree(0, 0, hw, hh);
+    northEast= new QuadTree(hw, 0, hw, hh);
+    southWest= new QuadTree(0, hh, hw, hh);
+    southEast= new QuadTree(hw, hh, hw, hh);
+  }
+  void insert( PVector p) {
+    if (p.x>x  && p.x< x+w &&p.y > y&& p.y < y+h ) {
+      if (points.length > capacity) {
+        subdivide();
+      }
+    }
   }
 }

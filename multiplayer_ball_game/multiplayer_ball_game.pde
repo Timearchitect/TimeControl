@@ -21,23 +21,32 @@ import net.java.games.input.*;
 import net.java.games.input.EventQueue;
 import net.java.games.input.Event;
 
-
 AudioContext  ac = new AudioContext();
+AudioContext  as = new AudioContext();
+
 AudioContext an= new AudioContext();
-Noise n = new Noise(an);
+beads.Noise n = new beads.Noise(an);
 SamplePlayer musicPlayer;
+SamplePlayer chargeSound, pewSound, shineSound, deathSound, peSound, thunderSound, zapSound, slashSound, teleportSound, sipSound, thumpSound,
+  shotSound, tickSound, clinkSound, machineSound,reflectSound,tickingSound,pumpSound,sniperSound;
+
 Envelope speedControl;
-Gain   g = new Gain(ac, 1, 0.05); //volume
-Gain  g3 = new Gain(an, 1, 0.0);
+
+
 final color BGcolor=color(100);
 PFont font;
 PGraphics GUILayer;
 PShader  Blur;
-int MaxSkillAmount= 100;
-int[] skillMaxAmount,currentTotalSkillAmount;
-boolean hitBox=false,fixedSkillpoint=false, cleanStart=true, preSelectedSkills=true, RandomSkillsOnDeath=false, noFlash=true, noShake=true, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=false, inGame;
-boolean gradualCleaning=true;
-final float flashAmount=0.3, shakeAmount=0.4;
+
+final int MaxSkillAmount= 100;
+int[] skillMaxAmount, currentTotalSkillAmount;
+boolean hitBox=false, fixedSkillpoint=false, cleanStart=true, preSelectedSkills=true, RandomSkillsOnDeath=false, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=false, inGame;
+boolean gradualCleaning=false;
+final float flashAmount=0.2, shakeAmount=0.1, effectVolume=0.012;
+Gain   g = new Gain(ac, 1, 0.05); //volume
+Gain  g3 = new Gain(an, 1, 0.0);
+Gain  gainSoundeffect = new Gain(as, 1, effectVolume);
+
 int mouseSelectedPlayerIndex=0;
 int halfWidth, halfHeight, coins, mouseScroll;
 UpgradebleButton skillpointsButton;
@@ -109,13 +118,27 @@ int playerControl[][]= {
  return false;
  }
  */
+//import processing.sound.*;
+//SoundFile  deathSound, chargeSound, shineSound, pewSound;
+
+
+
 void setup() {
+
   // hint(DISABLE_OPENGL_ERROR_REPORT);
   hint(DISABLE_DEPTH_TEST);
   hint(DISABLE_ASYNC_SAVEFRAME);
   fullScreen(P3D);
   //size(displayWidth, displayHeight, P3D);
   draw();
+  /*deathSound= new SoundFile(this, "death.mp3");
+   deathSound.amp(effectVolume);
+   pewSound= new SoundFile(this, "pew.mp3");
+   pewSound.amp(effectVolume);
+   // chargeSound= new SoundFile(this, "charge.mp3");
+   // chargeSound.amp(effectVolume);
+   shineSound= new SoundFile(this, "shine.mp3");
+   shineSound.amp(effectVolume);*/
   imageMode(CENTER);
   textAlign(CENTER, CENTER);
   font= loadFont("PressStart2P-Regular-28.vlw");
@@ -160,7 +183,7 @@ void setup() {
     new Gravity(), 
     new DeployTurret(), 
     new Bazooka(), 
-    new MissleLauncher(), 
+    new MissileLauncher(), 
     new AutoGun(), 
     new Combo(), 
     new CloudStrike(), 
@@ -199,7 +222,9 @@ void setup() {
     new CutThroat(), 
     new CrossFire(), 
     new FlashBomb(), 
-    new Explosion()
+    new Explosion(), 
+    new SplitShot()
+    //new Multiply2()
   };
 
   passiveList = new Ability[]{
@@ -286,11 +311,12 @@ void setup() {
   mList.add( new ModeButton(GameType.BOSSRUSH, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255), icons[34]));
   mList.add( new ModeButton(GameType.SHOP, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255), icons[45]));
   mList.add( new ModeButton(GameType.SETTINGS, width/AmountOfModes*mList.size(), halfHeight/AmountOfModes*mList.size(), menuBtnWidth, menuBtnHeight, color(255/AmountOfModes*mList.size(), 255, 255), icons[55]));
-
+  selectedModeButton=mList.get(0);
+  selectedModeButton.hover=true;
   println("loaded save ... abilities!");
   abilities= new Ability[][]{ 
-  /* player 1 */    new Ability[]{new Torpedo(), new MpRegen()}, 
-  /* player 2 */    new Ability[]{new CutThroat(), new Random().randomize(passiveList)}, 
+  /* player 1 */    new Ability[]{new Torpedo(), new Redemption()}, 
+  /* player 2 */    new Ability[]{new Explosion(), new Random().randomize(passiveList)}, 
   /* player 3 mouse */    new Ability[]{new  Random().randomize(abilityList), new  Random().randomize(passiveList)}, 
   /* player 4 */    new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
     new Ability[]{new Random().randomize(abilityList), new Random().randomize(passiveList)}, 
@@ -299,7 +325,7 @@ void setup() {
   currentTotalSkillAmount= new int[AmountOfPlayers];
   skillMaxAmount= new int[AmountOfPlayers];
   updateSkillPoints();
-  
+
   //ChloeSet = new Ability[]{new ForceShoot(),new RapidFire(), new Dash(), new Tumble(),new Emergency()};
   //abilities[1]=ChloeSet;
 
@@ -338,20 +364,60 @@ void setup() {
 
   try {  
     // initialize the SamplePlayer
+    pewSound  = new SamplePlayer(as, new Sample(sketchPath("") +"data/pew.mp3")); 
+    chargeSound  = new SamplePlayer(as, new Sample(sketchPath("") +"data/charge.mp3")); 
+    deathSound  = new SamplePlayer(as, new Sample(sketchPath("") +"data/death.mp3")); 
+    shineSound  = new SamplePlayer(as, new Sample(sketchPath("") +"data/shine.mp3")); 
+    thunderSound  = new SamplePlayer(as, new Sample(sketchPath("") +"data/thunder.mp3")); 
+    zapSound  = new SamplePlayer(as, new Sample(sketchPath("") +"data/zap.mp3")); 
+    slashSound  = new SamplePlayer(as, new Sample(sketchPath("") +"data/slash.mp3")); 
+    teleportSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/teleport.mp3")); 
+    peSound = new SamplePlayer(as, new Sample(sketchPath("") +"data/pe.mp3"));
+    thumpSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/thump.mp3")); 
+    sipSound  = new SamplePlayer(as, new Sample(sketchPath("") +"data/sip.mp3")); 
+    shotSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/shot.mp3"));
+    tickSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/tick.mp3")); 
+    clinkSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/clink.mp3")); 
+    machineSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/machine.mp3")); 
+    reflectSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/reflect.mp3")); 
+    tickingSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/ticking.mp3")); 
+    sniperSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/sniper.mp3")); 
+    pumpSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/pump.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/TooManyCooksAdultSwim.mp3"));
-     musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
-    // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
+
+    // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
+     musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Branching time.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/orange caramel -aing.mp3"));
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/goodbye.mp3"));
-    //  musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/wierd.mp3"));
+    // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/wierd.mp3"));
   }
   catch(Exception e) {
     println("Exception while attempting to load sample!");
     e.printStackTrace(); // then print a technical description of the error
     exit(); // and exit the program
   }
+  initSound(thumpSound);
 
+  initSound(sipSound);
+  initSound(zapSound);
+  initSound(chargeSound);
+  initSound(pewSound);
+  initSound(peSound);
+  initSound(shineSound);
+  initSound(deathSound);
+  initSound(thunderSound);
+  initSound(slashSound);
+  initSound(teleportSound);
+  initSound(sipSound );
+  initSound(shotSound);
+  initSound(tickSound);
+  initSound(clinkSound);
+  initSound(machineSound);
+    initSound(reflectSound);
+    initSound(tickingSound);
+initSound(pumpSound);
+initSound(sniperSound);
   g.addInput(musicPlayer);
   ac.out.addInput(g);
   speedControl = new Envelope(ac, 1);
@@ -360,6 +426,10 @@ void setup() {
   musicPlayer.setLoopType(SamplePlayer.LoopType.LOOP_FORWARDS);
   //  speedControl.addSegment(1, 3000); //now rewind
   if (!mute)ac.start(); //start music
+
+
+  as.out.addInput(gainSoundeffect);
+  as.start();
 
   Gain g2 = new Gain(an, 1, 0);
   g2.addInput(n);
@@ -385,17 +455,39 @@ void setup() {
     for (int i=0; i<2; i++) {
       sBList.add( new SettingButton(i, settingSkillXOffset+settingSkillInterval*i, settingSkillYOffset+200*j, 100, players.get(j)) );
     }
-    pSBList.add( new StatButton(icons[46], 0, "HP", 50, settingSkillYOffset+50+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[47], 1, "MP", 100, settingSkillYOffset+50+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[48], 2, "Sp", 150, settingSkillYOffset+50+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[49], 3, "Armor", 200, settingSkillYOffset+50+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[50], 4, "Crit%", 250, settingSkillYOffset+50+200*j, 50, players.get(j)) );
+    StatButton s=    new StatButton(icons[46], 0+players.get(j).abilityList.size(), "HP", 50, settingSkillYOffset+50+200*j, 50, players.get(j));
 
-    pSBList.add( new StatButton(icons[51], 5, "CritD", 300, settingSkillYOffset+50+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[52], 6, "Damage", 350, settingSkillYOffset+50+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[53], 7, "Acc", 400, settingSkillYOffset+50+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[54], 8, "AttSp", 450, settingSkillYOffset+50+200*j, 50, players.get(j)) );
-    pSBList.add( new StatButton(icons[54], 9, "CDR", 500, settingSkillYOffset+50+200*j, 50, players.get(j)) );
+    players.get(j).statList.add(s);
+    pSBList.add( s);
+    s=  new StatButton(icons[47], 1+players.get(j).abilityList.size(), "MP", 100, settingSkillYOffset+50+200*j, 50, players.get(j)) ;
+    players.get(j).statList.add(s);
+    pSBList.add( s);
+    s= new StatButton(icons[48], 2+players.get(j).abilityList.size(), "Sp", 150, settingSkillYOffset+50+200*j, 50, players.get(j)) ;
+    players.get(j).statList.add(s);
+    pSBList.add( s);
+    s=  new StatButton(icons[49], 3+players.get(j).abilityList.size(), "Armor", 200, settingSkillYOffset+50+200*j, 50, players.get(j)) ;
+    players.get(j).statList.add(s);
+    pSBList.add( s);
+    s=  new StatButton(icons[50], 4+players.get(j).abilityList.size(), "Crit%", 250, settingSkillYOffset+50+200*j, 50, players.get(j)) ;
+    players.get(j).statList.add(s);
+    pSBList.add( s);
+    s= new StatButton(icons[51], 5+players.get(j).abilityList.size(), "CritD", 300, settingSkillYOffset+50+200*j, 50, players.get(j)) ;
+    players.get(j).statList.add(s);
+    pSBList.add( s);
+    s=  new StatButton(icons[52], 6+players.get(j).abilityList.size(), "Damage", 350, settingSkillYOffset+50+200*j, 50, players.get(j)) ;
+    players.get(j).statList.add(s);
+    pSBList.add( s);
+    s=  new StatButton(icons[53], 7+players.get(j).abilityList.size(), "Acc", 400, settingSkillYOffset+50+200*j, 50, players.get(j)) ;
+    players.get(j).statList.add(s);
+    pSBList.add( s);
+    s=  new StatButton(icons[54], 8+players.get(j).abilityList.size(), "AttSp", 450, settingSkillYOffset+50+200*j, 50, players.get(j)) ;
+
+    players.get(j).statList.add(s);
+    pSBList.add( s);
+    s=  new StatButton(icons[54], 9+players.get(j).abilityList.size(), "CDR", 500, settingSkillYOffset+50+200*j, 50, players.get(j)) ;
+    players.get(j).statList.add(s);
+    pSBList.add( s);
+    println( players.get(j).statList.size());
   }
   /*   String[] args = {"Rename player"};
    PApplet sa = new PApplet();

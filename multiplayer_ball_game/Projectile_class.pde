@@ -585,13 +585,15 @@ class ForceBall extends Projectile implements Reflectable { //------------------
   @Override
     void hit(Player enemy) {
     super.hit(enemy);
-    if (damage>100 && damage<=250) { 
-      particles.add(new TempSlow(700, 0.1, 1.05));
-      particles.add( new TempZoom(enemy, 200, 1.2, DEFAULT_ZOOMRATE, true) );
-    }
-    if (damage>250) {
-      particles.add( new TempFreeze(500));
-      particles.add( new TempZoom(enemy, 500, 2, 1, true) );
+    if (!enemy.turret) {
+      if (damage>100 && damage<=250) { 
+        particles.add(new TempSlow(700, 0.1, 1.05));
+        particles.add( new TempZoom(enemy, 200, 1.2, DEFAULT_ZOOMRATE, true) );
+      }
+      if (damage>250) {
+        particles.add( new TempFreeze(500));
+        particles.add( new TempZoom(enemy, 500, 2, 1, true) );
+      }
     }
     for (int i=0; i<2*v; i++) {
       particles.add(new Particle(int(x), int(y), random(-v, v)+vx, random(-v, v)+vy, int(random(30)+10), 800, 255));
@@ -2166,11 +2168,11 @@ class Rocket extends Bomb implements Reflectable, Destroyable, Container {//----
   }
 }
 
-class Missle extends Rocket implements Reflectable {//----------------------------------------- Missle objects ----------------------------------------------------
+class Missile extends Rocket implements Reflectable {//----------------------------------------- Missile objects ----------------------------------------------------
   int angleSpeed=13, seekRange=1200;
   float turnRate=0.15;
   Player target;
-  Missle(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage, boolean _friendlyFire) {
+  Missile(Player _owner, int _x, int _y, int _size, color _projectileColor, int  _time, float _angle, float _vx, float _vy, int _damage, boolean _friendlyFire) {
     super(_owner, _x, _y, _size, _projectileColor, _time, _angle, _vx, _vy, _damage, _friendlyFire);
     for (int i=0; i<2; i++) {
       particles.add(new Particle(int(x), int(y), random(10)-5+vx*0.5, random(10)-5+vy*0.5, int(random(20)+5), 800, 255));
@@ -2445,6 +2447,7 @@ class Thunder extends Bomb {//----------------------------------------- Thunder 
     void fizzle() {    // when fizzle
     if ( !dead ) {         
       super.fizzle();
+      play(thunderSound);
       for (int i=0; i<5; i++) {
         particles.add(new Particle(int(x), int(y), random(-80, 80), random(-80, 80), int(random(30)+10), 800, 255));
       }
@@ -2909,6 +2912,7 @@ class Slash extends Projectile implements Destroyer {//-------------------------
     strokeWeight(8);
     triangle(x+random(50)-150, y+random(50)-25, x+random(50)+100, y+random(50)-25, x+random(50)-50, y+random(50)+75);
     particles.add(new Fragment(int(destroyedP.x), int(destroyedP.y), 0, 0, 40, 10, 500, 100, owner.playerColor) );
+    play(clinkSound);
   }
 }
 class Slice extends Slash implements Destroyer {//----------------------------------------- Slash objects ----------------------------------------------------
@@ -3820,6 +3824,7 @@ class Shield extends Projectile implements Reflector, Container { //------------
   public void reflecting() {
     brightness=500;
     particles.add(new ShockWave(int(x), int(y), size, 16, 100, WHITE));
+    play(reflectSound);
   }
 
   public Projectile setSize(int s) {
