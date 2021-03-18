@@ -41,9 +41,9 @@ PShader  Blur;
 final int MaxSkillAmount= 100;
 int[] skillMaxAmount, currentTotalSkillAmount;
 boolean hitBox=false, fixedSkillpoint=false, cleanStart=true, preSelectedSkills=true, RandomSkillsOnDeath=false, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=false, inGame;
-boolean gradualCleaning=false;
-final float flashAmount=0.2, shakeAmount=0.1, effectVolume=0.012;
-Gain   g = new Gain(ac, 1, 0.05); //volume
+boolean gradualCleaning=true;
+final float flashAmount=0.2, shakeAmount=0.1, effectVolume=0.042,musicVolume=0.35;
+Gain   g = new Gain(ac, 1, musicVolume); //volume
 Gain  g3 = new Gain(an, 1, 0.0);
 Gain  gainSoundeffect = new Gain(as, 1, effectVolume);
 
@@ -384,9 +384,8 @@ void setup() {
     sniperSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/sniper.mp3")); 
     pumpSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/pump.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/TooManyCooksAdultSwim.mp3"));
-
-    // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
-     musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
+     musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
+    // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Branching time.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/orange caramel -aing.mp3"));
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/goodbye.mp3"));
