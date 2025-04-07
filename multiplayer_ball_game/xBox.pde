@@ -1,5 +1,5 @@
 
-net.java.games.input.Controller controller;
+/*net.java.games.input.Controller controller;
 ControllerListener cl;
 ControllerEnvironment ce;
 Component components[]= new Component[20];
@@ -366,4 +366,4 @@ void settingsInput(){
       println(e +" keyboard");
     }
 }
-}
+}*/

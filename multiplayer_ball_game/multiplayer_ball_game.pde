@@ -17,10 +17,10 @@ import processing.opengl.*;
 import beads.*;
 import java.util.Arrays; 
 import processing.serial.*;
-import net.java.games.input.*;
+/*import net.java.games.input.*;
 import net.java.games.input.EventQueue;
 import net.java.games.input.Event;
-
+*/
 AudioContext  ac = new AudioContext();
 AudioContext  as = new AudioContext();
 
