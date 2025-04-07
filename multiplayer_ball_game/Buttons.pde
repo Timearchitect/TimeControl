@@ -345,7 +345,7 @@ class ModeButton extends Button {
   void hit() { // when button is pressed()
     gameMode=type;
     playerSetup();
-    controllerSetup();
+   // controllerSetup();
     resetGame();
     for (int i=0; i<36; i++) {
       particles.add( new  Particle(int(x+random(w)), int(y+random(h)), 0, 0, int(random(50)+20), 1000, pcolor));

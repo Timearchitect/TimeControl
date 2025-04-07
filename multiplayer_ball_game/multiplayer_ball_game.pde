@@ -40,11 +40,11 @@ PShader  Blur;
 
 final int MaxSkillAmount= 100;
 int[] skillMaxAmount, currentTotalSkillAmount;
-boolean hitBox=false, fixedSkillpoint=false, cleanStart=true, preSelectedSkills=true, RandomSkillsOnDeath=false, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=false, inGame;
-boolean gradualCleaning=true;
-final float flashAmount=0.2, shakeAmount=0.1, effectVolume=0.042,musicVolume=0.35;
+boolean hitBox=false, fixedSkillpoint=false, cleanStart=true, preSelectedSkills=true, RandomSkillsOnDeath=true, noFlash=false, noShake=false, slow, reverse, fastForward, freeze, controlable=true, cheatEnabled, debug, origo, noisy, mute=false, inGame;
+boolean gradualCleaning=true; // cant reverse otherwise
+final float flashAmount=0.2, shakeAmount=0.1, effectVolume=0.042,musicVolume=0.25;
 Gain   g = new Gain(ac, 1, musicVolume); //volume
-Gain  g3 = new Gain(an, 1, 0.0);
+Gain  g3 = new Gain(an,1, 0.1);
 Gain  gainSoundeffect = new Gain(as, 1, effectVolume);
 
 int mouseSelectedPlayerIndex=0;
@@ -52,7 +52,7 @@ int halfWidth, halfHeight, coins, mouseScroll;
 UpgradebleButton skillpointsButton;
 //int gameMode=0;
 GameType gameMode=GameType.MENU;
-final byte AmountOfPlayers=3, AmountOfModes=7; // start players
+final byte AmountOfPlayers=2, AmountOfModes=7; // start players
 final float DIFFICULTY_LEVEL=1.2;
 
 final int WHITE=color(255), GREY=color(172), BLACK=color(0), GOLD=color(255, 220, 0), RED=color(255, 0, 0), GREEN=color(0, 255, 0);
@@ -156,8 +156,8 @@ void setup() {
   for (int i=0; i<ICON_AMOUNT; i++ )icons[i]=loadImage("data/Ability Icons-"+(i+1)+".png");
   abilityList= new Ability[]{
     // new FastForward(), 
-    // new Freeze(), 
-    // new Reverse(), 
+   //  new Freeze(), 
+     //new Reverse(), 
     // new Slow(), 
     new NoActive(), 
     new ThrowDagger(), 
@@ -245,7 +245,7 @@ void setup() {
     new Glide(), 
     new MpRegen(), 
     new BulletTime(), 
-    new Emergency(), 
+   // new Emergency(), 
     new Adrenaline(), 
     new BulletCutter(), 
     new Dash(), 
@@ -284,10 +284,10 @@ void setup() {
     new Glide(), 
     new MpRegen(), 
     new BulletTime(), 
-    new Emergency(), 
+    //new Emergency(), 
     new Dash(), 
-    new Redemption(), // buggy on survival
-    new Undo(), // buggy on survival
+    //new Redemption(), // buggy on survival
+    //new Undo(), // buggy on survival
     new NoPassive()
   };
 
@@ -353,7 +353,7 @@ void setup() {
    players.get(i).FRICTION_FACTOR=0.062;
    }*/
   playerSetup();
-  controllerSetup();
+  //controllerSetup();
   GUILayer= createGraphics(width, height);
   GUILayer.beginDraw();
   GUILayer.noStroke();
@@ -385,7 +385,7 @@ void setup() {
     pumpSound= new SamplePlayer(as, new Sample(sketchPath("") +"data/pump.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/TooManyCooksAdultSwim.mp3"));
      musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Velocity.mp3")); 
-    // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
+   //  musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Death by Glamour.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/Branching time.mp3")); 
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/orange caramel -aing.mp3"));
     // musicPlayer = new SamplePlayer(ac, new Sample(sketchPath("") +"data/goodbye.mp3"));
@@ -492,7 +492,7 @@ initSound(sniperSound);
    PApplet sa = new PApplet();
    PApplet.runSketch(args, sa);
    */
-  if (xBox)xBoxSetup();
+  //if (xBox)xBoxSetup();
 }
 void stop() {
   musicPlayer.pause(true);
@@ -500,7 +500,7 @@ void stop() {
 }
 
 void draw() {
-  if (xBox)  getXboxInput() ;
+  //if (xBox)  getXboxInput() ;
   /*if (cheatEnabled && (gameMode!=GameType.MENU || gameMode!=GameType.SHOP ) && stampTime>500) {    
    //tempOffsetX=(tempZoom*zoom)*(width)-(tempZoom*zoom)*players.get(0).cx-(tempZoom*zoom)*(width*.75);
    //tempOffsetY=(tempZoom*zoom)*(height)-(tempZoom*zoom)*players.get(0).cy-(tempZoom*zoom)*(height*.75);
@@ -604,12 +604,12 @@ void draw() {
 
     //-----------------------  USB ------------------------
 
-    for (int i=0; i<Serial.list().length; i++) {   // USB devices & k
+   /* for (int i=0; i<Serial.list().length; i++) {   // USB devices & k
       if (portName[i]!= null && port[i].available() > 0) {  //ta in data och ignorerar skräpdata    
         players.get(i).control(port[i].read());
         // println("INPUT!:  "+char(port[i].read()));
       }
-    }
+    }*/
 
     checkPlayerVSPlayerColloision();
     checkProjectileVSProjectileColloision();

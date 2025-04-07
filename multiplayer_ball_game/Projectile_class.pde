@@ -2061,6 +2061,9 @@ class Rocket extends Bomb implements Reflectable, Destroyable, Container {//----
     particles.add( new TempSlow(10, 0.15, 1.05).setSoundTweek(false));
     super.fizzle();
     // fizzle();
+    play(thunderSound);
+
+
     deathTime=stampTime;   // projectile is dead on collision
     dead=true;
   }

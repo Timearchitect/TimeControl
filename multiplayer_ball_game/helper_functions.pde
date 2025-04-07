@@ -220,7 +220,7 @@ void playerSetup() {
     projectiles.add(new Ball(int(random(width-ballSize)+ballSize*0.5), int(random(height-ballSize)+ballSize*0.5), int(random(20)-10), int(random(20)-10), int(random(ballSize)+10), color(random(255), 0, 0)));
   }
 }
-void controllerSetup() {
+/*void controllerSetup() {
   println("amount of serial ports: "+Serial.list().length);
   for (int i=0; i<Serial.list ().length; i++) {
     portName[i] = Serial.list()[i];   // du kan också skriva COM + nummer på porten   
@@ -232,7 +232,7 @@ void controllerSetup() {
     players.get(i).arduino=true;
     players.get(i).FRICTION_FACTOR=0.062;
   }
-}
+}*/
 public static <C, L> boolean existInList(ArrayList<L> list, Class<C> genericType2) {
   for (L i : (ArrayList<L>)list) {
     if (i.getClass().getSimpleName().equals(genericType2.getSimpleName()))return true;
